@@ -7,6 +7,7 @@ import {
   ecosystemDelete,
   getTenantId,
 } from "./ecosystem-client";
+import { setupSocketProxy } from "./socket-proxy";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -533,6 +534,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  setupSocketProxy(httpServer);
 
   return httpServer;
 }

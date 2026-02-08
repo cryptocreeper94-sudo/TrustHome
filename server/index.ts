@@ -250,7 +250,7 @@ function setupErrorHandler(app: express.Application) {
     cookie: {
       secure: false,
       httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'lax',
     },
   }));

@@ -22,8 +22,8 @@ import {
 } from "./trustlayer-client";
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
-import { sendVerificationEmail } from "./resend-client";
-import { registerSchema, loginSchema, verificationCodes } from "@shared/schema";
+import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
+import { registerSchema, loginSchema, verificationCodes, users } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/verify-email", async (req: Request, res: Response) => {
     try {
-      const { email, code } = req.body;
+      const { email, code, rememberMe } = req.body;
       if (!email || !code) {
         return res.status(400).json({ error: "Email and code are required" });
       }
@@ -115,6 +115,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(400).json({ error: "User not found" });
+      }
+
+      if (rememberMe) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      } else {
+        req.session.cookie.maxAge = 24 * 60 * 60 * 1000;
       }
 
       req.session.userId = user.id;
@@ -205,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/login/verify", async (req: Request, res: Response) => {
     try {
-      const { email, code } = req.body;
+      const { email, code, rememberMe } = req.body;
       if (!email || !code) {
         return res.status(400).json({ error: "Email and code are required" });
       }
@@ -230,6 +236,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "User not found" });
       }
 
+      if (rememberMe) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      } else {
+        req.session.cookie.maxAge = 24 * 60 * 60 * 1000;
+      }
+
       req.session.userId = user.id;
       req.session.userRole = user.role;
       req.session.userEmail = user.email;
@@ -240,6 +252,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Login verify error:", error);
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.json({ message: "If an account exists with that email, a reset code has been sent" });
+      }
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+      await db.insert(verificationCodes).values({
+        email,
+        code,
+        type: 'password_reset',
+        expiresAt,
+      });
+
+      try {
+        await sendPasswordResetEmail(email, code);
+      } catch (emailErr) {
+        console.error("Failed to send password reset email:", emailErr);
+      }
+
+      return res.json({ message: "If an account exists with that email, a reset code has been sent" });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { email, code, newPassword } = req.body;
+      if (!email || !code || !newPassword) {
+        return res.status(400).json({ error: "Email, code, and new password are required" });
+      }
+
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({ error: "Password must have at least 8 characters, one uppercase letter, and one special character" });
+      }
+
+      const [verification] = await db.select().from(verificationCodes).where(
+        and(
+          eq(verificationCodes.email, email),
+          eq(verificationCodes.code, code),
+          eq(verificationCodes.type, 'password_reset'),
+          eq(verificationCodes.used, 'false'),
+        )
+      );
+
+      if (!verification || new Date(verification.expiresAt) < new Date()) {
+        return res.status(400).json({ error: "Invalid or expired reset code" });
+      }
+
+      await db.update(verificationCodes).set({ used: 'true' }).where(eq(verificationCodes.id, verification.id));
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      await db.update(users).set({ password: hashedPassword }).where(eq(users.email, email));
+
+      if (tlIsConfigured()) {
+        tlSyncPassword(email, newPassword).catch((err: any) =>
+          console.error("Trust Layer password sync error:", err)
+        );
+      }
+
+      return res.json({ message: "Password reset successfully" });
+    } catch (error) {
+      console.error("Reset password error:", error);
       return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });

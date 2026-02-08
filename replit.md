@@ -445,6 +445,808 @@ TrustHome has a layered permission system. Every user has a role, and that role 
 
 ---
 
+## DATA MODELS (Field-Level Definitions)
+
+### Transaction
+```
+Transaction {
+  id: UUID
+  type: "residential_buy" | "residential_sell" | "commercial_buy" | "commercial_sell" | "lease"
+  status: "pre_approval" | "searching" | "offer_submitted" | "offer_accepted" | "under_contract" | "inspection" | "appraisal" | "final_walkthrough" | "closing" | "closed" | "cancelled" | "expired"
+  property_id: UUID (linked property)
+  agent_id: UUID (lead agent)
+  client_id: UUID (buyer or seller)
+  
+  // Financial
+  listing_price: number
+  offer_price: number (null until offer made)
+  final_price: number (null until closed)
+  earnest_money: number
+  commission_rate: number
+  commission_amount: number (calculated)
+  
+  // Dates & Deadlines
+  listing_date: date
+  offer_date: date
+  acceptance_date: date
+  inspection_deadline: date
+  appraisal_deadline: date
+  financing_contingency_date: date
+  closing_date: date
+  actual_close_date: date
+  possession_date: date
+  
+  // Connected Parties
+  inspector_id: UUID (nullable)
+  mortgage_broker_id: UUID (nullable)
+  title_company_id: UUID (nullable)
+  appraiser_id: UUID (nullable)
+  buyer_agent_id: UUID (nullable, for sell-side transactions)
+  seller_agent_id: UUID (nullable, for buy-side transactions)
+  
+  // Trust Layer
+  blockchain_tx_hash: string (nullable)
+  trust_score_snapshot: number
+  
+  // Meta
+  notes: text
+  tags: string[] (e.g., "first-time-buyer", "investment", "relocation")
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Client Profile
+```
+ClientProfile {
+  id: UUID
+  user_id: UUID (linked to auth user)
+  role: "buyer" | "seller" | "both"
+  agent_id: UUID (their assigned agent)
+  
+  // Personal
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  avatar_url: string (nullable)
+  
+  // Buyer-specific
+  budget_min: number (nullable)
+  budget_max: number (nullable)
+  pre_approved: boolean
+  pre_approval_amount: number (nullable)
+  pre_approval_lender: string (nullable)
+  pre_approval_expiry: date (nullable)
+  must_haves: string[] (e.g., "3+ bedrooms", "garage", "good schools")
+  deal_breakers: string[] (e.g., "HOA over $500", "no basement")
+  preferred_neighborhoods: string[]
+  move_timeline: "asap" | "1-3_months" | "3-6_months" | "6-12_months" | "just_looking"
+  property_type_preference: "single_family" | "condo" | "townhouse" | "multi_family" | "any"
+  
+  // Seller-specific
+  current_property_id: UUID (nullable)
+  reason_for_selling: string (nullable)
+  desired_price: number (nullable)
+  
+  // Status
+  status: "active" | "inactive" | "closed" | "archived"
+  source: "referral" | "open_house" | "website" | "social_media" | "cold_call" | "walk_in" | "other"
+  
+  // Trust Layer
+  trust_score: number (nullable)
+  blockchain_identity_hash: string (nullable)
+  
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Property
+```
+Property {
+  id: UUID
+  mls_number: string (nullable - may not have MLS listing)
+  
+  // Address
+  street_address: string
+  unit: string (nullable)
+  city: string
+  state: string
+  zip: string
+  county: string
+  latitude: number
+  longitude: number
+  
+  // Details
+  property_type: "single_family" | "condo" | "townhouse" | "multi_family" | "commercial" | "land" | "other"
+  bedrooms: number
+  bathrooms: number
+  half_baths: number
+  sqft: number
+  lot_size: number (nullable)
+  year_built: number
+  stories: number
+  garage_spaces: number
+  parking_type: string (nullable)
+  
+  // Financials
+  listing_price: number
+  price_per_sqft: number (calculated)
+  hoa_fee: number (nullable)
+  annual_taxes: number
+  estimated_insurance: number (nullable)
+  
+  // Features
+  features: string[] (e.g., "pool", "fireplace", "hardwood floors", "updated kitchen")
+  heating_type: string
+  cooling_type: string
+  construction_type: string
+  roof_type: string
+  
+  // Media
+  photos: string[] (URLs)
+  virtual_tour_url: string (nullable)
+  floor_plan_url: string (nullable)
+  
+  // Neighborhood
+  school_district: string (nullable)
+  walk_score: number (nullable)
+  transit_score: number (nullable)
+  bike_score: number (nullable)
+  
+  // Status
+  listing_status: "coming_soon" | "active" | "pending" | "under_contract" | "sold" | "withdrawn" | "expired"
+  days_on_market: number (calculated)
+  
+  // Trust Layer
+  blockchain_property_hash: string (nullable)
+  
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Showing
+```
+Showing {
+  id: UUID
+  property_id: UUID
+  transaction_id: UUID (nullable - may be before a transaction exists)
+  agent_id: UUID
+  client_id: UUID
+  
+  date: date
+  start_time: time
+  end_time: time
+  status: "scheduled" | "confirmed" | "completed" | "cancelled" | "no_show"
+  
+  // Details
+  showing_type: "private" | "second_showing" | "final_walkthrough"
+  notes_for_client: text (nullable)
+  agent_private_notes: text (nullable)
+  
+  // Feedback (filled after showing)
+  client_rating: number (1-5, nullable)
+  client_feedback: text (nullable)
+  would_make_offer: boolean (nullable)
+  agent_feedback: text (nullable)
+  
+  // Logistics
+  lockbox_code: string (nullable, agent-only visibility)
+  special_instructions: text (nullable)
+  
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Open House
+```
+OpenHouse {
+  id: UUID
+  property_id: UUID
+  agent_id: UUID
+  
+  date: date
+  start_time: time
+  end_time: time
+  status: "scheduled" | "active" | "completed" | "cancelled"
+  
+  // Details
+  description: text
+  refreshments: boolean
+  virtual_option: boolean
+  virtual_link: string (nullable)
+  
+  // Attendance
+  attendees: [{
+    name: string
+    email: string (nullable)
+    phone: string (nullable)
+    registered_via: "app" | "walk_in" | "sign_in_sheet"
+    feedback: text (nullable)
+    rating: number (nullable)
+    interested: boolean (nullable)
+    converted_to_lead: boolean
+  }]
+  
+  // Marketing
+  flyer_url: string (nullable)
+  social_post_ids: string[] (nullable)
+  
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Lead
+```
+Lead {
+  id: UUID
+  agent_id: UUID
+  
+  // Contact
+  first_name: string
+  last_name: string
+  email: string (nullable)
+  phone: string (nullable)
+  
+  // Lead Info
+  source: "open_house" | "referral" | "website" | "social_media" | "cold_call" | "walk_in" | "ad_campaign" | "other"
+  source_detail: string (nullable, e.g., "Spring Open House at 123 Main St")
+  status: "new" | "contacted" | "qualifying" | "qualified" | "nurturing" | "converted" | "lost" | "dead"
+  temperature: "hot" | "warm" | "cold"
+  
+  // Qualification
+  buyer_or_seller: "buyer" | "seller" | "both" | "unknown"
+  budget_range: string (nullable)
+  timeline: string (nullable)
+  pre_approved: boolean (nullable)
+  
+  // Activity
+  last_contact_date: date (nullable)
+  next_follow_up_date: date (nullable)
+  follow_up_count: number
+  notes: text (nullable)
+  
+  // Conversion
+  converted_to_client_id: UUID (nullable, when lead becomes active client)
+  lost_reason: string (nullable, e.g., "went with another agent", "not ready", "unresponsive")
+  
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Document
+```
+Document {
+  id: UUID
+  transaction_id: UUID
+  uploaded_by_user_id: UUID
+  uploaded_by_role: "agent" | "client" | "inspector" | "mortgage_broker" | "title_company" | "appraiser"
+  
+  // File
+  file_name: string
+  file_url: string
+  file_type: "pdf" | "image" | "doc" | "other"
+  file_size: number (bytes)
+  
+  // Classification
+  document_type: "contract" | "disclosure" | "inspection_report" | "appraisal" | "pre_approval_letter" | "title_report" | "closing_document" | "amendment" | "addendum" | "photo" | "other"
+  transaction_stage: string (which stage this doc belongs to)
+  
+  // Status
+  status: "draft" | "pending_review" | "pending_signature" | "signed" | "completed" | "rejected" | "expired"
+  requires_signature: boolean
+  signature_provider: "docusign" | "dotloop" | "in_app" | "none" (nullable)
+  signature_status: string (nullable)
+  
+  // Visibility
+  visible_to_roles: string[] (which roles can see this document)
+  
+  // Trust Layer
+  blockchain_hash: string (nullable, for verification that document hasn't been altered)
+  verified: boolean
+  
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Message
+```
+Message {
+  id: UUID
+  conversation_id: UUID
+  sender_id: UUID
+  sender_role: string
+  
+  // Content
+  content: text
+  message_type: "text" | "image" | "file" | "system" | "notification"
+  attachment_url: string (nullable)
+  attachment_type: string (nullable)
+  
+  // Context
+  transaction_id: UUID (nullable, messages can be general or transaction-specific)
+  
+  // Status
+  read: boolean
+  read_at: timestamp (nullable)
+  delivered: boolean
+  
+  // Signal Chat Integration
+  signal_message_id: string (nullable, maps to Signal Chat backend)
+  
+  created_at: timestamp
+}
+
+Conversation {
+  id: UUID
+  participants: UUID[] (user IDs)
+  transaction_id: UUID (nullable)
+  type: "direct" | "group" | "transaction"
+  title: string (nullable, for group conversations)
+  last_message_at: timestamp
+  created_at: timestamp
+}
+```
+
+### Vendor (Inspector, Mortgage Broker, Title Company, etc.)
+```
+Vendor {
+  id: UUID
+  user_id: UUID (linked to auth user)
+  vendor_type: "inspector" | "mortgage_broker" | "title_company" | "appraiser" | "contractor" | "photographer" | "stager" | "other"
+  subscription_status: "subscriber" | "guest" | "trial"
+  
+  // Business Info
+  business_name: string
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  website: string (nullable)
+  avatar_url: string (nullable)
+  
+  // Location & Service Area
+  address: string
+  city: string
+  state: string
+  zip: string
+  service_radius_miles: number
+  service_areas: string[] (zip codes or city names)
+  
+  // Credentials
+  license_number: string (nullable)
+  license_state: string (nullable)
+  license_expiry: date (nullable)
+  certifications: string[] (e.g., "ASHI Certified", "FHA Approved")
+  insurance_verified: boolean
+  years_experience: number
+  
+  // Ratings
+  trust_score: number (from trust layer)
+  average_rating: number (from in-app reviews)
+  total_reviews: number
+  total_transactions: number (on platform)
+  
+  // Specialties (varies by vendor type)
+  specialties: string[] (e.g., inspector: "radon", "mold", "structural"; contractor: "roofing", "plumbing")
+  
+  // Trust Layer
+  blockchain_credential_hash: string (nullable)
+  verified: boolean
+  
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+### Trust Score
+```
+TrustScore {
+  id: UUID
+  user_id: UUID
+  user_role: string
+  
+  // Score
+  overall_score: number (0-100)
+  
+  // Components (weighted)
+  transaction_history_score: number (based on completed transactions)
+  review_score: number (based on peer reviews)
+  verification_score: number (based on credential verification)
+  response_time_score: number (based on communication responsiveness)
+  document_accuracy_score: number (based on document handling)
+  
+  // History
+  score_history: [{
+    date: date
+    score: number
+    change_reason: string
+  }]
+  
+  // Trust Layer
+  blockchain_score_hash: string
+  last_verified: timestamp
+  
+  updated_at: timestamp
+}
+```
+
+---
+
+## EDGE CASES & ERROR HANDLING
+
+### Deal Falls Through
+- Transaction status changes to "cancelled" with a reason code
+- Reason options: "inspection_issues", "financing_fell_through", "appraisal_low", "buyer_cold_feet", "seller_withdrew", "contingency_not_met", "mutual_agreement", "other"
+- All documents remain accessible (read-only) for record-keeping
+- Timeline shows cancellation point with reason
+- Agent gets notification, client gets notification
+- Lead status optionally reverts to "nurturing" (buyer may want to keep looking)
+- Earnest money disposition tracked (returned to buyer, released to seller, disputed)
+- Transaction remains in history, never deleted (important for trust score and analytics)
+- Agent can "restart" search for the same client without losing history
+
+### Client Switches Agents
+- Client's profile and personal data stays with the client (they own it)
+- Transaction history from previous agent is retained (read-only)
+- Previous agent loses access to client's profile
+- New agent gets a clean start with the client but can see the client's self-reported preferences
+- Documents from previous transactions remain with those transactions (previous agent can still access their own transaction records)
+- Trust score for both agent and client is unaffected
+- The switch is recorded for analytics but not publicly visible
+
+### Inspector Cancels
+- Agent and client get immediate notification
+- Showing/inspection slot opens up on calendar
+- Agent can reassign to another inspector from vendor directory
+- If inspection deadline is at risk, the system flags it with urgency
+- Cancelled inspector's rating may be affected (if pattern of cancellations)
+- Replacement inspector gets all relevant property details automatically
+
+### Document Disputed
+- Document flagged with "disputed" status
+- Both parties notified
+- Dispute reason recorded (e.g., "terms don't match verbal agreement", "missing addendum", "unauthorized changes")
+- Document version history preserved (if multiple versions exist)
+- Trust Shield verification can confirm if document was altered after signing
+- Agent mediates by default; escalation path if needed
+- Disputed documents cannot be used for closing until resolved
+
+### Expired Listings
+- Auto-status change to "expired" when listing date passes
+- Agent notified with option to renew, withdraw, or relist
+- Client notified that their listing has expired
+- Property data preserved for relisting (agent can clone with updates)
+- Days on market counter reflects total time (including any gaps between listings)
+- If buyer was interested, agent can notify them if relisted
+
+### Lead Goes Cold
+- After configurable period of no response (default: 30 days), status auto-changes to "cold"
+- Agent gets reminder before cold status triggers
+- Lead moves to "nurturing" pipeline with lower-touch follow-up cadence
+- Agent can manually override to keep lead at any temperature
+- After extended cold period (configurable, default: 90 days), lead status changes to "dead"
+- Dead leads can be resurrected at any time
+- All communication history preserved regardless of status
+
+### Dual Agency (Agent Represents Both Buyer and Seller)
+- Must be explicitly flagged on the transaction (legal requirement in most states)
+- Both buyer and seller must acknowledge dual agency status (documented)
+- Agent sees both sides of the transaction but with clear visual separation
+- Certain information remains confidential per side (e.g., buyer's max budget not visible on seller side, seller's minimum acceptable price not visible on buyer side)
+- Communication channels remain separate (buyer conversation vs seller conversation)
+- The system tracks dual agency for compliance and disclosure purposes
+- Some states prohibit dual agency - the system should be aware of state regulations (configurable per state)
+
+### Additional Edge Cases
+- **Multiple offers on a property:** Agent can track all offers with status (submitted, countered, accepted, rejected, expired)
+- **Backup offers:** If primary offer falls through, backup offer auto-promotes to primary
+- **Co-listing agents:** Multiple agents can be assigned to a listing with defined roles (primary, co-listing)
+- **Referral from another agent:** Referral fee tracking, referral source attribution
+- **Client buying AND selling simultaneously:** Linked transactions with coordinated timelines
+- **Cash buyer (no mortgage):** Mortgage-related steps automatically hidden/skipped
+- **New construction:** Different timeline (no inspection of existing structure, builder warranty instead)
+- **Short sale / foreclosure:** Additional steps for bank approval, different timeline expectations
+- **Investment property:** Different tax implications flagged, rental income projections
+
+---
+
+## NOTIFICATION STRATEGY
+
+### Delivery Channels
+1. **Push notifications (mobile)** - For urgent, time-sensitive items
+2. **In-app notifications** - For all activity (notification center with bell icon)
+3. **Signal Chat messages** - For communications between parties (via API)
+4. **Email** - For daily/weekly digests and important milestones (future integration)
+
+### Notification Triggers by Role
+
+**Agent receives notifications when:**
+- New lead comes in (from any source) - PUSH
+- Client favorites or rejects a property - IN-APP
+- Client submits showing feedback - PUSH
+- Client uploads a document - IN-APP
+- Client sends a message - PUSH
+- Transaction deadline approaching (7 day, 3 day, 1 day, day-of) - PUSH
+- Transaction status changes - PUSH
+- Vendor uploads a document (inspection report, appraisal, etc.) - PUSH
+- Open house RSVP received - IN-APP
+- Lead follow-up reminder due - PUSH
+- Lead goes cold (no contact in X days) - IN-APP
+- New review received on their profile - IN-APP
+- Team member activity (if applicable) - IN-APP
+
+**Client receives notifications when:**
+- Agent pushes a new property to their shortlist - PUSH
+- Showing scheduled or rescheduled - PUSH
+- Transaction stage updates (moved to next stage) - PUSH
+- Document needs their review or signature - PUSH
+- Agent sends a message - PUSH
+- Deadline approaching for something they need to do - PUSH
+- Inspection report available - PUSH
+- Pre-approval status update - PUSH
+- Closing date confirmed or changed - PUSH
+
+**Vendor (Inspector/Mortgage/Title) receives notifications when:**
+- New assignment/job received - PUSH
+- Schedule confirmed or changed - PUSH
+- Document requested or received - IN-APP
+- Message from agent or client - PUSH
+- Payment/invoice status update - IN-APP
+
+### Notification Preferences
+- Users can configure notification preferences per channel (push, in-app, email)
+- "Do Not Disturb" hours (e.g., no push notifications between 10pm-7am)
+- Urgency levels: Critical (always push), Important (push during business hours), Informational (in-app only)
+- Agents can set different preferences for different notification types
+- Weekly digest email option (summary of all activity)
+
+---
+
+## ONBOARDING FLOWS
+
+### Agent Onboarding
+1. **Sign Up** - Email/password or SSO (ecosystem login)
+2. **Choose Subscription Tier** - Starter, Professional, Team, Enterprise
+3. **Profile Setup** - Photo, bio, license number, brokerage, service area
+4. **Branding** - Choose accent colors, upload logo (if white-label tier)
+5. **Connect Services** - Link CRM (if existing), calendar sync, social media accounts
+6. **Import Data** - Import existing contacts/leads via CSV or API sync
+7. **Invite First Client** - Guided flow to send first client invite (the "aha moment")
+8. **Quick Tour** - Interactive walkthrough of key features (skippable)
+
+### Client Onboarding
+1. **Receive Invite** - Agent sends invite link (text, email, or QR code)
+2. **Create Account** - Simple signup (name, email, phone) or SSO
+3. **Profile Setup** - Buyer or seller? Budget range? Timeline? Must-haves? (conversational style, not a long form)
+4. **Welcome Screen** - Shows their agent's info, what to expect, how the app helps
+5. **First Action** - Directed to their transaction timeline or property shortlist (depending on stage)
+
+### Vendor Onboarding (Inspector/Mortgage/Title/etc.)
+1. **Sign Up** - Direct or via agent invitation
+2. **Choose Role** - What type of professional are you?
+3. **Business Profile** - Company name, license, certifications, service area, specialties
+4. **Subscription** - Subscribe for full tools or continue as guest (if invited to specific transaction)
+5. **Connect** - Link to agents they already work with
+6. **Quick Tour** - Walkthrough of their vertical-specific tools
+
+---
+
+## TECHNICAL DECISIONS
+
+### Tech Stack (Confirmed)
+- **Frontend:** Expo React Native (mobile-first, iOS + Android + web)
+- **Backend:** Express.js with TypeScript
+- **Database:** PostgreSQL with Drizzle ORM
+- **State Management:** React Query (server state) + React Context (shared state) + AsyncStorage (persistent local state)
+- **Routing:** Expo Router (file-based)
+- **Real-time:** WebSocket (for live notifications, chat, status updates)
+- **Authentication:** Role-based auth via SSO (ecosystem) with fallback email/password
+- **File Storage:** Cloud storage for documents and images (specific provider TBD)
+
+### API Architecture
+- **REST API** for standard CRUD operations (transactions, clients, properties, etc.)
+- **WebSocket** for real-time features (chat, live notifications, status updates)
+- **No GraphQL** - REST is simpler, well-understood, and sufficient for this use case. GraphQL adds complexity without enough benefit for a mobile app with well-defined data shapes.
+
+### Offline Capability
+- **Transaction timeline:** Cached locally, viewable offline
+- **Property shortlist:** Cached with photos, viewable offline
+- **Messages:** Cached locally, new messages queue and send when reconnected
+- **Documents:** Download for offline viewing, but upload requires connection
+- **Showings/Calendar:** Cached locally, viewable offline
+- **Search/MLS:** Requires connection
+- **Analytics:** Requires connection
+
+### Security Architecture
+- Role-based access control (RBAC) enforced at API level
+- All data encrypted in transit (TLS) and at rest
+- Document storage encrypted with per-tenant keys
+- Session management with refresh tokens
+- Rate limiting on all API endpoints
+- Input validation and sanitization on all user inputs
+- Trust Shield integration for identity verification and fraud prevention
+- Audit logging for all sensitive operations (document access, permission changes, financial data views)
+- Data retention policies (configurable per brokerage/state requirements)
+- GDPR/CCPA compliance considerations for client data (right to deletion, data export)
+
+### Database Schema Design Approach
+- Multi-tenant at the application level (agent is the primary tenant boundary)
+- Shared tables with tenant_id (agent_id) for data isolation
+- Soft deletes (archived flag) - never hard delete transaction data
+- Timestamps on everything (created_at, updated_at)
+- Audit trail table for sensitive operations
+- Indexes on frequently queried fields (agent_id, client_id, transaction_id, status)
+
+---
+
+## SCREEN-BY-SCREEN FLOW (High-Level)
+
+*Note: This is the initial flow based on industry standards. Subject to refinement based on Jennifer's feedback.*
+
+### Client Flow (Buyer)
+```
+Login/SSO → Client Home Dashboard
+├── My Transaction(s) → Transaction Timeline → Stage Details → Documents
+├── Property Shortlist → Property Detail → Compare → Request Showing
+├── Showings → Upcoming/Past → Showing Detail → Leave Feedback
+├── Messages → Conversation List → Chat Thread
+├── Mortgage Tools → Calculator / Pre-Approval Status
+├── Neighborhood Info → Map / School Ratings / Amenities
+├── Document Vault → All Docs → View/Sign
+└── My Profile → Edit Preferences / Settings
+```
+
+### Client Flow (Seller)
+```
+Login/SSO → Client Home Dashboard
+├── My Listing → Listing Status / Days on Market / Views
+├── My Transaction → Timeline → Stage Details → Documents
+├── Showing Feedback → What buyers said after viewing
+├── Offers → List of Offers → Offer Detail → Accept/Counter/Reject
+├── Messages → Conversation List → Chat Thread
+├── Document Vault → All Docs → View/Sign
+└── My Profile → Settings
+```
+
+### Agent Flow
+```
+Login/SSO → Agent Dashboard
+├── Overview (today's schedule, urgent items, pipeline summary)
+├── Clients → Client List → Client Detail → Their Transaction(s)
+├── Leads → Lead Pipeline → Lead Detail → Convert to Client
+├── Transactions → Active Deals → Transaction Detail → Manage Parties/Docs/Timeline
+├── Showings → Calendar View → Schedule/Manage
+├── Open Houses → Upcoming → Create/Edit → Attendance/Feedback
+├── Properties → Listings → Add/Edit Property
+├── Messages → All Conversations → Chat Thread
+├── Marketing → Create Post / Email Campaign / Templates
+├── Analytics → Performance / Revenue / Lead Sources
+├── Network → Vendor Directory → Vendor Profile → Assign to Transaction
+├── Branding → Logo / Colors / Agent Profile
+└── Settings → Notifications / Account / Team Management
+```
+
+### Navigation Structure (Hamburger Menu)
+```
+Hamburger Menu (right side)
+├── Home (Dashboard)
+├── My Transactions (Client) / All Transactions (Agent)
+├── Properties / Listings
+├── Showings & Open Houses
+├── Messages
+├── Documents
+├── [Agent only] Leads
+├── [Agent only] Marketing
+├── [Agent only] Analytics
+├── [Agent only] Network
+├── [Agent only] Branding
+├── Profile & Settings
+├── Help & Support
+└── Sign Out
+```
+
+---
+
+## PRICING DECISIONS (Proposed Final)
+
+### Standard Features (All Tiers)
+- Signal Chat messaging (core value prop - NOT paywalled)
+- Transaction timeline
+- Document vault
+- Showing management
+- Client/agent communication
+- Basic property shortlist
+- Mobile app access
+- Trust Score (basic)
+
+### Subscription Features
+- **Starter ($49-79/mo):** Core client portal, up to 10 active clients, basic showing management, basic lead tracking
+- **Professional ($149-199/mo):** Unlimited clients, full CRM integration, marketing hub, analytics, vendor network, open house tools, advanced trust features
+- **Team ($299-499/mo):** Multi-agent support, team management, shared pipelines, white-label branding, advanced analytics, API access
+- **Enterprise (Custom):** Full white-label, brokerage admin tools, dedicated support, custom integrations, compliance tools
+
+### Vendor Subscriptions (Each Vertical)
+- **Basic ($29-49/mo):** Dashboard, job pipeline, basic communication, profile
+- **Professional ($79-129/mo):** Full tools (report builder, scheduling, marketing, analytics)
+- Guest access: Free (limited to specific assignments)
+
+---
+
+## API ENDPOINT MAPPING (Ecosystem Connections)
+
+### CRM API (PaintPros.io Backend)
+- GET/POST/PUT /api/crm/contacts - Client and lead management
+- GET/POST/PUT /api/crm/deals - Transaction/deal tracking
+- GET /api/crm/pipeline - Pipeline stages and counts
+- GET /api/crm/activities - Activity log/timeline
+
+### Signal Chat API
+- GET /api/chat/conversations - List conversations
+- POST /api/chat/messages - Send message
+- GET /api/chat/messages/:conversationId - Get message history
+- WebSocket /ws/chat - Real-time message delivery
+
+### Trust Shield API (trustshield.tech)
+- POST /api/verify/identity - Verify user identity
+- POST /api/verify/document - Verify document authenticity
+- GET /api/verify/status/:id - Check verification status
+- POST /api/fraud/check - Run fraud check
+
+### SSO API
+- POST /api/auth/login - Authenticate user
+- POST /api/auth/token/refresh - Refresh access token
+- GET /api/auth/user - Get authenticated user profile
+- POST /api/auth/logout - End session
+
+### Marketing Hub API
+- GET/POST /api/marketing/campaigns - Campaign management
+- POST /api/marketing/posts - Create social media post
+- GET /api/marketing/analytics - Marketing performance data
+- GET /api/marketing/templates - Template library
+
+### Blockchain / Trust Layer API
+- POST /api/blockchain/record - Record transaction milestone
+- GET /api/blockchain/verify/:hash - Verify record
+- GET /api/blockchain/history/:userId - User's blockchain history
+- GET /api/blockchain/trust-score/:userId - Get trust score
+
+### Analytics API
+- GET /api/analytics/performance - Agent performance metrics
+- GET /api/analytics/revenue - Revenue tracking
+- GET /api/analytics/leads - Lead analytics
+- GET /api/analytics/market - Market data
+
+*Note: Exact endpoints will be confirmed when connecting to actual ecosystem backends. These are proposed based on standard REST patterns and the known capabilities of each service.*
+
+---
+
+## DATA MIGRATION PLAN
+
+### For Agents Moving From Other Tools
+1. **CSV Import** - Universal fallback for any system. Import contacts, leads, transaction history
+2. **BoldTrail/kvCORE Sync** - API connection to import RE/MAX agents' existing data
+3. **Manual Entry** - Smart forms with auto-complete and validation for quick data entry
+4. **Guided Migration** - Step-by-step wizard: "Where are you coming from?" → system-specific import instructions
+5. **Parallel Running** - Agents can run TrustHome alongside existing tools during transition, with data syncing where possible
+6. **Future: AI-Assisted** - Photo/screenshot of spreadsheet → OCR → auto-populate fields
+
+### Migration Priority
+1. Active clients and their contact info (most urgent)
+2. Active transactions and their current status
+3. Lead database
+4. Transaction history (for analytics baseline)
+5. Document library (manual upload initially)
+6. Vendor contacts and relationships
+
+---
+
 ## COMPLETE FEATURE MAP
 
 ### MODULE 1: CLIENT PORTAL (Buyer/Seller Experience)
@@ -827,55 +1629,50 @@ This is the list of everything that needs to be fully defined before any code is
 - [DONE] Complete feature map (4 modules, 20+ sub-features)
 - [DONE] Build phases defined (9 phases)
 - [DONE] Protocol layout (Bento grid, glassmorphism, navigation, card design, visual effects, information architecture)
-- [TODO] Screen-by-screen flow - every screen the client sees, every screen the agent sees, and navigation paths between them
+- [DONE] Screen-by-screen flow (high-level flows for Client Buyer, Client Seller, Agent, plus hamburger menu structure - subject to Jennifer's feedback)
 - [DONE] User roles and permissions (9 roles defined: Agent, Client, Inspector, Mortgage Broker, Title Company, Appraiser, Contractor, Team Member, Brokerage Admin + communication matrix + data ownership principles)
-- [TODO] Data models - field-by-field definition of: Transaction, Client Profile, Property, Showing, Open House, Lead, Document, Message, Vendor, Trust Score
-- [TODO] Edge cases and error handling:
-  - What happens when a deal falls through?
-  - What happens when a client switches agents?
-  - What happens when an inspector cancels?
-  - What happens when a document is disputed?
-  - How are expired listings handled?
-  - What happens when a lead goes cold?
-  - How is dual agency handled (agent represents both buyer and seller)?
-- [TODO] Notification strategy - what triggers notifications, how are they delivered (push, in-app, email, SMS via Signal Chat?)
+- [DONE] Data models (10 models defined field-by-field: Transaction, ClientProfile, Property, Showing, OpenHouse, Lead, Document, Message/Conversation, Vendor, TrustScore)
+- [DONE] Edge cases and error handling (deal falls through, client switches agents, inspector cancels, document disputed, expired listings, cold leads, dual agency, multiple offers, backup offers, co-listing, referrals, simultaneous buy/sell, cash buyer, new construction, short sale/foreclosure, investment property)
+- [DONE] Notification strategy (4 channels: push, in-app, Signal Chat, email; triggers defined per role; preference configuration; DND hours; urgency levels)
 
 ### Business & Monetization
 - [DONE] Industry pricing benchmarks
 - [DONE] Proposed pricing tiers
 - [DONE] Revenue model options
-- [TODO] Final pricing decisions (what's standard vs subscription)
-- [TODO] Onboarding flow for new agents (sign up, set up branding, invite clients)
-- [TODO] Onboarding flow for new clients (receive invite, create account, set up profile)
+- [DONE] Final pricing decisions (standard features defined, 4 agent tiers, vendor subscription tiers, guest access free)
+- [DONE] Onboarding flow for new agents (8 steps: signup, tier, profile, branding, connect services, import data, invite first client, tour)
+- [DONE] Onboarding flow for new clients (5 steps: receive invite, create account, profile setup, welcome, first action)
+- [DONE] Onboarding flow for vendors (6 steps: signup, choose role, business profile, subscription, connect, tour)
 
 ### Integration & Data
 - [DONE] Integration philosophy and strategy
 - [DONE] Priority external integrations list (MLS, ShowingTime, DocuSign, etc.)
 - [DONE] Data import capabilities (CSV, manual, OCR future)
-- [TODO] Specific API endpoint mapping for each ecosystem service connection
-- [TODO] Data migration plan (how agents move from existing tools to TrustHome)
+- [DONE] Specific API endpoint mapping (7 API groups mapped: CRM, Signal Chat, Trust Shield, SSO, Marketing Hub, Blockchain, Analytics)
+- [DONE] Data migration plan (6 methods: CSV import, BoldTrail sync, manual entry, guided wizard, parallel running, future AI-assisted; prioritized migration sequence defined)
 
 ### Technical
-- [TODO] Final tech stack confirmation
-- [TODO] Database schema design
-- [TODO] API architecture (REST vs GraphQL vs hybrid)
-- [TODO] Real-time features architecture (WebSocket for live updates, chat, notifications)
-- [TODO] Offline capability requirements (what works without internet?)
-- [TODO] Security architecture (beyond Trust Shield - app-level security, data encryption, HIPAA-like considerations for personal financial data)
+- [DONE] Final tech stack confirmation (Expo React Native + Express.js + PostgreSQL + Drizzle ORM + WebSocket)
+- [DONE] Database schema design approach (multi-tenant, soft deletes, audit trails, indexes defined)
+- [DONE] API architecture (REST for CRUD, WebSocket for real-time - no GraphQL)
+- [DONE] Real-time features architecture (WebSocket for chat, notifications, status updates)
+- [DONE] Offline capability requirements (cached: timeline, shortlist, messages, calendar; online-only: search, analytics)
+- [DONE] Security architecture (RBAC, encryption in transit + at rest, per-tenant keys, rate limiting, audit logging, GDPR/CCPA considerations)
 
 ---
 
 ## OPEN QUESTIONS & FUTURE CONSIDERATIONS
-- What specific MLS system does the sister's market use?
+- What specific MLS system does Jennifer's market use? (Needed for API integration)
 - What additional data points would be useful for the trust layer?
-- How will the app handle multiple agents in the same brokerage?
 - Multi-language support needed?
-- What level of branding customization for white-label?
-- How does Signal Chat integrate? API endpoints? WebSocket? What's the connection protocol?
-- What does the existing CRM's data model look like? What fields/entities does it track?
-- What's the SSO protocol? OAuth2? JWT? Custom?
-- User's protocol layout details (pending - user will share next)
-- Final app name decision (TrustHome is working name - is that the one?)
+- What level of branding customization for white-label? (Colors only? Logo? Full theme?)
+- Exact Signal Chat API spec (endpoints, auth, WebSocket protocol)
+- Exact CRM data model from PaintPros.io (field names, entity relationships)
+- SSO protocol details (OAuth2? JWT? Custom?)
+- Final app name decision (TrustHome is working name - confirmed?)
+- Jennifer's feedback on screen flows and transaction process
+- State-specific real estate regulations to account for (dual agency rules, disclosure requirements, etc.)
+- Commercial real estate: how different should the workflow be from residential?
 
 ---
 
@@ -889,4 +1686,5 @@ This is the list of everything that needs to be fully defined before any code is
 ---
 
 *Last Updated: February 8, 2026*
-*Status: PLANNING PHASE - Architecture and feature mapping in progress. No building has started.*
+*Status: PLANNING PHASE COMPLETE - All planning items resolved. Ready to begin front-end prototype build.*
+*Next Step: Build premium UI prototype (Agent Dashboard + Client Portal) for Jennifer's review.*

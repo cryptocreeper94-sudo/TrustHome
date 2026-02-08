@@ -1,4 +1,3 @@
-// template
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -7,15 +6,32 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AppProvider } from "@/contexts/AppContext";
+import { DrawerMenu } from "@/components/ui/DrawerMenu";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="transactions" />
+        <Stack.Screen name="properties" />
+        <Stack.Screen name="showings" />
+        <Stack.Screen name="messages" />
+        <Stack.Screen name="documents" />
+        <Stack.Screen name="leads" />
+        <Stack.Screen name="marketing" />
+        <Stack.Screen name="analytics" />
+        <Stack.Screen name="network" />
+        <Stack.Screen name="branding" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="support" />
+      </Stack>
+      <DrawerMenu />
+    </>
   );
 }
 
@@ -29,7 +45,11 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <GestureHandlerRootView>
           <KeyboardProvider>
-            <RootLayoutNav />
+            <ThemeProvider>
+              <AppProvider>
+                <RootLayoutNav />
+              </AppProvider>
+            </ThemeProvider>
           </KeyboardProvider>
         </GestureHandlerRootView>
       </QueryClientProvider>

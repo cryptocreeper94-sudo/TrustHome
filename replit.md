@@ -1,20 +1,22 @@
 # TrustHome - Master Roadmap
 
 ## Recent Changes
-- **Feb 8, 2026**: Built all functional screens and AI Assistant
+- **Feb 8, 2026**: PaintPros.io Backend Integration (Full Business Suite)
+  - Ecosystem API client (server/ecosystem-client.ts) with DarkWave HMAC-SHA256 authentication
+  - 50+ backend proxy routes covering all PaintPros.io services: CRM/Leads, Calendar, Bookings, Jobs, Marketing, Analytics, Blockchain, Messaging, Auth, Payments, Referrals, Subcontractors, Webhooks
+  - Frontend screens updated to fetch live data via React Query with graceful fallback to sample data
+  - Leads screen: fetches real leads from PaintPros.io API (5 live leads confirmed)
+  - Analytics screen: live dashboard stats from PaintPros.io analytics service
+  - Agent Dashboard: shows "Connected to PaintPros.io" ecosystem status
+  - Network screen: subcontractor integration with live data fetch
+  - Socket.IO real-time messaging proxy: frontend ↔ backend ↔ PaintPros.io upstream
+  - Server timezone: Central Standard Time (America/Chicago)
+  - Fixed react-is dependency conflict from socket.io installation
+- **Feb 8, 2026** (earlier): Built all functional screens and AI Assistant
   - All 9 navigation screens fully built with realistic sample data and interactive elements
-  - Leads/CRM: Stats row, List/Pipeline (Kanban) view toggle, 8 leads with scores and temperature badges, expandable cards with contact actions, lead sources bar chart
-  - Calendar/Showings: Full month calendar with navigation, color-coded events (5 types), day selection, event legend
-  - Messages: 7 conversations with avatars, expandable inline chat, unread badges, context labels
-  - Documents: 11 real estate docs across 3 transactions, filter tabs, blockchain verification badges, expandable details with hash previews
-  - Properties: 8 listings with gradient placeholders, filter pills, favorites toggle, expandable details with features
-  - Analytics: Period selector, revenue bar chart, conversion funnel, top sources, recent closings, period comparison
-  - Marketing Hub: 4-tab interface (Overview/Content/Schedule/Analytics), autopilot status, content library, weekly schedule grid
-  - Professional Network: 9 vendors across 6 categories, Trust Scores, expandable details with specialties, referral partners section
-  - Settings: Jennifer Lambert profile, Trust Score display, 6 settings sections with toggles, integration status indicators
+  - Leads/CRM, Calendar/Showings, Messages, Documents, Properties, Analytics, Marketing Hub, Professional Network, Settings
   - AI Assistant: Slide-out panel with role-aware responses, quick prompts, chat interface
-  - All e2e tests passed
-- **Feb 8, 2026** (earlier): Built front-end prototype with premium UI
+- **Feb 8, 2026** (earliest): Built front-end prototype with premium UI
   - App structure: Expo Router with hamburger menu navigation (no tab bar)
   - Theme system: Light/dark mode toggle with teal accent (#1A8A7E)
   - Agent Dashboard: Bento grid stats, urgent items, schedule, active deals carousel, hot leads carousel, connected verticals preview
@@ -27,6 +29,12 @@
 
 ## Project Structure
 ```
+server/
+  index.ts             - Express server entry point (port 5000)
+  routes.ts            - 50+ proxy routes to PaintPros.io ecosystem services
+  ecosystem-client.ts  - DarkWave HMAC-SHA256 API client for PaintPros.io
+  socket-proxy.ts      - Socket.IO proxy layer (frontend ↔ PaintPros.io)
+
 app/
   _layout.tsx          - Root layout with Stack navigator, providers
   index.tsx            - Main screen (Agent/Client dashboard based on role)
@@ -35,19 +43,19 @@ app/
   showings.tsx         - Calendar with month view and color-coded events
   messages.tsx         - Conversation list with expandable inline chat
   documents.tsx        - Document vault with blockchain verification
-  leads.tsx            - Lead CRM with List/Pipeline views
+  leads.tsx            - Lead CRM with List/Pipeline views (live data from API)
   marketing.tsx        - Marketing hub with 4-tab interface
-  analytics.tsx        - Performance analytics with charts and funnel
-  network.tsx          - Professional network with vendor directory
+  analytics.tsx        - Performance analytics (live data from API)
+  network.tsx          - Professional network with vendor directory (live data)
   branding.tsx         - White-label branding (placeholder)
   settings.tsx         - Profile & settings with toggles and integrations
   support.tsx          - Help & support (placeholder)
 
 components/
   screens/
-    AgentDashboard.tsx   - Full agent dashboard with stats, schedule, deals, leads
+    AgentDashboard.tsx   - Agent dashboard with ecosystem connection status
     ClientDashboard.tsx  - Client portal with timeline, showings, shortlist
-    PlaceholderScreen.tsx - Reusable placeholder for unbuilt screens (only used by branding and support)
+    PlaceholderScreen.tsx - Reusable placeholder (branding and support only)
   ui/
     DrawerMenu.tsx       - Hamburger menu with navigation and role switcher
     Footer.tsx           - Two-tiered footer with links and credits
@@ -57,12 +65,24 @@ components/
     PillButton.tsx       - Pill-shaped button component
     AiAssistant.tsx      - AI Assistant slide-out panel with role-aware chat
 
+lib/
+  query-client.ts      - React Query config with API URL helper (getApiUrl)
+
 contexts/
   ThemeContext.tsx      - Light/dark theme provider with teal accent
 
 constants/
   colors.ts            - Color palette for light and dark modes
 ```
+
+## Backend Integration
+- **API Client**: DarkWave HMAC-SHA256 auth (`DW {apiKey}:{timestamp}:{signature}`)
+- **Upstream**: https://paintpros.io/api/ with tenant "demo" for development
+- **Auth Secrets**: DARKWAVE_API_KEY, DARKWAVE_API_SECRET (stored as Replit secrets)
+- **Working Endpoints**: /api/leads, /api/analytics/dashboard, /api/analytics/live, /api/blockchain/wallet/balance, /api/blockchain/stamps, /api/bookings, /api/payments, /api/referrals, /api/subcontractors
+- **Unavailable for Demo Tenant** (gracefully handled): /api/calendar/events, /api/marketing/images, /api/marketing/posts, /api/tenant
+- **Socket.IO**: Backend proxy on /ws path connects to upstream wss://paintpros.io
+- **Graceful Fallback**: Frontend uses React Query; if API returns errors or non-JSON, falls back to sample data seamlessly
 
 ## Overview
 TrustHome is a real estate platform designed to be the central hub for all parties involved in a transaction (agents, buyers, sellers, inspectors, mortgage brokers, etc.). It aims to provide a unified, transparent experience, enhancing trust and efficiency in real estate dealings. The platform is white-label ready, allowing various real estate agents and brokerages to brand it as their own. TrustHome is a key vertical within a broader ecosystem built on a custom Layer 1 blockchain, serving as a universal trust layer across multiple industries. Its core principle is a client-first approach, offering a premium, intuitive front-end experience while providing agents with a powerful backend business suite. TrustHome will integrate with existing robust infrastructure developed by the user, including a comprehensive CRM, a cross-ecosystem chat system (Signal Chat), marketing tools, a Single Sign-On (SSO) system, and the Trust Shield security suite.

@@ -20,7 +20,7 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const topPadding = Platform.OS === 'web' ? 67 : insets.top;
+  const topPadding = Platform.OS === 'web' ? 4 : insets.top;
 
   return (
     <View style={[styles.container, { paddingTop: topPadding, backgroundColor: colors.primary }]}>

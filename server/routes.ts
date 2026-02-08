@@ -8,6 +8,18 @@ import {
   getTenantId,
 } from "./ecosystem-client";
 import { setupSocketProxy } from "./socket-proxy";
+import {
+  tlSyncUser,
+  tlSyncPassword,
+  tlVerifyCredentials,
+  tlGetCertificationTiers,
+  tlSubmitCertification,
+  tlGetCertificationStatus,
+  tlGetPublicRegistry,
+  tlGetBlockchainStamps,
+  tlCheckoutCertification,
+  tlIsConfigured,
+} from "./trustlayer-client";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -527,6 +539,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = await ecosystemGet(`/tenants/${getTenantId()}`);
       if (data.error) return res.status(500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // ─── Trust Layer (DWTL) ─────────────────────────────────────────────
+
+  app.get("/api/trustlayer/status", (_req: Request, res: Response) => {
+    res.json({
+      configured: tlIsConfigured(),
+      baseUrl: "https://dwsc.io",
+      service: "DarkWave Trust Layer",
+    });
+  });
+
+  app.post("/api/trustlayer/sync-user", async (req: Request, res: Response) => {
+    try {
+      const { email, password, displayName, username } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      const data = await tlSyncUser(email, password, displayName, username);
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/trustlayer/sync-password", async (req: Request, res: Response) => {
+    try {
+      const { email, newPassword } = req.body;
+      if (!email || !newPassword) {
+        return res.status(400).json({ error: "Email and newPassword are required" });
+      }
+      const data = await tlSyncPassword(email, newPassword);
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/trustlayer/verify-credentials", async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      const data = await tlVerifyCredentials(email, password);
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/trustlayer/tiers", async (_req: Request, res: Response) => {
+    try {
+      const data = await tlGetCertificationTiers();
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/trustlayer/certifications", async (req: Request, res: Response) => {
+    try {
+      const { projectName, projectUrl, contactEmail, tier, stripePaymentId } = req.body;
+      if (!projectName || !contactEmail || !tier) {
+        return res.status(400).json({ error: "projectName, contactEmail, and tier are required" });
+      }
+      const data = await tlSubmitCertification({ projectName, projectUrl, contactEmail, tier, stripePaymentId });
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/trustlayer/certifications/:id", async (req: Request, res: Response) => {
+    try {
+      const data = await tlGetCertificationStatus(req.params.id);
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/trustlayer/registry", async (_req: Request, res: Response) => {
+    try {
+      const data = await tlGetPublicRegistry();
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/trustlayer/stamps", async (req: Request, res: Response) => {
+    try {
+      const referenceId = req.query.referenceId as string;
+      if (!referenceId) {
+        return res.status(400).json({ error: "referenceId query parameter is required" });
+      }
+      const data = await tlGetBlockchainStamps(referenceId);
+      if (data.error) return res.status(data.status || 500).json(data);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/trustlayer/checkout", async (req: Request, res: Response) => {
+    try {
+      const { tier, projectName, projectUrl, contactEmail, contractCount } = req.body;
+      if (!tier || !projectName || !contactEmail) {
+        return res.status(400).json({ error: "tier, projectName, and contactEmail are required" });
+      }
+      const data = await tlCheckoutCertification({ tier, projectName, projectUrl, contactEmail, contractCount });
+      if (data.error) return res.status(data.status || 500).json(data);
       res.json(data);
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });

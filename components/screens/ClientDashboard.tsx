@@ -20,7 +20,7 @@ const CARD_IMAGES = {
 
 const MOCK_CLIENT = {
   name: 'Sarah',
-  agentName: 'Jennifer Cole',
+  agentName: 'Jennifer Lambert',
   agentPhoto: null,
   trustScore: 88,
 };

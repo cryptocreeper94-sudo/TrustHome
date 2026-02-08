@@ -25,7 +25,7 @@ const CARD_IMAGES = {
 };
 
 const MOCK_AGENT = {
-  name: 'Jennifer',
+  name: 'Jennifer Lambert',
   activeClients: 12,
   activeTransactions: 8,
   pendingLeads: 5,

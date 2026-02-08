@@ -82,6 +82,67 @@ The user has an extensive suite of apps already built (2+ million lines of code 
 - Everything should be instantly intuitive - no learning curve for non-tech-savvy clients
 - Final color palette to be decided before building begins
 
+### Protocol Layout (UI/UX Design Specification)
+
+**Grid System:**
+- True Bento grid, 3-column layout
+- Content organized in grouped cards/boxes within the grid
+- When grouped cards exceed the screen width, they go into horizontal carousels
+- Within the Bento grid itself (e.g., a 1-of-3-column slot), use self-contained carousels for overflow content
+- NO vertical stacking of full-width horizontal boxes/cards - that's cookie-cutter 1998 web design
+
+**Card & Surface Design:**
+- Glassmorphism throughout
+- Every card has a photorealistic image OR a rich gradient/textured background - never just a plain translucent card with nothing behind it
+- Images should match the subject matter of the card content
+- If not an image, use gradient backgrounds or visual treatments that create depth and fullness
+- This applies everywhere, to everything - no exceptions
+- Low-profile cards and banners - tight, compact, not bloated or oversized
+
+**Visual Effects & Interactions:**
+- 3D effects and hover effects throughout
+- Accordion/dropdown menus where contextually appropriate
+- Pill-shaped buttons (not rectangular, not square-cornered)
+- The overall feel should be "sparkling gold" - not literally gold-colored, but that sense of premium value, like holding something impressive and valuable
+- No cookie-cutter design. Every element should feel intentional and crafted
+
+**Information Architecture:**
+- Modal information buttons (i-buttons) on anything that needs explanation or context
+- Modals should describe what the element is, explain it, give examples, provide details - whatever is needed to make it crystal clear
+- This is especially important for real estate terminology, trust scores, blockchain verification, and other concepts that may be unfamiliar to clients
+
+**Navigation:**
+- Consistent navigation on every screen
+- Clear Back button - takes you back to WHERE YOU WERE (not to home, not to some random page)
+- Home button - always available
+- Close button - for modals, overlays, and detail views
+- Hamburger menu on the RIGHT side of the header - contains full navigation
+- Header contains ONLY: hamburger menu (right side) + app title ("TrustHome") - nothing else
+- No bottom tab bar cluttering the screen
+- Navigation should be intuitive - user never gets lost, never trapped in a screen
+
+**Mobile-First Principles:**
+- Designed for mobile first, scales up to tablet
+- Touch-friendly targets
+- Swipe gestures where natural (carousels, dismissing modals, etc.)
+- Content prioritized for small screens - most important info visible first
+
+**The Standard:**
+- Ultimate premium UI/UX - no compromises
+- Every screen should make someone say "this is impressive"
+- Think Airbnb, top banking apps, premium fintech - that caliber of polish
+- If it looks like a template or a basic app, it's not good enough
+
+**Additional Considerations (Agent's Suggestions):**
+- Pull-to-refresh on data screens (transactions, messages, listings)
+- Subtle micro-animations on state changes (card loading, data updating, button presses)
+- Skeleton loading states (shimmer effect) instead of plain loading spinners
+- Haptic feedback on key actions (iOS)
+- Smooth page transitions (not just hard cuts between screens)
+- Search functionality - global search accessible from header or gesture
+- Empty states that are designed, not just "No data" text
+- Error states that are helpful, not just red text
+
 ### Architecture Decision: API-First Integration (Not Embedded Code)
 
 **Decision:** TrustHome connects to ecosystem tools via APIs, NOT by embedding code from other apps.
@@ -550,7 +611,7 @@ This is the list of everything that needs to be fully defined before any code is
 ### Features & Functionality
 - [DONE] Complete feature map (4 modules, 20+ sub-features)
 - [DONE] Build phases defined (9 phases)
-- [IN PROGRESS] User's protocol layout (pending - user about to share)
+- [DONE] Protocol layout (Bento grid, glassmorphism, navigation, card design, visual effects, information architecture)
 - [TODO] Screen-by-screen flow - every screen the client sees, every screen the agent sees, and navigation paths between them
 - [TODO] User roles and permissions - who can see what, who can do what (client vs agent vs inspector vs mortgage broker vs admin)
 - [TODO] Data models - field-by-field definition of: Transaction, Client Profile, Property, Showing, Open House, Lead, Document, Message, Vendor, Trust Score

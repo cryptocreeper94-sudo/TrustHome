@@ -24,7 +24,7 @@ import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
 import { registerSchema, loginSchema, verificationCodes, users } from "@shared/schema";
-import { db, rawSql } from "./db";
+import { db, pool } from "./db";
 import { eq, and } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1015,7 +1015,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 1. Database
       const dbStart = Date.now();
       try {
-        await rawSql`SELECT 1`;
+        await pool.query("SELECT 1");
         services.push({ name: "PostgreSQL Database", endpoint: "localhost", status: "online", latency: Date.now() - dbStart });
       } catch (e) {
         services.push({ name: "PostgreSQL Database", endpoint: "localhost", status: "offline", details: e instanceof Error ? e.message : "Connection failed" });
@@ -1182,8 +1182,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/overview", async (_req: Request, res: Response) => {
     try {
-      const userCountResult = await rawSql`SELECT COUNT(*) as count FROM users`;
-      const userCount = Number((userCountResult as any)?.[0]?.count ?? 0);
+      const userCountResult = await pool.query("SELECT COUNT(*) as count FROM users");
+      const userCount = Number(userCountResult.rows?.[0]?.count ?? 0);
 
       res.json({
         platform: "TrustHome",

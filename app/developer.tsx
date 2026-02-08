@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, Platform,
-  ActivityIndicator, RefreshControl,
+  ActivityIndicator, RefreshControl, TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +12,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
 import { getQueryFn } from '@/lib/query-client';
+
+const DEV_PIN = '0424';
 
 interface ServiceStatus {
   name: string;
@@ -65,6 +67,11 @@ export default function DeveloperScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const pulseRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [pulseKey, setPulseKey] = useState(0);
+  const [pinUnlocked, setPinUnlocked] = useState(false);
+  const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '']);
+  const [pinError, setPinError] = useState(false);
+  const [pinShake, setPinShake] = useState(false);
+  const pinInputRefs = useRef<(TextInput | null)[]>([null, null, null, null]);
 
   const overviewQuery = useQuery<OverviewData>({
     queryKey: ['/api/admin/overview'],
@@ -350,10 +357,103 @@ export default function DeveloperScreen() {
     );
   };
 
+  const handlePinDigit = useCallback((text: string, index: number) => {
+    if (text.length > 1) text = text.slice(-1);
+    if (text && !/^\d$/.test(text)) return;
+
+    setPinError(false);
+    const newDigits = [...pinDigits];
+    newDigits[index] = text;
+    setPinDigits(newDigits);
+
+    if (text && index < 3) {
+      pinInputRefs.current[index + 1]?.focus();
+    }
+
+    if (newDigits.every(d => d.length === 1)) {
+      const entered = newDigits.join('');
+      if (entered === DEV_PIN) {
+        setPinUnlocked(true);
+      } else {
+        setPinError(true);
+        setPinShake(true);
+        setTimeout(() => {
+          setPinDigits(['', '', '', '']);
+          setPinShake(false);
+          pinInputRefs.current[0]?.focus();
+        }, 600);
+      }
+    }
+  }, [pinDigits]);
+
+  const handlePinKeyPress = useCallback((e: any, index: number) => {
+    if (e.nativeEvent.key === 'Backspace' && !pinDigits[index] && index > 0) {
+      const newDigits = [...pinDigits];
+      newDigits[index - 1] = '';
+      setPinDigits(newDigits);
+      pinInputRefs.current[index - 1]?.focus();
+    }
+  }, [pinDigits]);
+
   if (authLoading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (!pinUnlocked) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Header title="Developer Console" showBack />
+        <View style={styles.pinGateContainer}>
+          <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.pinGateContent}>
+            <View style={[styles.pinLockIcon, { backgroundColor: colors.primary + '14' }]}>
+              <Ionicons name="lock-closed" size={36} color={colors.primary} />
+            </View>
+            <Text style={[styles.pinTitle, { color: colors.text }]}>Restricted Access</Text>
+            <Text style={[styles.pinSubtitle, { color: colors.textSecondary }]}>
+              Enter your developer PIN to continue
+            </Text>
+
+            <View style={[styles.pinRow, pinShake && styles.pinShake]}>
+              {pinDigits.map((digit, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.pinCell,
+                    {
+                      backgroundColor: colors.backgroundTertiary,
+                      borderColor: pinError ? colors.error : digit ? colors.primary : colors.cardGlassBorder,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    ref={(ref) => { pinInputRefs.current[i] = ref; }}
+                    style={[styles.pinInput, { color: colors.text }]}
+                    value={digit}
+                    onChangeText={(text) => handlePinDigit(text, i)}
+                    onKeyPress={(e) => handlePinKeyPress(e, i)}
+                    keyboardType="number-pad"
+                    maxLength={1}
+                    secureTextEntry
+                    autoFocus={i === 0}
+                    selectTextOnFocus
+                  />
+                </View>
+              ))}
+            </View>
+
+            {pinError && (
+              <Animated.View entering={FadeInDown.duration(200)}>
+                <Text style={[styles.pinErrorText, { color: colors.error }]}>
+                  Incorrect PIN. Try again.
+                </Text>
+              </Animated.View>
+            )}
+          </Animated.View>
+        </View>
       </View>
     );
   }
@@ -409,6 +509,66 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loader: { marginTop: 40 },
   emptyText: { textAlign: 'center', marginTop: 40, fontSize: 14 },
+
+  pinGateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  pinGateContent: {
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 320,
+  },
+  pinLockIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  pinTitle: {
+    fontSize: 22,
+    fontWeight: '700' as const,
+    letterSpacing: -0.3,
+    marginBottom: 6,
+  },
+  pinSubtitle: {
+    fontSize: 14,
+    textAlign: 'center' as const,
+    marginBottom: 32,
+    lineHeight: 20,
+  },
+  pinRow: {
+    flexDirection: 'row' as const,
+    gap: 14,
+    marginBottom: 20,
+  },
+  pinShake: {
+    ...(Platform.OS === 'web' ? { animation: 'shake 0.4s ease-in-out' } : {}) as any,
+  },
+  pinCell: {
+    width: 56,
+    height: 64,
+    borderRadius: 16,
+    borderWidth: 2,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  pinInput: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    textAlign: 'center' as const,
+    width: '100%' as any,
+    height: '100%' as any,
+  },
+  pinErrorText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    textAlign: 'center' as const,
+  },
 
   tabBar: {
     flexDirection: 'row',

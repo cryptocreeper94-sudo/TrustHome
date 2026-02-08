@@ -23,28 +23,25 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
   return (
-    <View style={[styles.container, { paddingTop: topPadding, backgroundColor: colors.background }]}>
+    <View style={[styles.container, { paddingTop: topPadding, backgroundColor: colors.primary }]}>
       <View style={styles.content}>
         <View style={styles.left}>
           {showBack ? (
             <Pressable onPress={() => router.back()} style={styles.iconButton} testID="header-back">
-              <Ionicons name="chevron-back" size={24} color={colors.text} />
+              <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
             </Pressable>
           ) : showClose ? (
             <Pressable onPress={onClose} style={styles.iconButton} testID="header-close">
-              <Ionicons name="close" size={24} color={colors.text} />
+              <Ionicons name="close" size={22} color="#FFFFFF" />
             </Pressable>
-          ) : (
-            <View style={styles.iconPlaceholder} />
-          )}
+          ) : null}
+          <Text style={styles.title} numberOfLines={1}>{title}</Text>
         </View>
-
-        <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{title}</Text>
 
         <View style={styles.right}>
           {rightAction || (
             <Pressable onPress={toggleDrawer} style={styles.iconButton} testID="header-menu">
-              <Ionicons name="menu" size={26} color={colors.text} />
+              <Ionicons name="menu" size={24} color="#FFFFFF" />
             </Pressable>
           )}
         </View>
@@ -62,33 +59,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 50,
-    paddingHorizontal: 16,
+    height: 44,
+    paddingHorizontal: 12,
   },
   left: {
-    width: 44,
-    alignItems: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 4,
   },
   right: {
-    width: 44,
     alignItems: 'flex-end',
   },
   title: {
-    flex: 1,
     fontSize: 18,
     fontWeight: '700' as const,
-    textAlign: 'center',
-    letterSpacing: 0.5,
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
   iconButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
-  },
-  iconPlaceholder: {
-    width: 40,
-    height: 40,
+    borderRadius: 18,
   },
 });

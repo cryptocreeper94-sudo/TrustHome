@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -8,6 +8,16 @@ import { BentoGrid, BentoRow } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { PillButton } from '@/components/ui/PillButton';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+
+const CARD_IMAGES = {
+  home1: require('@/assets/images/cards/home1_1.jpg'),
+  home2: require('@/assets/images/cards/home1_2.jpg'),
+  home3: require('@/assets/images/cards/home1_3.jpg'),
+  home4: require('@/assets/images/cards/home1_4.jpg'),
+  inspector: require('@/assets/images/cards/inspector.jpg'),
+  lender: require('@/assets/images/cards/lender.jpg'),
+  team: require('@/assets/images/cards/team.jpg'),
+};
 
 const MOCK_CLIENT = {
   name: 'Sarah',
@@ -28,10 +38,10 @@ const TRANSACTION_STAGES = [
 ];
 
 const MOCK_SHORTLIST = [
-  { address: '1847 Oak Valley Dr', price: '$425,000', beds: 4, baths: 3, sqft: '2,400', status: 'Under Contract', favorited: true },
-  { address: '302 Elm Park Ct', price: '$389,000', beds: 3, baths: 2, sqft: '1,850', status: 'Favorited', favorited: true },
-  { address: '910 Cedar Ridge Blvd', price: '$445,000', beds: 4, baths: 2.5, sqft: '2,600', status: 'New', favorited: false },
-  { address: '55 Lakeview Terrace', price: '$510,000', beds: 5, baths: 3, sqft: '3,100', status: 'New', favorited: false },
+  { address: '1847 Oak Valley Dr', price: '$425,000', beds: 4, baths: 3, sqft: '2,400', status: 'Under Contract', favorited: true, image: CARD_IMAGES.home1 },
+  { address: '302 Elm Park Ct', price: '$389,000', beds: 3, baths: 2, sqft: '1,850', status: 'Favorited', favorited: true, image: CARD_IMAGES.home2 },
+  { address: '910 Cedar Ridge Blvd', price: '$445,000', beds: 4, baths: 2.5, sqft: '2,600', status: 'New', favorited: false, image: CARD_IMAGES.home3 },
+  { address: '55 Lakeview Terrace', price: '$510,000', beds: 5, baths: 3, sqft: '3,100', status: 'New', favorited: false, image: CARD_IMAGES.home4 },
 ];
 
 const MOCK_SHOWINGS = [
@@ -45,6 +55,12 @@ const MOCK_DOCUMENTS = [
   { name: 'Pre-Approval Letter', status: 'Completed', icon: 'shield-checkmark' as const, date: 'Jan 8' },
   { name: 'Disclosure Package', status: 'Needs Review', icon: 'alert-circle' as const, date: 'Feb 5' },
   { name: 'Home Inspection Report', status: 'Pending', icon: 'time' as const, date: '' },
+];
+
+const CONNECTED_PARTIES = [
+  { role: 'Agent', name: 'Jennifer C.', icon: 'person' as const, color: '#1A8A7E', image: CARD_IMAGES.team },
+  { role: 'Inspector', name: 'Mark T.', icon: 'search' as const, color: '#34C759', image: CARD_IMAGES.inspector },
+  { role: 'Lender', name: "First Nat'l", icon: 'cash' as const, color: '#007AFF', image: CARD_IMAGES.lender },
 ];
 
 function TimelineStage({ label, status, icon, isLast }: { label: string; status: 'completed' | 'active' | 'upcoming'; icon: keyof typeof Ionicons.glyphMap; isLast: boolean }) {
@@ -164,40 +180,39 @@ export function ClientDashboard() {
         </Pressable>
       ))}
 
-      <HorizontalCarousel title="Your Shortlist" onSeeAll={() => {}} style={styles.shortlistSection}>
+      <HorizontalCarousel title="Your Shortlist" onSeeAll={() => {}} style={styles.shortlistSection} itemWidth={240}>
         {MOCK_SHORTLIST.map((prop, i) => (
           <Pressable key={i}>
-            <View style={[styles.propCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
+            <View style={styles.propCard}>
+              <Image source={prop.image} style={styles.propImage} />
               <LinearGradient
-                colors={isDark
-                  ? ['rgba(26,138,126,0.08)', 'rgba(26,138,126,0.02)']
-                  : ['rgba(26,138,126,0.04)', 'transparent']}
-                style={styles.propCardGradient}
+                colors={['transparent', 'rgba(0,0,0,0.75)']}
+                style={styles.propOverlay}
               />
-              <View style={styles.propHeader}>
+              <View style={styles.propTopRow}>
                 <View style={[styles.propStatusPill, {
                   backgroundColor: prop.status === 'Under Contract'
-                    ? (isDark ? 'rgba(52,199,89,0.15)' : 'rgba(52,199,89,0.1)')
+                    ? 'rgba(52,199,89,0.85)'
                     : prop.status === 'New'
-                      ? (isDark ? 'rgba(0,122,255,0.15)' : 'rgba(0,122,255,0.1)')
-                      : (isDark ? 'rgba(255,149,0,0.15)' : 'rgba(255,149,0,0.1)')
+                      ? 'rgba(0,122,255,0.85)'
+                      : 'rgba(255,149,0,0.85)'
                 }]}>
-                  <Text style={[styles.propStatusText, {
-                    color: prop.status === 'Under Contract' ? colors.success : prop.status === 'New' ? colors.info : colors.warning
-                  }]}>{prop.status}</Text>
+                  <Text style={styles.propStatusText}>{prop.status}</Text>
                 </View>
                 <Pressable>
-                  <Ionicons name={prop.favorited ? 'heart' : 'heart-outline'} size={20} color={prop.favorited ? colors.error : colors.textTertiary} />
+                  <Ionicons name={prop.favorited ? 'heart' : 'heart-outline'} size={22} color={prop.favorited ? '#FF3B30' : '#FFFFFF'} />
                 </Pressable>
               </View>
-              <Text style={[styles.propPrice, { color: colors.text }]}>{prop.price}</Text>
-              <Text style={[styles.propAddr, { color: colors.textSecondary }]} numberOfLines={1}>{prop.address}</Text>
-              <View style={styles.propDetails}>
-                <Text style={[styles.propDetail, { color: colors.textTertiary }]}>{prop.beds} bed</Text>
-                <View style={[styles.detailDot, { backgroundColor: colors.border }]} />
-                <Text style={[styles.propDetail, { color: colors.textTertiary }]}>{prop.baths} bath</Text>
-                <View style={[styles.detailDot, { backgroundColor: colors.border }]} />
-                <Text style={[styles.propDetail, { color: colors.textTertiary }]}>{prop.sqft} sqft</Text>
+              <View style={styles.propBottom}>
+                <Text style={styles.propPrice}>{prop.price}</Text>
+                <Text style={styles.propAddr} numberOfLines={1}>{prop.address}</Text>
+                <View style={styles.propDetails}>
+                  <Text style={styles.propDetail}>{prop.beds} bed</Text>
+                  <View style={styles.detailDot} />
+                  <Text style={styles.propDetail}>{prop.baths} bath</Text>
+                  <View style={styles.detailDot} />
+                  <Text style={styles.propDetail}>{prop.sqft} sqft</Text>
+                </View>
               </View>
             </View>
           </Pressable>
@@ -243,37 +258,26 @@ export function ClientDashboard() {
         )} />
       </View>
 
-      <BentoGrid style={styles.partiesGrid}>
-        <BentoRow>
-          <GlassCard compact onPress={() => {}}>
+      <HorizontalCarousel itemWidth={160}>
+        {CONNECTED_PARTIES.map((party, i) => (
+          <Pressable key={i}>
             <View style={styles.partyCard}>
-              <View style={[styles.partyIcon, { backgroundColor: isDark ? 'rgba(26,138,126,0.15)' : 'rgba(26,138,126,0.08)' }]}>
-                <Ionicons name="person" size={20} color={colors.primary} />
+              <Image source={party.image} style={styles.partyImage} />
+              <LinearGradient
+                colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.65)']}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={styles.partyContent}>
+                <View style={[styles.partyIconWrap, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                  <Ionicons name={party.icon} size={18} color="#FFFFFF" />
+                </View>
+                <Text style={styles.partyRole}>{party.role}</Text>
+                <Text style={styles.partyName}>{party.name}</Text>
               </View>
-              <Text style={[styles.partyRole, { color: colors.textSecondary }]}>Agent</Text>
-              <Text style={[styles.partyName, { color: colors.text }]}>Jennifer C.</Text>
             </View>
-          </GlassCard>
-          <GlassCard compact onPress={() => {}}>
-            <View style={styles.partyCard}>
-              <View style={[styles.partyIcon, { backgroundColor: isDark ? 'rgba(52,199,89,0.15)' : 'rgba(52,199,89,0.08)' }]}>
-                <Ionicons name="search" size={20} color={colors.success} />
-              </View>
-              <Text style={[styles.partyRole, { color: colors.textSecondary }]}>Inspector</Text>
-              <Text style={[styles.partyName, { color: colors.text }]}>Mark T.</Text>
-            </View>
-          </GlassCard>
-          <GlassCard compact onPress={() => {}}>
-            <View style={styles.partyCard}>
-              <View style={[styles.partyIcon, { backgroundColor: isDark ? 'rgba(0,122,255,0.15)' : 'rgba(0,122,255,0.08)' }]}>
-                <Ionicons name="cash" size={20} color={colors.info} />
-              </View>
-              <Text style={[styles.partyRole, { color: colors.textSecondary }]}>Lender</Text>
-              <Text style={[styles.partyName, { color: colors.text }]}>First Nat'l</Text>
-            </View>
-          </GlassCard>
-        </BentoRow>
-      </BentoGrid>
+          </Pressable>
+        ))}
+      </HorizontalCarousel>
 
       <View style={styles.quickActions}>
         <PillButton title="Message Agent" icon="chatbubble-outline" onPress={() => {}} variant="primary" size="medium" />
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 12,
     paddingBottom: 16,
   },
   greeting: { fontSize: 14, fontWeight: '500' as const },
@@ -373,48 +377,81 @@ const styles = StyleSheet.create({
   showingAddr: { fontSize: 14, fontWeight: '600' as const },
   showingType: { fontSize: 12, marginTop: 1 },
   shortlistSection: { marginTop: 16 },
+
   propCard: {
-    width: 200,
-    padding: 14,
+    width: 230,
+    height: 200,
     borderRadius: 16,
-    borderWidth: 1,
     overflow: 'hidden',
   },
-  propCardGradient: { ...StyleSheet.absoluteFillObject },
-  propHeader: {
+  propImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  propOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  propTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    alignItems: 'flex-start',
+    padding: 10,
   },
   propStatusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  propStatusText: { fontSize: 10, fontWeight: '600' as const },
-  propPrice: { fontSize: 18, fontWeight: '800' as const, marginBottom: 4 },
-  propAddr: { fontSize: 12, marginBottom: 6 },
+  propStatusText: { fontSize: 10, fontWeight: '700' as const, color: '#FFFFFF' },
+  propBottom: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 12,
+  },
+  propPrice: { fontSize: 20, fontWeight: '800' as const, color: '#FFFFFF', marginBottom: 2 },
+  propAddr: { fontSize: 13, color: 'rgba(255,255,255,0.9)', marginBottom: 4 },
   propDetails: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  propDetail: { fontSize: 11 },
-  detailDot: { width: 3, height: 3, borderRadius: 1.5 },
+  propDetail: { fontSize: 11, color: 'rgba(255,255,255,0.8)' },
+  detailDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: 'rgba(255,255,255,0.5)' },
+
   docsList: { paddingHorizontal: 16, gap: 6, marginBottom: 16 },
   docCard: { minHeight: 52 },
   docRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   docInfo: { flex: 1 },
   docName: { fontSize: 14, fontWeight: '600' as const },
   docStatus: { fontSize: 12, marginTop: 1 },
-  partiesGrid: { paddingHorizontal: 16, marginBottom: 20, gap: 10 },
-  partyCard: { alignItems: 'center', gap: 4, paddingVertical: 4 },
-  partyIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+
+  partyCard: {
+    width: 150,
+    height: 120,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  partyImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  partyContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 12,
+  },
+  partyIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 6,
   },
-  partyRole: { fontSize: 11 },
-  partyName: { fontSize: 13, fontWeight: '600' as const },
+  partyRole: { fontSize: 11, color: 'rgba(255,255,255,0.8)' },
+  partyName: { fontSize: 14, fontWeight: '700' as const, color: '#FFFFFF' },
+
   quickActions: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     gap: 8,
     flexWrap: 'wrap',
+    marginTop: 8,
   },
 });

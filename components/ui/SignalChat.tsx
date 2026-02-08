@@ -134,13 +134,13 @@ export function SignalChat() {
       seedMessages.push(
         { id: '1', senderId: 'system', senderName: 'Signal', text: `Welcome to the Ecosystem Hub. Messages here reach all connected apps across the DarkWave ecosystem.`, timestamp: formatTime(new Date(Date.now() - 7200000)), isOwn: false, channel: channel.id, sourceApp: 'darkwave' },
         { id: '2', senderId: 'pp-admin', senderName: 'Marcus Chen', text: 'PaintPros Q1 numbers are in. Three new franchise partners onboarded this month. Syncing lead data across verticals now.', timestamp: formatTime(new Date(Date.now() - 3600000)), isOwn: false, channel: channel.id, sourceApp: 'paintpros' },
-        { id: '3', senderId: 'jennifer', senderName: 'Jennifer Lambert', text: 'Great news. TrustHome is seeing strong referral traffic from the PaintPros network. 12 pre-qualified leads this week.', timestamp: formatTime(new Date(Date.now() - 1800000)), isOwn: false, channel: channel.id, sourceApp: 'trusthome' },
+        { id: '3', senderId: 'jennifer', senderName: 'Jennifer Lambert', text: 'Great news. TrustHome is seeing strong referral traffic from the ecosystem network. 12 pre-qualified leads this week.', timestamp: formatTime(new Date(Date.now() - 1800000)), isOwn: false, channel: channel.id, sourceApp: 'trusthome' },
         { id: '4', senderId: 'ts-ops', senderName: 'Alex Rivera', text: 'TrustShield security audit complete across all verticals. All endpoints passed. Full report in the dashboard.', timestamp: formatTime(new Date(Date.now() - 900000)), isOwn: false, channel: channel.id, sourceApp: 'trustshield' },
       );
     } else if (channel.id === 'ecosystem-ops') {
       seedMessages.push(
         { id: '5', senderId: 'system', senderName: 'Signal', text: `Cross-vertical operations coordination. Discuss workflows that span multiple ecosystem apps.`, timestamp: formatTime(new Date(Date.now() - 10800000)), isOwn: false, channel: channel.id, sourceApp: 'darkwave' },
-        { id: '6', senderId: 'pp-admin', senderName: 'Marcus Chen', text: 'When a PaintPros job completes on a listed property, can we auto-update the TrustHome listing photos? Would streamline the pipeline.', timestamp: formatTime(new Date(Date.now() - 5400000)), isOwn: false, channel: channel.id, sourceApp: 'paintpros' },
+        { id: '6', senderId: 'pp-admin', senderName: 'Marcus Chen', text: 'When a PaintPros job completes on a listed property, can we auto-update the TrustHome listing photos? Would streamline the cross-vertical pipeline.', timestamp: formatTime(new Date(Date.now() - 5400000)), isOwn: false, channel: channel.id, sourceApp: 'paintpros' },
         { id: '7', senderId: 'jennifer', senderName: 'Jennifer Lambert', text: 'Love that idea. We already have the property ID link. I will open a feature request on the integration board.', timestamp: formatTime(new Date(Date.now() - 4800000)), isOwn: false, channel: channel.id, sourceApp: 'trusthome' },
       );
     } else if (channel.id === 'ecosystem-trust') {
@@ -157,7 +157,7 @@ export function SignalChat() {
     } else if (channel.id === 'th-leads') {
       seedMessages.push(
         { id: '13', senderId: 'system', senderName: 'Signal', text: `TrustHome lead coordination and pipeline updates.`, timestamp: formatTime(new Date(Date.now() - 7200000)), isOwn: false, channel: channel.id, sourceApp: 'trusthome' },
-        { id: '14', senderId: 'pp-admin', senderName: 'Marcus Chen', text: 'Sending over a referral from a PaintPros client who is looking to sell after renovation. Pre-qualified, high intent.', timestamp: formatTime(new Date(Date.now() - 2700000)), isOwn: false, channel: channel.id, sourceApp: 'paintpros' },
+        { id: '14', senderId: 'pp-admin', senderName: 'Marcus Chen', text: 'Sending over a cross-vertical referral - client looking to sell after renovation. Pre-qualified, high intent.', timestamp: formatTime(new Date(Date.now() - 2700000)), isOwn: false, channel: channel.id, sourceApp: 'paintpros' },
       );
     } else if (channel.id === 'support') {
       seedMessages.push(
@@ -351,15 +351,15 @@ export function SignalChat() {
 
             <View style={styles.ecosystemInfo}>
               <View style={[styles.ecosystemBadge, { backgroundColor: isDark ? colors.surface : '#F8F9FA', borderColor: colors.border }]}>
-                <Ionicons name="flash" size={14} color="#3A76F0" />
+                <Ionicons name="cube-outline" size={14} color="#2D3436" />
                 <Text style={[styles.ecosystemText, { color: colors.textSecondary }]}>
-                  Powered by PaintPros.io Signal Protocol
+                  DarkWave Studios LLC 2026
                 </Text>
               </View>
               <View style={[styles.ecosystemBadge, { backgroundColor: isDark ? colors.surface : '#F8F9FA', borderColor: colors.border, marginTop: 6 }]}>
                 <Ionicons name="shield-checkmark" size={14} color="#6C5CE7" />
                 <Text style={[styles.ecosystemText, { color: colors.textSecondary }]}>
-                  Secured by TrustShield - darkwavestudios.io
+                  Powered by trustshield.tech
                 </Text>
               </View>
             </View>

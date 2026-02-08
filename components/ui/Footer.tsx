@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Linking } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface FooterLink {
   label: string;
   url?: string;
   onPress?: () => void;
+  route?: string;
 }
 
 interface FooterColumn {
@@ -13,54 +15,57 @@ interface FooterColumn {
   links: FooterLink[];
 }
 
-const FOOTER_COLUMNS: FooterColumn[] = [
-  {
-    title: 'For Agents',
-    links: [
-      { label: 'Dashboard', onPress: () => {} },
-      { label: 'CRM Integration', onPress: () => {} },
-      { label: 'Marketing Tools', onPress: () => {} },
-      { label: 'Analytics', onPress: () => {} },
-      { label: 'Pricing', onPress: () => {} },
-    ],
-  },
-  {
-    title: 'For Professionals',
-    links: [
-      { label: 'Inspector Tools', onPress: () => {} },
-      { label: 'Lender Portal', onPress: () => {} },
-      { label: 'Title Services', onPress: () => {} },
-      { label: 'Appraiser Tools', onPress: () => {} },
-      { label: 'Contractor Hub', onPress: () => {} },
-    ],
-  },
-  {
-    title: 'Resources',
-    links: [
-      { label: 'Help Center', onPress: () => {} },
-      { label: 'MLS Information', url: 'https://www.nar.realtor/mls' },
-      { label: 'API Documentation', onPress: () => {} },
-      { label: 'Blog', onPress: () => {} },
-      { label: 'Contact Us', onPress: () => {} },
-    ],
-  },
-  {
-    title: 'Legal',
-    links: [
-      { label: 'Terms of Service', onPress: () => {} },
-      { label: 'Privacy Policy', onPress: () => {} },
-      { label: 'Data Protection', onPress: () => {} },
-      { label: 'Cookie Policy', onPress: () => {} },
-      { label: 'Licensing', onPress: () => {} },
-    ],
-  },
-];
-
 export function Footer() {
   const { colors, isDark } = useTheme();
+  const router = useRouter();
+
+  const FOOTER_COLUMNS: FooterColumn[] = [
+    {
+      title: 'For Agents',
+      links: [
+        { label: 'Dashboard', onPress: () => {} },
+        { label: 'CRM Integration', onPress: () => {} },
+        { label: 'Marketing Tools', onPress: () => {} },
+        { label: 'Analytics', onPress: () => {} },
+        { label: 'Pricing', onPress: () => {} },
+      ],
+    },
+    {
+      title: 'For Professionals',
+      links: [
+        { label: 'Inspector Tools', onPress: () => {} },
+        { label: 'Lender Portal', onPress: () => {} },
+        { label: 'Title Services', onPress: () => {} },
+        { label: 'Appraiser Tools', onPress: () => {} },
+        { label: 'Contractor Hub', onPress: () => {} },
+      ],
+    },
+    {
+      title: 'Resources',
+      links: [
+        { label: 'Help Center', onPress: () => {} },
+        { label: 'MLS Information', url: 'https://www.nar.realtor/mls' },
+        { label: 'API Documentation', onPress: () => {} },
+        { label: 'Blog', onPress: () => {} },
+        { label: 'Contact Us', onPress: () => {} },
+      ],
+    },
+    {
+      title: 'Legal',
+      links: [
+        { label: 'Terms of Service', onPress: () => {} },
+        { label: 'Privacy Policy', onPress: () => {} },
+        { label: 'Data Protection', onPress: () => {} },
+        { label: 'Cookie Policy', onPress: () => {} },
+        { label: 'Licensing', onPress: () => {} },
+      ],
+    },
+  ];
 
   const handleLinkPress = (link: FooterLink) => {
-    if (link.url) {
+    if (link.route) {
+      router.push(link.route as any);
+    } else if (link.url) {
       Linking.openURL(link.url);
     } else if (link.onPress) {
       link.onPress();
@@ -100,6 +105,10 @@ export function Footer() {
           <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
           <Pressable onPress={() => Linking.openURL('https://dwtl.io')}>
             <Text style={[styles.bottomText, styles.bottomLink, { color: colors.textSecondary }]}>dwtl.io</Text>
+          </Pressable>
+          <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
+          <Pressable onPress={() => router.push('/team' as any)} testID="footer-team-link">
+            <Text style={[styles.bottomText, styles.bottomLink, { color: colors.primary }]}>Team</Text>
           </Pressable>
         </View>
       </View>

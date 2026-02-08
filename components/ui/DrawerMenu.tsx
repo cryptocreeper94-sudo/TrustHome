@@ -18,11 +18,11 @@ interface MenuItem {
 
 export function DrawerMenu() {
   const { colors, isDark, toggleTheme } = useTheme();
-  const { drawerOpen, closeDrawer, currentRole, setCurrentRole } = useApp();
+  const { drawerOpen, closeDrawer, currentRole, isAuthenticated, isAgentAuthenticated, signOut, user } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const isAgent = currentRole === 'agent';
+  const isAgent = isAgentAuthenticated;
 
   const menuItems: MenuItem[] = [
     { icon: 'home-outline', label: 'Dashboard', route: '/' },
@@ -47,6 +47,17 @@ export function DrawerMenu() {
     } else if (item.route) {
       router.push(item.route as any);
     }
+  };
+
+  const handleSignOut = async () => {
+    closeDrawer();
+    await signOut();
+    router.replace('/auth');
+  };
+
+  const handleSignIn = () => {
+    closeDrawer();
+    router.push('/auth');
   };
 
   if (!drawerOpen) return null;
@@ -75,34 +86,37 @@ export function DrawerMenu() {
           ]}
         >
           <View style={styles.drawerHeader}>
-            <View>
-              <Text style={[styles.drawerTitle, { color: colors.text }]}>TrustHome</Text>
-              <Text style={[styles.roleLabel, { color: colors.textSecondary }]}>
-                {isAgent ? 'Agent Dashboard' : 'Client Portal'}
-              </Text>
+            <View style={styles.headerLeft}>
+              {isAuthenticated && user ? (
+                <>
+                  <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+                    <Text style={styles.avatarText}>
+                      {(user.firstName?.[0] || '').toUpperCase()}{(user.lastName?.[0] || '').toUpperCase()}
+                    </Text>
+                  </View>
+                  <View>
+                    <Text style={[styles.drawerTitle, { color: colors.text }]} numberOfLines={1}>
+                      {user.firstName} {user.lastName}
+                    </Text>
+                    <Text style={[styles.roleLabel, { color: colors.textSecondary }]}>
+                      {isAgent ? 'Agent Dashboard' : 'Client Portal'}
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <View>
+                  <Text style={[styles.drawerTitle, { color: colors.text }]}>TrustHome</Text>
+                  <Text style={[styles.roleLabel, { color: colors.textSecondary }]}>Guest</Text>
+                </View>
+              )}
             </View>
             <Pressable onPress={closeDrawer} style={styles.closeBtn}>
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
           </View>
 
-          <View style={[styles.roleSwitch, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
-            <Pressable
-              onPress={() => setCurrentRole('agent')}
-              style={[styles.roleBtn, isAgent && { backgroundColor: colors.primary }]}
-            >
-              <Text style={[styles.roleBtnText, { color: isAgent ? colors.textInverse : colors.textSecondary }]}>Agent</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setCurrentRole('client_buyer')}
-              style={[styles.roleBtn, !isAgent && { backgroundColor: colors.primary }]}
-            >
-              <Text style={[styles.roleBtnText, { color: !isAgent ? colors.textInverse : colors.textSecondary }]}>Client</Text>
-            </Pressable>
-          </View>
-
           <ScrollView style={styles.menuScroll} showsVerticalScrollIndicator={false}>
-            {menuItems.map((item, i) => {
+            {menuItems.map((item) => {
               if (item.agentOnly && !isAgent) return null;
               return (
                 <React.Fragment key={item.label}>
@@ -129,10 +143,17 @@ export function DrawerMenu() {
               <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textSecondary} />
               <Text style={[styles.themeText, { color: colors.textSecondary }]}>{isDark ? 'Light Mode' : 'Dark Mode'}</Text>
             </Pressable>
-            <Pressable style={styles.menuItem}>
-              <Ionicons name="log-out-outline" size={22} color={colors.error} />
-              <Text style={[styles.menuLabel, { color: colors.error }]}>Sign Out</Text>
-            </Pressable>
+            {isAuthenticated ? (
+              <Pressable onPress={handleSignOut} style={styles.menuItem} testID="drawer-sign-out">
+                <Ionicons name="log-out-outline" size={22} color={colors.error} />
+                <Text style={[styles.menuLabel, { color: colors.error }]}>Sign Out</Text>
+              </Pressable>
+            ) : (
+              <Pressable onPress={handleSignIn} style={styles.menuItem} testID="drawer-sign-in">
+                <Ionicons name="log-in-outline" size={22} color={colors.primary} />
+                <Text style={[styles.menuLabel, { color: colors.primary }]}>Sign In</Text>
+              </Pressable>
+            )}
           </View>
         </Animated.View>
       </View>
@@ -158,10 +179,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700' as const,
+  },
   drawerTitle: {
-    fontSize: 22,
-    fontWeight: '800' as const,
-    letterSpacing: 0.5,
+    fontSize: 18,
+    fontWeight: '700' as const,
+    letterSpacing: 0.3,
   },
   roleLabel: {
     fontSize: 13,
@@ -173,24 +212,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  roleSwitch: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderRadius: 12,
-    padding: 3,
-    borderWidth: 1,
-  },
-  roleBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  roleBtnText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
   },
   menuScroll: {
     flex: 1,

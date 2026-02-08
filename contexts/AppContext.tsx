@@ -28,6 +28,10 @@ interface AppContextValue {
   openAiAssistant: () => void;
   closeAiAssistant: () => void;
   toggleAiAssistant: () => void;
+  signalChatOpen: boolean;
+  openSignalChat: () => void;
+  closeSignalChat: () => void;
+  toggleSignalChat: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -47,6 +51,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentRole, setCurrentRole] = useState<UserRole>('client_buyer');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
+  const [signalChatOpen, setSignalChatOpen] = useState(false);
 
   React.useEffect(() => {
     if (user) {
@@ -72,6 +77,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const openAiAssistant = useCallback(() => setAiAssistantOpen(true), []);
   const closeAiAssistant = useCallback(() => setAiAssistantOpen(false), []);
   const toggleAiAssistant = useCallback(() => setAiAssistantOpen(prev => !prev), []);
+  const openSignalChat = useCallback(() => setSignalChatOpen(true), []);
+  const closeSignalChat = useCallback(() => setSignalChatOpen(false), []);
+  const toggleSignalChat = useCallback(() => setSignalChatOpen(prev => !prev), []);
 
   const value = useMemo(() => ({
     user,
@@ -89,7 +97,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openAiAssistant,
     closeAiAssistant,
     toggleAiAssistant,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, drawerOpen, aiAssistantOpen, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant]);
+    signalChatOpen,
+    openSignalChat,
+    closeSignalChat,
+    toggleSignalChat,
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, drawerOpen, aiAssistantOpen, signalChatOpen, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat]);
 
   return (
     <AppContext.Provider value={value}>

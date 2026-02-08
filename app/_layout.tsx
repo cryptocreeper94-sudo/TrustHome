@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { DrawerMenu } from "@/components/ui/DrawerMenu";
 import { AiAssistant } from "@/components/ui/AiAssistant";
+import { SignalChat } from "@/components/ui/SignalChat";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,6 +36,7 @@ function RootLayoutNav() {
         <Stack.Screen name="support" />
       </Stack>
       <DrawerMenu />
+      <SignalChat />
       <AiAssistant />
     </>
   );

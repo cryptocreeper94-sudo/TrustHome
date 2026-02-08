@@ -5,8 +5,8 @@ import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
-import { PillButton } from '@/components/ui/PillButton';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { Footer } from '@/components/ui/Footer';
 
 const CARD_IMAGES = {
   team: require('@/assets/images/cards/team.jpg'),
@@ -79,6 +79,7 @@ const VERTICALS = [
 
 export function AgentDashboard() {
   const { colors, isDark } = useTheme();
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; description: string; details?: string[]; examples?: string[] }>({
     visible: false, title: '', description: '',
   });
@@ -249,12 +250,32 @@ export function AgentDashboard() {
       </HorizontalCarousel>
 
       <View style={styles.quickActions}>
-        <PillButton title="Add Client" icon="person-add-outline" onPress={() => {}} variant="primary" size="medium" />
-        <PillButton title="New Showing" icon="calendar-outline" onPress={() => {}} variant="secondary" size="medium" />
-        <PillButton title="Create Post" icon="megaphone-outline" onPress={() => {}} variant="secondary" size="medium" />
+        {[
+          { label: 'Add Client', icon: 'person-add-outline' as const, key: 'add' },
+          { label: 'New Showing', icon: 'calendar-outline' as const, key: 'showing' },
+          { label: 'Create Post', icon: 'megaphone-outline' as const, key: 'post' },
+        ].map((btn) => {
+          const isActive = selectedAction === btn.key;
+          return (
+            <Pressable
+              key={btn.key}
+              onPress={() => setSelectedAction(isActive ? null : btn.key)}
+              style={[
+                styles.actionBtn,
+                {
+                  backgroundColor: isActive ? colors.primary : (isDark ? colors.surface : colors.backgroundTertiary),
+                  borderColor: isActive ? colors.primary : colors.border,
+                },
+              ]}
+            >
+              <Ionicons name={btn.icon} size={18} color={isActive ? '#FFFFFF' : colors.text} />
+              <Text style={[styles.actionBtnText, { color: isActive ? '#FFFFFF' : colors.text }]}>{btn.label}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
-      <View style={{ height: 40 }} />
+      <Footer />
 
       <InfoModal
         visible={infoModal.visible}
@@ -459,7 +480,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     gap: 8,
-    flexWrap: 'wrap',
-    marginTop: 8,
+    marginTop: 12,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
   },
 });

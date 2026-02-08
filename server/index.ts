@@ -1,6 +1,9 @@
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
+import session from 'express-session';
+import connectPg from 'connect-pg-simple';
 import { registerRoutes } from "./routes";
+import { pool } from './db';
 import * as fs from "fs";
 import * as path from "path";
 
@@ -10,6 +13,15 @@ const log = console.log;
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
+  }
+}
+
+declare module 'express-session' {
+  interface SessionData {
+    userId: string;
+    userRole: string;
+    userEmail: string;
+    userName: string;
   }
 }
 
@@ -40,7 +52,7 @@ function setupCors(app: express.Application) {
         "Access-Control-Allow-Methods",
         "GET, POST, PUT, DELETE, OPTIONS",
       );
-      res.header("Access-Control-Allow-Headers", "Content-Type");
+      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
       res.header("Access-Control-Allow-Credentials", "true");
     }
 
@@ -228,6 +240,21 @@ function setupErrorHandler(app: express.Application) {
 (async () => {
   setupCors(app);
   setupBodyParsing(app);
+
+  const PgStore = connectPg(session);
+  app.use(session({
+    store: new PgStore({ pool, createTableIfMissing: true }),
+    secret: process.env.SESSION_SECRET || 'trusthome-session-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+    },
+  }));
+
   setupRequestLogging(app);
 
   configureExpoAndLanding(app);

@@ -21,6 +21,16 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const verificationCodes = pgTable("verification_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull(),
+  code: text("code").notNull(),
+  type: text("type").notNull().default('email_verification'),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: text("used").notNull().default('false'),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -34,12 +44,14 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(8).regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/,
+    'Password must have at least 8 characters, one uppercase letter, and one special character'),
 });
 
 export const registerSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(8).regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/,
+    'Password must have at least 8 characters, one uppercase letter, and one special character'),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   role: z.enum(userRoleEnum),

@@ -521,6 +521,74 @@ Our app should NOT try to replace MLS search or e-signatures. It should fill the
 
 ---
 
+## MASTER PLANNING CHECKLIST (Complete Before Building)
+
+This is the list of everything that needs to be fully defined before any code is written. Items are marked as DONE, IN PROGRESS, or TODO.
+
+### Architecture & Vision
+- [DONE] Project vision and purpose
+- [DONE] White-label strategy
+- [DONE] Trust layer / blockchain ecosystem connection
+- [DONE] Trust Shield security integration
+- [DONE] Ecosystem connection model (blockchain dashboard, membership cards, SSO, cross-vertical navigation)
+- [DONE] API-first architecture decision (not embedded code)
+- [DONE] Modular services decision (Salesforce model - keep separate, don't unify)
+- [DONE] Tenant strategy (separate tenant per service for TrustHome)
+- [DONE] API connection map (8 API connections identified)
+- [DONE] Existing ecosystem inventory (CRM, Signal Chat, Marketing Suite, SSO, Trust Shield, Blockchain)
+- [DONE] PaintPros.io as backend hub / source of truth
+
+### Design & Branding
+- [DONE] Color scheme direction (light/dark toggle, earthy accent, not holographic)
+- [DONE] Design philosophy (mobile-native, minimal chrome, premium, intuitive)
+- [TODO] Final accent color selection (deep teal vs warm terracotta vs forest green vs other)
+- [TODO] Typography choices (fonts for headers, body, data displays)
+- [TODO] Icon style direction
+- [TODO] App icon design concept
+- [TODO] Splash screen design concept
+
+### Features & Functionality
+- [DONE] Complete feature map (4 modules, 20+ sub-features)
+- [DONE] Build phases defined (9 phases)
+- [IN PROGRESS] User's protocol layout (pending - user about to share)
+- [TODO] Screen-by-screen flow - every screen the client sees, every screen the agent sees, and navigation paths between them
+- [TODO] User roles and permissions - who can see what, who can do what (client vs agent vs inspector vs mortgage broker vs admin)
+- [TODO] Data models - field-by-field definition of: Transaction, Client Profile, Property, Showing, Open House, Lead, Document, Message, Vendor, Trust Score
+- [TODO] Edge cases and error handling:
+  - What happens when a deal falls through?
+  - What happens when a client switches agents?
+  - What happens when an inspector cancels?
+  - What happens when a document is disputed?
+  - How are expired listings handled?
+  - What happens when a lead goes cold?
+  - How is dual agency handled (agent represents both buyer and seller)?
+- [TODO] Notification strategy - what triggers notifications, how are they delivered (push, in-app, email, SMS via Signal Chat?)
+
+### Business & Monetization
+- [DONE] Industry pricing benchmarks
+- [DONE] Proposed pricing tiers
+- [DONE] Revenue model options
+- [TODO] Final pricing decisions (what's standard vs subscription)
+- [TODO] Onboarding flow for new agents (sign up, set up branding, invite clients)
+- [TODO] Onboarding flow for new clients (receive invite, create account, set up profile)
+
+### Integration & Data
+- [DONE] Integration philosophy and strategy
+- [DONE] Priority external integrations list (MLS, ShowingTime, DocuSign, etc.)
+- [DONE] Data import capabilities (CSV, manual, OCR future)
+- [TODO] Specific API endpoint mapping for each ecosystem service connection
+- [TODO] Data migration plan (how agents move from existing tools to TrustHome)
+
+### Technical
+- [TODO] Final tech stack confirmation
+- [TODO] Database schema design
+- [TODO] API architecture (REST vs GraphQL vs hybrid)
+- [TODO] Real-time features architecture (WebSocket for live updates, chat, notifications)
+- [TODO] Offline capability requirements (what works without internet?)
+- [TODO] Security architecture (beyond Trust Shield - app-level security, data encryption, HIPAA-like considerations for personal financial data)
+
+---
+
 ## OPEN QUESTIONS & FUTURE CONSIDERATIONS
 - What specific MLS system does the sister's market use?
 - What additional data points would be useful for the trust layer?
@@ -531,6 +599,7 @@ Our app should NOT try to replace MLS search or e-signatures. It should fill the
 - What does the existing CRM's data model look like? What fields/entities does it track?
 - What's the SSO protocol? OAuth2? JWT? Custom?
 - User's protocol layout details (pending - user will share next)
+- Final app name decision (TrustHome is working name - is that the one?)
 
 ---
 

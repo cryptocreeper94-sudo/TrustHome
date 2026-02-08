@@ -296,6 +296,155 @@ Our app should NOT try to replace MLS search or e-signatures. It should fill the
 
 ---
 
+## USER ROLES & PERMISSIONS
+
+### Role Architecture
+TrustHome has a layered permission system. Every user has a role, and that role determines what they see, what they can do, and what data they can access. The key principle: **nobody sees more than they need to.**
+
+### Role 1: Agent (The Hub)
+**Who they are:** The real estate agent. This is the primary subscriber and power user. The agent is the center of every transaction.
+**What they see:**
+- Full agent dashboard with all their clients, leads, transactions, showings, open houses
+- CRM data (connected via API)
+- Marketing tools (connected via API)
+- Analytics and performance data
+- All communications across all their transactions
+- Vendor directory and ratings
+- Branding/white-label settings
+**What they can do:**
+- Invite clients, connect vendors, manage all parties in a transaction
+- Create and manage listings, showings, open houses
+- Push properties to client shortlists
+- Send messages to anyone in their network
+- View and manage all documents across all transactions
+- Access marketing tools, analytics, lead management
+- Customize their branding
+- Manage team members (Team/Brokerage tier)
+**What they cannot do:**
+- See other agents' data (unless Brokerage Admin grants access)
+- Modify vendor-uploaded documents (inspection reports, appraisals, etc.)
+
+### Role 2: Client (Buyer or Seller)
+**Who they are:** The person buying or selling a home. Invited by their agent.
+**What they see:**
+- ONLY their own transaction(s) - their timeline, their documents, their messages
+- Their property shortlist and comparison tools
+- Their showing schedule and history
+- Neighborhood intelligence for properties they're considering
+- Mortgage calculator tools
+- Post-close hub (after closing)
+**What they can do:**
+- View transaction progress and timeline
+- Favorite/reject/comment on properties
+- Request showing reschedules
+- Submit post-showing feedback
+- Upload requested documents
+- Message their agent
+- Message connected vendors (inspector, mortgage broker) within their transaction
+- Access their document vault
+**What they cannot do:**
+- See other clients' data
+- See agent's business info (other deals, revenue, lead pipeline)
+- Invite other users
+- Access marketing, analytics, or CRM features
+- See vendor business data beyond what's relevant to their deal
+
+### Role 3: Inspector (Subscriber or Guest)
+**Subscriber:** Full inspector vertical with dashboard, pipeline, report builder, scheduling, revenue tracking, marketing tools
+**Guest:** Limited to specific assignment - view property details, upload report, communicate about that inspection
+**In either case, they can:**
+- View property details for their assigned inspections
+- Upload inspection reports
+- Communicate with agent (and client if permitted)
+- Update scheduling/status
+**What they cannot see:**
+- Financial details of the deal (offer price, loan terms, etc.)
+- Client personal info beyond name and contact for scheduling
+- Other transactions they're not assigned to
+- Agent's business data
+
+### Role 4: Mortgage Broker / Lender (Subscriber or Guest)
+**Subscriber:** Full lending vertical with pipeline, document management, rate tools, agent relationship tracking
+**Guest:** Limited to specific transaction - update loan status, upload documents, communicate
+**In either case, they can:**
+- View relevant financial information for their assigned transactions
+- Update pre-approval and loan status
+- Upload and request documents
+- Communicate with agent and client about financing
+**What they cannot see:**
+- Inspection reports (unless agent shares)
+- Other transaction details beyond financing
+- Agent's other clients or business data
+
+### Role 5: Title Company (Subscriber or Guest)
+**Subscriber:** Full title vertical with pipeline, closing management, document prep
+**Guest:** Limited to specific closing - update status, upload documents, schedule
+**In either case, they can:**
+- View property and party information needed for title search and closing
+- Upload title documents and closing paperwork
+- Schedule closing
+- Communicate with agent about closing details
+**What they cannot see:**
+- Inspection results
+- Full financial terms beyond what's needed for closing
+- Agent's other transactions or business data
+
+### Role 6: Appraiser (Subscriber or Guest)
+**Subscriber:** Full appraiser vertical with pipeline, comp tools, report builder
+**Guest:** Limited to specific appraisal - upload report, communicate
+**Permissions similar to Inspector** - focused on their specific assignment
+
+### Role 7: Contractor / Service Provider (Subscriber or Guest)
+**Subscriber:** Full service provider vertical with job pipeline, quoting, portfolio, marketing
+**Guest:** Limited to specific job referral - submit quote, communicate
+**Context:** Primarily post-close (home repairs, renovations, maintenance) but could also be pre-close (repair negotiations)
+
+### Role 8: Team Member / Assistant (Under an Agent)
+**Who they are:** Junior agents or admin staff working under a lead agent (Team/Brokerage tier)
+**Permissions:** Configurable by the lead agent. Can range from:
+- Read-only access to specific clients
+- Full management access to all clients
+- Marketing tools access
+- Analytics access
+- Anything the lead agent chooses to grant
+**What they cannot do:**
+- Override the lead agent's settings
+- Access billing or subscription management
+- Invite or remove other team members (only lead agent can)
+
+### Role 9: Brokerage Admin (Enterprise Tier - Future)
+**Who they are:** Brokerage management overseeing multiple agents
+**What they see:**
+- Aggregate performance data across all agents in the brokerage
+- Compliance and transaction oversight
+- Brokerage-wide analytics
+**What they can do:**
+- View (not modify) individual agent dashboards for compliance
+- Set brokerage-wide branding
+- Manage agent accounts within the brokerage
+**What they cannot do:**
+- Modify individual agent's client data or transactions
+- Communicate with clients on behalf of agents (unless explicitly delegated)
+
+### Communication Permissions Matrix
+| Sender → Receiver | Agent | Client | Inspector | Mortgage | Title | Appraiser | Contractor |
+|---|---|---|---|---|---|---|---|
+| **Agent** | - | Yes | Yes | Yes | Yes | Yes | Yes |
+| **Client** | Yes (their agent) | - | Yes (in their deal) | Yes (in their deal) | Limited | Limited | Yes (post-close) |
+| **Inspector** | Yes (assigned agent) | Via agent | - | No | No | No | No |
+| **Mortgage** | Yes (assigned agent) | Yes (in deal) | No | - | Yes (for closing) | No | No |
+| **Title** | Yes (assigned agent) | Limited | No | Yes (for closing) | - | No | No |
+| **Appraiser** | Yes (assigned agent) | No | No | No | No | - | No |
+| **Contractor** | Yes (referring agent) | Yes (homeowner) | No | No | No | No | - |
+
+### Key Principle: Data Ownership
+- Clients OWN their personal data and transaction history - it stays with them even if they switch agents
+- Agents OWN their business data (leads, analytics, marketing content)
+- Vendors OWN their professional data (reports, ratings, certifications)
+- The platform connects these ownership boundaries without violating them
+
+---
+
 ## COMPLETE FEATURE MAP
 
 ### MODULE 1: CLIENT PORTAL (Buyer/Seller Experience)
@@ -430,41 +579,100 @@ Our app should NOT try to replace MLS search or e-signatures. It should fill the
 
 ---
 
-### MODULE 3: CONNECTED VERTICALS (The Ecosystem)
+### MODULE 3: CONNECTED VERTICALS (Full Subscription Products Within TrustHome)
 
-#### 3A. Home Inspector Portal
-- Receives inspection assignments from agents
-- Uploads inspection reports directly to the transaction
-- Scheduling coordination with buyer and agent
-- Rating and review system
-- **TRUST LAYER**: Inspection results and certifications verified on blockchain
+**Key Decision:** Each vertical is NOT just a lightweight guest portal. It's a full product with its own tools, its own value, and its own subscription tier. All verticals live WITHIN TrustHome (one app, one ecosystem), not as separate apps. However, each profession gets their own experience, tools, and reason to subscribe independently.
 
-#### 3B. Mortgage Broker Portal
-- Pre-approval status updates pushed to agent and client
-- Document requests sent to client through the app
-- Rate quotes and comparisons
-- Loan progress tracker
-- **TRUST LAYER**: Pre-approval verifications on blockchain
+**The Network Effect:** An inspector can subscribe to TrustHome for their own tools even if no agent they work with uses it. But when BOTH are on the platform, they connect seamlessly - and that's the magic. The more professionals on the platform, the more valuable it becomes for everyone.
 
-#### 3C. Title Company Portal
-- Title search status updates
-- Document preparation and delivery
-- Closing scheduling
-- Fee transparency
-- **TRUST LAYER**: Title verification on blockchain
+**Guest Access (for non-subscribers):** When an agent's preferred inspector/lender/title company doesn't subscribe, they get a lightweight guest connection - a link to upload documents, view transaction details, and communicate about a specific deal. They get a taste of the platform. This is also the conversion funnel to turn them into subscribers.
 
-#### 3D. Appraiser Portal
-- Appraisal scheduling
-- Report delivery
-- Comparable analysis sharing
-- **TRUST LAYER**: Appraisal records on blockchain
+**Scope:** Covers BOTH residential AND commercial real estate. Commercial transactions involve different parties (commercial brokers, commercial lenders, environmental inspectors, zoning attorneys, tenant reps) and different workflows (longer timelines, more complex due diligence, different document types). The platform adapts based on transaction type.
 
-#### 3E. Contractor/Service Provider Portal
-- For post-close home services
-- Quote requests from homeowners
-- Job tracking
-- Rating and review system
-- **TRUST LAYER**: Service history and reviews on blockchain
+#### 3A. Home Inspector Vertical
+**As a full product (subscribing inspector):**
+- Their own dashboard with job pipeline (scheduled, in progress, completed)
+- Inspection report builder (templated, photo/video documentation, checklist-driven)
+- Scheduling and calendar management across all their clients/agents
+- Client communication tools
+- Revenue/invoice tracking
+- Marketing tools to promote their services to agents
+- Rating and review profile (trust score)
+- **TRUST LAYER**: Certifications, inspection history, and results verified on blockchain
+**As guest access (non-subscriber):**
+- Receives assignment link from agent
+- Can view property details and schedule
+- Upload completed report
+- Communicate about the specific inspection
+- That's it - no tools, no dashboard
+
+#### 3B. Mortgage Broker / Lender Vertical
+**As a full product (subscribing broker):**
+- Loan pipeline dashboard (applications, in progress, approved, closed)
+- Pre-approval workflow and status tracking
+- Document collection and management
+- Rate sheet management
+- Client communication tools
+- Agent relationship management (which agents send them business)
+- Revenue tracking
+- Marketing tools
+- **TRUST LAYER**: Pre-approval verifications, lending history on blockchain
+**As guest access (non-subscriber):**
+- Receives transaction link from agent
+- Can update loan status
+- Upload required documents
+- Communicate about the specific deal
+
+#### 3C. Title Company Vertical
+**As a full product (subscribing title company):**
+- Title search pipeline and tracking
+- Closing scheduling and coordination
+- Document preparation and delivery workflow
+- Fee transparency and invoice management
+- Wire fraud prevention via Trust Shield
+- Multi-agent/multi-transaction management
+- **TRUST LAYER**: Title verification records on blockchain
+**As guest access (non-subscriber):**
+- Receives closing link from agent
+- Can update title search status
+- Upload closing documents
+- Schedule closing
+
+#### 3D. Appraiser Vertical
+**As a full product (subscribing appraiser):**
+- Appraisal job pipeline
+- Comparable analysis tools
+- Report builder
+- Scheduling management
+- Revenue tracking
+- **TRUST LAYER**: Appraisal records and credentials on blockchain
+**As guest access (non-subscriber):**
+- Receives appraisal assignment link
+- Upload completed report
+- Communicate about the appraisal
+
+#### 3E. Contractor / Service Provider Vertical
+**As a full product (subscribing contractor):**
+- Job pipeline management
+- Quote/estimate builder
+- Client communication
+- Portfolio/gallery of past work
+- Revenue tracking
+- Marketing to homeowners and agents
+- **TRUST LAYER**: Service history, reviews, and licensing on blockchain
+**As guest access (non-subscriber):**
+- Receives job referral from agent or homeowner
+- Can submit quote
+- Communicate about the specific job
+
+#### 3F. Commercial Real Estate Extensions (Future)
+- Commercial broker tools (different from residential)
+- Commercial lender connections
+- Environmental inspector vertical
+- Zoning/legal professional connections
+- Tenant representation tools
+- Commercial lease management
+- Due diligence tracking (longer, more complex than residential)
 
 ---
 
@@ -620,7 +828,7 @@ This is the list of everything that needs to be fully defined before any code is
 - [DONE] Build phases defined (9 phases)
 - [DONE] Protocol layout (Bento grid, glassmorphism, navigation, card design, visual effects, information architecture)
 - [TODO] Screen-by-screen flow - every screen the client sees, every screen the agent sees, and navigation paths between them
-- [TODO] User roles and permissions - who can see what, who can do what (client vs agent vs inspector vs mortgage broker vs admin)
+- [DONE] User roles and permissions (9 roles defined: Agent, Client, Inspector, Mortgage Broker, Title Company, Appraiser, Contractor, Team Member, Brokerage Admin + communication matrix + data ownership principles)
 - [TODO] Data models - field-by-field definition of: Transaction, Client Profile, Property, Showing, Open House, Lead, Document, Message, Vendor, Trust Score
 - [TODO] Edge cases and error handling:
   - What happens when a deal falls through?

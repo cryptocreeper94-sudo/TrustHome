@@ -334,6 +334,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/auth/dev-pin", async (req: Request, res: Response) => {
+    try {
+      const { pin } = req.body;
+      if (!pin) {
+        return res.status(400).json({ error: "PIN is required" });
+      }
+
+      if (pin !== "0424") {
+        return res.status(401).json({ error: "Invalid PIN" });
+      }
+
+      const devEmail = "developer@trusthome.io";
+      let user = await storage.getUserByEmail(devEmail);
+
+      if (!user) {
+        const hashedPassword = await bcrypt.hash("DevAccess!2026", 12);
+        user = await storage.createUser({
+          email: devEmail,
+          password: hashedPassword,
+          firstName: "Developer",
+          lastName: "Admin",
+          role: "agent",
+          phone: null,
+          brokerage: "DarkWave Studios",
+          licenseNumber: null,
+        });
+      }
+
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+      req.session.userEmail = user.email;
+      req.session.userName = user.firstName + ' ' + user.lastName;
+
+      return res.json({
+        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+      });
+    } catch (error) {
+      console.error("Dev PIN error:", error);
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
       if (!req.session.userId) {

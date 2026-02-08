@@ -54,6 +54,34 @@ The user has an extensive suite of apps already built (2+ million lines of code 
 - **Trust Layer visual connection**: Subtle nods to trust layer branding in trust score badges and blockchain verification indicators, so ecosystem users recognize the connection without it dominating the real estate app's look
 - **White-label consideration**: TBD - whether agents can customize accent colors or if TrustHome has one unified brand identity
 
+### TrustHome Color Scheme & Design Direction (Proposed)
+
+**Why light/dark toggle (not trust layer holographic):**
+- Real estate clients are a broad audience - all ages, all tech comfort levels
+- Home buying is stressful - the app needs to feel clean and calming, not futuristic
+- Agent side needs to feel professional and trustworthy ("trust me with the biggest purchase of your life")
+- Both iOS and Android have system-level dark mode that users expect apps to respect
+- Agents use the app at all hours - light mode during showings, dark mode at night doing admin
+
+**Proposed Color Palette:**
+- Primary accent: A warm, earthy tone that feels premium and trustworthy - options include:
+  - Deep teal
+  - Warm terracotta
+  - Rich forest green
+  - NOT the typical real estate red/blue that every brokerage uses (we want to stand out)
+- Light mode: Clean whites and soft grays for backgrounds
+- Dark mode: Deep charcoals and near-blacks
+- Accent color stays consistent across both modes for brand identity
+- Inspiration: Airbnb (warm, inviting), banking apps (trustworthy, clean), top-tier real estate apps
+- Target audience consideration: A 55-year-old first-time home buyer should feel just as comfortable as a 28-year-old tech-savvy buyer
+
+**Design Philosophy:**
+- Mobile-native patterns, not web-like designs
+- Minimal chrome - no cluttered headers or visible title bars (like Instagram, ChatGPT, WhatsApp)
+- Premium feel without being intimidating
+- Everything should be instantly intuitive - no learning curve for non-tech-savvy clients
+- Final color palette to be decided before building begins
+
 ### Architecture Decision: API-First Integration (Not Embedded Code)
 
 **Decision:** TrustHome connects to ecosystem tools via APIs, NOT by embedding code from other apps.

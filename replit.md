@@ -75,13 +75,38 @@ The user has an extensive suite of apps already built (2+ million lines of code 
 - The CRM and marketing hub currently exist (embedded) in 3-5 other apps - the long-term goal is to migrate those to the API approach as well
 - Signal Chat, SSO, Trust Shield, and blockchain have their own backends/locations
 
+**Architecture Decision: Keep Services Modular (Not Unified)**
+- The CRM, Marketing Hub, Analytics, Automated Marketing, etc. are all SEPARATE builds with separate tenant spacing
+- Decision: DO NOT rebuild them into one unified suite
+- Reason: Preserves the ability to sell each service separately (like Salesforce sells Sales Cloud, Marketing Cloud, Service Cloud independently)
+- Each service has its own PWA already set up
+- For TrustHome: create a SEPARATE TENANT in EACH service
+- This is the Salesforce model - modular products that integrate seamlessly but are independently purchasable
+- Future verticals (inspector app, mortgage broker app) can pick and choose which services they need
+
 **Tenant Strategy for TrustHome:**
-- TrustHome = a NEW TENANT in the existing PaintPros.io backend systems
-- Create tenant space for: CRM, Marketing Hub, Analytics
-- Connect via API using tenant-specific credentials/keys
-- Data flows: PaintPros.io backend (source of truth) -> API -> TrustHome (renders in its own UI)
+- TrustHome = a NEW TENANT in EACH of the existing backend systems (they are separate, not one monolith)
+- Create separate tenant space in: CRM, Marketing Hub, Analytics, Automated Marketing, and any other applicable service
+- Connect via API using tenant-specific credentials/keys for each service
+- Data flows: Each service backend (source of truth) -> its API -> TrustHome (renders in its own UI)
 - The agent never knows or cares that the CRM also powers PaintPros and other apps
 - To the agent, it's just "my real estate CRM" - same data engine, real estate presentation
+
+**TrustHome API Connection Map:**
+```
+TrustHome App connects to:
+├── CRM tenant ..................... API #1 (PaintPros.io backend)
+├── Marketing Hub tenant ........... API #2 (separate backend)
+├── Analytics tenant ............... API #3 (separate backend)
+├── Automated Marketing tenant ..... API #4 (separate backend)
+├── Signal Chat .................... API #5 (its own backend)
+├── SSO ............................ API #6 (its own backend)
+├── Trust Shield ................... API #7 (trustshield.tech)
+└── Blockchain / Trust Layer ....... API #8 (its own backend)
+```
+- TrustHome's own backend acts as the ORCHESTRATION LAYER
+- It knows which APIs to call and stitches data together into one seamless experience
+- The user sees ONE app, not 8 backends
 
 **Why this is better than embedding code:**
 - When you update the CRM or Signal Chat, you update it ONCE in the shared backend - every app that connects to it gets the update automatically

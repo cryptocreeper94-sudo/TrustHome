@@ -66,6 +66,23 @@ The user has an extensive suite of apps already built (2+ million lines of code 
 - TrustHome makes API calls to Trust Shield for verification
 - SSO handles authentication across all apps
 
+**Existing Backend Hubs (Source of Truth):**
+- **PaintPros.io** - This is where the main business hub backend lives. It contains:
+  - Full CRM (tenant-spaced, already multi-app ready)
+  - Marketing Hub (with analytics)
+  - Extensive backend features beyond CRM and marketing
+  - Already tenant-spaced and serving multiple apps
+- The CRM and marketing hub currently exist (embedded) in 3-5 other apps - the long-term goal is to migrate those to the API approach as well
+- Signal Chat, SSO, Trust Shield, and blockchain have their own backends/locations
+
+**Tenant Strategy for TrustHome:**
+- TrustHome = a NEW TENANT in the existing PaintPros.io backend systems
+- Create tenant space for: CRM, Marketing Hub, Analytics
+- Connect via API using tenant-specific credentials/keys
+- Data flows: PaintPros.io backend (source of truth) -> API -> TrustHome (renders in its own UI)
+- The agent never knows or cares that the CRM also powers PaintPros and other apps
+- To the agent, it's just "my real estate CRM" - same data engine, real estate presentation
+
 **Why this is better than embedding code:**
 - When you update the CRM or Signal Chat, you update it ONCE in the shared backend - every app that connects to it gets the update automatically
 - Each app stays lightweight and focused on its vertical

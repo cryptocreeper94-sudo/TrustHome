@@ -9,6 +9,10 @@ interface AppContextValue {
   openDrawer: () => void;
   closeDrawer: () => void;
   toggleDrawer: () => void;
+  aiAssistantOpen: boolean;
+  openAiAssistant: () => void;
+  closeAiAssistant: () => void;
+  toggleAiAssistant: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -16,10 +20,14 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentRole, setCurrentRole] = useState<UserRole>('agent');
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const toggleDrawer = useCallback(() => setDrawerOpen(prev => !prev), []);
+  const openAiAssistant = useCallback(() => setAiAssistantOpen(true), []);
+  const closeAiAssistant = useCallback(() => setAiAssistantOpen(false), []);
+  const toggleAiAssistant = useCallback(() => setAiAssistantOpen(prev => !prev), []);
 
   const value = useMemo(() => ({
     currentRole,
@@ -28,7 +36,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openDrawer,
     closeDrawer,
     toggleDrawer,
-  }), [currentRole, drawerOpen, openDrawer, closeDrawer, toggleDrawer]);
+    aiAssistantOpen,
+    openAiAssistant,
+    closeAiAssistant,
+    toggleAiAssistant,
+  }), [currentRole, drawerOpen, aiAssistantOpen, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant]);
 
   return (
     <AppContext.Provider value={value}>

@@ -9,6 +9,7 @@ import { queryClient } from "@/lib/query-client";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { DrawerMenu } from "@/components/ui/DrawerMenu";
+import { AiAssistant } from "@/components/ui/AiAssistant";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,6 +32,7 @@ function RootLayoutNav() {
         <Stack.Screen name="support" />
       </Stack>
       <DrawerMenu />
+      <AiAssistant />
     </>
   );
 }

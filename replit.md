@@ -54,11 +54,44 @@ The user has an extensive suite of apps already built (2+ million lines of code 
 - **Trust Layer visual connection**: Subtle nods to trust layer branding in trust score badges and blockchain verification indicators, so ecosystem users recognize the connection without it dominating the real estate app's look
 - **White-label consideration**: TBD - whether agents can customize accent colors or if TrustHome has one unified brand identity
 
+### Architecture Decision: API-First Integration (Not Embedded Code)
+
+**Decision:** TrustHome connects to ecosystem tools via APIs, NOT by embedding code from other apps.
+
+**How it works:**
+- Each app stays standalone (its own native app in the App Store / Google Play)
+- They all share the same backend infrastructure for SSO, Signal Chat, Trust Shield, etc.
+- TrustHome makes API calls to the CRM backend for client/lead data
+- TrustHome makes API calls to Signal Chat backend for messaging
+- TrustHome makes API calls to Trust Shield for verification
+- SSO handles authentication across all apps
+
+**Why this is better than embedding code:**
+- When you update the CRM or Signal Chat, you update it ONCE in the shared backend - every app that connects to it gets the update automatically
+- Each app stays lightweight and focused on its vertical
+- No duplicated code across apps = no maintenance headaches
+- This is exactly how Google, Apple, and every major app ecosystem works
+
+**UI Consistency:**
+- APIs return RAW DATA only (names, numbers, messages, etc.)
+- TrustHome displays that data using ITS OWN UI, colors, and layout
+- Users never see another app's interface - everything looks native to TrustHome
+- Signal Chat messages appear in TrustHome's chat UI with TrustHome's styling
+- CRM data appears in TrustHome's client management screens with TrustHome's design
+- Trust Shield badges are styled to match TrustHome while keeping recognizable trust layer elements
+- Result: Total visual consistency for the user, even though data comes from multiple backend systems
+
+**Reusable UI Components (The Twist):**
+- While the backend logic stays API-connected, polished UI component FILES (buttons, cards, chat bubbles, form patterns) can be shared across apps for design consistency
+- Components talk to the shared backend through APIs, but the visual presentation is consistent across the ecosystem
+- Each vertical app can have its own accent colors while sharing the same design language/patterns
+
 ### What This Means for TrustHome
 - We do NOT need to build: CRM engine, chat system, marketing tools, authentication, or blockchain
-- We DO need to build: Real estate-specific features, UI/UX for both client and agent, real estate data models, integration points to connect to the existing ecosystem tools
+- We DO need to build: Real estate-specific features, UI/UX for both client and agent, real estate data models, API integration layer to connect to existing ecosystem backends
 - The app needs API connection points / hooks to plug into Signal Chat, the existing CRM, the marketing suite, and SSO
 - The real estate vertical is the domain-specific layer that sits ON TOP of the existing infrastructure
+- All ecosystem data displays in TrustHome's own UI - users experience one seamless, visually consistent app
 
 ---
 

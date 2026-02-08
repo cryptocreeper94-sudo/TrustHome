@@ -20,6 +20,25 @@
 
 ---
 
+## Existing Ecosystem (Already Built by User)
+
+The user has an extensive suite of apps already built (2+ million lines of code across all projects). Many core infrastructure pieces already exist and TrustHome will plug into them rather than rebuilding from scratch.
+
+### Already Built Tools
+- **Full CRM** - A complete CRM that rivals (and intentionally exceeds) anything on the market. This will serve as the foundation for client/lead management rather than building a new CRM from scratch.
+- **Signal Chat** - An ecosystem-wide chat system that works between ALL of the user's apps. This handles direct messaging, cross-app communication, and will be the communication backbone for TrustHome (agent-client chat, agent-inspector chat, etc.)
+- **Marketing Suite** - Full marketing tools including automated marketing for Facebook, Instagram, and other channels. Already built and operational.
+- **SSO (Single Sign-On)** - Cross-app authentication system currently being connected across all apps. Apps being used most are getting SSO treatment first. TrustHome will use this same SSO system.
+- **Trust Layer Blockchain** - Custom Layer 1 blockchain built by the user. This is the connective tissue across ALL verticals (automotive, trades, real estate, etc.). Not just for real estate - it's the universal trust and verification layer.
+
+### What This Means for TrustHome
+- We do NOT need to build: CRM engine, chat system, marketing tools, authentication, or blockchain
+- We DO need to build: Real estate-specific features, UI/UX for both client and agent, real estate data models, integration points to connect to the existing ecosystem tools
+- The app needs API connection points / hooks to plug into Signal Chat, the existing CRM, the marketing suite, and SSO
+- The real estate vertical is the domain-specific layer that sits ON TOP of the existing infrastructure
+
+---
+
 ## Industry Context: What RE/MAX Agents Already Use
 
 ### MAX/Tech powered by BoldTrail (formerly kvCORE) - Free to RE/MAX agents
@@ -320,13 +339,72 @@ Our app should NOT try to replace MLS search or e-signatures. It should fill the
 
 ---
 
+## PRICING & MONETIZATION STRATEGY
+
+### Industry Pricing Benchmarks (What competitors charge)
+
+| Platform | Type | Price | Notes |
+|----------|------|-------|-------|
+| BoldTrail/kvCORE | All-in-one (CRM + IDX + marketing) | $499-750/mo solo, $1,200+/mo teams | Free for RE/MAX agents |
+| Follow Up Boss | CRM focused | $69/user/mo | Popular with high-volume teams |
+| Wise Agent | CRM + transaction | $32-49/mo | Budget solo agents |
+| LionDesk | CRM + AI follow-ups | $25-75/mo | Mid-range |
+| Top Producer | MLS + transaction mgmt | $40-50/user/mo | MLS integration |
+| CINC | Premium lead gen + CRM | $1,000-2,000+/mo | Includes buyer leads |
+| Real Geeks | IDX website + CRM | $249+/mo | Lead gen focused |
+| RAYSE | AI transaction tracking | Subscription | 114+ automated tasks |
+| ShowingTime | Showing management | Subscription | Industry standard |
+
+### Key Pricing Insights
+- Solo agents typically pay $50-150/mo for single-purpose tools
+- All-in-one platforms command $200-500/mo but face resistance from agents with existing stacks
+- Agents earn $50K-500K+ annually, so pricing tolerance is high for ROI-driven tools
+- Freemium or 14-day trials are standard for onboarding
+- Per-seat pricing works for small teams; tiered flat-rate works for larger brokerages
+
+### TrustHome Pricing Decisions Needed
+
+**For Clients (Buyers/Sellers):**
+- Should the client app be FREE? (Most likely yes - it's the agent's selling point)
+- Or should some premium client features be subscription? (mortgage tools, neighborhood intelligence, post-close hub)
+
+**For Agents:**
+- Tiered subscription model seems most appropriate given the feature depth
+- Possible tiers:
+  - **Starter** ($49-79/mo): Core client portal, basic showing management, transaction timeline, limited clients
+  - **Professional** ($149-199/mo): Full CRM integration, marketing hub, unlimited clients, analytics
+  - **Team/Brokerage** ($299-499/mo): Multi-agent support, white-label branding, advanced analytics, API access
+  - **Enterprise** (Custom): Full white-label, dedicated support, custom integrations
+
+**For Connected Verticals (Inspectors, Mortgage Brokers, etc.):**
+- Could be free to encourage adoption (network effect)
+- Or small subscription ($19-39/mo) for their portal
+- Or per-transaction fee model
+
+**Standard vs. Subscription Features - Key Question:**
+- Is Signal Chat (agent-client communication) standard or subscription?
+- Options: Standard for all tiers (drives adoption), or premium feature for Pro+ tiers
+- Recommendation: Make messaging STANDARD - it's the core value proposition. Charge for advanced features like marketing automation, analytics, and multi-agent support.
+
+### Revenue Model Options
+1. **SaaS Subscription** (primary) - Monthly/annual agent subscriptions
+2. **Transaction Fees** - Small fee per closed transaction recorded on trust layer
+3. **Referral Fees** - Percentage of referral fees processed through the platform
+4. **Premium Integrations** - Charge for MLS sync, BoldTrail sync, etc.
+5. **White Label Licensing** - Brokerages pay premium for full branding customization
+
+---
+
 ## OPEN QUESTIONS & FUTURE CONSIDERATIONS
 - What specific MLS system does the sister's market use?
 - What additional data points would be useful for the trust layer?
-- Pricing model: Free for clients, subscription for agents? Per-transaction fee?
 - How will the app handle multiple agents in the same brokerage?
 - Multi-language support needed?
 - What level of branding customization for white-label?
+- How does Signal Chat integrate? API endpoints? WebSocket? What's the connection protocol?
+- What does the existing CRM's data model look like? What fields/entities does it track?
+- What's the SSO protocol? OAuth2? JWT? Custom?
+- User's protocol layout details (pending - user will share next)
 
 ---
 

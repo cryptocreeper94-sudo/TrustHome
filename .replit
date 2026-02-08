@@ -77,3 +77,4 @@ ensurePreviewReachable = "/status"
 
 [userenv.shared]
 TZ = "America/Chicago"
+TRUSTLAYER_BASE_URL = "https://dwsc.io"

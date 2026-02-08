@@ -30,6 +30,20 @@ The user has an extensive suite of apps already built (2+ million lines of code 
 - **Marketing Suite** - Full marketing tools including automated marketing for Facebook, Instagram, and other channels. Already built and operational.
 - **SSO (Single Sign-On)** - Cross-app authentication system currently being connected across all apps. Apps being used most are getting SSO treatment first. TrustHome will use this same SSO system.
 - **Trust Layer Blockchain** - Custom Layer 1 blockchain built by the user. This is the connective tissue across ALL verticals (automotive, trades, real estate, etc.). Not just for real estate - it's the universal trust and verification layer.
+- **Trust Shield (trustshield.tech)** - The ecosystem's security system. A full-blown security suite comparable to services like Certik. Includes:
+  - Guardian Shield - comprehensive security framework
+  - AI Agent Verification System - automatically red-flags suspicious activity, fraudulent behavior, or security concerns
+  - Verification & certification services - the trust layer stands behind its own products with this system
+  - Used for: identity verification, professional credential verification, document authenticity, transaction security
+  - This is what the trust layer itself promotes beyond just being a blockchain - the SECURITY side is a core value proposition
+  - TrustHome will integrate Trust Shield for: agent license verification, inspector certification verification, document authenticity checks, secure transaction records, fraud prevention
+
+### Ecosystem Branding
+- **Trust Layer brand identity**: Navy, cyan, lavender/purple, holographic feel
+- **TrustHome (real estate app)**: Should NOT use the holographic trust layer theme. Needs its own identity that's clean, professional, and approachable for a broad audience (home buyers/sellers of all ages)
+- **Design decision**: Light/dark mode toggle with a premium, trustworthy color palette
+- **Trust Layer visual connection**: Subtle nods to trust layer branding in trust score badges and blockchain verification indicators, so ecosystem users recognize the connection without it dominating the real estate app's look
+- **White-label consideration**: TBD - whether agents can customize accent colors or if TrustHome has one unified brand identity
 
 ### What This Means for TrustHome
 - We do NOT need to build: CRM engine, chat system, marketing tools, authentication, or blockchain

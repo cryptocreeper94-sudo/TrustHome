@@ -5,6 +5,9 @@ type UserRole = 'agent' | 'client_buyer' | 'client_seller';
 interface AppContextValue {
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
+  isAgentAuthenticated: boolean;
+  agentSignIn: () => void;
+  agentSignOut: () => void;
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -18,9 +21,20 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [currentRole, setCurrentRole] = useState<UserRole>('agent');
+  const [currentRole, setCurrentRole] = useState<UserRole>('client_buyer');
+  const [isAgentAuthenticated, setIsAgentAuthenticated] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
+
+  const agentSignIn = useCallback(() => {
+    setIsAgentAuthenticated(true);
+    setCurrentRole('agent');
+  }, []);
+
+  const agentSignOut = useCallback(() => {
+    setIsAgentAuthenticated(false);
+    setCurrentRole('client_buyer');
+  }, []);
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
@@ -32,6 +46,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({
     currentRole,
     setCurrentRole,
+    isAgentAuthenticated,
+    agentSignIn,
+    agentSignOut,
     drawerOpen,
     openDrawer,
     closeDrawer,
@@ -40,7 +57,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openAiAssistant,
     closeAiAssistant,
     toggleAiAssistant,
-  }), [currentRole, drawerOpen, aiAssistantOpen, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant]);
+  }), [currentRole, isAgentAuthenticated, drawerOpen, aiAssistantOpen, agentSignIn, agentSignOut, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant]);
 
   return (
     <AppContext.Provider value={value}>

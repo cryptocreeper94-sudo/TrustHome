@@ -133,15 +133,22 @@ The user has an extensive suite of apps already built (2+ million lines of code 
 - Think Airbnb, top banking apps, premium fintech - that caliber of polish
 - If it looks like a template or a basic app, it's not good enough
 
-**Additional Considerations (Agent's Suggestions):**
+**Client View vs Agent View - Layout Density:**
+- Client-facing UI: More breathing room, less dense, calmer, more visual. The client is likely stressed (buying/selling a home) and may not be tech-savvy. Every screen should feel simple and welcoming. Fewer items visible at once, larger touch targets, more whitespace. Think "luxury hotel lobby" - spacious, clear, you know exactly where to go.
+- Agent-facing UI: Can be more information-dense since agents are power users, but still must be clean and easy to use. NOT a cramped spreadsheet. NOT a cluttered dashboard with 25 widgets. Think "premium cockpit" - lots of controls, but everything is organized, labeled, and within reach. Still follows the same Bento grid / glassmorphism / premium design language.
+- Both views: Same design system, same visual identity, same premium feel. The difference is density and complexity, not quality.
+- Anti-pattern to avoid: Facebook-style design where features are buried, navigation is confusing, and the user has to fight the interface. If someone has to think about how to use it, it's wrong.
+- Guiding principle: "I can look at this and say it's easy to use" - that's the test for every screen, both client and agent side.
+
+**Additional Considerations (Agreed):**
 - Pull-to-refresh on data screens (transactions, messages, listings)
 - Subtle micro-animations on state changes (card loading, data updating, button presses)
-- Skeleton loading states (shimmer effect) instead of plain loading spinners
-- Haptic feedback on key actions (iOS)
-- Smooth page transitions (not just hard cuts between screens)
+- Skeleton loading states (shimmer effect) instead of plain loading spinners - these are the subtle animated placeholder shapes you see while content loads, much more polished than a spinning wheel
+- Haptic feedback on key actions (iOS) - the little vibration/tap you feel when you press a button, like when you long-press an app icon
+- Smooth page transitions (not just hard cuts between screens) - screens slide or fade in/out instead of just appearing
 - Search functionality - global search accessible from header or gesture
-- Empty states that are designed, not just "No data" text
-- Error states that are helpful, not just red text
+- Designed empty states - when there's no data yet (no transactions, no messages), the screen still looks good with a helpful message, not just blank
+- Helpful error states - if something goes wrong, the app tells you what happened and what to do about it, not just a red error message
 
 ### Architecture Decision: API-First Integration (Not Embedded Code)
 

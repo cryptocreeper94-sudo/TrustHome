@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { TrustShieldInline } from '@/components/ui/TrustShieldBadge';
 import { Footer } from '@/components/ui/Footer';
 
 const CATEGORIES = ['All', 'Inspectors', 'Lenders', 'Title', 'Appraisers', 'Contractors'] as const;
@@ -148,9 +149,7 @@ export default function NetworkScreen() {
 
                   <View style={styles.vendorMetrics}>
                     <View style={styles.metricItem}>
-                      <Ionicons name="shield-checkmark" size={14} color={colors.primary} />
-                      <Text style={[styles.metricValue, { color: colors.text }]}>{vendor.trustScore}</Text>
-                      <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Trust</Text>
+                      <TrustShieldInline score={vendor.trustScore} showTier />
                     </View>
                     <View style={styles.metricItem}>
                       <Ionicons name="briefcase" size={14} color={colors.primary} />
@@ -197,6 +196,14 @@ export default function NetworkScreen() {
                           <Text style={styles.expandedBtnText}>Assign to Deal</Text>
                         </Pressable>
                       </View>
+
+                      <Pressable
+                        onPress={() => Linking.openURL(`https://dwtl.io/verify/${vendor.id}`)}
+                        style={styles.verifyLink}
+                      >
+                        <Ionicons name="link-outline" size={13} color={colors.primary} />
+                        <Text style={[styles.verifyLinkText, { color: colors.primary }]}>Verify on dwtl.io</Text>
+                      </Pressable>
                     </View>
                   )}
 
@@ -400,6 +407,19 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 12,
     fontWeight: '600' as const,
+  },
+  verifyLink: {
+    flexDirection: 'row',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 4,
+    marginTop: 12,
+    paddingVertical: 6,
+  },
+  verifyLinkText: {
+    fontSize: 12,
+    fontWeight: '500' as const,
+    textDecorationLine: 'underline' as const,
   },
   expandIndicator: {
     alignItems: 'center' as const,

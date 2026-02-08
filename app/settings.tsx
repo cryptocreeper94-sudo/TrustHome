@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { TrustShieldBadge } from '@/components/ui/TrustShieldBadge';
 import { Footer } from '@/components/ui/Footer';
 
 interface SettingsItem {
@@ -22,6 +24,10 @@ interface SettingsSection {
 
 export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
+
+  const trustLayerQuery = useQuery<any>({
+    queryKey: ['/api/trustlayer/status'],
+  });
 
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     twoFactor: true,
@@ -82,7 +88,7 @@ export default function SettingsScreen() {
       items: [
         { icon: 'git-network-outline', label: 'CRM Connection', type: 'status', value: 'Connected', statusColor: colors.success },
         { icon: 'chatbubbles-outline', label: 'Signal Chat', type: 'status', value: 'Active', statusColor: colors.success },
-        { icon: 'shield-outline', label: 'Trust Shield', type: 'status', value: 'Verified', statusColor: colors.success },
+        { icon: 'shield-outline', label: 'Trust Layer (DWTL)', type: 'status', value: trustLayerQuery.data?.configured ? 'Connected' : 'Not Configured', statusColor: trustLayerQuery.data?.configured ? colors.success : colors.warning },
         { icon: 'home-outline', label: 'MLS Connection', type: 'status', value: 'Synced', statusColor: colors.success },
       ],
     },
@@ -122,21 +128,9 @@ export default function SettingsScreen() {
             </View>
           </GlassCard>
 
-          <GlassCard style={{ marginTop: 14 }}>
-            <View style={styles.trustRow}>
-              <View style={styles.trustLeft}>
-                <Ionicons name="shield-checkmark" size={28} color={colors.primary} />
-                <View style={{ marginLeft: 12 }}>
-                  <Text style={[styles.trustLabel, { color: colors.textSecondary }]}>Trust Score</Text>
-                  <Text style={[styles.trustValue, { color: colors.text }]}>97.4</Text>
-                </View>
-              </View>
-              <View style={[styles.verifiedBadge, { backgroundColor: colors.primary + '15' }]}>
-                <Ionicons name="link" size={14} color={colors.primary} />
-                <Text style={[styles.verifiedText, { color: colors.primary }]}>Blockchain Verified</Text>
-              </View>
-            </View>
-          </GlassCard>
+          <View style={{ marginTop: 14 }}>
+            <TrustShieldBadge score={97.4} verified showLink />
+          </View>
 
           {SECTIONS.map((section, si) => (
             <View key={si} style={styles.settingsGroup}>
@@ -244,34 +238,6 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 13,
-  },
-  trustRow: {
-    flexDirection: 'row',
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
-  },
-  trustLeft: {
-    flexDirection: 'row',
-    alignItems: 'center' as const,
-  },
-  trustLabel: {
-    fontSize: 12,
-  },
-  trustValue: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-  },
-  verifiedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center' as const,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    gap: 5,
-  },
-  verifiedText: {
-    fontSize: 11,
-    fontWeight: '600' as const,
   },
   settingsGroup: {
     marginTop: 24,

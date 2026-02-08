@@ -7,6 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { TrustShieldBadge } from '@/components/ui/TrustShieldBadge';
 import { Footer } from '@/components/ui/Footer';
 
 const CARD_IMAGES = {
@@ -93,6 +94,10 @@ export function AgentDashboard() {
     queryKey: ['/api/analytics/dashboard'],
   });
 
+  const trustLayerQuery = useQuery<any>({
+    queryKey: ['/api/trustlayer/status'],
+  });
+
   const liveLeadCount = leadsQuery.data && Array.isArray(leadsQuery.data) ? leadsQuery.data.length : null;
   const liveAnalytics = analyticsQuery.data && !analyticsQuery.data?.error ? analyticsQuery.data : null;
 
@@ -118,16 +123,23 @@ export function AgentDashboard() {
           <Text style={[styles.greeting, { color: colors.textSecondary }]}>Good morning</Text>
           <Text style={[styles.name, { color: colors.text }]}>{MOCK_AGENT.name}</Text>
         </View>
-        <View style={[styles.trustBadge, { backgroundColor: isDark ? 'rgba(26,138,126,0.15)' : 'rgba(26,138,126,0.08)' }]}>
-          <MaterialCommunityIcons name="shield-check" size={18} color={colors.primary} />
-          <Text style={[styles.trustText, { color: colors.primary }]}>{MOCK_AGENT.trustScore}</Text>
-        </View>
+        <TrustShieldBadge score={MOCK_AGENT.trustScore} compact showLink />
       </View>
 
-      {(liveLeadCount !== null || liveAnalytics) && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginBottom: 4 }}>
-          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
-          <Text style={{ fontSize: 10, color: colors.textTertiary }}>Connected to PaintPros.io</Text>
+      {(liveLeadCount !== null || liveAnalytics || trustLayerQuery.data?.configured) && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, marginBottom: 4, flexWrap: 'wrap' }}>
+          {(liveLeadCount !== null || liveAnalytics) && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
+              <Text style={{ fontSize: 10, color: colors.textTertiary }}>PaintPros.io</Text>
+            </View>
+          )}
+          {trustLayerQuery.data?.configured && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#D4AF37' }} />
+              <Text style={{ fontSize: 10, color: colors.textTertiary }}>Trust Layer (dwsc.io)</Text>
+            </View>
+          )}
         </View>
       )}
 

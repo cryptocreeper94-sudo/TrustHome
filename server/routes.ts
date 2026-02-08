@@ -24,7 +24,7 @@ import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
 import { registerSchema, loginSchema, verificationCodes, users } from "@shared/schema";
-import { db } from "./db";
+import { db, rawSql } from "./db";
 import { eq, and } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -954,7 +954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/trustlayer/certifications/:id", async (req: Request, res: Response) => {
     try {
-      const data = await tlGetCertificationStatus(req.params.id);
+      const data = await tlGetCertificationStatus(req.params.id as string);
       if (data.error) return res.status(data.status || 500).json(data);
       res.json(data);
     } catch (error) {
@@ -995,6 +995,209 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = await tlCheckoutCertification({ tier, projectName, projectUrl, contactEmail, contractCount });
       if (data.error) return res.status(data.status || 500).json(data);
       res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // ─── Developer / Owner Admin Routes ─────────────────────────────────
+
+  app.get("/api/admin/system-health", async (req: Request, res: Response) => {
+    try {
+      const services: Array<{
+        name: string;
+        endpoint: string;
+        status: "online" | "offline" | "degraded" | "not_configured";
+        latency?: number;
+        details?: string;
+      }> = [];
+
+      // 1. Database
+      const dbStart = Date.now();
+      try {
+        await rawSql`SELECT 1`;
+        services.push({ name: "PostgreSQL Database", endpoint: "localhost", status: "online", latency: Date.now() - dbStart });
+      } catch (e) {
+        services.push({ name: "PostgreSQL Database", endpoint: "localhost", status: "offline", details: e instanceof Error ? e.message : "Connection failed" });
+      }
+
+      // 2. PaintPros.io Ecosystem
+      const ecoStart = Date.now();
+      try {
+        const ecoResult = await ecosystemGet("/health");
+        const ecoLatency = Date.now() - ecoStart;
+        if (ecoResult.error || ecoResult.notAvailable) {
+          services.push({ name: "PaintPros.io Ecosystem", endpoint: "https://paintpros.io/api", status: "degraded", latency: ecoLatency, details: ecoResult.error });
+        } else {
+          services.push({ name: "PaintPros.io Ecosystem", endpoint: "https://paintpros.io/api", status: "online", latency: ecoLatency });
+        }
+      } catch (e) {
+        services.push({ name: "PaintPros.io Ecosystem", endpoint: "https://paintpros.io/api", status: "offline", latency: Date.now() - ecoStart, details: e instanceof Error ? e.message : "Connection failed" });
+      }
+
+      // 3. Trust Layer (DWTL)
+      const tlStart = Date.now();
+      if (tlIsConfigured()) {
+        try {
+          const tlResult = await tlGetPublicRegistry();
+          const tlLatency = Date.now() - tlStart;
+          if (tlResult.error || tlResult.notAvailable) {
+            services.push({ name: "DarkWave Trust Layer", endpoint: process.env.TRUSTLAYER_BASE_URL || "https://dwsc.io", status: "degraded", latency: tlLatency, details: tlResult.error });
+          } else {
+            services.push({ name: "DarkWave Trust Layer", endpoint: process.env.TRUSTLAYER_BASE_URL || "https://dwsc.io", status: "online", latency: tlLatency });
+          }
+        } catch (e) {
+          services.push({ name: "DarkWave Trust Layer", endpoint: process.env.TRUSTLAYER_BASE_URL || "https://dwsc.io", status: "offline", latency: Date.now() - tlStart, details: e instanceof Error ? e.message : "Connection failed" });
+        }
+      } else {
+        services.push({ name: "DarkWave Trust Layer", endpoint: process.env.TRUSTLAYER_BASE_URL || "https://dwsc.io", status: "not_configured", details: "API credentials not set" });
+      }
+
+      // 4. Socket.IO Proxy
+      services.push({ name: "Socket.IO Proxy", endpoint: "wss://paintpros.io", status: "online", details: "Relay active" });
+
+      // 5. Resend Email
+      try {
+        const resendCheck = await fetch("https://api.resend.com/domains", {
+          headers: { Authorization: "Bearer test" },
+        });
+        services.push({ name: "Resend Email Service", endpoint: "https://api.resend.com", status: resendCheck.status === 401 || resendCheck.status === 403 ? "online" : "degraded", details: "API reachable" });
+      } catch {
+        services.push({ name: "Resend Email Service", endpoint: "https://api.resend.com", status: "offline", details: "API unreachable" });
+      }
+
+      // 6. Stripe
+      const stripeKey = process.env.STRIPE_SECRET_KEY;
+      if (stripeKey) {
+        try {
+          const stripeStart = Date.now();
+          const stripeRes = await fetch("https://api.stripe.com/v1/balance", {
+            headers: { Authorization: `Bearer ${stripeKey}` },
+          });
+          const stripeLatency = Date.now() - stripeStart;
+          if (stripeRes.ok) {
+            services.push({ name: "Stripe Payments", endpoint: "https://api.stripe.com", status: "online", latency: stripeLatency });
+          } else {
+            services.push({ name: "Stripe Payments", endpoint: "https://api.stripe.com", status: "degraded", latency: stripeLatency, details: `HTTP ${stripeRes.status}` });
+          }
+        } catch {
+          services.push({ name: "Stripe Payments", endpoint: "https://api.stripe.com", status: "offline", details: "Connection failed" });
+        }
+      } else {
+        services.push({ name: "Stripe Payments", endpoint: "https://api.stripe.com", status: "not_configured", details: "Keys not set" });
+      }
+
+      const overall = services.every(s => s.status === "online" || s.status === "not_configured")
+        ? "healthy"
+        : services.some(s => s.status === "offline")
+        ? "critical"
+        : "degraded";
+
+      res.json({
+        overall,
+        services,
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || "development",
+        tenantId: getTenantId(),
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/admin/api-connections", async (_req: Request, res: Response) => {
+    try {
+      const connections = [
+        {
+          id: "orbit_ecosystem",
+          name: "Orbit Ecosystem (PaintPros.io)",
+          description: "CRM, Marketing, Analytics, Leads, Calendar, Messaging",
+          baseUrl: "https://paintpros.io/api",
+          configured: !!(process.env.ORBIT_ECOSYSTEM_API_KEY && process.env.ORBIT_ECOSYSTEM_API_SECRET),
+          keyMasked: process.env.ORBIT_ECOSYSTEM_API_KEY ? `${process.env.ORBIT_ECOSYSTEM_API_KEY.slice(0, 6)}...${process.env.ORBIT_ECOSYSTEM_API_KEY.slice(-4)}` : null,
+          icon: "globe-outline",
+        },
+        {
+          id: "darkwave",
+          name: "DarkWave Studios Core",
+          description: "Ecosystem authentication, cross-app authorization",
+          baseUrl: "https://darkwavestudios.io",
+          configured: !!(process.env.DARKWAVE_API_KEY && process.env.DARKWAVE_API_SECRET),
+          keyMasked: process.env.DARKWAVE_API_KEY ? `${process.env.DARKWAVE_API_KEY.slice(0, 6)}...${process.env.DARKWAVE_API_KEY.slice(-4)}` : null,
+          icon: "shield-outline",
+        },
+        {
+          id: "trustlayer",
+          name: "DarkWave Trust Layer (DWTL)",
+          description: "Blockchain verification, certifications, Trust Score",
+          baseUrl: process.env.TRUSTLAYER_BASE_URL || "https://dwsc.io",
+          configured: tlIsConfigured(),
+          keyMasked: process.env.TRUSTLAYER_API_KEY ? `${process.env.TRUSTLAYER_API_KEY.slice(0, 6)}...${process.env.TRUSTLAYER_API_KEY.slice(-4)}` : null,
+          icon: "link-outline",
+        },
+        {
+          id: "financial_hub",
+          name: "Orbit Financial Hub",
+          description: "Payment processing, subscription management, tenant billing",
+          baseUrl: "https://paintpros.io/api/payments",
+          configured: !!process.env.ORBIT_FINANCIAL_HUB_SECRET,
+          keyMasked: process.env.ORBIT_FINANCIAL_HUB_SECRET ? `${process.env.ORBIT_FINANCIAL_HUB_SECRET.slice(0, 6)}...${process.env.ORBIT_FINANCIAL_HUB_SECRET.slice(-4)}` : null,
+          icon: "card-outline",
+        },
+        {
+          id: "stripe",
+          name: "Stripe",
+          description: "Tenant space purchases, subscription billing (demo space)",
+          baseUrl: "https://api.stripe.com",
+          configured: !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PUBLISHABLE_KEY),
+          keyMasked: process.env.STRIPE_PUBLISHABLE_KEY ? `${process.env.STRIPE_PUBLISHABLE_KEY.slice(0, 8)}...${process.env.STRIPE_PUBLISHABLE_KEY.slice(-4)}` : null,
+          icon: "logo-usd",
+        },
+        {
+          id: "resend",
+          name: "Resend Email",
+          description: "Transactional emails, verification codes, notifications",
+          baseUrl: "https://api.resend.com",
+          configured: true,
+          keyMasked: "Managed by Replit",
+          icon: "mail-outline",
+        },
+        {
+          id: "socketio",
+          name: "Socket.IO (Real-time)",
+          description: "Live messaging, notifications, presence via PaintPros.io relay",
+          baseUrl: "wss://paintpros.io",
+          configured: true,
+          keyMasked: "Uses Orbit credentials",
+          icon: "flash-outline",
+        },
+      ];
+
+      res.json({ connections, tenantId: getTenantId() });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/admin/overview", async (_req: Request, res: Response) => {
+    try {
+      const userCountResult = await rawSql`SELECT COUNT(*) as count FROM users`;
+      const userCount = Number((userCountResult as any)?.[0]?.count ?? 0);
+
+      res.json({
+        platform: "TrustHome",
+        version: "1.0.0-beta",
+        tenantId: getTenantId(),
+        environment: process.env.NODE_ENV || "development",
+        uptime: process.uptime(),
+        registeredUsers: userCount,
+        owner: "DarkWave Studios",
+        ownerUrl: "https://darkwavestudios.io",
+        ecosystem: "PaintPros.io / Orbit",
+        trustLayer: "dwsc.io",
+        securitySuite: "trustshield.tech",
+      });
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }

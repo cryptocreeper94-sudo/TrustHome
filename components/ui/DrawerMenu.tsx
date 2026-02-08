@@ -35,8 +35,9 @@ export function DrawerMenu() {
     { icon: 'megaphone-outline', label: 'Marketing', route: '/marketing', agentOnly: true },
     { icon: 'bar-chart-outline', label: 'Analytics', route: '/analytics', agentOnly: true },
     { icon: 'globe-outline', label: 'Network', route: '/network', agentOnly: true, dividerAfter: true },
-    { icon: 'color-palette-outline', label: 'Branding', route: '/branding', agentOnly: true },
+    { icon: 'color-palette-outline', label: 'Branding', route: '/branding', agentOnly: true, dividerAfter: true },
     { icon: 'person-outline', label: 'Profile & Settings', route: '/settings' },
+    { icon: 'code-slash-outline', label: 'Developer Console', route: '/developer', agentOnly: true },
     { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
   ];
 

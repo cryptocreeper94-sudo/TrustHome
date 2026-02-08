@@ -133,7 +133,7 @@ export function AgentDashboard() {
         {STAT_CARDS.map((stat, i) => (
           <Pressable key={i}>
             <View style={styles.statCard}>
-              <Image source={stat.image} style={styles.statCardImage} />
+              <Image source={stat.image} style={styles.statCardImage} resizeMode="cover" />
               <LinearGradient
                 colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.7)']}
                 style={StyleSheet.absoluteFill}
@@ -181,7 +181,7 @@ export function AgentDashboard() {
         {MOCK_ACTIVE_DEALS.map((deal, i) => (
           <Pressable key={i}>
             <View style={styles.dealCard}>
-              <Image source={deal.image} style={styles.dealImage} />
+              <Image source={deal.image} style={styles.dealImage} resizeMode="cover" />
               <LinearGradient
                 colors={['transparent', 'rgba(0,0,0,0.8)']}
                 style={styles.dealOverlay}
@@ -231,7 +231,7 @@ export function AgentDashboard() {
         {VERTICALS.map((v, i) => (
           <Pressable key={i}>
             <View style={styles.verticalCard}>
-              <Image source={v.image} style={styles.verticalImage} />
+              <Image source={v.image} style={styles.verticalImage} resizeMode="cover" />
               <LinearGradient
                 colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.65)']}
                 style={StyleSheet.absoluteFill}
@@ -321,7 +321,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   statCardContent: {
     flex: 1,
@@ -384,7 +383,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   dealOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -440,7 +438,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   verticalContent: {
     flex: 1,

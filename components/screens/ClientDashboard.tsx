@@ -184,7 +184,7 @@ export function ClientDashboard() {
         {MOCK_SHORTLIST.map((prop, i) => (
           <Pressable key={i}>
             <View style={styles.propCard}>
-              <Image source={prop.image} style={styles.propImage} />
+              <Image source={prop.image} style={styles.propImage} resizeMode="cover" />
               <LinearGradient
                 colors={['transparent', 'rgba(0,0,0,0.75)']}
                 style={styles.propOverlay}
@@ -262,7 +262,7 @@ export function ClientDashboard() {
         {CONNECTED_PARTIES.map((party, i) => (
           <Pressable key={i}>
             <View style={styles.partyCard}>
-              <Image source={party.image} style={styles.partyImage} />
+              <Image source={party.image} style={styles.partyImage} resizeMode="cover" />
               <LinearGradient
                 colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.65)']}
                 style={StyleSheet.absoluteFill}
@@ -388,7 +388,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   propOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -429,7 +428,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   partyContent: {
     flex: 1,

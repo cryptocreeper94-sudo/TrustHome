@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -31,7 +32,7 @@ interface Vendor {
   recentTransactions: string[];
 }
 
-const VENDORS: Vendor[] = [
+const SAMPLE_VENDORS: Vendor[] = [
   { id: '1', name: 'Michael Torres', company: 'ProCheck Inspections', category: 'Inspectors', initial: 'MT', trustScore: 98, activeTransactions: 3, phone: '(555) 234-5678', lastUsed: 'Feb 5, 2026', specialties: ['Residential', 'Radon Testing', 'Mold Assessment'], recentTransactions: ['742 Elm Street - Buyer Inspection', '1200 Oak Ave - Pre-listing'] },
   { id: '2', name: 'Sarah Chen', company: 'Pacific Lending Group', category: 'Lenders', initial: 'SC', trustScore: 96, activeTransactions: 5, phone: '(555) 345-6789', lastUsed: 'Feb 7, 2026', specialties: ['Conventional', 'FHA', 'VA Loans', 'Jumbo'], recentTransactions: ['890 Pine St - Pre-approval', '234 Maple Dr - Closing'] },
   { id: '3', name: 'David Park', company: 'ClearTitle Services', category: 'Title', initial: 'DP', trustScore: 95, activeTransactions: 4, phone: '(555) 456-7890', lastUsed: 'Feb 6, 2026', specialties: ['Title Search', 'Escrow Services', 'Commercial Closings'], recentTransactions: ['567 Cedar Ln - Title Search', '1100 Birch Rd - Closing'] },
@@ -62,15 +63,31 @@ export default function NetworkScreen() {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const subcontractorsQuery = useQuery<any[]>({
+    queryKey: ['/api/subcontractors'],
+  });
+
+  const apiSubcontractors = subcontractorsQuery.data && Array.isArray(subcontractorsQuery.data) && subcontractorsQuery.data.length > 0 
+    ? subcontractorsQuery.data 
+    : null;
+
+  const vendorsList = apiSubcontractors || SAMPLE_VENDORS;
+
   const filteredVendors = activeCategory === 'All'
-    ? VENDORS
-    : VENDORS.filter(v => v.category === activeCategory);
+    ? vendorsList
+    : vendorsList.filter(v => v.category === activeCategory);
 
   const catColor = (cat: string) => CATEGORY_COLORS[cat] || colors.primary;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Professional Network" showBack />
+      {apiSubcontractors && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
+          <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live data</Text>
+        </View>
+      )}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <View style={styles.statsRow}>
@@ -104,6 +121,12 @@ export default function NetworkScreen() {
               </Pressable>
             ))}
           </ScrollView>
+
+          {subcontractorsQuery.isLoading && (
+            <View style={{ alignItems: 'center', paddingVertical: 8 }}>
+              <ActivityIndicator size="small" color={colors.primary} />
+            </View>
+          )}
 
           {filteredVendors.map(vendor => {
             const isExpanded = expandedId === vendor.id;
@@ -145,7 +168,7 @@ export default function NetworkScreen() {
                     <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
                       <Text style={[styles.expandedTitle, { color: colors.text }]}>Specialties</Text>
                       <View style={styles.tagRow}>
-                        {vendor.specialties.map((s, i) => (
+                        {vendor.specialties.map((s: string, i: number) => (
                           <View key={i} style={[styles.tag, { backgroundColor: colors.primaryLight }]}>
                             <Text style={[styles.tagText, { color: colors.primary }]}>{s}</Text>
                           </View>
@@ -153,7 +176,7 @@ export default function NetworkScreen() {
                       </View>
 
                       <Text style={[styles.expandedTitle, { color: colors.text, marginTop: 12 }]}>Recent Transactions</Text>
-                      {vendor.recentTransactions.map((t, i) => (
+                      {vendor.recentTransactions.map((t: string, i: number) => (
                         <View key={i} style={styles.txRow}>
                           <Ionicons name="document-text-outline" size={14} color={colors.textSecondary} />
                           <Text style={[styles.txText, { color: colors.textSecondary }]}>{t}</Text>

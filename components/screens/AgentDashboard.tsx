@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Image, ImageBackground, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
@@ -84,6 +85,24 @@ export function AgentDashboard() {
     visible: false, title: '', description: '',
   });
 
+  const leadsQuery = useQuery<any[]>({
+    queryKey: ['/api/leads'],
+  });
+
+  const analyticsQuery = useQuery<any>({
+    queryKey: ['/api/analytics/dashboard'],
+  });
+
+  const liveLeadCount = leadsQuery.data && Array.isArray(leadsQuery.data) ? leadsQuery.data.length : null;
+  const liveAnalytics = analyticsQuery.data && !analyticsQuery.data?.error ? analyticsQuery.data : null;
+
+  const statCards = STAT_CARDS.map(card => {
+    if (card.label === 'Pending Leads' && liveLeadCount !== null) {
+      return { ...card, value: liveLeadCount.toString() };
+    }
+    return card;
+  });
+
   const showInfo = (title: string, description: string, details?: string[], examples?: string[]) => {
     setInfoModal({ visible: true, title, description, details, examples });
   };
@@ -104,6 +123,13 @@ export function AgentDashboard() {
           <Text style={[styles.trustText, { color: colors.primary }]}>{MOCK_AGENT.trustScore}</Text>
         </View>
       </View>
+
+      {(liveLeadCount !== null || liveAnalytics) && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginBottom: 4 }}>
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
+          <Text style={{ fontSize: 10, color: colors.textTertiary }}>Connected to PaintPros.io</Text>
+        </View>
+      )}
 
       {MOCK_URGENT.length > 0 ? (
         <View style={[styles.urgentBar, { backgroundColor: isDark ? 'rgba(255,59,48,0.1)' : 'rgba(255,59,48,0.06)' }]}>
@@ -131,7 +157,7 @@ export function AgentDashboard() {
           ['A score of 90+ means you are in the top tier of verified agents', 'Completing transactions on time improves your score', 'Fast response times to client messages boost your score']
         )}
       >
-        {STAT_CARDS.map((stat, i) => (
+        {statCards.map((stat, i) => (
           <Pressable key={i}>
             <View style={styles.statCard}>
               <Image source={stat.image} style={styles.statCardImage} resizeMode="cover" />

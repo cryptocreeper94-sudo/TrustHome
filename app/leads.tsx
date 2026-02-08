@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { useQuery } from '@tanstack/react-query';
 
 interface Lead {
   id: string;
@@ -21,7 +22,26 @@ interface Lead {
   notes: string;
 }
 
-const LEADS: Lead[] = [
+interface ApiLead {
+  id: string;
+  tenantId: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  address: string | null;
+  propertyType: string | null;
+  timeline: string | null;
+  urgencyScore: number | null;
+  budget: string | null;
+  description: string | null;
+  source: string;
+  referralSource: string | null;
+  status: string;
+  createdAt: string;
+}
+
+const SAMPLE_LEADS: Lead[] = [
   { id: '1', name: 'Sarah Mitchell', phone: '(555) 234-8901', email: 'sarah.m@email.com', source: 'Zillow', budget: '$450,000', score: 92, temperature: 'hot', stage: 'Proposal', property: '1847 Oak Valley Dr', lastActivity: '2 hours ago', notes: 'Pre-approved, ready to make offer this week.' },
   { id: '2', name: 'James Rivera', phone: '(555) 876-5432', email: 'jrivera@email.com', source: 'Referral', budget: '$680,000', score: 87, temperature: 'hot', stage: 'Qualified', property: '302 Maple Heights Blvd', lastActivity: '1 day ago', notes: 'Looking for 4BR in school district. Second showing scheduled.' },
   { id: '3', name: 'Emily Chen', phone: '(555) 345-6789', email: 'echen@email.com', source: 'Open House', budget: '$320,000', score: 74, temperature: 'warm', stage: 'Contacted', property: '55 Riverside Ln', lastActivity: '3 days ago', notes: 'First-time buyer, needs guidance on financing.' },
@@ -34,15 +54,35 @@ const LEADS: Lead[] = [
 
 const STAGES = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won'] as const;
 
-const SOURCES = [
-  { label: 'Referral', count: 2, color: '#1A8A7E' },
-  { label: 'Zillow', count: 1, color: '#007AFF' },
-  { label: 'Realtor.com', count: 1, color: '#FF9500' },
-  { label: 'Open House', count: 1, color: '#34C759' },
-  { label: 'Website', count: 1, color: '#AF52DE' },
-  { label: 'Facebook', count: 1, color: '#3B5998' },
-  { label: 'Instagram', count: 1, color: '#E1306C' },
-];
+function mapApiLead(api: ApiLead): Lead {
+  const name = [api.firstName, api.lastName].filter(Boolean).join(' ') || api.phone || 'Unknown';
+  const phone = api.phone ? api.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') : '';
+  const score = api.urgencyScore ?? (api.status === 'new' ? 40 : api.status === 'contacted' ? 60 : 50);
+  const temperature: Lead['temperature'] = score >= 75 ? 'hot' : score >= 50 ? 'warm' : 'cold';
+  const stageMap: Record<string, Lead['stage']> = { new: 'New', contacted: 'Contacted', qualified: 'Qualified', proposal: 'Proposal', won: 'Won' };
+  const stage = stageMap[api.status] || 'New';
+  const budget = api.budget || 'TBD';
+  const createdDate = new Date(api.createdAt);
+  const now = new Date();
+  const diffMs = now.getTime() - createdDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const lastActivity = diffDays === 0 ? 'Today' : diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
+  
+  return {
+    id: api.id,
+    name,
+    phone,
+    email: api.email || '',
+    source: api.source === 'popup_modal' ? 'Website' : api.source === 'website' ? 'Website' : api.source,
+    budget,
+    score,
+    temperature,
+    stage,
+    property: api.address || 'TBD',
+    lastActivity,
+    notes: api.description || api.timeline || '',
+  };
+}
 
 const tempColors = { hot: '#FF3B30', warm: '#FF9500', cold: '#007AFF' };
 
@@ -54,6 +94,16 @@ function getScoreColor(score: number) {
 
 export default function LeadsScreen() {
   const { colors, isDark } = useTheme();
+
+  const leadsQuery = useQuery<ApiLead[]>({
+    queryKey: ['/api/leads'],
+  });
+
+  const apiLeads = leadsQuery.data && !('error' in leadsQuery.data) && Array.isArray(leadsQuery.data) 
+    ? leadsQuery.data.map(mapApiLead) 
+    : null;
+  const LEADS = apiLeads && apiLeads.length > 0 ? apiLeads : SAMPLE_LEADS;
+
   const [viewMode, setViewMode] = useState<'list' | 'pipeline'>('list');
   const [expandedLead, setExpandedLead] = useState<string | null>(null);
   const [filterTemp, setFilterTemp] = useState<'all' | 'hot' | 'warm' | 'cold'>('all');
@@ -62,13 +112,40 @@ export default function LeadsScreen() {
   const wonCount = LEADS.filter(l => l.stage === 'Won').length;
 
   const filteredLeads = filterTemp === 'all' ? LEADS : LEADS.filter(l => l.temperature === filterTemp);
-  const maxSourceCount = Math.max(...SOURCES.map(s => s.count));
+
+  const computedSources = (() => {
+    const sourceColors: Record<string, string> = {
+      'Referral': '#1A8A7E', 'Zillow': '#007AFF', 'Realtor.com': '#FF9500',
+      'Open House': '#34C759', 'Website': '#AF52DE', 'Facebook': '#3B5998',
+      'Instagram': '#E1306C', 'popup_modal': '#AF52DE', 'other': '#8E8E93',
+    };
+    const defaultColors = ['#1A8A7E', '#007AFF', '#FF9500', '#34C759', '#AF52DE', '#3B5998', '#E1306C'];
+    const counts: Record<string, number> = {};
+    LEADS.forEach(l => {
+      const src = l.source || 'Other';
+      counts[src] = (counts[src] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count], i) => ({
+        label,
+        count,
+        color: sourceColors[label] || defaultColors[i % defaultColors.length],
+      }));
+  })();
+
+  const maxSourceCount = Math.max(...computedSources.map(s => s.count));
   const screenWidth = Dimensions.get('window').width;
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Header title="Leads & CRM" showBack />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {leadsQuery.isLoading && (
+          <View style={{ alignItems: 'center', paddingVertical: 8 }}>
+            <ActivityIndicator size="small" color={colors.primary} />
+          </View>
+        )}
         <View style={styles.statsRow}>
           <GlassCard style={styles.statCard} compact>
             <View style={styles.statInner}>
@@ -92,6 +169,13 @@ export default function LeadsScreen() {
             </View>
           </GlassCard>
         </View>
+
+        {apiLeads && apiLeads.length > 0 && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 4, marginTop: 4 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
+            <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live data</Text>
+          </View>
+        )}
 
         <View style={styles.toggleRow}>
           <Pressable
@@ -213,7 +297,7 @@ export default function LeadsScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Lead Sources</Text>
         </View>
         <GlassCard style={styles.sourcesCard}>
-          {SOURCES.map((src, i) => (
+          {computedSources.map((src, i) => (
             <View key={i} style={styles.sourceRow}>
               <Text style={[styles.sourceLabel, { color: colors.textSecondary }]}>{src.label}</Text>
               <View style={styles.barWrap}>

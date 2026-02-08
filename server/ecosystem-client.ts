@@ -58,6 +58,12 @@ export async function ecosystemGet(
       headers: getAuthHeaders(),
     });
 
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      console.warn(`ecosystemGet [${endpoint}]: non-JSON response (${contentType}), status ${response.status}`);
+      return { error: `Non-JSON response from upstream (${response.status})`, notAvailable: true };
+    }
+
     return await response.json();
   } catch (error) {
     console.error(`ecosystemGet error [${endpoint}]:`, error);
@@ -78,6 +84,12 @@ export async function ecosystemPost(
       headers: getAuthHeaders(),
       body: JSON.stringify(payload),
     });
+
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      console.warn(`ecosystemPost [${endpoint}]: non-JSON response (${contentType}), status ${response.status}`);
+      return { error: `Non-JSON response from upstream (${response.status})`, notAvailable: true };
+    }
 
     return await response.json();
   } catch (error) {
@@ -100,6 +112,12 @@ export async function ecosystemPut(
       body: JSON.stringify(payload),
     });
 
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      console.warn(`ecosystemPut [${endpoint}]: non-JSON response (${contentType}), status ${response.status}`);
+      return { error: `Non-JSON response from upstream (${response.status})`, notAvailable: true };
+    }
+
     return await response.json();
   } catch (error) {
     console.error(`ecosystemPut error [${endpoint}]:`, error);
@@ -116,6 +134,12 @@ export async function ecosystemDelete(endpoint: string): Promise<any> {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
+
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      console.warn(`ecosystemDelete [${endpoint}]: non-JSON response (${contentType}), status ${response.status}`);
+      return { error: `Non-JSON response from upstream (${response.status})`, notAvailable: true };
+    }
 
     return await response.json();
   } catch (error) {

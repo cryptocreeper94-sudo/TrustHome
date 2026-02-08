@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -20,7 +21,7 @@ interface PeriodData {
   vsLast: { closings: number; revenue: number; avgSalePrice: number; avgDOM: number };
 }
 
-const DATA: Record<Period, PeriodData> = {
+const SAMPLE_DATA: Record<Period, PeriodData> = {
   'This Month': {
     closings: 3,
     revenue: 128500,
@@ -118,7 +119,21 @@ function formatCurrency(val: number): string {
 export default function AnalyticsScreen() {
   const { colors, isDark } = useTheme();
   const [period, setPeriod] = useState<Period>('This Month');
-  const data = DATA[period];
+
+  const dashboardQuery = useQuery<any>({
+    queryKey: ['/api/analytics/dashboard'],
+  });
+
+  const apiDashboard = dashboardQuery.data && !dashboardQuery.data?.error ? dashboardQuery.data : null;
+
+  const baseData = SAMPLE_DATA[period];
+  const data = apiDashboard ? {
+    ...baseData,
+    funnel: {
+      ...baseData.funnel,
+      leads: period === 'This Month' ? (apiDashboard.thisMonth?.visitors ?? baseData.funnel.leads) : baseData.funnel.leads,
+    },
+  } : baseData;
 
   const maxRevenue = Math.max(...data.revenueByMonth.map(m => m.value));
   const maxSource = Math.max(...data.sources.map(s => s.value));
@@ -141,6 +156,19 @@ export default function AnalyticsScreen() {
             );
           })}
         </View>
+
+        {apiDashboard && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
+            <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live analytics data</Text>
+          </View>
+        )}
+
+        {dashboardQuery.isLoading && (
+          <View style={{ alignItems: 'center', paddingVertical: 8 }}>
+            <ActivityIndicator size="small" color={colors.primary} />
+          </View>
+        )}
 
         <View style={styles.statsGrid}>
           {[

@@ -45,12 +45,18 @@ TrustHome is a real estate platform designed to be a central hub for all parties
 - Contextual help system across 9+ screens
 - Credential-verified demo mode for licensed professionals
 - Developer console for access request management
-- Partner onboarding modal for Jennifer Lambert (51% partner)
+- Partner onboarding modal for Jennifer Lambert (51% partner, 9 slides with Founders Program & Stripe setup)
+- Founders Program pricing: $49/agent, $299/brokerage, $1499/white-label for first 100 agents; then $99/$599/$2999 standard
 - Light/dark theme with premium glassmorphism design
 - PWA capabilities
+- Orbit Staffing integration — client wired up, routes registered, webhook handler ready (pending ORBIT server republish)
+  - Client: server/services/orbitClient.ts (OrbitEcosystemClient class)
+  - Routes: server/orbit-routes.ts (/api/orbit/status, sync endpoints, /webhooks/orbit)
+  - Env: ORBIT_HUB_URL, ORBIT_ECOSYSTEM_API_KEY, ORBIT_ECOSYSTEM_API_SECRET, ORBIT_FINANCIAL_HUB_SECRET
+  - Royalty split: 51% Jennifer / 49% Jason — enforced by ORBIT Financial Hub
+  - App ID: dw_app_trusthome
 
 **Upcoming:**
-- Orbit Staffing integration (bookkeeping, HR, payroll with 51/49 split)
 - MLS/RESO Web API integration
 - DocuSign/Dotloop e-signatures
 - Calendar sync (Google/Apple)

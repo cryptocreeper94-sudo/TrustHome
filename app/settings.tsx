@@ -31,7 +31,7 @@ interface SettingsSection {
 
 export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
-  const { replayWelcomeGuide } = useApp();
+  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard } = useApp();
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const trustLayerQuery = useQuery<any>({
@@ -201,6 +201,49 @@ export default function SettingsScreen() {
                 {section.items.map((item, ii) => renderSettingsRow(item, ii))}
               </AccordionSection>
             ))}
+
+            {isJenniferUser && (
+              <AccordionSection
+                title="Partner Dashboard"
+                icon="shield-checkmark"
+                iconColor="#D4AF37"
+                defaultOpen
+              >
+                <Pressable
+                  onPress={replayPartnerDashboard}
+                  style={styles.settingsRow}
+                >
+                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
+                    <Ionicons name="stats-chart" size={18} color="#D4AF37" />
+                  </View>
+                  <Text style={[styles.settingsLabel, { color: colors.text }]}>View Partner Dashboard</Text>
+                  <View style={styles.statusRow}>
+                    <Text style={[styles.statusValue, { color: '#D4AF37' }]}>51% Owner</Text>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+                  </View>
+                </Pressable>
+                <Pressable
+                  onPress={replayPartnerDashboard}
+                  style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
+                >
+                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
+                    <Ionicons name="trending-up" size={18} color="#D4AF37" />
+                  </View>
+                  <Text style={[styles.settingsLabel, { color: colors.text }]}>Revenue Projections</Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+                </Pressable>
+                <Pressable
+                  onPress={replayPartnerDashboard}
+                  style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
+                >
+                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
+                    <Ionicons name="layers" size={18} color="#D4AF37" />
+                  </View>
+                  <Text style={[styles.settingsLabel, { color: colors.text }]}>White-Label & Franchise Info</Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+                </Pressable>
+              </AccordionSection>
+            )}
 
             <AccordionSection
               title="Help"

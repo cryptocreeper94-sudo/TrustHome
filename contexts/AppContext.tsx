@@ -41,6 +41,8 @@ interface AppContextValue {
   replayWelcomeGuide: () => void;
   showPartnerOnboarding: boolean;
   setShowPartnerOnboarding: (show: boolean) => void;
+  isJenniferUser: boolean;
+  replayPartnerDashboard: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -161,6 +163,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const isJenniferUser = useMemo(() => {
+    if (!user) return false;
+    return user.email === 'jennifer@trusthome.io' || (user.firstName === 'Jennifer' && user.lastName === 'Lambert');
+  }, [user]);
+
+  const replayPartnerDashboard = useCallback(() => {
+    setShowPartnerOnboarding(true);
+  }, []);
+
   const value = useMemo(() => ({
     user,
     isLoading,
@@ -189,7 +200,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     replayWelcomeGuide,
     showPartnerOnboarding,
     setShowPartnerOnboarding: handleSetShowPartnerOnboarding,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding]);
+    isJenniferUser,
+    replayPartnerDashboard,
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard]);
 
   return (
     <AppContext.Provider value={value}>

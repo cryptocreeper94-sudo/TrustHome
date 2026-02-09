@@ -5,6 +5,7 @@ import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLocation } from '@/contexts/LocationContext';
+import { useApp } from '@/contexts/AppContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
@@ -80,8 +81,52 @@ const VERTICALS = [
   { label: 'Title', count: '1 active', icon: 'document-text' as const, color: '#8E44AD', image: CARD_IMAGES.title },
 ];
 
+function PartnerQuickAccess({ colors, isDark, onPress }: { colors: any; isDark: boolean; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={[partnerStyles.card, { backgroundColor: isDark ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.06)', borderColor: 'rgba(212,175,55,0.2)' }]}>
+      <View style={partnerStyles.left}>
+        <MaterialCommunityIcons name="shield-star" size={20} color="#D4AF37" />
+        <View>
+          <Text style={[partnerStyles.title, { color: colors.text }]}>Partner Dashboard</Text>
+          <Text style={[partnerStyles.subtitle, { color: colors.textSecondary }]}>Revenue projections, franchise model, white-label status</Text>
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color="#D4AF37" />
+    </Pressable>
+  );
+}
+
+const partnerStyles = StyleSheet.create({
+  card: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  left: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 10,
+    flex: 1,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+  },
+  subtitle: {
+    fontSize: 11,
+    marginTop: 1,
+  },
+});
+
 export function AgentDashboard() {
   const { colors, isDark } = useTheme();
+  const { isJenniferUser, replayPartnerDashboard } = useApp();
   const { safetyModeActive, toggleSafetyMode, currentLocation, hasPermission, requestPermission } = useLocation();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; description: string; details?: string[]; examples?: string[] }>({
@@ -160,6 +205,10 @@ export function AgentDashboard() {
           ))}
         </View>
       ) : null}
+
+      {isJenniferUser && (
+        <PartnerQuickAccess colors={colors} isDark={isDark} onPress={replayPartnerDashboard} />
+      )}
 
       <HorizontalCarousel
         title="At a Glance"

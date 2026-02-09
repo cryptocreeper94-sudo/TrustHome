@@ -20,6 +20,9 @@ interface AppContextValue {
   setCurrentRole: (role: UserRole) => void;
   isAgentAuthenticated: boolean;
   signOut: () => Promise<void>;
+  demoMode: boolean;
+  enterDemo: () => void;
+  exitDemo: () => void;
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -44,11 +47,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: 'returnNull' }),
   });
 
-  const user = data?.user ?? null;
+  const realUser = data?.user ?? null;
+
+  const DEMO_USER: AuthUser = {
+    id: 'demo-user',
+    email: 'demo@trusthome.io',
+    firstName: 'Demo',
+    lastName: 'Explorer',
+    role: 'agent',
+  };
+
+  const user = demoMode ? DEMO_USER : realUser;
   const isAuthenticated = !!user;
   const isAgentAuthenticated = isAuthenticated && user?.role === 'agent';
 
   const [currentRole, setCurrentRole] = useState<UserRole>('client_buyer');
+  const [demoMode, setDemoMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [signalChatOpen, setSignalChatOpen] = useState(false);
@@ -67,9 +81,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await apiRequest('POST', '/api/auth/logout');
     } catch {}
+    setDemoMode(false);
     queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     setCurrentRole('client_buyer');
   }, [queryClient]);
+
+  const enterDemo = useCallback(() => {
+    setDemoMode(true);
+    setCurrentRole('agent');
+  }, []);
+
+  const exitDemo = useCallback(() => {
+    setDemoMode(false);
+    setCurrentRole('client_buyer');
+  }, []);
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
@@ -89,6 +114,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCurrentRole,
     isAgentAuthenticated,
     signOut,
+    demoMode,
+    enterDemo,
+    exitDemo,
     drawerOpen,
     openDrawer,
     closeDrawer,
@@ -101,7 +129,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openSignalChat,
     closeSignalChat,
     toggleSignalChat,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, drawerOpen, aiAssistantOpen, signalChatOpen, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat]);
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat]);
 
   return (
     <AppContext.Provider value={value}>

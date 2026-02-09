@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useApp } from '@/contexts/AppContext';
 import { apiRequest, queryClient } from '@/lib/query-client';
 
 type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password' | 'request_access' | 'request_success';
@@ -15,6 +16,7 @@ type VerifySource = 'login' | 'register';
 
 export default function TeamScreen() {
   const { colors } = useTheme();
+  const { enterDemo } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -65,6 +67,11 @@ export default function TeamScreen() {
     clearError();
     setStep(s);
   }, [clearError]);
+
+  const handleEnterDemo = useCallback(() => {
+    enterDemo();
+    router.replace('/');
+  }, [enterDemo, router]);
 
   const parseError = async (err: unknown): Promise<string> => {
     if (err instanceof Error) {
@@ -514,6 +521,16 @@ export default function TeamScreen() {
                 >
                   <Ionicons name="hand-right-outline" size={18} color={colors.primary} />
                   <Text style={[styles.requestAccessText, { color: colors.primary }]}>Request Access</Text>
+                </Pressable>
+
+                <Pressable
+                  style={[styles.demoBtn, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' }]}
+                  onPress={handleEnterDemo}
+                  testID="explore-demo-btn"
+                >
+                  <Ionicons name="play-circle-outline" size={20} color={colors.primary} />
+                  <Text style={[styles.demoBtnText, { color: colors.primary }]}>Explore Demo</Text>
+                  <Text style={[styles.demoBtnSub, { color: colors.textSecondary }]}>See how TrustHome works</Text>
                 </Pressable>
               </Animated.View>
             )}
@@ -1298,4 +1315,25 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   footerText: { fontSize: 12 },
+  demoBtn: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: 12,
+  },
+  demoBtnText: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+  },
+  demoBtnSub: {
+    width: '100%' as any,
+    textAlign: 'center' as const,
+    fontSize: 12,
+    marginTop: -4,
+  },
 });

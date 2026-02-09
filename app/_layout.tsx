@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppProvider } from "@/contexts/AppContext";
+import { LocationProvider } from "@/contexts/LocationContext";
 import { DrawerMenu } from "@/components/ui/DrawerMenu";
 import { AiAssistant } from "@/components/ui/AiAssistant";
 import { SignalChat } from "@/components/ui/SignalChat";
@@ -55,7 +56,9 @@ export default function RootLayout() {
           <KeyboardProvider>
             <ThemeProvider>
               <AppProvider>
-                <RootLayoutNav />
+                <LocationProvider>
+                  <RootLayoutNav />
+                </LocationProvider>
               </AppProvider>
             </ThemeProvider>
           </KeyboardProvider>

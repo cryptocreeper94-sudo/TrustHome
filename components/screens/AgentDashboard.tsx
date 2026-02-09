@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLocation } from '@/contexts/LocationContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
@@ -81,6 +82,7 @@ const VERTICALS = [
 
 export function AgentDashboard() {
   const { colors, isDark } = useTheme();
+  const { safetyModeActive, toggleSafetyMode, currentLocation, hasPermission, requestPermission } = useLocation();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; description: string; details?: string[]; examples?: string[] }>({
     visible: false, title: '', description: '',
@@ -286,6 +288,42 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+
+      <Pressable
+        onPress={toggleSafetyMode}
+        style={[
+          styles.safetyCard,
+          {
+            backgroundColor: safetyModeActive
+              ? (isDark ? 'rgba(26, 138, 126, 0.15)' : 'rgba(26, 138, 126, 0.08)')
+              : (isDark ? colors.surface : colors.backgroundTertiary),
+            borderColor: safetyModeActive ? '#1A8A7E' : colors.border,
+          },
+        ]}
+      >
+        <View style={styles.safetyLeft}>
+          <View style={[styles.safetyIconWrap, { backgroundColor: safetyModeActive ? 'rgba(26, 138, 126, 0.2)' : 'rgba(255, 59, 48, 0.1)' }]}>
+            <Ionicons
+              name={safetyModeActive ? 'shield-checkmark' : 'location-outline'}
+              size={22}
+              color={safetyModeActive ? '#1A8A7E' : '#FF3B30'}
+            />
+          </View>
+          <View style={styles.safetyTextWrap}>
+            <Text style={[styles.safetyTitle, { color: colors.text }]}>
+              {safetyModeActive ? 'Safety Mode Active' : 'Agent Safety'}
+            </Text>
+            <Text style={[styles.safetySubtext, { color: colors.textSecondary }]}>
+              {safetyModeActive
+                ? (currentLocation ? `GPS tracking ${'\u2022'} Location shared` : 'Activating GPS...')
+                : 'Tap to enable GPS for showings'}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.safetyToggle, { backgroundColor: safetyModeActive ? '#1A8A7E' : 'rgba(120,120,128,0.2)' }]}>
+          <View style={[styles.safetyToggleKnob, { transform: [{ translateX: safetyModeActive ? 18 : 2 }] }]} />
+        </View>
+      </Pressable>
 
       <View style={styles.quickActions}>
         {[
@@ -520,6 +558,58 @@ const styles = StyleSheet.create({
   },
   verticalLabel: { fontSize: 14, fontWeight: '700' as const, color: '#FFFFFF' },
   verticalCount: { fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 1 },
+
+  safetyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  safetyLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  safetyIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  safetyTextWrap: {
+    flex: 1,
+  },
+  safetyTitle: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+  },
+  safetySubtext: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  safetyToggle: {
+    width: 44,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: 'center',
+  },
+  safetyToggleKnob: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
 
   quickActions: {
     flexDirection: 'row',

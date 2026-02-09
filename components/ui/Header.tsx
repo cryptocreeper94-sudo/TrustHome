@@ -58,14 +58,14 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
           <View style={styles.demoActions}>
             <Pressable
               style={styles.demoRequestBtn}
-              onPress={() => { exitDemo(); router.replace('/team'); }}
+              onPress={() => { router.replace('/team'); setTimeout(exitDemo, 150); }}
               testID="demo-request-access"
             >
               <Text style={styles.demoRequestText}>Request Access</Text>
             </Pressable>
             <Pressable
               style={styles.demoExitBtn}
-              onPress={() => { exitDemo(); router.replace('/team'); }}
+              onPress={() => { router.replace('/team'); setTimeout(exitDemo, 150); }}
               testID="demo-exit"
             >
               <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.8)" />

@@ -148,7 +148,7 @@ export function DrawerMenu() {
             {demoMode ? (
               <>
                 <Pressable
-                  onPress={() => { closeDrawer(); exitDemo(); router.replace('/team'); }}
+                  onPress={() => { closeDrawer(); router.replace('/team'); setTimeout(exitDemo, 150); }}
                   style={styles.menuItem}
                   testID="drawer-request-access"
                 >
@@ -156,7 +156,7 @@ export function DrawerMenu() {
                   <Text style={[styles.menuLabel, { color: colors.primary }]}>Request Access</Text>
                 </Pressable>
                 <Pressable
-                  onPress={() => { closeDrawer(); exitDemo(); router.replace('/team'); }}
+                  onPress={() => { closeDrawer(); router.replace('/team'); setTimeout(exitDemo, 150); }}
                   style={styles.menuItem}
                   testID="drawer-exit-demo"
                 >

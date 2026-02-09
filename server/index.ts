@@ -213,7 +213,24 @@ function configureExpoAndLanding(app: express.Application) {
   });
 
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
+  app.use("/invite-assets", express.static(path.resolve(process.cwd(), "server", "templates", "invite-assets")));
   app.use(express.static(path.resolve(process.cwd(), "static-build")));
+
+  const inviteTemplate = fs.readFileSync(
+    path.resolve(process.cwd(), "server", "templates", "invite-jennifer.html"),
+    "utf-8"
+  );
+
+  app.get("/invite/jennifer", (req: Request, res: Response) => {
+    const forwardedProto = req.header("x-forwarded-proto");
+    const protocol = forwardedProto || req.protocol || "https";
+    const host = req.header("x-forwarded-host") || req.get("host");
+    const baseUrl = `${protocol}://${host}`;
+
+    const html = inviteTemplate.replace(/BASE_URL_PLACEHOLDER/g, baseUrl);
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.status(200).send(html);
+  });
 
   const manifestJsonPath = path.resolve(process.cwd(), "server", "templates", "manifest.json");
   app.get("/manifest.json", (_req: Request, res: Response) => {

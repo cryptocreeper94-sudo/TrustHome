@@ -93,6 +93,7 @@ export function AiAssistant() {
   const audioChunksRef = useRef<any[]>([]);
   const audioContextRef = useRef<any>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const mp3AudioRef = useRef<string | null>(null);
 
   const isAgent = currentRole === 'agent';
 
@@ -201,7 +202,10 @@ export function AiAssistant() {
   }, [inputText, messages, scrollToBottom]);
 
   const playAudioChunks = useCallback(async (base64Chunks: string[]) => {
-    if (Platform.OS !== 'web' || base64Chunks.length === 0) return;
+    if (Platform.OS !== 'web' || base64Chunks.length === 0) {
+      setVoiceState('idle');
+      return;
+    }
     try {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       audioContextRef.current = ctx;
@@ -215,7 +219,7 @@ export function AiAssistant() {
         for (let i = 0; i < int16.length; i++) allSamples.push(int16[i] / 32768);
       }
 
-      if (allSamples.length === 0) return;
+      if (allSamples.length === 0) { setVoiceState('idle'); return; }
 
       const audioBuffer = ctx.createBuffer(1, allSamples.length, 16000);
       audioBuffer.getChannelData(0).set(new Float32Array(allSamples));
@@ -226,6 +230,26 @@ export function AiAssistant() {
       source.start();
     } catch (err) {
       console.error('Audio playback error:', err);
+      setVoiceState('idle');
+    }
+  }, []);
+
+  const playMp3Audio = useCallback(async (base64: string) => {
+    if (Platform.OS !== 'web') { setVoiceState('idle'); return; }
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = ctx;
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const audioBuffer = await ctx.decodeAudioData(bytes.buffer);
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
+      source.onended = () => setVoiceState('idle');
+      source.start();
+    } catch (err) {
+      console.error('MP3 playback error:', err);
       setVoiceState('idle');
     }
   }, []);
@@ -332,6 +356,8 @@ export function AiAssistant() {
                   scrollToBottom();
                 } else if (data.type === 'audio') {
                   audioB64Chunks.push(data.content);
+                } else if (data.type === 'audio_full') {
+                  mp3AudioRef.current = data.content;
                 } else if (data.type === 'done') {
                   setMessages(prev =>
                     prev.map(m => m.id === aiMsgId ? { ...m, isStreaming: false } : m)
@@ -348,6 +374,10 @@ export function AiAssistant() {
           if (audioB64Chunks.length > 0) {
             setVoiceState('speaking');
             await playAudioChunks(audioB64Chunks);
+          } else if (mp3AudioRef.current) {
+            setVoiceState('speaking');
+            await playMp3Audio(mp3AudioRef.current);
+            mp3AudioRef.current = null;
           } else {
             setVoiceState('idle');
           }
@@ -405,19 +435,23 @@ export function AiAssistant() {
           try {
             const data = JSON.parse(line.slice(6));
             if (data.type === 'audio') audioB64Chunks.push(data.content);
+            if (data.type === 'audio_full') mp3AudioRef.current = data.content;
           } catch {}
         }
       }
 
       if (audioB64Chunks.length > 0) {
         await playAudioChunks(audioB64Chunks);
+      } else if (mp3AudioRef.current) {
+        await playMp3Audio(mp3AudioRef.current);
+        mp3AudioRef.current = null;
       } else {
         setVoiceState('idle');
       }
     } catch {
       setVoiceState('idle');
     }
-  }, [playAudioChunks]);
+  }, [playAudioChunks, playMp3Audio]);
 
   const quickPrompts = isAgent
     ? ['Check my deadlines', 'Lead priorities', "Tomorrow's schedule", 'Market analysis']

@@ -7,6 +7,9 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
+import { BentoGrid } from '@/components/ui/BentoGrid';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
+import { AccordionSection } from '@/components/ui/AccordionSection';
 
 const TABS = ['Overview', 'Content', 'Schedule', 'Analytics'] as const;
 type Tab = typeof TABS[number];
@@ -49,6 +52,16 @@ const ANALYTICS_DATA = [
   { label: 'Shares', value: 890, max: 30000, color: '#B3E0DA' },
 ];
 
+const DAY_FULL_NAMES: Record<string, string> = {
+  Mon: 'Monday',
+  Tue: 'Tuesday',
+  Wed: 'Wednesday',
+  Thu: 'Thursday',
+  Fri: 'Friday',
+  Sat: 'Saturday',
+  Sun: 'Sunday',
+};
+
 export default function MarketingScreen() {
   const { colors, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
@@ -67,6 +80,47 @@ export default function MarketingScreen() {
     return colors.primary;
   };
 
+  const statusIcon = (status: string): keyof typeof Ionicons.glyphMap => {
+    if (status === 'Published') return 'checkmark-circle';
+    if (status === 'Scheduled') return 'time';
+    return 'document-text';
+  };
+
+  const statusIconColor = (status: string) => {
+    if (status === 'Published') return colors.success;
+    if (status === 'Scheduled') return colors.info;
+    return colors.warning;
+  };
+
+  const publishedItems = CONTENT_ITEMS.filter(c => c.status === 'Published');
+  const scheduledItems = CONTENT_ITEMS.filter(c => c.status === 'Scheduled');
+  const draftItems = CONTENT_ITEMS.filter(c => c.status === 'Draft');
+
+  const renderContentItem = (item: ContentItem) => (
+    <View key={item.id} style={styles.contentCard}>
+      <View style={styles.contentHeader}>
+        <View style={[styles.typeBadge, { backgroundColor: item.type === 'Social Post' ? colors.primary + '20' : item.type === 'Ad Copy' ? colors.warning + '20' : colors.info + '20' }]}>
+          <Text style={[styles.typeBadgeText, { color: item.type === 'Social Post' ? colors.primary : item.type === 'Ad Copy' ? colors.warning : colors.info }]}>{item.type}</Text>
+        </View>
+        <View style={[styles.statusBadge, { backgroundColor: statusColor(item.status) + '20' }]}>
+          <Text style={[styles.statusBadgeText, { color: statusColor(item.status) }]}>{item.status}</Text>
+        </View>
+      </View>
+      <Text style={[styles.contentTitle, { color: colors.text }]}>{item.title}</Text>
+      <Text style={[styles.contentPreview, { color: colors.textSecondary }]} numberOfLines={2}>{item.preview}</Text>
+      <View style={styles.contentFooter}>
+        <View style={styles.platformRow}>
+          {item.platforms.map(p => (
+            <View key={p} style={[styles.platformDot, { backgroundColor: platformColor(p) + '20' }]}>
+              <Text style={[styles.platformDotText, { color: platformColor(p) }]}>{p}</Text>
+            </View>
+          ))}
+        </View>
+        {item.date ? <Text style={[styles.contentDate, { color: colors.textTertiary }]}>{item.date}</Text> : null}
+      </View>
+    </View>
+  );
+
   const renderOverview = () => (
     <View style={styles.section}>
       <GlassCard>
@@ -79,65 +133,67 @@ export default function MarketingScreen() {
         </View>
       </GlassCard>
 
-      <View style={styles.statsRow}>
-        {[
-          { label: 'Posts This Week', value: '5', icon: 'document-text' as const },
-          { label: 'Scheduled', value: '3', icon: 'time' as const },
-          { label: 'Total Reach', value: '12.4K', icon: 'eye' as const },
-          { label: 'Engagement', value: '4.8%', icon: 'trending-up' as const },
-        ].map((stat, i) => (
-          <GlassCard key={i} compact style={styles.statCard}>
-            <Ionicons name={stat.icon} size={20} color={colors.primary} />
-            <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
-          </GlassCard>
-        ))}
+      <View style={{ marginTop: 14 }}>
+        <BentoGrid columns={2} gap={10}>
+          {[
+            { label: 'Posts This Week', value: '5', icon: 'document-text' as const },
+            { label: 'Scheduled', value: '3', icon: 'time' as const },
+            { label: 'Total Reach', value: '12.4K', icon: 'eye' as const },
+            { label: 'Engagement', value: '4.8%', icon: 'trending-up' as const },
+          ].map((stat, i) => (
+            <GlassCard key={i} compact style={styles.statCard}>
+              <Ionicons name={stat.icon} size={20} color={colors.primary} />
+              <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
+            </GlassCard>
+          ))}
+        </BentoGrid>
       </View>
 
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>Today's Suggested Post</Text>
-      <GlassCard>
-        <View style={styles.suggestedPost}>
-          <View style={styles.suggestedHeader}>
-            <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
-              <Text style={styles.avatarText}>JL</Text>
-            </View>
-            <View style={{ flex: 1, marginLeft: 10 }}>
-              <Text style={[styles.suggestedName, { color: colors.text }]}>Jennifer Lambert</Text>
-              <Text style={[styles.suggestedHandle, { color: colors.textSecondary }]}>Lambert Realty Group</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: colors.info + '20' }]}>
-              <Text style={[styles.badgeText, { color: colors.info }]}>AI Generated</Text>
-            </View>
-          </View>
-          <Text style={[styles.suggestedBody, { color: colors.text }]}>
-            Spring is the perfect time to sell! Our latest market analysis shows prices up 4.2% in your neighborhood. Curious about your home's value? Send me a DM for a free, no-obligation assessment.
-          </Text>
-          <View style={styles.suggestedPlatforms}>
-            {['FB', 'IG'].map(p => (
-              <View key={p} style={[styles.platformPill, { backgroundColor: platformColor(p) + '20' }]}>
-                <Text style={[styles.platformPillText, { color: platformColor(p) }]}>{p}</Text>
+      <View style={{ marginTop: 14 }}>
+        <AccordionSection title="Today's Suggested Post" icon="sparkles" iconColor="#FF9500" defaultOpen={true}>
+          <View style={styles.suggestedPost}>
+            <View style={styles.suggestedHeader}>
+              <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
+                <Text style={styles.avatarText}>JL</Text>
               </View>
-            ))}
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={[styles.suggestedName, { color: colors.text }]}>Jennifer Lambert</Text>
+                <Text style={[styles.suggestedHandle, { color: colors.textSecondary }]}>Lambert Realty Group</Text>
+              </View>
+              <View style={[styles.badge, { backgroundColor: colors.info + '20' }]}>
+                <Text style={[styles.badgeText, { color: colors.info }]}>AI Generated</Text>
+              </View>
+            </View>
+            <Text style={[styles.suggestedBody, { color: colors.text }]}>
+              Spring is the perfect time to sell! Our latest market analysis shows prices up 4.2% in your neighborhood. Curious about your home's value? Send me a DM for a free, no-obligation assessment.
+            </Text>
+            <View style={styles.suggestedPlatforms}>
+              {['FB', 'IG'].map(p => (
+                <View key={p} style={[styles.platformPill, { backgroundColor: platformColor(p) + '20' }]}>
+                  <Text style={[styles.platformPillText, { color: platformColor(p) }]}>{p}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={styles.suggestedActions}>
+              <Pressable style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+                <Ionicons name="send" size={16} color="#FFF" />
+                <Text style={styles.actionBtnText}>Post Now</Text>
+              </Pressable>
+              <Pressable style={[styles.actionBtnOutline, { borderColor: colors.border }]}>
+                <Ionicons name="create-outline" size={16} color={colors.text} />
+                <Text style={[styles.actionBtnOutlineText, { color: colors.text }]}>Edit</Text>
+              </Pressable>
+              <Pressable style={[styles.actionBtnOutline, { borderColor: colors.border }]}>
+                <Ionicons name="time-outline" size={16} color={colors.text} />
+                <Text style={[styles.actionBtnOutlineText, { color: colors.text }]}>Schedule</Text>
+              </Pressable>
+            </View>
           </View>
-          <View style={styles.suggestedActions}>
-            <Pressable style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
-              <Ionicons name="send" size={16} color="#FFF" />
-              <Text style={styles.actionBtnText}>Post Now</Text>
-            </Pressable>
-            <Pressable style={[styles.actionBtnOutline, { borderColor: colors.border }]}>
-              <Ionicons name="create-outline" size={16} color={colors.text} />
-              <Text style={[styles.actionBtnOutlineText, { color: colors.text }]}>Edit</Text>
-            </Pressable>
-            <Pressable style={[styles.actionBtnOutline, { borderColor: colors.border }]}>
-              <Ionicons name="time-outline" size={16} color={colors.text} />
-              <Text style={[styles.actionBtnOutlineText, { color: colors.text }]}>Schedule</Text>
-            </Pressable>
-          </View>
-        </View>
-      </GlassCard>
+        </AccordionSection>
+      </View>
 
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>Content Library</Text>
-      <GlassCard>
+      <AccordionSection title="Content Library" icon="library" iconColor="#007AFF">
         <View style={styles.libraryRow}>
           <View style={styles.libraryItem}>
             <Ionicons name="image" size={24} color={colors.primary} />
@@ -157,10 +213,9 @@ export default function MarketingScreen() {
             <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Videos</Text>
           </View>
         </View>
-      </GlassCard>
+      </AccordionSection>
 
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>Autopilot Status</Text>
-      <GlassCard>
+      <AccordionSection title="Autopilot Status" icon="rocket" iconColor="#1A8A7E">
         <View style={styles.autopilotRow}>
           <View style={styles.autopilotItem}>
             <Ionicons name="logo-facebook" size={24} color="#1877F2" />
@@ -192,26 +247,21 @@ export default function MarketingScreen() {
             <Text style={[styles.statusText, { color: colors.textTertiary }]}>Disconnected</Text>
           </View>
         </View>
-      </GlassCard>
+      </AccordionSection>
     </View>
   );
 
   const renderContent = () => (
     <View style={styles.section}>
-      {CONTENT_ITEMS.map(item => (
-        <GlassCard key={item.id} style={{ marginBottom: 12 }}>
-          <View style={styles.contentCard}>
-            <View style={styles.contentHeader}>
-              <View style={[styles.typeBadge, { backgroundColor: item.type === 'Social Post' ? colors.primary + '20' : item.type === 'Ad Copy' ? colors.warning + '20' : colors.info + '20' }]}>
+      <HorizontalCarousel title="Recent Content" itemWidth={240}>
+        {CONTENT_ITEMS.map(item => (
+          <GlassCard key={item.id} compact style={{ width: 240, marginBottom: 0 }}>
+            <View style={styles.carouselCard}>
+              <View style={[styles.typeBadge, { backgroundColor: item.type === 'Social Post' ? colors.primary + '20' : item.type === 'Ad Copy' ? colors.warning + '20' : colors.info + '20', alignSelf: 'flex-start' }]}>
                 <Text style={[styles.typeBadgeText, { color: item.type === 'Social Post' ? colors.primary : item.type === 'Ad Copy' ? colors.warning : colors.info }]}>{item.type}</Text>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: statusColor(item.status) + '20' }]}>
-                <Text style={[styles.statusBadgeText, { color: statusColor(item.status) }]}>{item.status}</Text>
-              </View>
-            </View>
-            <Text style={[styles.contentTitle, { color: colors.text }]}>{item.title}</Text>
-            <Text style={[styles.contentPreview, { color: colors.textSecondary }]} numberOfLines={2}>{item.preview}</Text>
-            <View style={styles.contentFooter}>
+              <Text style={[styles.contentTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
+              <Text style={[styles.contentPreview, { color: colors.textSecondary }]} numberOfLines={2}>{item.preview}</Text>
               <View style={styles.platformRow}>
                 {item.platforms.map(p => (
                   <View key={p} style={[styles.platformDot, { backgroundColor: platformColor(p) + '20' }]}>
@@ -219,11 +269,58 @@ export default function MarketingScreen() {
                   </View>
                 ))}
               </View>
-              {item.date ? <Text style={[styles.contentDate, { color: colors.textTertiary }]}>{item.date}</Text> : null}
             </View>
-          </View>
-        </GlassCard>
-      ))}
+          </GlassCard>
+        ))}
+      </HorizontalCarousel>
+
+      <View style={{ marginTop: 10 }}>
+        <AccordionSection
+          title="Published"
+          icon={statusIcon('Published')}
+          iconColor={statusIconColor('Published')}
+          badge={publishedItems.length}
+          badgeColor={colors.success}
+          defaultOpen={true}
+        >
+          {publishedItems.map((item, i) => (
+            <View key={item.id}>
+              {i > 0 && <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />}
+              {renderContentItem(item)}
+            </View>
+          ))}
+        </AccordionSection>
+
+        <AccordionSection
+          title="Scheduled"
+          icon={statusIcon('Scheduled')}
+          iconColor={statusIconColor('Scheduled')}
+          badge={scheduledItems.length}
+          badgeColor={colors.info}
+        >
+          {scheduledItems.map((item, i) => (
+            <View key={item.id}>
+              {i > 0 && <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />}
+              {renderContentItem(item)}
+            </View>
+          ))}
+        </AccordionSection>
+
+        <AccordionSection
+          title="Draft"
+          icon={statusIcon('Draft')}
+          iconColor={statusIconColor('Draft')}
+          badge={draftItems.length}
+          badgeColor={colors.warning}
+        >
+          {draftItems.map((item, i) => (
+            <View key={item.id}>
+              {i > 0 && <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />}
+              {renderContentItem(item)}
+            </View>
+          ))}
+        </AccordionSection>
+      </View>
     </View>
   );
 
@@ -234,29 +331,30 @@ export default function MarketingScreen() {
       </GlassCard>
       <View style={{ height: 12 }} />
       {SCHEDULE_DATA.map((day, i) => (
-        <GlassCard key={i} style={{ marginBottom: 10 }}>
-          <View style={styles.dayRow}>
-            <View style={[styles.dayLabel, { backgroundColor: day.posts.length > 0 ? colors.primary + '15' : 'transparent' }]}>
-              <Text style={[styles.dayText, { color: day.posts.length > 0 ? colors.primary : colors.textTertiary }]}>{day.day}</Text>
-            </View>
-            <View style={styles.dayContent}>
-              {day.posts.length === 0 ? (
-                <Text style={[styles.noPost, { color: colors.textTertiary }]}>No posts scheduled</Text>
-              ) : (
-                day.posts.map((post, j) => (
-                  <View key={j} style={styles.postItem}>
-                    <View style={[styles.postDot, { backgroundColor: platformColor(post.platform) }]} />
-                    <Text style={[styles.postTitle, { color: colors.text }]}>{post.title}</Text>
-                    <Text style={[styles.postTime, { color: colors.textSecondary }]}>{post.time}</Text>
-                    <View style={[styles.platformMini, { backgroundColor: platformColor(post.platform) + '20' }]}>
-                      <Text style={[styles.platformMiniText, { color: platformColor(post.platform) }]}>{post.platform}</Text>
-                    </View>
-                  </View>
-                ))
-              )}
-            </View>
-          </View>
-        </GlassCard>
+        <AccordionSection
+          key={i}
+          title={DAY_FULL_NAMES[day.day] || day.day}
+          icon="calendar-outline"
+          iconColor={day.posts.length > 0 ? colors.primary : colors.textTertiary}
+          badge={day.posts.length > 0 ? `${day.posts.length} post${day.posts.length > 1 ? 's' : ''}` : undefined}
+          badgeColor={colors.primary}
+          defaultOpen={day.posts.length > 0}
+        >
+          {day.posts.length === 0 ? (
+            <Text style={[styles.noPost, { color: colors.textTertiary }]}>No posts scheduled</Text>
+          ) : (
+            day.posts.map((post, j) => (
+              <View key={j} style={styles.postItem}>
+                <View style={[styles.postDot, { backgroundColor: platformColor(post.platform) }]} />
+                <Text style={[styles.postTitle, { color: colors.text }]}>{post.title}</Text>
+                <Text style={[styles.postTime, { color: colors.textSecondary }]}>{post.time}</Text>
+                <View style={[styles.platformMini, { backgroundColor: platformColor(post.platform) + '20' }]}>
+                  <Text style={[styles.platformMiniText, { color: platformColor(post.platform) }]}>{post.platform}</Text>
+                </View>
+              </View>
+            ))
+          )}
+        </AccordionSection>
       ))}
     </View>
   );
@@ -270,8 +368,8 @@ export default function MarketingScreen() {
         </View>
       </GlassCard>
       <View style={{ height: 12 }} />
-      <GlassCard>
-        <Text style={[styles.analyticsTitle, { color: colors.text }]}>Performance Overview</Text>
+
+      <AccordionSection title="Performance Overview" icon="bar-chart" iconColor={colors.primary} defaultOpen={true}>
         {ANALYTICS_DATA.map((item, i) => (
           <View key={i} style={styles.analyticsRow}>
             <View style={styles.analyticsLabelRow}>
@@ -283,8 +381,8 @@ export default function MarketingScreen() {
             </View>
           </View>
         ))}
-      </GlassCard>
-      <View style={{ height: 12 }} />
+      </AccordionSection>
+
       <View style={styles.statsRow}>
         {[
           { label: 'Avg CTR', value: '3.2%', icon: 'finger-print' as const, change: '+0.4%' },
@@ -299,8 +397,8 @@ export default function MarketingScreen() {
         ))}
       </View>
       <View style={{ height: 12 }} />
-      <GlassCard>
-        <Text style={[styles.analyticsTitle, { color: colors.text }]}>Top Performing Content</Text>
+
+      <AccordionSection title="Top Performing Content" icon="trophy" iconColor={colors.warning}>
         {CONTENT_ITEMS.filter(c => c.status === 'Published').slice(0, 3).map((item, i) => (
           <View key={i} style={[styles.topContentRow, i > 0 && { borderTopWidth: 1, borderTopColor: colors.divider }]}>
             <Text style={[styles.topRank, { color: colors.primary }]}>#{i + 1}</Text>
@@ -310,7 +408,7 @@ export default function MarketingScreen() {
             </View>
           </View>
         ))}
-      </GlassCard>
+      </AccordionSection>
     </View>
   );
 
@@ -402,12 +500,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600' as const,
     marginTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    marginTop: 20,
-    marginBottom: 10,
   },
   suggestedPost: {},
   suggestedHeader: {
@@ -540,7 +632,9 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 4,
   },
-  contentCard: {},
+  contentCard: {
+    paddingVertical: 10,
+  },
   contentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between' as const,
@@ -595,78 +689,57 @@ const styles = StyleSheet.create({
   contentDate: {
     fontSize: 12,
   },
+  carouselCard: {
+    gap: 6,
+  },
   scheduleWeek: {
     fontSize: 15,
     fontWeight: '600' as const,
     textAlign: 'center' as const,
   },
-  dayRow: {
-    flexDirection: 'row',
-  },
-  dayLabel: {
-    width: 44,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    marginRight: 12,
-  },
-  dayText: {
-    fontSize: 13,
-    fontWeight: '700' as const,
-  },
-  dayContent: {
-    flex: 1,
-    justifyContent: 'center' as const,
-  },
-  noPost: {
-    fontSize: 13,
-  },
   postItem: {
     flexDirection: 'row',
     alignItems: 'center' as const,
-    paddingVertical: 3,
+    paddingVertical: 6,
     gap: 8,
   },
   postDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   postTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '500' as const,
     flex: 1,
   },
   postTime: {
-    fontSize: 11,
+    fontSize: 12,
   },
   platformMini: {
     paddingHorizontal: 6,
-    paddingVertical: 1,
+    paddingVertical: 2,
     borderRadius: 6,
   },
   platformMiniText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '600' as const,
+  },
+  noPost: {
+    fontSize: 13,
+    paddingVertical: 4,
   },
   analyticsPeriod: {
     flexDirection: 'row',
     alignItems: 'center' as const,
-    justifyContent: 'center' as const,
     gap: 8,
   },
   analyticsPeriodText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600' as const,
   },
-  analyticsTitle: {
-    fontSize: 15,
-    fontWeight: '700' as const,
-    marginBottom: 14,
-  },
   analyticsRow: {
-    marginBottom: 14,
+    marginTop: 14,
   },
   analyticsLabelRow: {
     flexDirection: 'row',
@@ -696,12 +769,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   topRank: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700' as const,
   },
   topTitle: {
     fontSize: 14,
-    fontWeight: '500' as const,
+    fontWeight: '600' as const,
   },
   topMeta: {
     fontSize: 12,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,9 @@ import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 import { apiRequest } from '@/lib/query-client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { BentoGrid } from '@/components/ui/BentoGrid';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
+import { AccordionSection } from '@/components/ui/AccordionSection';
 
 const TABS = ['Posts', 'Create', 'AI Generate'] as const;
 type Tab = typeof TABS[number];
@@ -76,6 +79,10 @@ export default function BlogScreen() {
   const { data: posts, isLoading: postsLoading } = useQuery<BlogPost[]>({
     queryKey: ['/api/blog/admin/posts'],
   });
+
+  const publishedPosts = useMemo(() => (posts || []).filter(p => p.status === 'published'), [posts]);
+  const draftPosts = useMemo(() => (posts || []).filter(p => p.status === 'draft'), [posts]);
+  const totalPosts = (posts || []).length;
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -238,6 +245,58 @@ export default function BlogScreen() {
     );
   };
 
+  const renderPostCard = (post: BlogPost) => (
+    <GlassCard key={post.id} style={styles.postCard}>
+      <View style={styles.postHeader}>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.postTitle, { color: colors.text }]} numberOfLines={2}>{post.title}</Text>
+          <View style={styles.postMeta}>
+            <View style={[styles.statusBadge, { backgroundColor: statusBadgeColor(post.status) + '20' }]}>
+              <Text style={[styles.statusText, { color: statusBadgeColor(post.status) }]}>{post.status}</Text>
+            </View>
+            <Text style={[styles.postCategory, { color: colors.textSecondary }]}>{post.category}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.postInfo}>
+        <Text style={[styles.postDate, { color: colors.textSecondary }]}>
+          {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}
+        </Text>
+        {post.authorName ? (
+          <Text style={[styles.postAuthor, { color: colors.textSecondary }]}>by {post.authorName}</Text>
+        ) : null}
+      </View>
+      <View style={styles.postActions}>
+        {post.status === 'draft' && (
+          <Pressable
+            testID={`publish-post-${post.id}`}
+            onPress={() => publishMutation.mutate(post.id)}
+            style={[styles.actionButton, { backgroundColor: '#1A8A7E' }]}
+          >
+            <Ionicons name="checkmark-circle-outline" size={16} color="#FFF" />
+            <Text style={styles.actionButtonText}>Publish</Text>
+          </Pressable>
+        )}
+        <Pressable
+          testID={`edit-post-${post.id}`}
+          onPress={() => openEditForm(post)}
+          style={[styles.actionButton, { backgroundColor: colors.primary + '20' }]}
+        >
+          <Ionicons name="create-outline" size={16} color={colors.primary} />
+          <Text style={[styles.actionButtonTextDark, { color: colors.primary }]}>Edit</Text>
+        </Pressable>
+        <Pressable
+          testID={`delete-post-${post.id}`}
+          onPress={() => handleDelete(post.id)}
+          style={[styles.actionButton, { backgroundColor: '#EF444420' }]}
+        >
+          <Ionicons name="trash-outline" size={16} color="#EF4444" />
+          <Text style={[styles.actionButtonTextDark, { color: '#EF4444' }]}>Delete</Text>
+        </Pressable>
+      </View>
+    </GlassCard>
+  );
+
   const renderPostsTab = () => (
     <View style={styles.section}>
       {postsLoading ? (
@@ -254,68 +313,78 @@ export default function BlogScreen() {
           </View>
         </GlassCard>
       ) : (
-        posts.map((post) => (
-          <GlassCard key={post.id} style={styles.postCard}>
-            <View style={styles.postHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.postTitle, { color: colors.text }]} numberOfLines={2}>{post.title}</Text>
-                <View style={styles.postMeta}>
-                  <View style={[styles.statusBadge, { backgroundColor: statusBadgeColor(post.status) + '20' }]}>
-                    <Text style={[styles.statusText, { color: statusBadgeColor(post.status) }]}>{post.status}</Text>
-                  </View>
-                  <Text style={[styles.postCategory, { color: colors.textSecondary }]}>{post.category}</Text>
-                </View>
+        <>
+          <BentoGrid columns={3} gap={10}>
+            <GlassCard compact>
+              <View style={styles.statCard}>
+                <Ionicons name="layers-outline" size={20} color={colors.primary} />
+                <Text style={[styles.statValue, { color: colors.text }]}>{totalPosts}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
               </View>
-            </View>
-            <View style={styles.postInfo}>
-              <Text style={[styles.postDate, { color: colors.textSecondary }]}>
-                {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}
-              </Text>
-              {post.authorName ? (
-                <Text style={[styles.postAuthor, { color: colors.textSecondary }]}>by {post.authorName}</Text>
-              ) : null}
-            </View>
-            <View style={styles.postActions}>
-              {post.status === 'draft' && (
-                <Pressable
-                  testID={`publish-post-${post.id}`}
-                  onPress={() => publishMutation.mutate(post.id)}
-                  style={[styles.actionButton, { backgroundColor: '#1A8A7E' }]}
-                >
-                  <Ionicons name="checkmark-circle-outline" size={16} color="#FFF" />
-                  <Text style={styles.actionButtonText}>Publish</Text>
-                </Pressable>
-              )}
-              <Pressable
-                testID={`edit-post-${post.id}`}
-                onPress={() => openEditForm(post)}
-                style={[styles.actionButton, { backgroundColor: colors.primary + '20' }]}
-              >
-                <Ionicons name="create-outline" size={16} color={colors.primary} />
-                <Text style={[styles.actionButtonTextDark, { color: colors.primary }]}>Edit</Text>
-              </Pressable>
-              <Pressable
-                testID={`delete-post-${post.id}`}
-                onPress={() => handleDelete(post.id)}
-                style={[styles.actionButton, { backgroundColor: '#EF444420' }]}
-              >
-                <Ionicons name="trash-outline" size={16} color="#EF4444" />
-                <Text style={[styles.actionButtonTextDark, { color: '#EF4444' }]}>Delete</Text>
-              </Pressable>
-            </View>
-          </GlassCard>
-        ))
+            </GlassCard>
+            <GlassCard compact>
+              <View style={styles.statCard}>
+                <Ionicons name="checkmark-circle-outline" size={20} color="#34C759" />
+                <Text style={[styles.statValue, { color: colors.text }]}>{publishedPosts.length}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Published</Text>
+              </View>
+            </GlassCard>
+            <GlassCard compact>
+              <View style={styles.statCard}>
+                <Ionicons name="document-text-outline" size={20} color="#FF9500" />
+                <Text style={[styles.statValue, { color: colors.text }]}>{draftPosts.length}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Drafts</Text>
+              </View>
+            </GlassCard>
+          </BentoGrid>
+
+          {publishedPosts.length > 0 && (
+            <HorizontalCarousel title="Published" itemWidth={220}>
+              {publishedPosts.map((post) => (
+                <GlassCard key={post.id} compact style={styles.carouselCard} onPress={() => openEditForm(post)}>
+                  <Text style={[styles.carouselTitle, { color: colors.text }]} numberOfLines={2}>{post.title}</Text>
+                  <View style={[styles.carouselBadge, { backgroundColor: '#1A8A7E20' }]}>
+                    <Text style={[styles.carouselBadgeText, { color: '#1A8A7E' }]}>{post.category}</Text>
+                  </View>
+                  <Text style={[styles.carouselDate, { color: colors.textSecondary }]}>
+                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}
+                  </Text>
+                </GlassCard>
+              ))}
+            </HorizontalCarousel>
+          )}
+
+          <AccordionSection title="Published" icon="checkmark-circle" iconColor="#34C759" badge={publishedPosts.length} defaultOpen={true}>
+            {publishedPosts.length === 0 ? (
+              <Text style={[styles.emptyAccordion, { color: colors.textSecondary }]}>No published posts yet.</Text>
+            ) : (
+              <View style={styles.accordionPostList}>
+                {publishedPosts.map((post) => renderPostCard(post))}
+              </View>
+            )}
+          </AccordionSection>
+
+          <AccordionSection title="Drafts" icon="document-text" iconColor="#FF9500" badge={draftPosts.length} defaultOpen={true}>
+            {draftPosts.length === 0 ? (
+              <Text style={[styles.emptyAccordion, { color: colors.textSecondary }]}>No drafts.</Text>
+            ) : (
+              <View style={styles.accordionPostList}>
+                {draftPosts.map((post) => renderPostCard(post))}
+              </View>
+            )}
+          </AccordionSection>
+        </>
       )}
     </View>
   );
 
   const renderCreateTab = () => (
     <View style={styles.section}>
-      <GlassCard>
-        <Text style={[styles.formTitle, { color: colors.text }]}>
-          {editingPost ? 'Edit Post' : 'Create New Post'}
-        </Text>
+      <Text style={[styles.formTitle, { color: colors.text }]}>
+        {editingPost ? 'Edit Post' : 'Create New Post'}
+      </Text>
 
+      <AccordionSection title="Post Details" icon="create" defaultOpen={true}>
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Title</Text>
         <TextInput
           testID="blog-title-input"
@@ -334,30 +403,6 @@ export default function BlogScreen() {
           onChangeText={setSlug}
           placeholder="auto-generated-from-title"
           placeholderTextColor={colors.textTertiary}
-        />
-
-        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Excerpt</Text>
-        <TextInput
-          testID="blog-excerpt-input"
-          style={[styles.input, styles.multilineInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
-          value={excerpt}
-          onChangeText={setExcerpt}
-          placeholder="Brief description of the post"
-          placeholderTextColor={colors.textTertiary}
-          multiline
-          numberOfLines={3}
-        />
-
-        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Content</Text>
-        <TextInput
-          testID="blog-content-input"
-          style={[styles.input, styles.contentInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
-          value={content}
-          onChangeText={setContent}
-          placeholder="Write your blog post content (HTML supported)"
-          placeholderTextColor={colors.textTertiary}
-          multiline
-          numberOfLines={8}
         />
 
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Category</Text>
@@ -401,44 +446,65 @@ export default function BlogScreen() {
           <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
         </Pressable>
         {renderPicker(showStatusPicker, () => setShowStatusPicker(false), ['draft', 'published'], status, (val) => setStatus(val as 'draft' | 'published'))}
+      </AccordionSection>
 
-        <View style={styles.formActions}>
-          {editingPost && (
-            <Pressable
-              testID="blog-cancel-edit"
-              onPress={resetForm}
-              style={[styles.formButton, { backgroundColor: colors.backgroundTertiary }]}
-            >
-              <Text style={[styles.formButtonText, { color: colors.text }]}>Cancel</Text>
-            </Pressable>
-          )}
+      <AccordionSection title="Content" icon="document-text" defaultOpen={true}>
+        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Excerpt</Text>
+        <TextInput
+          testID="blog-excerpt-input"
+          style={[styles.input, styles.multilineInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          value={excerpt}
+          onChangeText={setExcerpt}
+          placeholder="Brief description of the post"
+          placeholderTextColor={colors.textTertiary}
+          multiline
+          numberOfLines={3}
+        />
+
+        <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Content</Text>
+        <TextInput
+          testID="blog-content-input"
+          style={[styles.input, styles.contentInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          value={content}
+          onChangeText={setContent}
+          placeholder="Write your blog post content (HTML supported)"
+          placeholderTextColor={colors.textTertiary}
+          multiline
+          numberOfLines={8}
+        />
+      </AccordionSection>
+
+      <View style={styles.formActions}>
+        {editingPost && (
           <Pressable
-            testID="blog-submit"
-            onPress={handleSubmitForm}
-            style={[styles.formButton, styles.submitButton, { backgroundColor: colors.primary }]}
+            testID="blog-cancel-edit"
+            onPress={resetForm}
+            style={[styles.formButton, { backgroundColor: colors.backgroundTertiary }]}
           >
-            {createMutation.isPending ? (
-              <ActivityIndicator size="small" color="#FFF" />
-            ) : (
-              <>
-                <Ionicons name={editingPost ? 'save-outline' : 'add-circle-outline'} size={18} color="#FFF" />
-                <Text style={styles.submitButtonText}>{editingPost ? 'Update Post' : 'Create Post'}</Text>
-              </>
-            )}
+            <Text style={[styles.formButtonText, { color: colors.text }]}>Cancel</Text>
           </Pressable>
-        </View>
-      </GlassCard>
+        )}
+        <Pressable
+          testID="blog-submit"
+          onPress={handleSubmitForm}
+          style={[styles.formButton, styles.submitButton, { backgroundColor: colors.primary }]}
+        >
+          {createMutation.isPending ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <>
+              <Ionicons name={editingPost ? 'save-outline' : 'add-circle-outline'} size={18} color="#FFF" />
+              <Text style={styles.submitButtonText}>{editingPost ? 'Update Post' : 'Create Post'}</Text>
+            </>
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 
   const renderAiTab = () => (
     <View style={styles.section}>
-      <GlassCard>
-        <View style={styles.aiHeader}>
-          <Ionicons name="sparkles" size={24} color={colors.primary} />
-          <Text style={[styles.formTitle, { color: colors.text, marginLeft: 8 }]}>AI Blog Generator</Text>
-        </View>
-
+      <AccordionSection title="Generate Settings" icon="sparkles" iconColor="#FF9500" defaultOpen={true}>
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Topic</Text>
         <TextInput
           testID="ai-topic-input"
@@ -491,7 +557,7 @@ export default function BlogScreen() {
             </>
           )}
         </Pressable>
-      </GlassCard>
+      </AccordionSection>
 
       {generateMutation.isPending && (
         <GlassCard style={styles.generatingCard}>
@@ -504,7 +570,7 @@ export default function BlogScreen() {
       )}
 
       {generatedPost && !generateMutation.isPending && (
-        <GlassCard style={styles.generatedCard}>
+        <AccordionSection title="Generated Result" icon="document" defaultOpen={true}>
           <View style={styles.generatedHeader}>
             <Ionicons name="checkmark-circle" size={20} color="#1A8A7E" />
             <Text style={[styles.generatedLabel, { color: '#1A8A7E' }]}>Generated Successfully</Text>
@@ -533,10 +599,10 @@ export default function BlogScreen() {
               style={[styles.formButton, { backgroundColor: colors.backgroundTertiary }]}
             >
               <Ionicons name="create-outline" size={18} color={colors.primary} />
-              <Text style={[styles.formButtonText, { color: colors.primary }]}>Edit</Text>
+              <Text style={[styles.formButtonText, { color: colors.primary }]}>Use This Post</Text>
             </Pressable>
           </View>
-        </GlassCard>
+        </AccordionSection>
       )}
     </View>
   );
@@ -644,6 +710,53 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  statCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    gap: 4,
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: '700' as const,
+  },
+  statLabel: {
+    fontSize: 11,
+    fontWeight: '500' as const,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.5,
+  },
+  carouselCard: {
+    width: 220,
+    minHeight: 90,
+  },
+  carouselTitle: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    marginBottom: 6,
+  },
+  carouselBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  carouselBadgeText: {
+    fontSize: 11,
+    fontWeight: '600' as const,
+  },
+  carouselDate: {
+    fontSize: 11,
+  },
+  accordionPostList: {
+    gap: 10,
+    marginTop: 8,
+  },
+  emptyAccordion: {
+    fontSize: 13,
+    paddingVertical: 8,
+  },
   postCard: {
     minHeight: 80,
   },
@@ -711,7 +824,7 @@ const styles = StyleSheet.create({
   formTitle: {
     fontSize: 18,
     fontWeight: '700' as const,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   inputLabel: {
     fontSize: 13,
@@ -762,7 +875,7 @@ const styles = StyleSheet.create({
   formActions: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 20,
+    marginTop: 8,
   },
   formButton: {
     flexDirection: 'row',
@@ -786,11 +899,6 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: '#FFF',
   },
-  aiHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 0,
-  },
   generatingCard: {
     minHeight: 120,
   },
@@ -806,9 +914,6 @@ const styles = StyleSheet.create({
   },
   generatingSubtext: {
     fontSize: 13,
-  },
-  generatedCard: {
-    minHeight: 80,
   },
   generatedHeader: {
     flexDirection: 'row',

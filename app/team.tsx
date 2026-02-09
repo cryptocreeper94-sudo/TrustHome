@@ -10,10 +10,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { apiRequest, queryClient } from '@/lib/query-client';
 
-type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code';
+type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password';
 type VerifySource = 'login' | 'register';
-
-const DEV_PIN = '0424';
 
 export default function TeamScreen() {
   const { colors } = useTheme();
@@ -46,6 +44,10 @@ export default function TeamScreen() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const [setupPassword, setSetupPassword] = useState('');
+  const [setupConfirm, setSetupConfirm] = useState('');
+  const [showSetupPassword, setShowSetupPassword] = useState(false);
 
   const clearError = useCallback(() => {
     setError('');
@@ -86,23 +88,24 @@ export default function TeamScreen() {
 
     if (newDigits.every(d => d.length === 1)) {
       const entered = newDigits.join('');
-      if (entered === DEV_PIN) {
-        setPinChecking(true);
-        try {
-          await apiRequest('POST', '/api/auth/dev-pin', { pin: entered });
-          await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      setPinChecking(true);
+      try {
+        const res = await apiRequest('POST', '/api/auth/dev-pin', { pin: entered });
+        const data = await res.json();
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        if (data.mustResetPassword) {
+          goToStep('set_password');
+        } else {
           router.replace('/');
-        } catch (err) {
-          setPinError(true);
-          setTimeout(() => {
-            setPinDigits(['', '', '', '']);
-            pinRefs.current[0]?.focus();
-          }, 600);
-        } finally {
-          setPinChecking(false);
         }
-      } else {
-        goToStep('login');
+      } catch (err) {
+        setPinError(true);
+        setTimeout(() => {
+          setPinDigits(['', '', '', '']);
+          pinRefs.current[0]?.focus();
+        }, 600);
+      } finally {
+        setPinChecking(false);
       }
     }
   }, [pinDigits, router, goToStep]);
@@ -257,6 +260,37 @@ export default function TeamScreen() {
       setLoading(false);
     }
   };
+
+  const handleSetPassword = async () => {
+    if (!setupPassword || !setupConfirm) {
+      setError('Please fill in both fields');
+      return;
+    }
+    if (setupPassword !== setupConfirm) {
+      setError('Passwords do not match');
+      return;
+    }
+    const pwRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!pwRegex.test(setupPassword)) {
+      setError('Password does not meet requirements');
+      return;
+    }
+    setLoading(true);
+    clearError();
+    try {
+      await apiRequest('POST', '/api/auth/set-password', { password: setupPassword });
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      router.replace('/');
+    } catch (err) {
+      setError(await parseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const setupPwHasLength = setupPassword.length >= 8;
+  const setupPwHasUpper = /[A-Z]/.test(setupPassword);
+  const setupPwHasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(setupPassword);
 
   const handleCodeChange = (text: string, index: number) => {
     const newCode = [...verifyCode];
@@ -751,6 +785,65 @@ export default function TeamScreen() {
               </Animated.View>
             )}
 
+            {step === 'set_password' && (
+              <Animated.View entering={FadeInDown.duration(400)}>
+                <View style={[styles.setupBanner, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
+                  <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
+                  <Text style={[styles.setupBannerText, { color: colors.primary }]}>Welcome! Set up your secure password to continue.</Text>
+                </View>
+
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Create Your Password</Text>
+                <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                  Choose a strong password for your account. You will use this to sign in going forward.
+                </Text>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>New Password</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={setupPassword}
+                      onChangeText={setSetupPassword}
+                      placeholder="Create a strong password"
+                      placeholderTextColor={colors.textTertiary}
+                      secureTextEntry={!showSetupPassword}
+                      testID="setup-password-input"
+                    />
+                    <Pressable style={styles.eyeBtn} onPress={() => setShowSetupPassword(!showSetupPassword)}>
+                      <Ionicons name={showSetupPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textTertiary} />
+                    </Pressable>
+                  </View>
+                  {setupPassword.length > 0 && renderPasswordReqs(setupPwHasLength, setupPwHasUpper, setupPwHasSpecial)}
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Confirm Password</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={setupConfirm}
+                      onChangeText={setSetupConfirm}
+                      placeholder="Confirm your password"
+                      placeholderTextColor={colors.textTertiary}
+                      secureTextEntry={!showSetupPassword}
+                      testID="setup-confirm-input"
+                    />
+                  </View>
+                </View>
+
+                <Pressable
+                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  onPress={handleSetPassword}
+                  disabled={loading}
+                  testID="setup-password-btn"
+                >
+                  {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.primaryBtnText}>Set Password & Continue</Text>}
+                </Pressable>
+              </Animated.View>
+            )}
+
             {error ? (
               <View style={[styles.errorBox, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
                 <Ionicons name="alert-circle" size={16} color={colors.error} />
@@ -955,6 +1048,21 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   successText: { flex: 1, fontSize: 13, lineHeight: 18 },
+  setupBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  setupBannerText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500' as const,
+  },
   footerArea: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -38,7 +38,7 @@ export async function transcribeAudio(audioBuffer: Buffer, filename: string): Pr
   const apiKey = await getCredentials();
 
   const formData = new FormData();
-  formData.append('file', new Blob([audioBuffer]), filename);
+  formData.append('file', new Blob([new Uint8Array(audioBuffer)]), filename);
   formData.append('model_id', 'scribe_v1');
 
   const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
@@ -93,7 +93,7 @@ export async function createStreamingTTS(
       });
     });
 
-    websocket.on('message', (event) => {
+    websocket.on('message', (event: WebSocket.Data) => {
       const data = JSON.parse(event.toString());
       if (data.audio) {
         onAudioChunk(data.audio);

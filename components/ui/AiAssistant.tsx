@@ -1,55 +1,22 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Animated, Dimensions, Platform, KeyboardAvoidingView } from 'react-native';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Dimensions, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
+import { getApiUrl } from '@/lib/query-client';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const PANEL_WIDTH = Math.min(340, SCREEN_WIDTH * 0.88);
 
-interface Message {
+interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   text: string;
-  timestamp: string;
+  isStreaming?: boolean;
 }
 
-const AGENT_WELCOME = "Hi Jennifer! I'm your TrustHome AI assistant. I can help you with:\n\n- Transaction management and deadlines\n- Lead scoring and follow-up suggestions\n- Marketing content ideas\n- Scheduling optimization\n- Market analysis and pricing\n- Contract and document questions\n\nWhat can I help you with?";
-
-const CLIENT_WELCOME = "Hi Sarah! I'm here to help you through your home buying journey. I can help with:\n\n- Understanding your transaction timeline\n- Explaining documents you need to sign\n- Mortgage terms and calculations\n- What to expect at each stage\n- Scheduling questions\n- General real estate questions\n\nHow can I help you today?";
-
-const AGENT_RESPONSES: Record<string, string> = {
-  'lead': "Based on your current pipeline, I'd recommend prioritizing Amanda Chen - she has a 92 lead score, visited the open house yesterday, and is pre-approved for $400K-$500K. I'd suggest scheduling a showing for this week while her interest is high.\n\nYour other hot leads (David Park and Jennifer Cole) also need follow-ups within the next 48 hours.",
-  'schedule': "Your schedule for tomorrow:\n\n10:00 AM - Showing at 1847 Oak Valley Dr with Sarah M.\n11:30 AM - Showing at 302 Elm Park Ct with Sarah M.\n1:00 PM - Listing Appointment at 890 Magnolia Way with Robert K.\n3:30 PM - Open House at 445 Sunset Blvd\n\nI notice you have back-to-back showings in the morning. The properties are 12 minutes apart, so you should have enough time. Want me to send a reminder to Sarah?",
-  'market': "Here's a quick market snapshot for your area:\n\nMedian Sale Price: $425,000 (up 3.2% YoY)\nAvg Days on Market: 28 days (down from 35)\nInventory: 342 active listings (down 12%)\nList-to-Sale Ratio: 98.4%\n\nThe market is favoring sellers right now. For your listing at 890 Magnolia Way ($580K), I'd suggest pricing at $575K to generate multiple offers given the low inventory.",
-  'deadline': "You have 3 urgent deadlines:\n\n1. Inspection deadline TOMORROW - 2205 Birch Creek Ln (Amanda Chen). The inspector report needs to be reviewed and the inspection contingency response is due.\n\n2. Contract signature needed - Sarah Mitchell's purchase agreement at 1847 Oak Valley Dr. This has been pending for 2 days.\n\n3. Pre-approval expiring in 3 days - Mike Torres. He needs to submit his updated income documentation to the lender.",
-  'default': "I can help with that! Let me look into it for you.\n\nIn the full version, I'll be connected to your CRM, calendar, MLS data, and transaction management system to give you real-time insights and recommendations.\n\nIs there anything specific about your deals, leads, or schedule I can help with right now?",
-};
-
-const CLIENT_RESPONSES: Record<string, string> = {
-  'inspection': "Great question! The home inspection is a key step in your purchase. Here's what to expect:\n\nYour inspection at 1847 Oak Valley Dr is scheduled for this week. The inspector will spend 2-4 hours examining the property's structure, systems, and condition.\n\nAfter the inspection, you'll receive a detailed report. Jennifer will help you review it and decide if you want to:\n- Proceed as-is\n- Request repairs from the seller\n- Renegotiate the price\n- Walk away (using your inspection contingency)\n\nYou have until Feb 12 to respond after receiving the report.",
-  'mortgage': "Here's a quick breakdown of your mortgage terms:\n\nLoan Amount: ~$340,000 (after 20% down on $425,000)\nEstimated Rate: 6.5% (30-year fixed)\nMonthly Payment: ~$2,149 (principal + interest)\nProperty Tax: ~$354/month\nInsurance: ~$125/month\nTotal Monthly: ~$2,628\n\nYour pre-approval is good through March 1st. Want me to calculate payments for a different price or down payment amount?",
-  'timeline': "Here's where you are in your home buying journey:\n\nCompleted:\n- Pre-Approval\n- Home Search\n- Offer (accepted!)\n\nCurrent Stage:\n- Under Contract at 1847 Oak Valley Dr\n\nComing Up:\n- Inspection (this week)\n- Appraisal (expected next week)\n- Final Walk-through\n- Closing (estimated Feb 28)\n\nThe biggest upcoming milestone is the inspection. Jennifer will guide you through the results.",
-  'default': "That's a great question! In the full version, I'll be able to pull up your specific transaction details, documents, and timeline to give you a detailed answer.\n\nFor now, I can help explain general real estate concepts, walk you through what to expect at each stage, or help with mortgage calculations.\n\nWhat would you like to know more about?",
-};
-
-function getResponse(text: string, isAgent: boolean): string {
-  const lower = text.toLowerCase();
-  const responses = isAgent ? AGENT_RESPONSES : CLIENT_RESPONSES;
-
-  if (isAgent) {
-    if (lower.includes('lead') || lower.includes('follow') || lower.includes('prospect')) return responses['lead'];
-    if (lower.includes('schedule') || lower.includes('calendar') || lower.includes('tomorrow') || lower.includes('today')) return responses['schedule'];
-    if (lower.includes('market') || lower.includes('price') || lower.includes('comp')) return responses['market'];
-    if (lower.includes('deadline') || lower.includes('urgent') || lower.includes('due')) return responses['deadline'];
-  } else {
-    if (lower.includes('inspect')) return responses['inspection'];
-    if (lower.includes('mortgage') || lower.includes('payment') || lower.includes('loan') || lower.includes('rate')) return responses['mortgage'];
-    if (lower.includes('timeline') || lower.includes('stage') || lower.includes('status') || lower.includes('where')) return responses['timeline'];
-  }
-  return responses['default'];
-}
+type VoiceState = 'idle' | 'recording' | 'processing' | 'speaking';
 
 function AiTab({ onPress }: { onPress: () => void }) {
   const { colors } = useTheme();
@@ -62,39 +29,395 @@ function AiTab({ onPress }: { onPress: () => void }) {
   );
 }
 
+function TypingDots({ color }: { color: string }) {
+  return (
+    <View style={styles.typingRow}>
+      <View style={[styles.dot, { backgroundColor: color, opacity: 0.4 }]} />
+      <View style={[styles.dot, { backgroundColor: color, opacity: 0.6 }]} />
+      <View style={[styles.dot, { backgroundColor: color, opacity: 0.8 }]} />
+    </View>
+  );
+}
+
+function VoiceWaveform({ color }: { color: string }) {
+  return (
+    <View style={styles.waveformRow}>
+      {[0.3, 0.7, 1, 0.8, 0.5, 0.9, 0.6, 0.4, 0.8, 1, 0.7, 0.3].map((h, i) => (
+        <View
+          key={i}
+          style={[styles.waveBar, { backgroundColor: color, height: 4 + h * 16, opacity: 0.6 + h * 0.4 }]}
+        />
+      ))}
+    </View>
+  );
+}
+
+function MicButton({ voiceState, onPress, colors }: { voiceState: VoiceState; onPress: () => void; colors: any }) {
+  const isRecording = voiceState === 'recording';
+  const isProcessing = voiceState === 'processing';
+  const isSpeaking = voiceState === 'speaking';
+  const isDisabled = isProcessing;
+
+  const bgColor = isRecording ? '#EF4444' : isSpeaking ? '#F59E0B' : colors.primary;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={isDisabled}
+      style={[styles.micBtn, { backgroundColor: bgColor, opacity: isDisabled ? 0.5 : 1 }]}
+      testID="voice-mic-btn"
+    >
+      {isProcessing ? (
+        <ActivityIndicator size="small" color="#FFFFFF" />
+      ) : isRecording ? (
+        <Ionicons name="stop" size={18} color="#FFFFFF" />
+      ) : isSpeaking ? (
+        <Ionicons name="volume-high" size={18} color="#FFFFFF" />
+      ) : (
+        <Ionicons name="mic" size={18} color="#FFFFFF" />
+      )}
+    </Pressable>
+  );
+}
+
 export function AiAssistant() {
   const { colors, isDark } = useTheme();
   const { currentRole, aiAssistantOpen, openAiAssistant, closeAiAssistant } = useApp();
   const insets = useSafeAreaInsets();
   const [inputText, setInputText] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
+  const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+  const mediaRecorderRef = useRef<any>(null);
+  const audioChunksRef = useRef<any[]>([]);
+  const audioContextRef = useRef<any>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const isAgent = currentRole === 'agent';
-  const welcomeMsg = isAgent ? AGENT_WELCOME : CLIENT_WELCOME;
 
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '0', role: 'assistant', text: welcomeMsg, timestamp: 'Now' },
-  ]);
+  useEffect(() => {
+    if (messages.length === 0) {
+      const welcomeMsg = isAgent
+        ? "Hi! I'm your TrustHome AI assistant. I can help with transaction management, lead scoring, marketing ideas, scheduling, market analysis, and contract questions. What can I help you with?"
+        : "Hi! I'm here to help you through your home buying journey. Ask me about your timeline, documents, mortgage terms, or anything else. How can I help?";
+      setMessages([{ id: '0', role: 'assistant', text: welcomeMsg }]);
+    }
+  }, []);
 
-  const sendMessage = () => {
-    if (!inputText.trim()) return;
-    const userMsg: Message = {
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+  }, []);
+
+  const sendTextMessage = useCallback(async () => {
+    const text = inputText.trim();
+    if (!text) return;
+    setInputText('');
+
+    const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
-      text: inputText.trim(),
-      timestamp: 'Now',
+      text,
     };
-    const response = getResponse(inputText, isAgent);
-    const aiMsg: Message = {
-      id: (Date.now() + 1).toString(),
+
+    const aiMsgId = (Date.now() + 1).toString();
+    const aiMsg: ChatMessage = {
+      id: aiMsgId,
       role: 'assistant',
-      text: response,
-      timestamp: 'Now',
+      text: '',
+      isStreaming: true,
     };
+
     setMessages(prev => [...prev, userMsg, aiMsg]);
-    setInputText('');
-    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-  };
+    setIsTyping(true);
+    scrollToBottom();
+
+    const history = messages
+      .filter(m => m.id !== '0')
+      .map(m => ({ role: m.role, content: m.text }));
+
+    try {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      const baseUrl = getApiUrl();
+      const url = new URL('/api/ai/chat', baseUrl);
+
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) throw new Error('Chat request failed');
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No response body');
+
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'text' && data.content) {
+              accumulated += data.content;
+              setMessages(prev =>
+                prev.map(m => m.id === aiMsgId ? { ...m, text: accumulated } : m)
+              );
+              scrollToBottom();
+            } else if (data.type === 'done') {
+              setMessages(prev =>
+                prev.map(m => m.id === aiMsgId ? { ...m, text: data.content || accumulated, isStreaming: false } : m)
+              );
+            }
+          } catch {}
+        }
+      }
+
+      setMessages(prev =>
+        prev.map(m => m.id === aiMsgId ? { ...m, isStreaming: false } : m)
+      );
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        setMessages(prev =>
+          prev.map(m => m.id === aiMsgId ? { ...m, text: 'Sorry, I had trouble processing that. Please try again.', isStreaming: false } : m)
+        );
+      }
+    } finally {
+      setIsTyping(false);
+      abortControllerRef.current = null;
+      scrollToBottom();
+    }
+  }, [inputText, messages, scrollToBottom]);
+
+  const playAudioChunks = useCallback(async (base64Chunks: string[]) => {
+    if (Platform.OS !== 'web' || base64Chunks.length === 0) return;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
+      audioContextRef.current = ctx;
+
+      const allSamples: number[] = [];
+      for (const b64 of base64Chunks) {
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const int16 = new Int16Array(bytes.buffer);
+        for (let i = 0; i < int16.length; i++) allSamples.push(int16[i] / 32768);
+      }
+
+      if (allSamples.length === 0) return;
+
+      const audioBuffer = ctx.createBuffer(1, allSamples.length, 16000);
+      audioBuffer.getChannelData(0).set(new Float32Array(allSamples));
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
+      source.onended = () => setVoiceState('idle');
+      source.start();
+    } catch (err) {
+      console.error('Audio playback error:', err);
+      setVoiceState('idle');
+    }
+  }, []);
+
+  const handleVoicePress = useCallback(async () => {
+    if (voiceState === 'recording') {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+      return;
+    }
+
+    if (voiceState === 'speaking') {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      setVoiceState('idle');
+      return;
+    }
+
+    if (Platform.OS !== 'web') {
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        text: 'Voice input is available on the web version. Please use text input on this device.',
+      }]);
+      scrollToBottom();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e: any) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        setVoiceState('processing');
+
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        const arrayBuffer = await blob.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+        const userMsgId = Date.now().toString();
+        const aiMsgId = (Date.now() + 1).toString();
+
+        setMessages(prev => [...prev,
+          { id: userMsgId, role: 'user', text: 'Processing voice...' },
+          { id: aiMsgId, role: 'assistant', text: '', isStreaming: true },
+        ]);
+        scrollToBottom();
+
+        try {
+          const baseUrl = getApiUrl();
+          const url = new URL('/api/ai/voice', baseUrl);
+          const response = await fetch(url.toString(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio: base64 }),
+          });
+
+          if (!response.ok) throw new Error('Voice request failed');
+
+          const reader = response.body?.getReader();
+          if (!reader) throw new Error('No response body');
+
+          const decoder = new TextDecoder();
+          const audioB64Chunks: string[] = [];
+          let aiText = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.type === 'transcript') {
+                  setMessages(prev =>
+                    prev.map(m => m.id === userMsgId ? { ...m, text: data.content } : m)
+                  );
+                } else if (data.type === 'ai_text') {
+                  aiText = data.content;
+                  setMessages(prev =>
+                    prev.map(m => m.id === aiMsgId ? { ...m, text: aiText } : m)
+                  );
+                  scrollToBottom();
+                } else if (data.type === 'audio') {
+                  audioB64Chunks.push(data.content);
+                } else if (data.type === 'done') {
+                  setMessages(prev =>
+                    prev.map(m => m.id === aiMsgId ? { ...m, isStreaming: false } : m)
+                  );
+                }
+              } catch {}
+            }
+          }
+
+          setMessages(prev =>
+            prev.map(m => m.id === aiMsgId ? { ...m, isStreaming: false } : m)
+          );
+
+          if (audioB64Chunks.length > 0) {
+            setVoiceState('speaking');
+            await playAudioChunks(audioB64Chunks);
+          } else {
+            setVoiceState('idle');
+          }
+        } catch (err) {
+          console.error('Voice error:', err);
+          setMessages(prev =>
+            prev.map(m => m.id === aiMsgId ? { ...m, text: 'Voice processing failed. Please try again or use text.', isStreaming: false } : m)
+          );
+          setVoiceState('idle');
+        }
+      };
+
+      recorder.start(100);
+      setVoiceState('recording');
+    } catch (err) {
+      console.error('Mic access error:', err);
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        text: 'Unable to access microphone. Please allow microphone access in your browser settings.',
+      }]);
+      scrollToBottom();
+    }
+  }, [voiceState, scrollToBottom, playAudioChunks]);
+
+  const speakMessage = useCallback(async (text: string) => {
+    if (Platform.OS !== 'web') return;
+    setVoiceState('speaking');
+
+    try {
+      const baseUrl = getApiUrl();
+      const url = new URL('/api/ai/tts', baseUrl);
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) throw new Error('TTS failed');
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No body');
+
+      const decoder = new TextDecoder();
+      const audioB64Chunks: string[] = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'audio') audioB64Chunks.push(data.content);
+          } catch {}
+        }
+      }
+
+      if (audioB64Chunks.length > 0) {
+        await playAudioChunks(audioB64Chunks);
+      } else {
+        setVoiceState('idle');
+      }
+    } catch {
+      setVoiceState('idle');
+    }
+  }, [playAudioChunks]);
 
   const quickPrompts = isAgent
     ? ['Check my deadlines', 'Lead priorities', "Tomorrow's schedule", 'Market analysis']
@@ -123,6 +446,18 @@ export function AiAssistant() {
               <Ionicons name="close" size={22} color="#FFFFFF" />
             </Pressable>
           </View>
+          {voiceState === 'recording' && (
+            <View style={styles.recordingBanner}>
+              <VoiceWaveform color="#FFFFFF" />
+              <Text style={styles.recordingText}>Listening...</Text>
+            </View>
+          )}
+          {voiceState === 'processing' && (
+            <View style={styles.recordingBanner}>
+              <ActivityIndicator size="small" color="#FFFFFF" />
+              <Text style={styles.recordingText}>Thinking...</Text>
+            </View>
+          )}
         </View>
 
         <ScrollView
@@ -135,17 +470,29 @@ export function AiAssistant() {
             <View key={msg.id} style={[styles.messageBubble, msg.role === 'user' ? styles.userBubble : styles.aiBubble, {
               backgroundColor: msg.role === 'user' ? colors.primary : (isDark ? colors.surface : colors.backgroundTertiary),
             }]}>
-              {msg.role === 'assistant' ? (
+              {msg.role === 'assistant' && (
                 <View style={styles.aiHeader}>
                   <MaterialCommunityIcons name="robot" size={14} color={colors.primary} />
                   <Text style={[styles.aiLabel, { color: colors.primary }]}>TrustHome AI</Text>
+                  {!msg.isStreaming && msg.text && Platform.OS === 'web' && (
+                    <Pressable
+                      onPress={() => speakMessage(msg.text)}
+                      style={styles.speakBtn}
+                      hitSlop={8}
+                    >
+                      <Ionicons name="volume-medium" size={14} color={colors.textSecondary} />
+                    </Pressable>
+                  )}
                 </View>
-              ) : null}
-              <Text style={[styles.messageText, { color: msg.role === 'user' ? '#FFFFFF' : colors.text }]}>{msg.text}</Text>
+              )}
+              <Text style={[styles.messageText, { color: msg.role === 'user' ? '#FFFFFF' : colors.text }]}>
+                {msg.text || (msg.isStreaming ? '' : '')}
+              </Text>
+              {msg.isStreaming && !msg.text && <TypingDots color={colors.primary} />}
             </View>
           ))}
 
-          {messages.length <= 1 ? (
+          {messages.length <= 1 && (
             <View style={styles.quickPrompts}>
               <Text style={[styles.quickPromptsTitle, { color: colors.textSecondary }]}>Try asking:</Text>
               {quickPrompts.map((prompt, i) => (
@@ -155,21 +502,27 @@ export function AiAssistant() {
                 </Pressable>
               ))}
             </View>
-          ) : null}
+          )}
         </ScrollView>
 
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
           <View style={[styles.inputRow, { borderTopColor: colors.divider, backgroundColor: colors.background }]}>
+            <MicButton voiceState={voiceState} onPress={handleVoicePress} colors={colors} />
             <TextInput
               style={[styles.input, { backgroundColor: isDark ? colors.surface : colors.backgroundTertiary, color: colors.text, borderColor: colors.borderLight }]}
               placeholder={isAgent ? 'Ask about leads, schedule, deals...' : 'Ask about your transaction...'}
               placeholderTextColor={colors.textTertiary}
               value={inputText}
               onChangeText={setInputText}
-              onSubmitEditing={sendMessage}
+              onSubmitEditing={sendTextMessage}
               returnKeyType="send"
+              editable={voiceState === 'idle'}
             />
-            <Pressable onPress={sendMessage} style={[styles.sendBtn, { backgroundColor: colors.primary, opacity: inputText.trim() ? 1 : 0.5 }]}>
+            <Pressable
+              onPress={sendTextMessage}
+              disabled={!inputText.trim() || voiceState !== 'idle'}
+              style={[styles.sendBtn, { backgroundColor: colors.primary, opacity: inputText.trim() && voiceState === 'idle' ? 1 : 0.4 }]}
+            >
               <Ionicons name="send" size={18} color="#FFFFFF" />
             </Pressable>
           </View>
@@ -254,6 +607,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 16,
   },
+  recordingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 8,
+    paddingVertical: 6,
+  },
+  recordingText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
   messageList: {
     flex: 1,
   },
@@ -283,10 +648,34 @@ const styles = StyleSheet.create({
   aiLabel: {
     fontSize: 11,
     fontWeight: '700' as const,
+    flex: 1,
+  },
+  speakBtn: {
+    padding: 2,
   },
   messageText: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  typingRow: {
+    flexDirection: 'row',
+    gap: 4,
+    paddingVertical: 4,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  waveformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    height: 24,
+  },
+  waveBar: {
+    width: 3,
+    borderRadius: 1.5,
   },
   quickPrompts: {
     marginTop: 8,
@@ -330,6 +719,13 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  micBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
   },

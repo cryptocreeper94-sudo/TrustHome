@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Image, ImageBackground, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Image, ImageBackground, Platform, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
@@ -292,12 +292,19 @@ export function AgentDashboard() {
           { label: 'Add Client', icon: 'person-add-outline' as const, key: 'add' },
           { label: 'New Showing', icon: 'calendar-outline' as const, key: 'showing' },
           { label: 'Create Post', icon: 'megaphone-outline' as const, key: 'post' },
+          { label: 'Room Visualizer', icon: 'color-palette-outline' as const, key: 'visualizer' },
         ].map((btn) => {
           const isActive = selectedAction === btn.key;
           return (
             <Pressable
               key={btn.key}
-              onPress={() => setSelectedAction(isActive ? null : btn.key)}
+              onPress={() => {
+                if (btn.key === 'visualizer') {
+                  Linking.openURL('https://paintpros.io/npp/estimate');
+                } else {
+                  setSelectedAction(isActive ? null : btn.key);
+                }
+              }}
               style={[
                 styles.actionBtn,
                 {

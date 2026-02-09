@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Image, Platform, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -279,6 +279,28 @@ export function ClientDashboard() {
         ))}
       </HorizontalCarousel>
 
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Tools</Text>
+      </View>
+
+      <Pressable
+        onPress={() => Linking.openURL('https://paintpros.io/npp/estimate')}
+        style={styles.toolCard}
+      >
+        <GlassCard compact style={styles.toolCardInner}>
+          <View style={styles.toolRow}>
+            <View style={[styles.toolIconWrap, { backgroundColor: isDark ? 'rgba(26,138,126,0.15)' : 'rgba(26,138,126,0.08)' }]}>
+              <Ionicons name="color-palette-outline" size={22} color={colors.primary} />
+            </View>
+            <View style={styles.toolInfo}>
+              <Text style={[styles.toolName, { color: colors.text }]}>Room Visualizer</Text>
+              <Text style={[styles.toolDesc, { color: colors.textSecondary }]}>AI-powered room visualization, size estimates, and color matching</Text>
+            </View>
+            <Ionicons name="open-outline" size={16} color={colors.textTertiary} />
+          </View>
+        </GlassCard>
+      </Pressable>
+
       <View style={styles.quickActions}>
         {[
           { label: 'Message Agent', icon: 'chatbubble-outline' as const, key: 'message' },
@@ -466,6 +488,19 @@ const styles = StyleSheet.create({
   partyRole: { fontSize: 11, color: 'rgba(255,255,255,0.8)' },
   partyName: { fontSize: 14, fontWeight: '700' as const, color: '#FFFFFF' },
 
+  toolCard: { paddingHorizontal: 16, marginBottom: 4 },
+  toolCardInner: { minHeight: 60 },
+  toolRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12 },
+  toolIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  toolInfo: { flex: 1 },
+  toolName: { fontSize: 15, fontWeight: '700' as const },
+  toolDesc: { fontSize: 12, marginTop: 2, lineHeight: 17 },
   quickActions: {
     flexDirection: 'row',
     paddingHorizontal: 16,

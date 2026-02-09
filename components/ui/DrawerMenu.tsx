@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Platform, Modal, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -36,7 +36,8 @@ export function DrawerMenu() {
     { icon: 'newspaper-outline', label: 'Blog', route: '/blog', agentOnly: true },
     { icon: 'bar-chart-outline', label: 'Analytics', route: '/analytics', agentOnly: true },
     { icon: 'globe-outline', label: 'Network', route: '/network', agentOnly: true, dividerAfter: true },
-    { icon: 'color-palette-outline', label: 'Branding', route: '/branding', agentOnly: true, dividerAfter: true },
+    { icon: 'color-palette-outline', label: 'Branding', route: '/branding', agentOnly: true },
+    { icon: 'brush-outline', label: 'Room Visualizer', onPress: () => Linking.openURL('https://paintpros.io/npp/estimate'), dividerAfter: true },
     { icon: 'person-outline', label: 'Profile & Settings', route: '/settings' },
     { icon: 'code-slash-outline', label: 'Developer Console', route: '/developer', agentOnly: true },
     { icon: 'map-outline', label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); } },

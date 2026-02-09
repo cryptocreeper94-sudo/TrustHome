@@ -11,7 +11,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { apiRequest, queryClient } from '@/lib/query-client';
 
-type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password' | 'request_access' | 'request_success';
+type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password' | 'request_access' | 'request_success' | 'demo_verify';
 type VerifySource = 'login' | 'register';
 
 export default function TeamScreen() {
@@ -58,6 +58,11 @@ export default function TeamScreen() {
   const [reqBrokerage, setReqBrokerage] = useState('');
   const [reqMessage, setReqMessage] = useState('');
 
+  const [demoFirstName, setDemoFirstName] = useState('');
+  const [demoLastName, setDemoLastName] = useState('');
+  const [demoEmail, setDemoEmail] = useState('');
+  const [demoLicense, setDemoLicense] = useState('');
+
   const clearError = useCallback(() => {
     setError('');
     setSuccessMsg('');
@@ -69,9 +74,47 @@ export default function TeamScreen() {
   }, [clearError]);
 
   const handleEnterDemo = useCallback(() => {
-    enterDemo();
-    router.replace('/');
-  }, [enterDemo, router]);
+    goToStep('demo_verify');
+  }, [goToStep]);
+
+  const handleDemoVerify = async () => {
+    if (!demoFirstName.trim() || !demoLastName.trim()) {
+      setError('Please enter your full name');
+      return;
+    }
+    if (!demoEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(demoEmail.trim())) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    if (!demoLicense.trim()) {
+      setError('Please enter your realtor license number');
+      return;
+    }
+    setLoading(true);
+    clearError();
+    try {
+      await apiRequest('POST', '/api/access-requests', {
+        firstName: demoFirstName.trim(),
+        lastName: demoLastName.trim(),
+        email: demoEmail.trim().toLowerCase(),
+        licenseNumber: demoLicense.trim(),
+        role: 'agent',
+        source: 'demo',
+      });
+      enterDemo();
+      router.replace('/');
+    } catch (err) {
+      const msg = await parseError(err);
+      if (msg.includes('already')) {
+        enterDemo();
+        router.replace('/');
+      } else {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const parseError = async (err: unknown): Promise<string> => {
     if (err instanceof Error) {
@@ -1032,6 +1075,112 @@ export default function TeamScreen() {
               </Animated.View>
             )}
 
+            {step === 'demo_verify' && (
+              <Animated.View entering={FadeInDown.duration(400)}>
+                <Pressable style={styles.backRow} onPress={() => goToStep('gate')}>
+                  <Ionicons name="chevron-back" size={18} color={colors.primary} />
+                  <Text style={[styles.backText, { color: colors.primary }]}>Back</Text>
+                </Pressable>
+
+                <View style={[styles.demoVerifyHeader, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
+                  <Ionicons name="play-circle" size={24} color={colors.primary} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.demoVerifyTitle, { color: colors.primary }]}>Explore the Demo</Text>
+                    <Text style={[styles.demoVerifyDesc, { color: colors.textSecondary }]}>
+                      Verify your credentials to access the full platform demo
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Verify Your Identity</Text>
+                <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                  Enter your details below to explore TrustHome as a licensed professional
+                </Text>
+
+                <View style={[styles.nameRow, { marginBottom: 16 }]}>
+                  <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
+                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>First Name</Text>
+                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                      <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={demoFirstName}
+                        onChangeText={setDemoFirstName}
+                        placeholder="First"
+                        placeholderTextColor={colors.textTertiary}
+                        testID="demo-first-name"
+                      />
+                    </View>
+                  </View>
+                  <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
+                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Last Name</Text>
+                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                      <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={demoLastName}
+                        onChangeText={setDemoLastName}
+                        placeholder="Last"
+                        placeholderTextColor={colors.textTertiary}
+                        testID="demo-last-name"
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email Address</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={{ marginRight: 8 }} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={demoEmail}
+                      onChangeText={setDemoEmail}
+                      placeholder="you@brokerage.com"
+                      placeholderTextColor={colors.textTertiary}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      testID="demo-email"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Realtor License Number</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="card-outline" size={18} color={colors.textTertiary} style={{ marginRight: 8 }} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={demoLicense}
+                      onChangeText={setDemoLicense}
+                      placeholder="e.g. DRE# 01234567"
+                      placeholderTextColor={colors.textTertiary}
+                      autoCapitalize="characters"
+                      testID="demo-license"
+                    />
+                  </View>
+                </View>
+
+                <Pressable
+                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  onPress={handleDemoVerify}
+                  disabled={loading}
+                  testID="demo-verify-btn"
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.primaryBtnText}>Enter Demo</Text>
+                  )}
+                </Pressable>
+
+                <View style={[styles.privacyNote, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <Ionicons name="lock-closed-outline" size={14} color={colors.textTertiary} />
+                  <Text style={[styles.privacyText, { color: colors.textTertiary }]}>
+                    Your information is used solely for verification. We will never spam you or share your data with third parties.
+                  </Text>
+                </View>
+              </Animated.View>
+            )}
+
             {step === 'request_success' && (
               <Animated.View entering={FadeInDown.duration(400)}>
                 <View style={styles.successCenter}>
@@ -1335,5 +1484,37 @@ const styles = StyleSheet.create({
     textAlign: 'center' as const,
     fontSize: 12,
     marginTop: -4,
+  },
+  demoVerifyHeader: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 12,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  demoVerifyTitle: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+  },
+  demoVerifyDesc: {
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  privacyNote: {
+    flexDirection: 'row' as const,
+    alignItems: 'flex-start' as const,
+    gap: 8,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 16,
+  },
+  privacyText: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 16,
   },
 });

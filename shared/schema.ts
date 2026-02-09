@@ -107,7 +107,9 @@ export const accessRequests = pgTable("access_requests", {
   phone: text("phone"),
   role: text("role").notNull().default('agent'),
   brokerage: text("brokerage"),
+  licenseNumber: text("license_number"),
   message: text("message"),
+  source: text("source").notNull().default('request'),
   status: text("status").notNull().default('pending'),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -121,7 +123,9 @@ export const insertAccessRequestSchema = createInsertSchema(accessRequests).pick
   phone: true,
   role: true,
   brokerage: true,
+  licenseNumber: true,
   message: true,
+  source: true,
 });
 
 export type InsertAccessRequest = z.infer<typeof insertAccessRequestSchema>;

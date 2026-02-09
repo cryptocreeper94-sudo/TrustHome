@@ -70,6 +70,8 @@ interface AccessRequestItem {
   notes: string | null;
   createdAt: string;
   reviewedAt: string | null;
+  source: string | null;
+  licenseNumber: string | null;
 }
 
 export default function DeveloperScreen() {
@@ -433,10 +435,23 @@ export default function DeveloperScreen() {
                 </Text>
               </View>
               <View style={styles.reqCardInfo}>
-                <Text style={[styles.reqName, { color: colors.text }]}>{req.firstName} {req.lastName}</Text>
+                <View style={styles.reqNameRow}>
+                  <Text style={[styles.reqName, { color: colors.text }]}>{req.firstName} {req.lastName}</Text>
+                  {req.source === 'demo' && (
+                    <View style={[styles.reqSourceBadge, { backgroundColor: colors.primary + '18' }]}>
+                      <Text style={[styles.reqSourceText, { color: colors.primary }]}>Demo</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={[styles.reqEmail, { color: colors.textSecondary }]}>{req.email}</Text>
               </View>
             </View>
+            {req.licenseNumber && (
+              <View style={styles.reqDetailRow}>
+                <Ionicons name="card-outline" size={14} color={colors.textTertiary} />
+                <Text style={[styles.reqDetailText, { color: colors.textSecondary }]}>License: {req.licenseNumber}</Text>
+              </View>
+            )}
             {req.phone && (
               <View style={styles.reqDetailRow}>
                 <Ionicons name="call-outline" size={14} color={colors.textTertiary} />
@@ -495,7 +510,14 @@ export default function DeveloperScreen() {
                 </Text>
               </View>
               <View style={styles.reqCardInfo}>
-                <Text style={[styles.reqName, { color: colors.text }]}>{req.firstName} {req.lastName}</Text>
+                <View style={styles.reqNameRow}>
+                  <Text style={[styles.reqName, { color: colors.text }]}>{req.firstName} {req.lastName}</Text>
+                  {req.source === 'demo' && (
+                    <View style={[styles.reqSourceBadge, { backgroundColor: colors.primary + '18' }]}>
+                      <Text style={[styles.reqSourceText, { color: colors.primary }]}>Demo</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={[styles.reqEmail, { color: colors.textSecondary }]}>{req.email}</Text>
               </View>
               <View style={[styles.reqStatusBadge, { backgroundColor: req.status === 'contacted' ? colors.success + '20' : colors.textTertiary + '20' }]}>
@@ -504,6 +526,12 @@ export default function DeveloperScreen() {
                 </Text>
               </View>
             </View>
+            {req.licenseNumber && (
+              <View style={styles.reqDetailRow}>
+                <Ionicons name="card-outline" size={14} color={colors.textTertiary} />
+                <Text style={[styles.reqDetailText, { color: colors.textSecondary }]}>License: {req.licenseNumber}</Text>
+              </View>
+            )}
           </Animated.View>
         ))}
       </View>
@@ -974,4 +1002,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   reqStatusText: { fontSize: 11, fontWeight: '600' as const, textTransform: 'capitalize' as const },
+  reqNameRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6 },
+  reqSourceBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  reqSourceText: { fontSize: 10, fontWeight: '600' as const },
+  reqDetailRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6, marginTop: 6, paddingLeft: 42 },
+  reqDetailText: { fontSize: 12 },
 });

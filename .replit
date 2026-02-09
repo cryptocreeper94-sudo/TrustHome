@@ -79,3 +79,4 @@ ensurePreviewReachable = "/status"
 [userenv.shared]
 TZ = "America/Chicago"
 TRUSTLAYER_BASE_URL = "https://dwsc.io"
+ORBIT_HUB_URL = "https://orbitstaffing.replit.app"

@@ -10,7 +10,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { apiRequest, queryClient } from '@/lib/query-client';
 
-type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password';
+type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password' | 'request_access' | 'request_success';
 type VerifySource = 'login' | 'register';
 
 export default function TeamScreen() {
@@ -48,6 +48,13 @@ export default function TeamScreen() {
   const [setupPassword, setSetupPassword] = useState('');
   const [setupConfirm, setSetupConfirm] = useState('');
   const [showSetupPassword, setShowSetupPassword] = useState(false);
+
+  const [reqFirstName, setReqFirstName] = useState('');
+  const [reqLastName, setReqLastName] = useState('');
+  const [reqEmail, setReqEmail] = useState('');
+  const [reqPhone, setReqPhone] = useState('');
+  const [reqBrokerage, setReqBrokerage] = useState('');
+  const [reqMessage, setReqMessage] = useState('');
 
   const clearError = useCallback(() => {
     setError('');
@@ -288,6 +295,35 @@ export default function TeamScreen() {
     }
   };
 
+  const handleRequestAccess = async () => {
+    if (!reqFirstName.trim() || !reqLastName.trim() || !reqEmail.trim()) {
+      setError('Please fill in your name and email');
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(reqEmail.trim())) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    setLoading(true);
+    clearError();
+    try {
+      await apiRequest('POST', '/api/access-requests', {
+        firstName: reqFirstName.trim(),
+        lastName: reqLastName.trim(),
+        email: reqEmail.trim().toLowerCase(),
+        phone: reqPhone.trim() || undefined,
+        brokerage: reqBrokerage.trim() || undefined,
+        message: reqMessage.trim() || undefined,
+        role: 'agent',
+      });
+      goToStep('request_success');
+    } catch (err) {
+      setError(await parseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const setupPwHasLength = setupPassword.length >= 8;
   const setupPwHasUpper = /[A-Z]/.test(setupPassword);
   const setupPwHasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(setupPassword);
@@ -463,6 +499,21 @@ export default function TeamScreen() {
 
                 <Pressable style={styles.linkBtn} onPress={() => goToStep('register')}>
                   <Text style={[styles.linkText, { color: colors.primary }]}>Create Team Account</Text>
+                </Pressable>
+
+                <View style={[styles.dividerRow, { marginTop: 4 }]}>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+                  <Text style={[styles.dividerText, { color: colors.textTertiary }]}>new here?</Text>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+                </View>
+
+                <Pressable
+                  style={[styles.requestAccessBtn, { borderColor: colors.primary }]}
+                  onPress={() => goToStep('request_access')}
+                  testID="request-access-btn"
+                >
+                  <Ionicons name="hand-right-outline" size={18} color={colors.primary} />
+                  <Text style={[styles.requestAccessText, { color: colors.primary }]}>Request Access</Text>
                 </Pressable>
               </Animated.View>
             )}
@@ -844,6 +895,147 @@ export default function TeamScreen() {
               </Animated.View>
             )}
 
+            {step === 'request_access' && (
+              <Animated.View entering={FadeInDown.duration(400)}>
+                <Pressable style={styles.backRow} onPress={() => goToStep('gate')}>
+                  <Ionicons name="chevron-back" size={18} color={colors.primary} />
+                  <Text style={[styles.backText, { color: colors.primary }]}>Back</Text>
+                </Pressable>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Request Access</Text>
+                <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                  Interested in TrustHome? Tell us about yourself and we'll get you set up.
+                </Text>
+
+                <View style={[styles.nameRow, { marginBottom: 16 }]}>
+                  <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
+                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>First Name *</Text>
+                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                      <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={reqFirstName}
+                        onChangeText={setReqFirstName}
+                        placeholder="First"
+                        placeholderTextColor={colors.textTertiary}
+                        autoCapitalize="words"
+                        testID="req-first-name"
+                      />
+                    </View>
+                  </View>
+                  <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
+                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Last Name *</Text>
+                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                      <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={reqLastName}
+                        onChangeText={setReqLastName}
+                        placeholder="Last"
+                        placeholderTextColor={colors.textTertiary}
+                        autoCapitalize="words"
+                        testID="req-last-name"
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email *</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={reqEmail}
+                      onChangeText={setReqEmail}
+                      placeholder="you@example.com"
+                      placeholderTextColor={colors.textTertiary}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      testID="req-email"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Phone</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="call-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={reqPhone}
+                      onChangeText={setReqPhone}
+                      placeholder="(555) 123-4567"
+                      placeholderTextColor={colors.textTertiary}
+                      keyboardType="phone-pad"
+                      testID="req-phone"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Brokerage / Company</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="business-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={reqBrokerage}
+                      onChangeText={setReqBrokerage}
+                      placeholder="Your brokerage or company"
+                      placeholderTextColor={colors.textTertiary}
+                      autoCapitalize="words"
+                      testID="req-brokerage"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Tell us about your needs</Text>
+                  <View style={[styles.inputWrap, styles.textAreaWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <TextInput
+                      style={[styles.input, styles.textArea, { color: colors.text }]}
+                      value={reqMessage}
+                      onChangeText={setReqMessage}
+                      placeholder="What are you looking for in a real estate platform?"
+                      placeholderTextColor={colors.textTertiary}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                      testID="req-message"
+                    />
+                  </View>
+                </View>
+
+                <Pressable
+                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  onPress={handleRequestAccess}
+                  disabled={loading}
+                  testID="req-submit-btn"
+                >
+                  {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.primaryBtnText}>Submit Request</Text>}
+                </Pressable>
+              </Animated.View>
+            )}
+
+            {step === 'request_success' && (
+              <Animated.View entering={FadeInDown.duration(400)}>
+                <View style={styles.successCenter}>
+                  <View style={[styles.successIcon, { backgroundColor: colors.success + '15' }]}>
+                    <Ionicons name="checkmark-circle" size={48} color={colors.success} />
+                  </View>
+                  <Text style={[styles.cardTitle, { color: colors.text, textAlign: 'center' as const }]}>Request Received!</Text>
+                  <Text style={[styles.cardSubtitle, { color: colors.textSecondary, textAlign: 'center' as const }]}>
+                    Thank you for your interest in TrustHome. Our team will review your request and reach out to you shortly to get you set up.
+                  </Text>
+                  <Pressable
+                    style={[styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 8 }]}
+                    onPress={() => router.back()}
+                    testID="req-done-btn"
+                  >
+                    <Text style={styles.primaryBtnText}>Done</Text>
+                  </Pressable>
+                </View>
+              </Animated.View>
+            )}
+
             {error ? (
               <View style={[styles.errorBox, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
                 <Ionicons name="alert-circle" size={16} color={colors.error} />
@@ -1048,6 +1240,40 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   successText: { flex: 1, fontSize: 13, lineHeight: 18 },
+  requestAccessBtn: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    marginTop: 8,
+  },
+  requestAccessText: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+  },
+  textAreaWrap: {
+    alignItems: 'flex-start' as const,
+    minHeight: 100,
+  },
+  textArea: {
+    minHeight: 80,
+    paddingTop: 10,
+  },
+  successCenter: {
+    alignItems: 'center' as const,
+    paddingVertical: 12,
+  },
+  successIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginBottom: 16,
+  },
   setupBanner: {
     flexDirection: 'row',
     alignItems: 'center',

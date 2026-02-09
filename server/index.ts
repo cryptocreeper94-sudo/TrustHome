@@ -4,6 +4,7 @@ import session from 'express-session';
 import connectPg from 'connect-pg-simple';
 import { registerRoutes } from "./routes";
 import { registerVoiceAiRoutes } from "./voice-ai-routes";
+import { registerOrbitRoutes } from "./orbit-routes";
 import { pool, db } from './db';
 import { blogPosts } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -428,6 +429,7 @@ function setupErrorHandler(app: express.Application) {
   const server = await registerRoutes(app);
 
   registerVoiceAiRoutes(app);
+  registerOrbitRoutes(app);
 
   setupErrorHandler(app);
 

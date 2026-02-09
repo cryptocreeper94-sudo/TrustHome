@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, real, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -133,3 +133,64 @@ export type AccessRequest = typeof accessRequests.$inferSelect;
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+export const expenses = pgTable("expenses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  category: text("category").notNull().default('other'),
+  description: text("description").notNull(),
+  amount: real("amount").notNull(),
+  vendor: text("vendor"),
+  date: text("expense_date").notNull(),
+  receiptUrl: text("receipt_url"),
+  ocrData: text("ocr_data"),
+  notes: text("notes"),
+  propertyAddress: text("property_address"),
+  transactionId: varchar("transaction_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertExpenseSchema = createInsertSchema(expenses).pick({
+  category: true,
+  description: true,
+  amount: true,
+  vendor: true,
+  date: true,
+  notes: true,
+  propertyAddress: true,
+});
+
+export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+export type Expense = typeof expenses.$inferSelect;
+
+export const mileageEntries = pgTable("mileage_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  date: text("entry_date").notNull(),
+  startAddress: text("start_address"),
+  endAddress: text("end_address"),
+  miles: real("miles").notNull(),
+  purpose: text("purpose").notNull(),
+  category: text("category").notNull().default('showing'),
+  startLat: real("start_lat"),
+  startLng: real("start_lng"),
+  endLat: real("end_lat"),
+  endLng: real("end_lng"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertMileageSchema = createInsertSchema(mileageEntries).pick({
+  date: true,
+  startAddress: true,
+  endAddress: true,
+  miles: true,
+  purpose: true,
+  category: true,
+  notes: true,
+});
+
+export type InsertMileage = z.infer<typeof insertMileageSchema>;
+export type MileageEntry = typeof mileageEntries.$inferSelect;

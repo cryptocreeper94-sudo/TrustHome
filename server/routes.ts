@@ -23,7 +23,7 @@ import {
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
-import { registerSchema, loginSchema, verificationCodes, users, blogPosts } from "@shared/schema";
+import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 import OpenAI from "openai";
@@ -1489,6 +1489,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
 
       return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/access-requests", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertAccessRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Please fill in all required fields (first name, last name, email)" });
+      }
+
+      const existing = await db.select().from(accessRequests).where(eq(accessRequests.email, parsed.data.email.toLowerCase().trim()));
+      if (existing.length > 0) {
+        return res.json({ message: "Your request has been received. We'll be in touch soon!", alreadyExists: true });
+      }
+
+      const [request] = await db.insert(accessRequests).values({
+        ...parsed.data,
+        email: parsed.data.email.toLowerCase().trim(),
+      }).returning();
+
+      return res.json({ message: "Your request has been received. We'll be in touch soon!", request: { id: request.id } });
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/admin/access-requests", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      const user = await storage.getUser(req.session.userId);
+      if (!user || (user.email !== 'developer@trusthome.io' && user.email !== 'jennifer@trusthome.io')) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const requests = await db.select().from(accessRequests).orderBy(desc(accessRequests.createdAt));
+      return res.json(requests);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.put("/api/admin/access-requests/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      const user = await storage.getUser(req.session.userId);
+      if (!user || (user.email !== 'developer@trusthome.io' && user.email !== 'jennifer@trusthome.io')) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const { status, notes } = req.body;
+      const [updated] = await db.update(accessRequests)
+        .set({ status, notes, reviewedAt: new Date() })
+        .where(eq(accessRequests.id, req.params.id))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ error: "Request not found" });
+      }
+
+      return res.json(updated);
     } catch (error) {
       return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }

@@ -194,3 +194,5 @@ export const insertMileageSchema = createInsertSchema(mileageEntries).pick({
 
 export type InsertMileage = z.infer<typeof insertMileageSchema>;
 export type MileageEntry = typeof mileageEntries.$inferSelect;
+
+export * from "./models/chat";

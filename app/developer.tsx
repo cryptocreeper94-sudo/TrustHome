@@ -11,7 +11,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
-import { getQueryFn } from '@/lib/query-client';
+import { getQueryFn, apiRequest, queryClient } from '@/lib/query-client';
 
 const DEV_PIN = '0424';
 
@@ -56,7 +56,21 @@ interface OverviewData {
   securitySuite: string;
 }
 
-type TabId = 'overview' | 'health' | 'connections';
+type TabId = 'overview' | 'health' | 'connections' | 'requests';
+
+interface AccessRequestItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  brokerage: string | null;
+  message: string | null;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+}
 
 export default function DeveloperScreen() {
   const { colors } = useTheme();
@@ -86,6 +100,11 @@ export default function DeveloperScreen() {
 
   const connectionsQuery = useQuery<{ connections: ApiConnection[]; tenantId: string }>({
     queryKey: ['/api/admin/api-connections'],
+    queryFn: getQueryFn({ on401: 'returnNull' }),
+  });
+
+  const requestsQuery = useQuery<AccessRequestItem[]>({
+    queryKey: ['/api/admin/access-requests'],
     queryFn: getQueryFn({ on401: 'returnNull' }),
   });
 
@@ -158,6 +177,7 @@ export default function DeveloperScreen() {
     { id: 'overview', label: 'Overview', icon: 'grid-outline' },
     { id: 'health', label: 'Health', icon: 'pulse-outline' },
     { id: 'connections', label: 'APIs', icon: 'link-outline' },
+    { id: 'requests', label: 'Requests', icon: 'people-outline' },
   ];
 
   const renderOverview = () => {
@@ -357,6 +377,139 @@ export default function DeveloperScreen() {
     );
   };
 
+  const handleUpdateRequest = async (id: string, status: string) => {
+    try {
+      await apiRequest('PUT', `/api/admin/access-requests/${id}`, { status });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/access-requests'] });
+    } catch (err) {
+      console.error('Failed to update request:', err);
+    }
+  };
+
+  const renderRequests = () => {
+    const data = requestsQuery.data;
+    if (requestsQuery.isLoading) return <ActivityIndicator color={colors.primary} style={styles.loader} />;
+    if (!data || data.length === 0) {
+      return (
+        <View style={styles.sectionContent}>
+          <View style={[styles.emptyRequests, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
+            <Ionicons name="people-outline" size={36} color={colors.textTertiary} />
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No access requests yet</Text>
+          </View>
+        </View>
+      );
+    }
+
+    const pending = data.filter(r => r.status === 'pending');
+    const reviewed = data.filter(r => r.status !== 'pending');
+
+    return (
+      <View style={styles.sectionContent}>
+        <View style={[styles.reqSummary, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
+          <Text style={[styles.reqSummaryTitle, { color: colors.text }]}>Access Requests</Text>
+          <View style={styles.reqSummaryRow}>
+            <View style={[styles.reqBadge, { backgroundColor: colors.warning + '20' }]}>
+              <Text style={[styles.reqBadgeText, { color: colors.warning }]}>{pending.length} pending</Text>
+            </View>
+            <View style={[styles.reqBadge, { backgroundColor: colors.success + '20' }]}>
+              <Text style={[styles.reqBadgeText, { color: colors.success }]}>{reviewed.length} reviewed</Text>
+            </View>
+          </View>
+        </View>
+
+        {pending.length > 0 && (
+          <Text style={[styles.reqGroupTitle, { color: colors.text }]}>Pending</Text>
+        )}
+        {pending.map((req, i) => (
+          <Animated.View
+            key={req.id}
+            entering={FadeInDown.delay(100 + i * 50).duration(350)}
+            style={[styles.reqCard, { backgroundColor: colors.cardGlass, borderColor: colors.primary + '30' }]}
+          >
+            <View style={styles.reqCardHeader}>
+              <View style={[styles.reqAvatar, { backgroundColor: colors.primary + '14' }]}>
+                <Text style={[styles.reqAvatarText, { color: colors.primary }]}>
+                  {req.firstName[0]}{req.lastName[0]}
+                </Text>
+              </View>
+              <View style={styles.reqCardInfo}>
+                <Text style={[styles.reqName, { color: colors.text }]}>{req.firstName} {req.lastName}</Text>
+                <Text style={[styles.reqEmail, { color: colors.textSecondary }]}>{req.email}</Text>
+              </View>
+            </View>
+            {req.phone && (
+              <View style={styles.reqDetailRow}>
+                <Ionicons name="call-outline" size={14} color={colors.textTertiary} />
+                <Text style={[styles.reqDetailText, { color: colors.textSecondary }]}>{req.phone}</Text>
+              </View>
+            )}
+            {req.brokerage && (
+              <View style={styles.reqDetailRow}>
+                <Ionicons name="business-outline" size={14} color={colors.textTertiary} />
+                <Text style={[styles.reqDetailText, { color: colors.textSecondary }]}>{req.brokerage}</Text>
+              </View>
+            )}
+            {req.message && (
+              <View style={[styles.reqMessage, { backgroundColor: colors.backgroundTertiary }]}>
+                <Text style={[styles.reqMessageText, { color: colors.textSecondary }]}>{req.message}</Text>
+              </View>
+            )}
+            <View style={styles.reqDetailRow}>
+              <Ionicons name="time-outline" size={14} color={colors.textTertiary} />
+              <Text style={[styles.reqDetailText, { color: colors.textTertiary }]}>
+                {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </Text>
+            </View>
+            <View style={styles.reqActions}>
+              <Pressable
+                style={[styles.reqActionBtn, { backgroundColor: colors.success + '15', borderColor: colors.success + '30' }]}
+                onPress={() => handleUpdateRequest(req.id, 'contacted')}
+              >
+                <Ionicons name="checkmark" size={16} color={colors.success} />
+                <Text style={[styles.reqActionText, { color: colors.success }]}>Contacted</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.reqActionBtn, { backgroundColor: colors.error + '15', borderColor: colors.error + '30' }]}
+                onPress={() => handleUpdateRequest(req.id, 'dismissed')}
+              >
+                <Ionicons name="close" size={16} color={colors.error} />
+                <Text style={[styles.reqActionText, { color: colors.error }]}>Dismiss</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        ))}
+
+        {reviewed.length > 0 && (
+          <Text style={[styles.reqGroupTitle, { color: colors.textSecondary, marginTop: 8 }]}>Reviewed</Text>
+        )}
+        {reviewed.map((req, i) => (
+          <Animated.View
+            key={req.id}
+            entering={FadeInDown.delay(100 + i * 50).duration(350)}
+            style={[styles.reqCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder, opacity: 0.7 }]}
+          >
+            <View style={styles.reqCardHeader}>
+              <View style={[styles.reqAvatar, { backgroundColor: colors.backgroundTertiary }]}>
+                <Text style={[styles.reqAvatarText, { color: colors.textTertiary }]}>
+                  {req.firstName[0]}{req.lastName[0]}
+                </Text>
+              </View>
+              <View style={styles.reqCardInfo}>
+                <Text style={[styles.reqName, { color: colors.text }]}>{req.firstName} {req.lastName}</Text>
+                <Text style={[styles.reqEmail, { color: colors.textSecondary }]}>{req.email}</Text>
+              </View>
+              <View style={[styles.reqStatusBadge, { backgroundColor: req.status === 'contacted' ? colors.success + '20' : colors.textTertiary + '20' }]}>
+                <Text style={[styles.reqStatusText, { color: req.status === 'contacted' ? colors.success : colors.textTertiary }]}>
+                  {req.status}
+                </Text>
+              </View>
+            </View>
+          </Animated.View>
+        ))}
+      </View>
+    );
+  };
+
   const handlePinDigit = useCallback((text: string, index: number) => {
     if (text.length > 1) text = text.slice(-1);
     if (text && !/^\d$/.test(text)) return;
@@ -499,6 +652,7 @@ export default function DeveloperScreen() {
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'health' && renderHealth()}
         {activeTab === 'connections' && renderConnections()}
+        {activeTab === 'requests' && renderRequests()}
       </ScrollView>
     </View>
   );
@@ -739,4 +893,85 @@ const styles = StyleSheet.create({
   tenantBoxText: { flex: 1 },
   tenantLabel: { fontSize: 13, fontWeight: '600' as const },
   tenantValue: { fontSize: 12, marginTop: 2 },
+
+  emptyRequests: {
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    padding: 40,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 12,
+  },
+  reqSummary: {
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 10,
+  },
+  reqSummaryTitle: { fontSize: 16, fontWeight: '700' as const },
+  reqSummaryRow: { flexDirection: 'row' as const, gap: 8 },
+  reqBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  reqBadgeText: { fontSize: 12, fontWeight: '600' as const },
+  reqGroupTitle: { fontSize: 14, fontWeight: '600' as const, marginBottom: -4 },
+  reqCard: {
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 8,
+  },
+  reqCardHeader: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 12,
+  },
+  reqAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  reqAvatarText: { fontSize: 14, fontWeight: '700' as const },
+  reqCardInfo: { flex: 1 },
+  reqName: { fontSize: 15, fontWeight: '600' as const },
+  reqEmail: { fontSize: 13, marginTop: 1 },
+  reqDetailRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 6,
+    paddingLeft: 4,
+  },
+  reqDetailText: { fontSize: 13 },
+  reqMessage: {
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 2,
+  },
+  reqMessageText: { fontSize: 13, lineHeight: 18, fontStyle: 'italic' as const },
+  reqActions: {
+    flexDirection: 'row' as const,
+    gap: 8,
+    marginTop: 4,
+  },
+  reqActionBtn: {
+    flex: 1,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  reqActionText: { fontSize: 13, fontWeight: '600' as const },
+  reqStatusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  reqStatusText: { fontSize: 11, fontWeight: '600' as const, textTransform: 'capitalize' as const },
 });

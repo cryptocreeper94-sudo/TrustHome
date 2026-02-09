@@ -5,6 +5,9 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { BentoGrid } from '@/components/ui/BentoGrid';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
+import { AccordionSection } from '@/components/ui/AccordionSection';
 import { useQuery } from '@tanstack/react-query';
 
 interface Lead {
@@ -53,6 +56,14 @@ const SAMPLE_LEADS: Lead[] = [
 ];
 
 const STAGES = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won'] as const;
+
+const STAGE_COLORS: Record<string, string> = {
+  'New': '#007AFF',
+  'Contacted': '#FF9500',
+  'Qualified': '#AF52DE',
+  'Proposal': '#FF3B30',
+  'Won': '#34C759',
+};
 
 function mapApiLead(api: ApiLead): Lead {
   const name = [api.firstName, api.lastName].filter(Boolean).join(' ') || api.phone || 'Unknown';
@@ -110,6 +121,7 @@ export default function LeadsScreen() {
 
   const hotCount = LEADS.filter(l => l.temperature === 'hot').length;
   const wonCount = LEADS.filter(l => l.stage === 'Won').length;
+  const hotLeads = LEADS.filter(l => l.temperature === 'hot');
 
   const filteredLeads = filterTemp === 'all' ? LEADS : LEADS.filter(l => l.temperature === filterTemp);
 
@@ -146,7 +158,8 @@ export default function LeadsScreen() {
             <ActivityIndicator size="small" color={colors.primary} />
           </View>
         )}
-        <View style={styles.statsRow}>
+
+        <BentoGrid columns={3} gap={10} style={styles.bentoStats}>
           <GlassCard style={styles.statCard} compact>
             <View style={styles.statInner}>
               <Ionicons name="people" size={20} color={colors.primary} />
@@ -168,13 +181,34 @@ export default function LeadsScreen() {
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Won</Text>
             </View>
           </GlassCard>
-        </View>
+        </BentoGrid>
 
         {apiLeads && apiLeads.length > 0 && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 4, marginTop: 4 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
             <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live data</Text>
           </View>
+        )}
+
+        {hotLeads.length > 0 && (
+          <HorizontalCarousel title="Hot Leads" itemWidth={180} style={styles.hotCarousel}>
+            {hotLeads.map(lead => (
+              <GlassCard key={lead.id} compact style={styles.hotCard}>
+                <View style={styles.hotCardInner}>
+                  <View style={styles.hotCardTop}>
+                    <View style={[styles.scoreCircleSm, { borderColor: getScoreColor(lead.score) }]}>
+                      <Text style={[styles.scoreCircleSmText, { color: getScoreColor(lead.score) }]}>{lead.score}</Text>
+                    </View>
+                    <View style={[styles.tempBadgeSm, { backgroundColor: tempColors[lead.temperature] + '22' }]}>
+                      <Text style={[styles.tempBadgeSmText, { color: tempColors[lead.temperature] }]}>{lead.temperature}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.hotCardName, { color: colors.text }]} numberOfLines={1}>{lead.name}</Text>
+                  <Text style={[styles.hotCardBudget, { color: colors.primary }]}>{lead.budget}</Text>
+                </View>
+              </GlassCard>
+            ))}
+          </HorizontalCarousel>
         )}
 
         <View style={styles.toggleRow}>
@@ -195,35 +229,42 @@ export default function LeadsScreen() {
         </View>
 
         {viewMode === 'pipeline' ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pipelineScroll} contentContainerStyle={styles.pipelineContent}>
+          <View style={styles.pipelineAccordions}>
             {STAGES.map(stage => {
               const stageLeads = LEADS.filter(l => l.stage === stage);
+              const stageColor = STAGE_COLORS[stage] || colors.primary;
               return (
-                <View key={stage} style={[styles.pipelineCol, { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderColor: colors.border }]}>
-                  <View style={styles.pipelineHeader}>
-                    <Text style={[styles.pipelineStageName, { color: colors.text }]}>{stage}</Text>
-                    <View style={[styles.pipelineCount, { backgroundColor: colors.primary + '22' }]}>
-                      <Text style={[styles.pipelineCountText, { color: colors.primary }]}>{stageLeads.length}</Text>
-                    </View>
-                  </View>
-                  {stageLeads.map(lead => (
-                    <View key={lead.id} style={[styles.pipelineCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
-                      <Text style={[styles.pipelineCardName, { color: colors.text }]} numberOfLines={1}>{lead.name}</Text>
-                      <Text style={[styles.pipelineCardBudget, { color: colors.primary }]}>{lead.budget}</Text>
-                      <View style={styles.pipelineCardRow}>
-                        <View style={[styles.tempBadgeSm, { backgroundColor: tempColors[lead.temperature] + '22' }]}>
-                          <Text style={[styles.tempBadgeSmText, { color: tempColors[lead.temperature] }]}>{lead.temperature}</Text>
-                        </View>
-                        <View style={[styles.scoreCircleSm, { borderColor: getScoreColor(lead.score) }]}>
-                          <Text style={[styles.scoreCircleSmText, { color: getScoreColor(lead.score) }]}>{lead.score}</Text>
+                <AccordionSection
+                  key={stage}
+                  title={stage}
+                  icon={stage === 'Won' ? 'trophy' : stage === 'Proposal' ? 'document-text' : stage === 'Qualified' ? 'checkmark-circle' : stage === 'Contacted' ? 'chatbubble-ellipses' : 'add-circle'}
+                  iconColor={stageColor}
+                  badge={stageLeads.length}
+                  badgeColor={stageColor}
+                  defaultOpen={stage === 'Qualified' || stage === 'Proposal'}
+                >
+                  {stageLeads.length === 0 ? (
+                    <Text style={[styles.emptyStage, { color: colors.textTertiary }]}>No leads in this stage</Text>
+                  ) : (
+                    stageLeads.map(lead => (
+                      <View key={lead.id} style={[styles.pipelineCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', borderColor: colors.cardGlassBorder }]}>
+                        <Text style={[styles.pipelineCardName, { color: colors.text }]} numberOfLines={1}>{lead.name}</Text>
+                        <Text style={[styles.pipelineCardBudget, { color: colors.primary }]}>{lead.budget}</Text>
+                        <View style={styles.pipelineCardRow}>
+                          <View style={[styles.tempBadgeSm, { backgroundColor: tempColors[lead.temperature] + '22' }]}>
+                            <Text style={[styles.tempBadgeSmText, { color: tempColors[lead.temperature] }]}>{lead.temperature}</Text>
+                          </View>
+                          <View style={[styles.scoreCircleSm, { borderColor: getScoreColor(lead.score) }]}>
+                            <Text style={[styles.scoreCircleSmText, { color: getScoreColor(lead.score) }]}>{lead.score}</Text>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  ))}
-                </View>
+                    ))
+                  )}
+                </AccordionSection>
               );
             })}
-          </ScrollView>
+          </View>
         ) : (
           <>
             <View style={styles.filterRow}>
@@ -293,10 +334,15 @@ export default function LeadsScreen() {
           </>
         )}
 
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Lead Sources</Text>
-        </View>
-        <GlassCard style={styles.sourcesCard}>
+        <AccordionSection
+          title="Lead Sources"
+          icon="pie-chart"
+          iconColor="#1A8A7E"
+          defaultOpen={true}
+          badge={computedSources.length}
+          badgeColor="#1A8A7E"
+          style={styles.sourcesAccordion}
+        >
           {computedSources.map((src, i) => (
             <View key={i} style={styles.sourceRow}>
               <Text style={[styles.sourceLabel, { color: colors.textSecondary }]}>{src.label}</Text>
@@ -306,7 +352,7 @@ export default function LeadsScreen() {
               <Text style={[styles.sourceCount, { color: colors.text }]}>{src.count}</Text>
             </View>
           ))}
-        </GlassCard>
+        </AccordionSection>
 
         <Footer />
       </ScrollView>
@@ -318,11 +364,17 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 24, paddingHorizontal: 16 },
-  statsRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  bentoStats: { marginTop: 16 },
   statCard: { minHeight: 80 },
   statInner: { alignItems: 'center' as const, gap: 4 },
   statValue: { fontSize: 22, fontWeight: '700' as const },
   statLabel: { fontSize: 12, fontWeight: '500' as const },
+  hotCarousel: { marginTop: 16 },
+  hotCard: { width: 180, minHeight: 90 },
+  hotCardInner: { gap: 4 },
+  hotCardTop: { flexDirection: 'row', alignItems: 'center' as const, justifyContent: 'space-between' as const },
+  hotCardName: { fontSize: 14, fontWeight: '600' as const },
+  hotCardBudget: { fontSize: 13, fontWeight: '700' as const },
   toggleRow: { flexDirection: 'row', gap: 8, marginTop: 16, marginBottom: 12 },
   toggleBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
   toggleText: { fontSize: 13, fontWeight: '600' as const },
@@ -345,13 +397,7 @@ const styles = StyleSheet.create({
   expandedValue: { fontSize: 13, marginTop: 2 },
   actionRow: { flexDirection: 'row', gap: 12, marginTop: 14 },
   actionBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center' as const, justifyContent: 'center' as const },
-  pipelineScroll: { marginBottom: 8 },
-  pipelineContent: { paddingVertical: 4, gap: 10 },
-  pipelineCol: { width: 200, borderRadius: 16, padding: 12, borderWidth: 1, marginRight: 2 },
-  pipelineHeader: { flexDirection: 'row', alignItems: 'center' as const, justifyContent: 'space-between' as const, marginBottom: 10 },
-  pipelineStageName: { fontSize: 14, fontWeight: '700' as const },
-  pipelineCount: { width: 24, height: 24, borderRadius: 12, alignItems: 'center' as const, justifyContent: 'center' as const },
-  pipelineCountText: { fontSize: 12, fontWeight: '700' as const },
+  pipelineAccordions: { marginBottom: 8 },
   pipelineCard: { borderRadius: 12, padding: 10, marginBottom: 8, borderWidth: 1 },
   pipelineCardName: { fontSize: 13, fontWeight: '600' as const },
   pipelineCardBudget: { fontSize: 12, fontWeight: '600' as const, marginTop: 4 },
@@ -360,9 +406,8 @@ const styles = StyleSheet.create({
   tempBadgeSmText: { fontSize: 10, fontWeight: '600' as const, textTransform: 'capitalize' as const },
   scoreCircleSm: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, alignItems: 'center' as const, justifyContent: 'center' as const },
   scoreCircleSmText: { fontSize: 10, fontWeight: '700' as const },
-  sectionHeader: { marginTop: 20, marginBottom: 10 },
-  sectionTitle: { fontSize: 17, fontWeight: '700' as const },
-  sourcesCard: { minHeight: 60, marginBottom: 4 },
+  emptyStage: { fontSize: 12, fontStyle: 'italic' as const, paddingVertical: 8 },
+  sourcesAccordion: { marginTop: 20 },
   sourceRow: { flexDirection: 'row', alignItems: 'center' as const, marginBottom: 10 },
   sourceLabel: { width: 80, fontSize: 12, fontWeight: '500' as const },
   barWrap: { flex: 1, height: 14, borderRadius: 7, backgroundColor: 'rgba(128,128,128,0.12)', marginHorizontal: 8, overflow: 'hidden' as const },

@@ -40,7 +40,7 @@ TrustHome is a real estate platform designed to be a central hub for all parties
 - Membership awareness — subscribers informed of Trust Layer membership, dwtl.io login
 - DarkWave Media Studio integration for video/media
 - Signal Chat (cross-ecosystem messaging via PaintPros.io)
-- AI Assistant for agents and clients
+- AI Assistant for agents and clients (voice-capable with STT/TTS)
 - WelcomeGuide onboarding slideshow (8 slides, first-login trigger)
 - Contextual help system across 9+ screens
 - Credential-verified demo mode for licensed professionals
@@ -75,7 +75,8 @@ TrustHome's architecture is API-first, integrating with existing ecosystem tools
 
 **Technical Implementations & Design Choices:**
 - **Tech Stack:** Frontend: Expo React Native (iOS, Android, web). Backend: Express.js (TypeScript). Database: PostgreSQL with Drizzle ORM. State Management: React Query and React Context. Routing: Expo Router. Real-time: WebSockets.
-- **API Architecture:** REST APIs for standard operations, WebSockets for real-time. GraphQL is intentionally excluded.
+- **API Architecture:** REST APIs for standard operations, WebSockets for real-time, Server-Sent Events (SSE) for AI streaming. GraphQL is intentionally excluded.
+- **Voice AI Architecture:** OpenAI gpt-4o-mini-transcribe (STT) → OpenAI gpt-5.2 (AI brain) → OpenAI gpt-audio with "nova" voice (TTS). Three endpoints: `/api/ai/chat` (streaming text), `/api/ai/voice` (full voice interaction), `/api/ai/tts` (text-to-speech). Frontend uses MediaRecorder API (web only), AudioContext for playback. Audio format: records WebM/MP4, backend converts to WAV via ffmpeg, TTS outputs MP3. Uses OpenAI AI Integrations (no API key needed). 50MB body limit for audio payloads. Voice features gracefully degrade on mobile with helpful message.
 - **Security:** Role-based access control (RBAC), end-to-end encryption, document encryption with per-tenant keys, session management, rate limiting, input validation, Trust Shield integration, and audit logging.
 - **Database Schema:** Multi-tenant design using `agent_id` for tenant boundary, soft deletes, comprehensive timestamps, and indexing.
 - **User Roles:** Detailed role-based permission system for Agents, Clients, Vendors (Inspector, Mortgage Broker, Title Company, Appraiser, Contractor), Team Members, and Brokerage Admins.

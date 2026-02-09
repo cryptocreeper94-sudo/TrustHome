@@ -99,5 +99,33 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).pick({
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
 
+export const accessRequests = pgTable("access_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  role: text("role").notNull().default('agent'),
+  brokerage: text("brokerage"),
+  message: text("message"),
+  status: text("status").notNull().default('pending'),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at"),
+});
+
+export const insertAccessRequestSchema = createInsertSchema(accessRequests).pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+  phone: true,
+  role: true,
+  brokerage: true,
+  message: true,
+});
+
+export type InsertAccessRequest = z.infer<typeof insertAccessRequestSchema>;
+export type AccessRequest = typeof accessRequests.$inferSelect;
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;

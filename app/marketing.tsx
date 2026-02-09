@@ -5,6 +5,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const TABS = ['Overview', 'Content', 'Schedule', 'Analytics'] as const;
 type Tab = typeof TABS[number];
@@ -50,6 +52,7 @@ const ANALYTICS_DATA = [
 export default function MarketingScreen() {
   const { colors, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const statusColor = (status: string) => {
     if (status === 'Published') return colors.success;
@@ -313,7 +316,7 @@ export default function MarketingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Marketing Hub" showBack />
+      <Header title="Marketing Hub" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <View style={[styles.tabBar, { backgroundColor: colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
         {TABS.map(tab => (
           <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}>
@@ -328,6 +331,14 @@ export default function MarketingScreen() {
         {activeTab === 'Analytics' && renderAnalytics()}
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.marketing.title}
+        description={SCREEN_HELP.marketing.description}
+        details={SCREEN_HELP.marketing.details}
+        examples={SCREEN_HELP.marketing.examples}
+      />
     </View>
   );
 }

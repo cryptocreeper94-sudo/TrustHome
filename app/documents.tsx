@@ -5,6 +5,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 type DocStatus = 'Signed' | 'Pending' | 'Needs Review' | 'Verified';
 type FilterTab = 'All' | 'Pending' | 'Signed' | 'Verified';
@@ -49,6 +51,7 @@ export default function DocumentsScreen() {
   const { colors, isDark } = useTheme();
   const [activeFilter, setActiveFilter] = useState<FilterTab>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const filtered = activeFilter === 'All'
     ? DOCUMENTS
@@ -60,7 +63,7 @@ export default function DocumentsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Documents" showBack />
+      <Header title="Documents" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.statsRow}>
           {[
@@ -154,6 +157,14 @@ export default function DocumentsScreen() {
 
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.documents.title}
+        description={SCREEN_HELP.documents.description}
+        details={SCREEN_HELP.documents.details}
+        examples={SCREEN_HELP.documents.examples}
+      />
     </View>
   );
 }

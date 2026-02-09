@@ -5,6 +5,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 type EventType = 'Showing' | 'Open House' | 'Listing Appt' | 'Meeting' | 'Inspection';
 
@@ -65,6 +67,7 @@ export default function ShowingsScreen() {
   const [currentYear, setCurrentYear] = useState(2026);
   const [selectedDay, setSelectedDay] = useState(8);
   const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Month');
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const today = { day: 8, month: 1, year: 2026 };
   const daysInMonth = getDaysInMonth(currentMonth, currentYear);
@@ -98,7 +101,7 @@ export default function ShowingsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Calendar" showBack />
+      <Header title="Calendar" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.viewToggleRow}>
           {(['Month', 'Week', 'Day'] as const).map(mode => (
@@ -214,6 +217,14 @@ export default function ShowingsScreen() {
 
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.showings.title}
+        description={SCREEN_HELP.showings.description}
+        details={SCREEN_HELP.showings.details}
+        examples={SCREEN_HELP.showings.examples}
+      />
     </View>
   );
 }

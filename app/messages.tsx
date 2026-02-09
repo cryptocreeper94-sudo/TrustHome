@@ -5,6 +5,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 interface Message {
   id: string;
@@ -105,12 +107,13 @@ export default function MessagesScreen() {
   const { colors, isDark } = useTheme();
   const [expandedConvo, setExpandedConvo] = useState<string | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const totalUnread = CONVERSATIONS.reduce((sum, c) => sum + c.unread, 0);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Messages" showBack />
+      <Header title="Messages" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.actionRow}>
           <GlassCard style={styles.actionCard} compact onPress={() => {}}>
@@ -196,6 +199,14 @@ export default function MessagesScreen() {
 
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.messages.title}
+        description={SCREEN_HELP.messages.description}
+        details={SCREEN_HELP.messages.details}
+        examples={SCREEN_HELP.messages.examples}
+      />
     </View>
   );
 }

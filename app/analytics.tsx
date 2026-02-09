@@ -6,6 +6,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 type Period = 'This Month' | 'Quarter' | 'Year';
 
@@ -119,6 +121,7 @@ function formatCurrency(val: number): string {
 export default function AnalyticsScreen() {
   const { colors, isDark } = useTheme();
   const [period, setPeriod] = useState<Period>('This Month');
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const dashboardQuery = useQuery<any>({
     queryKey: ['/api/analytics/dashboard'],
@@ -140,7 +143,7 @@ export default function AnalyticsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Analytics" showBack />
+      <Header title="Analytics" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.periodRow}>
           {(['This Month', 'Quarter', 'Year'] as Period[]).map(p => {
@@ -290,6 +293,14 @@ export default function AnalyticsScreen() {
 
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.analytics.title}
+        description={SCREEN_HELP.analytics.description}
+        details={SCREEN_HELP.analytics.details}
+        examples={SCREEN_HELP.analytics.examples}
+      />
     </View>
   );
 }

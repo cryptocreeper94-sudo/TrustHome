@@ -6,6 +6,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 type PropertyStatus = 'Active' | 'Under Contract' | 'Buyer Shortlist' | 'Sold';
 type FilterTab = 'All' | 'My Listings' | 'Buyer Shortlist' | 'Under Contract' | 'Sold';
@@ -58,6 +60,7 @@ export default function PropertiesScreen() {
   const [activeFilter, setActiveFilter] = useState<FilterTab>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set(['5', '7']));
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const filtered = activeFilter === 'All'
     ? PROPERTIES
@@ -80,7 +83,7 @@ export default function PropertiesScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Properties" showBack />
+      <Header title="Properties" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.statsRow}>
           {[
@@ -192,6 +195,14 @@ export default function PropertiesScreen() {
 
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.properties.title}
+        description={SCREEN_HELP.properties.description}
+        details={SCREEN_HELP.properties.details}
+        examples={SCREEN_HELP.properties.examples}
+      />
     </View>
   );
 }

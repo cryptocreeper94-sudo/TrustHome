@@ -3,9 +3,12 @@ import { View, Text, ScrollView, StyleSheet, Pressable, Switch } from 'react-nat
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { TrustShieldBadge } from '@/components/ui/TrustShieldBadge';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 import { Footer } from '@/components/ui/Footer';
 
 interface SettingsItem {
@@ -24,6 +27,8 @@ interface SettingsSection {
 
 export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
+  const { replayWelcomeGuide } = useApp();
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const trustLayerQuery = useQuery<any>({
     queryKey: ['/api/trustlayer/status'],
@@ -104,7 +109,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Profile & Settings" showBack />
+      <Header title="Profile & Settings" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <GlassCard>
@@ -174,6 +179,32 @@ export default function SettingsScreen() {
             </View>
           ))}
 
+          <View style={styles.settingsGroup}>
+            <Text style={[styles.groupTitle, { color: colors.textSecondary }]}>Help</Text>
+            <GlassCard>
+              <Pressable
+                onPress={replayWelcomeGuide}
+                style={styles.settingsRow}
+              >
+                <View style={[styles.settingsIcon, { backgroundColor: colors.primaryLight }]}>
+                  <Ionicons name="map-outline" size={18} color={colors.primary} />
+                </View>
+                <Text style={[styles.settingsLabel, { color: colors.text }]}>Replay Welcome Tour</Text>
+                <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+              </Pressable>
+              <Pressable
+                onPress={() => setShowHelp(true)}
+                style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
+              >
+                <View style={[styles.settingsIcon, { backgroundColor: colors.primaryLight }]}>
+                  <Ionicons name="help-circle-outline" size={18} color={colors.primary} />
+                </View>
+                <Text style={[styles.settingsLabel, { color: colors.text }]}>About This Screen</Text>
+                <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+              </Pressable>
+            </GlassCard>
+          </View>
+
           <Pressable style={[styles.signOutBtn, { borderColor: colors.error }]}>
             <Ionicons name="log-out-outline" size={20} color={colors.error} />
             <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
@@ -181,6 +212,13 @@ export default function SettingsScreen() {
         </View>
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.settings.title}
+        description={SCREEN_HELP.settings.description}
+        details={SCREEN_HELP.settings.details}
+      />
     </View>
   );
 }

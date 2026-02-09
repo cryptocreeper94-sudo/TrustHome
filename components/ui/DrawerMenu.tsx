@@ -18,7 +18,7 @@ interface MenuItem {
 
 export function DrawerMenu() {
   const { colors, isDark, toggleTheme } = useTheme();
-  const { drawerOpen, closeDrawer, currentRole, isAuthenticated, isAgentAuthenticated, signOut, user, demoMode, exitDemo } = useApp();
+  const { drawerOpen, closeDrawer, currentRole, isAuthenticated, isAgentAuthenticated, signOut, user, demoMode, exitDemo, replayWelcomeGuide } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -39,6 +39,7 @@ export function DrawerMenu() {
     { icon: 'color-palette-outline', label: 'Branding', route: '/branding', agentOnly: true, dividerAfter: true },
     { icon: 'person-outline', label: 'Profile & Settings', route: '/settings' },
     { icon: 'code-slash-outline', label: 'Developer Console', route: '/developer', agentOnly: true },
+    { icon: 'map-outline', label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); } },
     { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
   ];
 

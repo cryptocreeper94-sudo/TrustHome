@@ -7,6 +7,8 @@ import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { TrustShieldInline } from '@/components/ui/TrustShieldBadge';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const CATEGORIES = ['All', 'Inspectors', 'Lenders', 'Title', 'Appraisers', 'Contractors'] as const;
 type Category = typeof CATEGORIES[number];
@@ -63,6 +65,7 @@ export default function NetworkScreen() {
   const { colors } = useTheme();
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const subcontractorsQuery = useQuery<any[]>({
     queryKey: ['/api/subcontractors'],
@@ -82,7 +85,7 @@ export default function NetworkScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Professional Network" showBack />
+      <Header title="Professional Network" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       {apiSubcontractors && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
           <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
@@ -242,6 +245,14 @@ export default function NetworkScreen() {
         </View>
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.network.title}
+        description={SCREEN_HELP.network.description}
+        details={SCREEN_HELP.network.details}
+        examples={SCREEN_HELP.network.examples}
+      />
     </View>
   );
 }

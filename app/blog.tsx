@@ -6,6 +6,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 import { apiRequest } from '@/lib/query-client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -50,6 +52,7 @@ export default function BlogScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>('Posts');
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [title, setTitle] = useState('');
@@ -540,7 +543,7 @@ export default function BlogScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Blog Management" showBack />
+      <Header title="Blog Management" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.tabContainer}>
           {TABS.map((tab) => (
@@ -578,6 +581,14 @@ export default function BlogScreen() {
 
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.blog.title}
+        description={SCREEN_HELP.blog.description}
+        details={SCREEN_HELP.blog.details}
+        examples={SCREEN_HELP.blog.examples}
+      />
     </View>
   );
 }

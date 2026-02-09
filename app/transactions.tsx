@@ -5,6 +5,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const PIPELINE_STAGES = [
   { key: 'pre_approval', label: 'Pre-Approval', color: '#FF9500', count: 2 },
@@ -32,12 +34,13 @@ export default function TransactionsScreen() {
   const { colors, isDark } = useTheme();
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const [expandedDeal, setExpandedDeal] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const filteredDeals = activeStage ? DEALS.filter(d => d.stage === activeStage) : DEALS;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Transactions" showBack />
+      <Header title="Transactions" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.statsRow}>
           <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
@@ -136,6 +139,14 @@ export default function TransactionsScreen() {
         })}
         <Footer />
       </ScrollView>
+      <InfoModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        title={SCREEN_HELP.transactions.title}
+        description={SCREEN_HELP.transactions.description}
+        details={SCREEN_HELP.transactions.details}
+        examples={SCREEN_HELP.transactions.examples}
+      />
     </View>
   );
 }

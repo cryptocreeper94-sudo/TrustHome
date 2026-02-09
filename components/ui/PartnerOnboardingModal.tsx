@@ -21,11 +21,24 @@ interface ProjectionTier {
   monthlyPerWhiteLabel: number;
 }
 
+const FOUNDER_PRICING = {
+  agent: 49,
+  brokerage: 299,
+  whiteLabel: 1499,
+  milestone: 100,
+};
+
+const STANDARD_PRICING = {
+  agent: 99,
+  brokerage: 599,
+  whiteLabel: 2999,
+};
+
 const PROJECTIONS: ProjectionTier[] = [
-  { label: 'Launch (Months 1-6)', agents: 25, monthlyPerAgent: 79, brokerages: 2, monthlyPerBrokerage: 499, whiteLabel: 0, monthlyPerWhiteLabel: 2499 },
-  { label: 'Growth (Months 7-12)', agents: 100, monthlyPerAgent: 79, brokerages: 8, monthlyPerBrokerage: 499, whiteLabel: 2, monthlyPerWhiteLabel: 2499 },
-  { label: 'Scale (Year 2)', agents: 500, monthlyPerAgent: 79, brokerages: 30, monthlyPerBrokerage: 499, whiteLabel: 10, monthlyPerWhiteLabel: 2499 },
-  { label: 'Franchise (Year 3+)', agents: 2000, monthlyPerAgent: 79, brokerages: 100, monthlyPerBrokerage: 499, whiteLabel: 50, monthlyPerWhiteLabel: 2499 },
+  { label: 'Founders Phase (Months 1-6)', agents: 25, monthlyPerAgent: FOUNDER_PRICING.agent, brokerages: 2, monthlyPerBrokerage: FOUNDER_PRICING.brokerage, whiteLabel: 0, monthlyPerWhiteLabel: FOUNDER_PRICING.whiteLabel },
+  { label: 'Milestone Hit (Months 7-12)', agents: 100, monthlyPerAgent: FOUNDER_PRICING.agent, brokerages: 8, monthlyPerBrokerage: FOUNDER_PRICING.brokerage, whiteLabel: 2, monthlyPerWhiteLabel: FOUNDER_PRICING.whiteLabel },
+  { label: 'Standard Pricing (Year 2)', agents: 500, monthlyPerAgent: STANDARD_PRICING.agent, brokerages: 30, monthlyPerBrokerage: STANDARD_PRICING.brokerage, whiteLabel: 10, monthlyPerWhiteLabel: STANDARD_PRICING.whiteLabel },
+  { label: 'Franchise Scale (Year 3+)', agents: 2000, monthlyPerAgent: STANDARD_PRICING.agent, brokerages: 100, monthlyPerBrokerage: STANDARD_PRICING.brokerage, whiteLabel: 50, monthlyPerWhiteLabel: STANDARD_PRICING.whiteLabel },
 ];
 
 function calcMRR(tier: ProjectionTier): number {
@@ -80,7 +93,7 @@ interface SlideData {
   title: string;
   subtitle: string;
   accent: string;
-  type: 'text' | 'features' | 'projections' | 'whitelabel' | 'franchise';
+  type: 'text' | 'features' | 'projections' | 'whitelabel' | 'franchise' | 'founders' | 'stripe';
   body?: string;
 }
 
@@ -128,6 +141,22 @@ const SLIDES: SlideData[] = [
     type: 'franchise',
   },
   {
+    icon: 'diamond',
+    iconLib: 'ion',
+    title: 'Founders Program',
+    subtitle: 'Reward Early Believers',
+    accent: '#D4AF37',
+    type: 'founders',
+  },
+  {
+    icon: 'card',
+    iconLib: 'ion',
+    title: 'Payment Setup',
+    subtitle: 'Getting Paid with Stripe',
+    accent: '#635BFF',
+    type: 'stripe',
+  },
+  {
     icon: 'briefcase',
     iconLib: 'ion',
     title: 'Woman-Owned Business',
@@ -141,7 +170,7 @@ const SLIDES: SlideData[] = [
     iconLib: 'ion',
     title: "Let's Build This",
     subtitle: 'The Foundation Is Set',
-    body: "Everything we've built so far is the foundation. The platform works. The architecture scales. The white-label system is ready. The AI assistant is live. The blockchain integration is verified.\n\nNow it's about getting it in front of people. Every agent you know, every broker you've worked with, every title company and lender in your network — they all need what we've built.\n\nYour 51% isn't just ownership. It's the driving force. You know this industry. You know these people. Let's show them what TrustHome can do.\n\nYou can revisit this dashboard anytime from your Settings page.",
+    body: "Everything we've built so far is the foundation. The platform works. The architecture scales. The white-label system is ready. The AI assistant is live. The blockchain integration is verified.\n\nNow it's about getting it in front of people. Every agent you know, every broker you've worked with, every title company and lender in your network — they all need what we've built.\n\nYour Stripe account will collect all subscription payments. Orbit Staffing handles bookkeeping and distributes your 51% share automatically. You focus on growth — the money flows to you.\n\nYou can revisit this dashboard anytime from your Settings page.",
     accent: '#1A8A7E',
     type: 'text',
   },
@@ -281,21 +310,27 @@ export function PartnerOnboardingModal({ visible, onComplete }: PartnerOnboardin
         return (
           <ScrollView style={styles.bodyScroll} showsVerticalScrollIndicator={false}>
             <View style={projStyles.pricingHeader}>
+              <View style={[projStyles.priceBadge, { backgroundColor: '#D4AF3715', borderColor: '#D4AF3730' }]}>
+                <Ionicons name="diamond" size={13} color="#D4AF37" />
+                <Text style={[projStyles.priceText, { color: '#D4AF37' }]}>Founder Rates (First 100)</Text>
+              </View>
+            </View>
+            <View style={projStyles.pricingHeader}>
               <View style={[projStyles.priceBadge, { backgroundColor: '#1A8A7E15', borderColor: '#1A8A7E30' }]}>
                 <Ionicons name="person" size={13} color="#1A8A7E" />
-                <Text style={[projStyles.priceText, { color: '#1A8A7E' }]}>Agents: $79/mo</Text>
+                <Text style={[projStyles.priceText, { color: '#1A8A7E' }]}>Agents: ${FOUNDER_PRICING.agent} then ${STANDARD_PRICING.agent}/mo</Text>
               </View>
               <View style={[projStyles.priceBadge, { backgroundColor: '#4A90D915', borderColor: '#4A90D930' }]}>
                 <Ionicons name="business" size={13} color="#4A90D9" />
-                <Text style={[projStyles.priceText, { color: '#4A90D9' }]}>Brokerages: $499/mo</Text>
+                <Text style={[projStyles.priceText, { color: '#4A90D9' }]}>Brokerages: ${FOUNDER_PRICING.brokerage} then ${STANDARD_PRICING.brokerage}/mo</Text>
               </View>
               <View style={[projStyles.priceBadge, { backgroundColor: '#9B59B615', borderColor: '#9B59B630' }]}>
                 <Ionicons name="layers" size={13} color="#9B59B6" />
-                <Text style={[projStyles.priceText, { color: '#9B59B6' }]}>White-Label: $2,499/mo</Text>
+                <Text style={[projStyles.priceText, { color: '#9B59B6' }]}>White-Label: ${FOUNDER_PRICING.whiteLabel.toLocaleString()} then ${STANDARD_PRICING.whiteLabel.toLocaleString()}/mo</Text>
               </View>
             </View>
             {PROJECTIONS.map((tier, i) => (
-              <ProjectionCard key={i} tier={tier} color={colors.text} secondaryColor={colors.textSecondary} accent={slide.accent} />
+              <ProjectionCard key={i} tier={tier} color={colors.text} secondaryColor={colors.textSecondary} accent={i < 2 ? '#D4AF37' : slide.accent} />
             ))}
             <View style={[projStyles.highlightBox, { backgroundColor: '#D4AF3710', borderColor: '#D4AF3730' }]}>
               <MaterialCommunityIcons name="star-four-points" size={18} color="#D4AF37" />
@@ -355,6 +390,109 @@ export function PartnerOnboardingModal({ visible, onComplete }: PartnerOnboardin
               <Ionicons name="bulb" size={18} color="#E8715A" />
               <Text style={[projStyles.highlightText, { color: colors.text }]}>
                 With the franchise model, TrustHome transitions from a product to a platform company — generating revenue even while you sleep.
+              </Text>
+            </View>
+          </ScrollView>
+        );
+
+      case 'founders':
+        return (
+          <ScrollView style={styles.bodyScroll} showsVerticalScrollIndicator={false}>
+            <Text style={[styles.slideBody, { color: colors.textSecondary, marginBottom: 16 }]}>
+              The Founders Program rewards agents and brokerages who believe in TrustHome early. They get locked-in pricing that never increases — and once we hit {FOUNDER_PRICING.milestone} agent subscribers, new signups pay the standard rate.
+            </Text>
+
+            <Text style={[styles.sectionLabel, { color: '#D4AF37' }]}>FOUNDER PRICING (First {FOUNDER_PRICING.milestone} Agents)</Text>
+            <View style={founderStyles.comparisonGrid}>
+              {[
+                { tier: 'Agent', founder: FOUNDER_PRICING.agent, standard: STANDARD_PRICING.agent, icon: 'person' as const },
+                { tier: 'Brokerage', founder: FOUNDER_PRICING.brokerage, standard: STANDARD_PRICING.brokerage, icon: 'business' as const },
+                { tier: 'White-Label', founder: FOUNDER_PRICING.whiteLabel, standard: STANDARD_PRICING.whiteLabel, icon: 'layers' as const },
+              ].map((row, i) => (
+                <View key={i} style={[founderStyles.compRow, { borderColor: '#D4AF3720', backgroundColor: '#D4AF3708' }]}>
+                  <View style={founderStyles.compLeft}>
+                    <Ionicons name={row.icon} size={16} color="#D4AF37" />
+                    <Text style={[founderStyles.compTier, { color: colors.text }]}>{row.tier}</Text>
+                  </View>
+                  <View style={founderStyles.compPrices}>
+                    <View style={founderStyles.priceCol}>
+                      <Text style={[founderStyles.priceAmount, { color: '#D4AF37' }]}>${row.founder}{row.founder >= 1000 ? '' : ''}</Text>
+                      <Text style={[founderStyles.priceLabel, { color: colors.textSecondary }]}>Founder</Text>
+                    </View>
+                    <Ionicons name="arrow-forward" size={14} color={colors.textTertiary} />
+                    <View style={founderStyles.priceCol}>
+                      <Text style={[founderStyles.priceAmount, { color: colors.text }]}>${row.standard}</Text>
+                      <Text style={[founderStyles.priceLabel, { color: colors.textSecondary }]}>Standard</Text>
+                    </View>
+                    <View style={[founderStyles.savingsBadge, { backgroundColor: '#34C75915' }]}>
+                      <Text style={[founderStyles.savingsText, { color: '#34C759' }]}>Save {Math.round((1 - row.founder / row.standard) * 100)}%</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            <Text style={[styles.sectionLabel, { color: slide.accent, marginTop: 16 }]}>HOW IT WORKS</Text>
+            <View style={franchiseStyles.steps}>
+              {[
+                { num: '1', title: 'Launch at Founder Pricing', desc: `First ${FOUNDER_PRICING.milestone} agent subscribers get the discounted rate. They keep that rate forever.` },
+                { num: '2', title: 'Hit the Milestone', desc: `Once we reach ${FOUNDER_PRICING.milestone} active agent subscribers, new signups automatically move to standard pricing.` },
+                { num: '3', title: 'Founders Stay Locked In', desc: 'Early supporters never see a price increase. Their loyalty is rewarded permanently.' },
+                { num: '4', title: 'Creates Urgency', desc: '"Get in now before founder pricing ends" is one of the strongest sales tools you can use.' },
+              ].map((step, i) => (
+                <View key={i} style={[franchiseStyles.step, { borderColor: '#D4AF3725' }]}>
+                  <View style={[franchiseStyles.stepNum, { backgroundColor: '#D4AF37' }]}>
+                    <Text style={franchiseStyles.stepNumText}>{step.num}</Text>
+                  </View>
+                  <View style={franchiseStyles.stepContent}>
+                    <Text style={[franchiseStyles.stepTitle, { color: colors.text }]}>{step.title}</Text>
+                    <Text style={[franchiseStyles.stepDesc, { color: colors.textSecondary }]}>{step.desc}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        );
+
+      case 'stripe':
+        return (
+          <ScrollView style={styles.bodyScroll} showsVerticalScrollIndicator={false}>
+            <Text style={[styles.slideBody, { color: colors.textSecondary, marginBottom: 16 }]}>
+              TrustHome needs a Stripe account to collect subscription payments from agents, brokerages, and white-label clients. This should be set up under DarkWave Studios LLC — not a personal account.
+            </Text>
+
+            <Text style={[styles.sectionLabel, { color: slide.accent }]}>SETUP STEPS</Text>
+            <View style={franchiseStyles.steps}>
+              {[
+                { num: '1', title: 'Go to stripe.com/register', desc: 'Create a new Stripe account. Use your DarkWave Studios LLC email if you have one, or your business email.' },
+                { num: '2', title: 'Select "Business" Account Type', desc: 'Choose LLC as the business type. Enter DarkWave Studios LLC as the legal business name. Use the company EIN.' },
+                { num: '3', title: 'Add Bank Account', desc: 'Connect the DarkWave Studios LLC business bank account. This is where Stripe will deposit collected payments.' },
+                { num: '4', title: 'Verify Identity', desc: 'Stripe requires identity verification for the account representative. As managing member, you complete this step.' },
+                { num: '5', title: 'Share API Keys', desc: 'Once approved, go to Developers > API Keys in your Stripe dashboard. Share the publishable key and secret key so we can connect it to TrustHome.' },
+              ].map((step, i) => (
+                <View key={i} style={[franchiseStyles.step, { borderColor: slide.accent + '25' }]}>
+                  <View style={[franchiseStyles.stepNum, { backgroundColor: slide.accent }]}>
+                    <Text style={franchiseStyles.stepNumText}>{step.num}</Text>
+                  </View>
+                  <View style={franchiseStyles.stepContent}>
+                    <Text style={[franchiseStyles.stepTitle, { color: colors.text }]}>{step.title}</Text>
+                    <Text style={[franchiseStyles.stepDesc, { color: colors.textSecondary }]}>{step.desc}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            <View style={[projStyles.highlightBox, { backgroundColor: '#635BFF10', borderColor: '#635BFF30', marginTop: 12 }]}>
+              <Ionicons name="information-circle" size={18} color="#635BFF" />
+              <Text style={[projStyles.highlightText, { color: colors.text }]}>
+                Stripe collects all payments. Orbit Staffing handles the bookkeeping and automatically distributes your 51% share. You don't manage the split manually.
+              </Text>
+            </View>
+
+            <View style={[projStyles.highlightBox, { backgroundColor: '#FF950010', borderColor: '#FF950030', marginTop: 4 }]}>
+              <Ionicons name="alert-circle" size={18} color="#FF9500" />
+              <Text style={[projStyles.highlightText, { color: colors.text }]}>
+                This is separate from any personal Stripe account. TrustHome payments flow through the business account only.
               </Text>
             </View>
           </ScrollView>
@@ -701,6 +839,57 @@ const wlStyles = StyleSheet.create({
   benefitDesc: {
     fontSize: 11,
     textAlign: 'center' as const,
+  },
+});
+
+const founderStyles = StyleSheet.create({
+  comparisonGrid: {
+    gap: 8,
+    marginBottom: 8,
+  },
+  compRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  compLeft: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 8,
+    minWidth: 90,
+  },
+  compTier: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+  },
+  compPrices: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 8,
+  },
+  priceCol: {
+    alignItems: 'center' as const,
+  },
+  priceAmount: {
+    fontSize: 15,
+    fontWeight: '800' as const,
+  },
+  priceLabel: {
+    fontSize: 9,
+    fontWeight: '500' as const,
+    marginTop: 1,
+  },
+  savingsBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  savingsText: {
+    fontSize: 10,
+    fontWeight: '700' as const,
   },
 });
 

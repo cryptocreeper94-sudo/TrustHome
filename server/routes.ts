@@ -23,7 +23,7 @@ import {
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
-import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema } from "@shared/schema";
+import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, expenses, mileageEntries } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 import OpenAI from "openai";
@@ -1555,6 +1555,218 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       return res.json(updated);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // ─── Business Suite: Expenses ──────────────────────────────────────
+  // Primary: PaintPros ecosystem backend | Fallback: local PostgreSQL
+
+  app.get("/api/expenses", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemGet("/expenses", req.query as Record<string, string>);
+      if (data.error || data.notAvailable) {
+        const agentId = req.query.agentId as string || 'demo';
+        const result = await db.select().from(expenses).where(eq(expenses.agentId, agentId)).orderBy(desc(expenses.createdAt));
+        return res.json(result);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/expenses", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemPost("/expenses", req.body);
+      if (data.error || data.notAvailable) {
+        const agentId = req.body.agentId || 'demo';
+        const [expense] = await db.insert(expenses).values({
+          agentId,
+          category: req.body.category || 'other',
+          description: req.body.description,
+          amount: parseFloat(req.body.amount),
+          vendor: req.body.vendor || null,
+          date: req.body.date,
+          notes: req.body.notes || null,
+          propertyAddress: req.body.propertyAddress || null,
+          receiptUrl: req.body.receiptUrl || null,
+          ocrData: req.body.ocrData || null,
+        }).returning();
+        return res.json(expense);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.put("/api/expenses/:id", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemPut(`/expenses/${req.params.id}`, req.body);
+      if (data.error || data.notAvailable) {
+        const { id } = req.params;
+        const updates: Record<string, any> = {};
+        if (req.body.category !== undefined) updates.category = req.body.category;
+        if (req.body.description !== undefined) updates.description = req.body.description;
+        if (req.body.amount !== undefined) updates.amount = parseFloat(req.body.amount);
+        if (req.body.vendor !== undefined) updates.vendor = req.body.vendor;
+        if (req.body.date !== undefined) updates.date = req.body.date;
+        if (req.body.notes !== undefined) updates.notes = req.body.notes;
+        if (req.body.propertyAddress !== undefined) updates.propertyAddress = req.body.propertyAddress;
+        updates.updatedAt = new Date();
+        const [updated] = await db.update(expenses).set(updates).where(eq(expenses.id, id)).returning();
+        if (!updated) return res.status(404).json({ error: "Expense not found" });
+        return res.json(updated);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.delete("/api/expenses/:id", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemDelete(`/expenses/${req.params.id}`);
+      if (data.error || data.notAvailable) {
+        const { id } = req.params;
+        const [deleted] = await db.delete(expenses).where(eq(expenses.id, id)).returning();
+        if (!deleted) return res.status(404).json({ error: "Expense not found" });
+        return res.json({ success: true });
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/expenses/ocr", async (req: Request, res: Response) => {
+    try {
+      const { imageBase64 } = req.body;
+      if (!imageBase64) return res.status(400).json({ error: "Image data required" });
+
+      const ecoData = await ecosystemPost("/expenses/ocr", { imageBase64 });
+      if (!ecoData.error && !ecoData.notAvailable) {
+        return res.json(ecoData);
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a receipt OCR parser. Extract the vendor name, total amount, date, and a brief description of the purchase from the receipt image. Return valid JSON with keys: vendor (string), amount (number), date (string in YYYY-MM-DD format), description (string), category (one of: marketing, office, travel, meals, supplies, technology, insurance, licensing, staging, photography, signage, gifts, education, other)."
+          },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Extract the receipt details from this image:" },
+              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
+            ]
+          }
+        ],
+        max_completion_tokens: 500,
+      });
+
+      const content = completion.choices[0]?.message?.content || '{}';
+      let parsed;
+      try {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : content);
+      } catch {
+        parsed = { vendor: '', amount: 0, date: new Date().toISOString().split('T')[0], description: content, category: 'other' };
+      }
+
+      return res.json(parsed);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // ─── Business Suite: Mileage ──────────────────────────────────────
+  // Primary: PaintPros ecosystem backend | Fallback: local PostgreSQL
+
+  app.get("/api/mileage", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemGet("/mileage", req.query as Record<string, string>);
+      if (data.error || data.notAvailable) {
+        const agentId = req.query.agentId as string || 'demo';
+        const result = await db.select().from(mileageEntries).where(eq(mileageEntries.agentId, agentId)).orderBy(desc(mileageEntries.createdAt));
+        return res.json(result);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/mileage", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemPost("/mileage", req.body);
+      if (data.error || data.notAvailable) {
+        const agentId = req.body.agentId || 'demo';
+        const [entry] = await db.insert(mileageEntries).values({
+          agentId,
+          date: req.body.date,
+          startAddress: req.body.startAddress || null,
+          endAddress: req.body.endAddress || null,
+          miles: parseFloat(req.body.miles),
+          purpose: req.body.purpose,
+          category: req.body.category || 'showing',
+          startLat: req.body.startLat ? parseFloat(req.body.startLat) : null,
+          startLng: req.body.startLng ? parseFloat(req.body.startLng) : null,
+          endLat: req.body.endLat ? parseFloat(req.body.endLat) : null,
+          endLng: req.body.endLng ? parseFloat(req.body.endLng) : null,
+          notes: req.body.notes || null,
+        }).returning();
+        return res.json(entry);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.put("/api/mileage/:id", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemPut(`/mileage/${req.params.id}`, req.body);
+      if (data.error || data.notAvailable) {
+        const { id } = req.params;
+        const updates: Record<string, any> = {};
+        if (req.body.date !== undefined) updates.date = req.body.date;
+        if (req.body.startAddress !== undefined) updates.startAddress = req.body.startAddress;
+        if (req.body.endAddress !== undefined) updates.endAddress = req.body.endAddress;
+        if (req.body.miles !== undefined) updates.miles = parseFloat(req.body.miles);
+        if (req.body.purpose !== undefined) updates.purpose = req.body.purpose;
+        if (req.body.category !== undefined) updates.category = req.body.category;
+        if (req.body.notes !== undefined) updates.notes = req.body.notes;
+        updates.updatedAt = new Date();
+        const [updated] = await db.update(mileageEntries).set(updates).where(eq(mileageEntries.id, id)).returning();
+        if (!updated) return res.status(404).json({ error: "Mileage entry not found" });
+        return res.json(updated);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.delete("/api/mileage/:id", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemDelete(`/mileage/${req.params.id}`);
+      if (data.error || data.notAvailable) {
+        const { id } = req.params;
+        const [deleted] = await db.delete(mileageEntries).where(eq(mileageEntries.id, id)).returning();
+        if (!deleted) return res.status(404).json({ error: "Mileage entry not found" });
+        return res.json({ success: true });
+      }
+      return res.json(data);
     } catch (error) {
       return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }

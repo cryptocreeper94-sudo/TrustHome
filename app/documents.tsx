@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -7,6 +7,9 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
+import { BentoGrid } from '@/components/ui/BentoGrid';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
+import { AccordionSection } from '@/components/ui/AccordionSection';
 
 type DocStatus = 'Signed' | 'Pending' | 'Needs Review' | 'Verified';
 type FilterTab = 'All' | 'Pending' | 'Signed' | 'Verified';
@@ -61,24 +64,57 @@ export default function DocumentsScreen() {
   const pendingCount = DOCUMENTS.filter(d => d.status === 'Pending' || d.status === 'Needs Review').length;
   const verifiedCount = DOCUMENTS.filter(d => d.verified).length;
 
+  const verifiedDocs = DOCUMENTS.filter(d => d.verified && d.hash);
+
+  const groupedByTransaction = useMemo(() => {
+    const groups: Record<string, Document[]> = {};
+    for (const doc of filtered) {
+      if (!groups[doc.transaction]) {
+        groups[doc.transaction] = [];
+      }
+      groups[doc.transaction].push(doc);
+    }
+    return groups;
+  }, [filtered]);
+
+  const transactionKeys = Object.keys(groupedByTransaction);
+
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Header title="Documents" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.statsRow}>
-          {[
-            { label: 'Total Docs', value: totalDocs, icon: 'documents' as const, color: colors.primary },
-            { label: 'Pending', value: pendingCount, icon: 'time' as const, color: '#FF9500' },
-            { label: 'Verified', value: verifiedCount, icon: 'shield-checkmark' as const, color: '#007AFF' },
-          ].map((stat) => (
-            <GlassCard key={stat.label} compact style={styles.statCard}>
-              <View style={styles.statInner}>
-                <Ionicons name={stat.icon} size={20} color={stat.color} />
-                <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
-              </View>
-            </GlassCard>
-          ))}
+        <View style={styles.bentoWrap}>
+          <BentoGrid columns={3} gap={10}>
+            {[
+              { label: 'Total Docs', value: totalDocs, icon: 'documents' as const, color: colors.primary },
+              { label: 'Pending', value: pendingCount, icon: 'time' as const, color: '#FF9500' },
+              { label: 'Verified', value: verifiedCount, icon: 'shield-checkmark' as const, color: '#007AFF' },
+            ].map((stat) => (
+              <GlassCard key={stat.label} compact style={styles.statCard}>
+                <View style={styles.statInner}>
+                  <Ionicons name={stat.icon} size={20} color={stat.color} />
+                  <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
+                </View>
+              </GlassCard>
+            ))}
+          </BentoGrid>
+        </View>
+
+        <View style={styles.carouselWrap}>
+          <HorizontalCarousel title="Verified on Chain" itemWidth={200}>
+            {verifiedDocs.map(doc => (
+              <GlassCard key={doc.id} compact style={styles.verifiedCard}>
+                <View style={styles.verifiedCardInner}>
+                  <View style={styles.verifiedCardTop}>
+                    <Ionicons name="checkmark-circle" size={18} color="#007AFF" />
+                    <Text style={[styles.verifiedCardName, { color: colors.text }]} numberOfLines={1}>{doc.name}</Text>
+                  </View>
+                  <Text style={[styles.verifiedCardHash, { color: colors.primary }]}>{doc.hash}</Text>
+                </View>
+              </GlassCard>
+            ))}
+          </HorizontalCarousel>
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterContent}>
@@ -107,53 +143,66 @@ export default function DocumentsScreen() {
           </Pressable>
         </View>
 
-        {filtered.map(doc => {
-          const expanded = expandedId === doc.id;
-          return (
-            <GlassCard key={doc.id} onPress={() => setExpandedId(expanded ? null : doc.id)} style={styles.docCard}>
-              <View style={styles.docRow}>
-                <View style={[styles.docIconWrap, { backgroundColor: statusColors[doc.status] + '18' }]}>
-                  <Ionicons name={doc.icon} size={22} color={statusColors[doc.status]} />
-                </View>
-                <View style={styles.docInfo}>
-                  <Text style={[styles.docName, { color: colors.text }]} numberOfLines={1}>{doc.name}</Text>
-                  <Text style={[styles.docMeta, { color: colors.textSecondary }]}>{doc.date} {'\u00B7'} {doc.transaction}</Text>
-                </View>
-                <View style={styles.docRight}>
-                  <View style={[styles.statusBadge, { backgroundColor: statusColors[doc.status] + '20' }]}>
-                    <Text style={[styles.statusText, { color: statusColors[doc.status] }]}>{doc.status}</Text>
-                  </View>
-                  {doc.verified && (
-                    <View style={styles.verifiedBadge}>
-                      <Ionicons name="checkmark-circle" size={14} color="#007AFF" />
-                      <Text style={styles.verifiedText}>On-chain</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-              {expanded && (
-                <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
-                  <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Parties Involved</Text>
-                  {doc.parties.map((p, i) => (
-                    <Text key={i} style={[styles.expandedValue, { color: colors.text }]}>{p}</Text>
-                  ))}
-                  <View style={styles.expandedRow}>
-                    <View style={styles.expandedCol}>
-                      <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Version</Text>
-                      <Text style={[styles.expandedValue, { color: colors.text }]}>{doc.version}</Text>
-                    </View>
-                    {doc.hash ? (
-                      <View style={styles.expandedCol}>
-                        <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Verification Hash</Text>
-                        <Text style={[styles.expandedValue, { color: colors.primary }]}>{doc.hash}</Text>
+        <View style={styles.accordionWrap}>
+          {transactionKeys.map((txn, idx) => (
+            <AccordionSection
+              key={txn}
+              title={txn}
+              icon="folder"
+              iconColor="#1A8A7E"
+              badge={groupedByTransaction[txn].length}
+              defaultOpen={idx === 0}
+            >
+              {groupedByTransaction[txn].map(doc => {
+                const expanded = expandedId === doc.id;
+                return (
+                  <GlassCard key={doc.id} onPress={() => setExpandedId(expanded ? null : doc.id)} style={styles.docCard}>
+                    <View style={styles.docRow}>
+                      <View style={[styles.docIconWrap, { backgroundColor: statusColors[doc.status] + '18' }]}>
+                        <Ionicons name={doc.icon} size={22} color={statusColors[doc.status]} />
                       </View>
-                    ) : null}
-                  </View>
-                </View>
-              )}
-            </GlassCard>
-          );
-        })}
+                      <View style={styles.docInfo}>
+                        <Text style={[styles.docName, { color: colors.text }]} numberOfLines={1}>{doc.name}</Text>
+                        <Text style={[styles.docMeta, { color: colors.textSecondary }]}>{doc.date} {'\u00B7'} {doc.transaction}</Text>
+                      </View>
+                      <View style={styles.docRight}>
+                        <View style={[styles.statusBadge, { backgroundColor: statusColors[doc.status] + '20' }]}>
+                          <Text style={[styles.statusText, { color: statusColors[doc.status] }]}>{doc.status}</Text>
+                        </View>
+                        {doc.verified && (
+                          <View style={styles.verifiedBadge}>
+                            <Ionicons name="checkmark-circle" size={14} color="#007AFF" />
+                            <Text style={styles.verifiedBadgeText}>On-chain</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                    {expanded && (
+                      <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
+                        <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Parties Involved</Text>
+                        {doc.parties.map((p, i) => (
+                          <Text key={i} style={[styles.expandedValue, { color: colors.text }]}>{p}</Text>
+                        ))}
+                        <View style={styles.expandedRow}>
+                          <View style={styles.expandedCol}>
+                            <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Version</Text>
+                            <Text style={[styles.expandedValue, { color: colors.text }]}>{doc.version}</Text>
+                          </View>
+                          {doc.hash ? (
+                            <View style={styles.expandedCol}>
+                              <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Verification Hash</Text>
+                              <Text style={[styles.expandedValue, { color: colors.primary }]}>{doc.hash}</Text>
+                            </View>
+                          ) : null}
+                        </View>
+                      </View>
+                    )}
+                  </GlassCard>
+                );
+              })}
+            </AccordionSection>
+          ))}
+        </View>
 
         <Footer />
       </ScrollView>
@@ -173,11 +222,17 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 32 },
-  statsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginTop: 16 },
+  bentoWrap: { paddingHorizontal: 16, marginTop: 16 },
   statCard: { minHeight: 80 },
   statInner: { alignItems: 'center' as const, gap: 4 },
   statValue: { fontSize: 22, fontWeight: '700' as const },
   statLabel: { fontSize: 11, fontWeight: '500' as const },
+  carouselWrap: { marginTop: 18 },
+  verifiedCard: { width: 200, minHeight: 70 },
+  verifiedCardInner: { gap: 6 },
+  verifiedCardTop: { flexDirection: 'row', alignItems: 'center' as const, gap: 6 },
+  verifiedCardName: { fontSize: 13, fontWeight: '600' as const, flex: 1 },
+  verifiedCardHash: { fontSize: 11, fontWeight: '500' as const },
   filterRow: { marginTop: 16, maxHeight: 44 },
   filterContent: { paddingHorizontal: 16, gap: 8 },
   filterPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
@@ -185,7 +240,8 @@ const styles = StyleSheet.create({
   actionsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginTop: 16 },
   actionBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
   actionBtnText: { fontSize: 13, fontWeight: '600' as const, color: '#FFFFFF' },
-  docCard: { marginHorizontal: 16, marginTop: 10, minHeight: 70 },
+  accordionWrap: { paddingHorizontal: 16, marginTop: 16 },
+  docCard: { marginTop: 8, minHeight: 70 },
   docRow: { flexDirection: 'row', alignItems: 'center' as const, gap: 12 },
   docIconWrap: { width: 40, height: 40, borderRadius: 10, alignItems: 'center' as const, justifyContent: 'center' as const },
   docInfo: { flex: 1, gap: 2 },
@@ -195,7 +251,7 @@ const styles = StyleSheet.create({
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   statusText: { fontSize: 10, fontWeight: '700' as const },
   verifiedBadge: { flexDirection: 'row', alignItems: 'center' as const, gap: 3 },
-  verifiedText: { fontSize: 9, color: '#007AFF', fontWeight: '500' as const },
+  verifiedBadgeText: { fontSize: 9, color: '#007AFF', fontWeight: '500' as const },
   expandedSection: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, gap: 4 },
   expandedLabel: { fontSize: 10, fontWeight: '600' as const, textTransform: 'uppercase' as const, letterSpacing: 0.5, marginTop: 6 },
   expandedValue: { fontSize: 13 },

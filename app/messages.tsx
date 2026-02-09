@@ -7,6 +7,9 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
+import { BentoGrid } from '@/components/ui/BentoGrid';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
+import { AccordionSection } from '@/components/ui/AccordionSection';
 
 interface Message {
   id: string;
@@ -103,6 +106,70 @@ const CONVERSATIONS: Conversation[] = [
   },
 ];
 
+function ConversationCard({ convo, isExpanded, onToggle, colors, isDark }: {
+  convo: Conversation;
+  isExpanded: boolean;
+  onToggle: () => void;
+  colors: any;
+  isDark: boolean;
+}) {
+  return (
+    <GlassCard style={styles.convoCard} onPress={onToggle}>
+      <View style={styles.convoRow}>
+        <View style={[styles.avatar, { backgroundColor: convo.initialColor + '22' }]}>
+          <Text style={[styles.avatarText, { color: convo.initialColor }]}>{convo.initial}</Text>
+        </View>
+        <View style={styles.convoInfo}>
+          <View style={styles.convoTopRow}>
+            <Text style={[styles.convoName, { color: colors.text }]} numberOfLines={1}>{convo.name}</Text>
+            <Text style={[styles.convoTime, { color: colors.textTertiary }]}>{convo.timestamp}</Text>
+          </View>
+          {convo.context && (
+            <View style={styles.contextRow}>
+              <Ionicons name="link-outline" size={11} color={colors.primary} />
+              <Text style={[styles.contextText, { color: colors.primary }]} numberOfLines={1}>{convo.context}</Text>
+            </View>
+          )}
+          <Text style={[styles.convoPreview, { color: colors.textSecondary }]} numberOfLines={1}>{convo.lastMessage}</Text>
+        </View>
+        {convo.unread > 0 && (
+          <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
+            <Text style={styles.unreadText}>{convo.unread}</Text>
+          </View>
+        )}
+      </View>
+
+      {isExpanded && (
+        <View style={[styles.messagesSection, { borderTopColor: colors.divider }]}>
+          {convo.messages.map(msg => (
+            <View key={msg.id} style={[styles.msgBubbleWrap, msg.sender === 'me' ? styles.msgRight : styles.msgLeft]}>
+              <View style={[
+                styles.msgBubble,
+                msg.sender === 'me'
+                  ? { backgroundColor: colors.primary }
+                  : { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary }
+              ]}>
+                <Text style={[styles.msgText, { color: msg.sender === 'me' ? '#FFF' : colors.text }]}>{msg.text}</Text>
+                <Text style={[styles.msgTime, { color: msg.sender === 'me' ? 'rgba(255,255,255,0.65)' : colors.textTertiary }]}>{msg.time}</Text>
+              </View>
+            </View>
+          ))}
+          <View style={styles.msgActions}>
+            <Pressable style={[styles.replyBtn, { backgroundColor: colors.primary + '15' }]}>
+              <Ionicons name="arrow-undo-outline" size={14} color={colors.primary} />
+              <Text style={[styles.replyBtnText, { color: colors.primary }]}>Reply</Text>
+            </Pressable>
+            <Pressable style={[styles.replyBtn, { backgroundColor: colors.primary + '15' }]}>
+              <Ionicons name="call-outline" size={14} color={colors.primary} />
+              <Text style={[styles.replyBtnText, { color: colors.primary }]}>Call</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+    </GlassCard>
+  );
+}
+
 export default function MessagesScreen() {
   const { colors, isDark } = useTheme();
   const [expandedConvo, setExpandedConvo] = useState<string | null>(null);
@@ -110,11 +177,38 @@ export default function MessagesScreen() {
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const totalUnread = CONVERSATIONS.reduce((sum, c) => sum + c.unread, 0);
+  const unreadConversations = CONVERSATIONS.filter(c => c.unread > 0);
+  const activeThreads = CONVERSATIONS.filter(c => c.unread > 0 || ['2m ago', '1h ago', '3h ago'].includes(c.timestamp));
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Header title="Messages" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+
+        <BentoGrid columns={3} gap={10}>
+          <GlassCard compact style={styles.statCard}>
+            <View style={styles.statInner}>
+              <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
+              <Text style={[styles.statValue, { color: colors.text }]}>{CONVERSATIONS.length}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
+            </View>
+          </GlassCard>
+          <GlassCard compact style={styles.statCard}>
+            <View style={styles.statInner}>
+              <Ionicons name="mail-unread-outline" size={20} color={totalUnread > 0 ? '#FF9500' : colors.primary} />
+              <Text style={[styles.statValue, { color: totalUnread > 0 ? '#FF9500' : colors.text }]}>{totalUnread}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Unread</Text>
+            </View>
+          </GlassCard>
+          <GlassCard compact style={styles.statCard}>
+            <View style={styles.statInner}>
+              <Ionicons name="pulse-outline" size={20} color={colors.primary} />
+              <Text style={[styles.statValue, { color: colors.text }]}>{activeThreads.length}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active</Text>
+            </View>
+          </GlassCard>
+        </BentoGrid>
+
         <View style={styles.actionRow}>
           <GlassCard style={styles.actionCard} compact onPress={() => {}}>
             <View style={styles.actionInner}>
@@ -138,64 +232,69 @@ export default function MessagesScreen() {
           </View>
         )}
 
-        {CONVERSATIONS.map(convo => {
-          const isExpanded = expandedConvo === convo.id;
-          return (
-            <GlassCard key={convo.id} style={styles.convoCard} onPress={() => setExpandedConvo(isExpanded ? null : convo.id)}>
-              <View style={styles.convoRow}>
-                <View style={[styles.avatar, { backgroundColor: convo.initialColor + '22' }]}>
-                  <Text style={[styles.avatarText, { color: convo.initialColor }]}>{convo.initial}</Text>
-                </View>
-                <View style={styles.convoInfo}>
-                  <View style={styles.convoTopRow}>
-                    <Text style={[styles.convoName, { color: colors.text }]} numberOfLines={1}>{convo.name}</Text>
-                    <Text style={[styles.convoTime, { color: colors.textTertiary }]}>{convo.timestamp}</Text>
-                  </View>
-                  {convo.context && (
-                    <View style={styles.contextRow}>
-                      <Ionicons name="link-outline" size={11} color={colors.primary} />
-                      <Text style={[styles.contextText, { color: colors.primary }]} numberOfLines={1}>{convo.context}</Text>
+        {unreadConversations.length > 0 && (
+          <HorizontalCarousel title="Unread" itemWidth={180}>
+            {unreadConversations.map(convo => (
+              <GlassCard
+                key={convo.id}
+                compact
+                style={styles.carouselCard}
+                onPress={() => setExpandedConvo(expandedConvo === convo.id ? null : convo.id)}
+              >
+                <View style={styles.carouselInner}>
+                  <View style={styles.carouselTop}>
+                    <View style={[styles.carouselAvatar, { backgroundColor: convo.initialColor + '22' }]}>
+                      <Text style={[styles.carouselAvatarText, { color: convo.initialColor }]}>{convo.initial}</Text>
                     </View>
-                  )}
-                  <Text style={[styles.convoPreview, { color: colors.textSecondary }]} numberOfLines={1}>{convo.lastMessage}</Text>
-                </View>
-                {convo.unread > 0 && (
-                  <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.unreadText}>{convo.unread}</Text>
+                    <View style={[styles.carouselBadge, { backgroundColor: colors.primary }]}>
+                      <Text style={styles.carouselBadgeText}>{convo.unread}</Text>
+                    </View>
                   </View>
-                )}
-              </View>
+                  <Text style={[styles.carouselName, { color: colors.text }]} numberOfLines={1}>{convo.name}</Text>
+                  <Text style={[styles.carouselPreview, { color: colors.textSecondary }]} numberOfLines={2}>{convo.lastMessage}</Text>
+                </View>
+              </GlassCard>
+            ))}
+          </HorizontalCarousel>
+        )}
 
-              {isExpanded && (
-                <View style={[styles.messagesSection, { borderTopColor: colors.divider }]}>
-                  {convo.messages.map(msg => (
-                    <View key={msg.id} style={[styles.msgBubbleWrap, msg.sender === 'me' ? styles.msgRight : styles.msgLeft]}>
-                      <View style={[
-                        styles.msgBubble,
-                        msg.sender === 'me'
-                          ? { backgroundColor: colors.primary }
-                          : { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary }
-                      ]}>
-                        <Text style={[styles.msgText, { color: msg.sender === 'me' ? '#FFF' : colors.text }]}>{msg.text}</Text>
-                        <Text style={[styles.msgTime, { color: msg.sender === 'me' ? 'rgba(255,255,255,0.65)' : colors.textTertiary }]}>{msg.time}</Text>
-                      </View>
-                    </View>
-                  ))}
-                  <View style={styles.msgActions}>
-                    <Pressable style={[styles.replyBtn, { backgroundColor: colors.primary + '15' }]}>
-                      <Ionicons name="arrow-undo-outline" size={14} color={colors.primary} />
-                      <Text style={[styles.replyBtnText, { color: colors.primary }]}>Reply</Text>
-                    </Pressable>
-                    <Pressable style={[styles.replyBtn, { backgroundColor: colors.primary + '15' }]}>
-                      <Ionicons name="call-outline" size={14} color={colors.primary} />
-                      <Text style={[styles.replyBtnText, { color: colors.primary }]}>Call</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              )}
-            </GlassCard>
-          );
-        })}
+        <AccordionSection
+          title="Active Conversations"
+          icon="chatbubbles"
+          iconColor="#1A8A7E"
+          badge={unreadConversations.length}
+          defaultOpen={true}
+        >
+          {unreadConversations.map(convo => (
+            <ConversationCard
+              key={convo.id}
+              convo={convo}
+              isExpanded={expandedConvo === convo.id}
+              onToggle={() => setExpandedConvo(expandedConvo === convo.id ? null : convo.id)}
+              colors={colors}
+              isDark={isDark}
+            />
+          ))}
+        </AccordionSection>
+
+        <AccordionSection
+          title="All Messages"
+          icon="mail"
+          iconColor="#007AFF"
+          badge={CONVERSATIONS.length}
+          defaultOpen={true}
+        >
+          {CONVERSATIONS.map(convo => (
+            <ConversationCard
+              key={convo.id}
+              convo={convo}
+              isExpanded={expandedConvo === convo.id}
+              onToggle={() => setExpandedConvo(expandedConvo === convo.id ? null : convo.id)}
+              colors={colors}
+              isDark={isDark}
+            />
+          ))}
+        </AccordionSection>
 
         <Footer />
       </ScrollView>
@@ -215,12 +314,25 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 24, paddingHorizontal: 16 },
-  actionRow: { flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 12 },
+  statCard: { minHeight: 80 },
+  statInner: { alignItems: 'center' as const, justifyContent: 'center' as const, gap: 4 },
+  statValue: { fontSize: 22, fontWeight: '800' as const },
+  statLabel: { fontSize: 11, fontWeight: '500' as const },
+  actionRow: { flexDirection: 'row', gap: 10, marginTop: 14, marginBottom: 12 },
   actionCard: { minHeight: 56 },
   actionInner: { flexDirection: 'row', alignItems: 'center' as const, gap: 8 },
   actionText: { fontSize: 14, fontWeight: '600' as const },
   unreadBanner: { marginBottom: 12, paddingLeft: 4 },
   unreadBannerText: { fontSize: 13, fontWeight: '600' as const },
+  carouselCard: { width: 180, minHeight: 120 },
+  carouselInner: { gap: 6 },
+  carouselTop: { flexDirection: 'row', alignItems: 'center' as const, justifyContent: 'space-between' as const },
+  carouselAvatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center' as const, justifyContent: 'center' as const },
+  carouselAvatarText: { fontSize: 15, fontWeight: '700' as const },
+  carouselBadge: { width: 20, height: 20, borderRadius: 10, alignItems: 'center' as const, justifyContent: 'center' as const },
+  carouselBadgeText: { fontSize: 10, fontWeight: '700' as const, color: '#FFF' },
+  carouselName: { fontSize: 13, fontWeight: '600' as const },
+  carouselPreview: { fontSize: 11, lineHeight: 15 },
   convoCard: { minHeight: 64, marginBottom: 8 },
   convoRow: { flexDirection: 'row', alignItems: 'center' as const, gap: 12 },
   avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center' as const, justifyContent: 'center' as const },

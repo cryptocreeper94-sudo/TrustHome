@@ -192,13 +192,26 @@ function configureExpoAndLanding(app: express.Application) {
       return next();
     }
 
-    if (req.path !== "/" && req.path !== "/manifest") {
+    if (req.path !== "/" && req.path !== "/manifest" && !req.path.startsWith("/app")) {
       return next();
     }
 
     const platform = req.header("expo-platform");
     if (platform && (platform === "ios" || platform === "android")) {
       return serveExpoManifest(platform, res);
+    }
+
+    if (req.path.startsWith("/app")) {
+      const webIndex = path.resolve(process.cwd(), "static-build", "index.html");
+      if (fs.existsSync(webIndex)) {
+        return res.sendFile(webIndex);
+      }
+      return serveLandingPage({
+        req,
+        res,
+        landingPageTemplate,
+        appName,
+      });
     }
 
     if (req.path === "/") {

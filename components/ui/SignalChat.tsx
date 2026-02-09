@@ -20,6 +20,7 @@ interface EcosystemApp {
 const ECOSYSTEM_APPS: EcosystemApp[] = [
   { id: 'trusthome', name: 'TrustHome', color: '#1A8A7E', icon: 'home', abbrev: 'TH' },
   { id: 'paintpros', name: 'PaintPros', color: '#E85D3A', icon: 'color-palette', abbrev: 'PP' },
+  { id: 'mediastudio', name: 'DW Media Studio', color: '#E74C3C', icon: 'videocam', abbrev: 'MS' },
   { id: 'trustshield', name: 'TrustShield', color: '#6C5CE7', icon: 'shield-checkmark', abbrev: 'TS' },
   { id: 'darkwave', name: 'DarkWave TL', color: '#2D3436', icon: 'cube', abbrev: 'DW' },
 ];
@@ -50,6 +51,7 @@ const DEFAULT_CHANNELS: ChatChannel[] = [
   { id: 'ecosystem-general', name: 'Ecosystem Hub', icon: 'globe', description: 'Cross-app announcements & updates', unread: 2, scope: 'ecosystem' },
   { id: 'ecosystem-ops', name: 'Operations', icon: 'git-network', description: 'Cross-vertical coordination', unread: 0, scope: 'ecosystem' },
   { id: 'ecosystem-trust', name: 'Trust Layer', icon: 'shield-checkmark', description: 'Blockchain verification & trust scores', unread: 1, scope: 'ecosystem' },
+  { id: 'ecosystem-media', name: 'Media Studio', icon: 'videocam', description: 'Video walkthroughs, media production & editing', unread: 1, scope: 'ecosystem' },
   { id: 'th-transactions', name: 'Transactions', icon: 'document-text', description: 'TrustHome deal discussions', unread: 0, scope: 'vertical' },
   { id: 'th-leads', name: 'Leads', icon: 'people', description: 'TrustHome lead coordination', unread: 0, scope: 'vertical' },
   { id: 'support', name: 'Support', icon: 'help-circle', description: 'Ecosystem-wide support desk', unread: 0, scope: 'ecosystem' },
@@ -158,6 +160,13 @@ export function SignalChat() {
       seedMessages.push(
         { id: '13', senderId: 'system', senderName: 'Signal', text: `TrustHome lead coordination and pipeline updates.`, timestamp: formatTime(new Date(Date.now() - 7200000)), isOwn: false, channel: channel.id, sourceApp: 'trusthome' },
         { id: '14', senderId: 'pp-admin', senderName: 'Marcus Chen', text: 'Sending over a cross-vertical referral - client looking to sell after renovation. Pre-qualified, high intent.', timestamp: formatTime(new Date(Date.now() - 2700000)), isOwn: false, channel: channel.id, sourceApp: 'paintpros' },
+      );
+    } else if (channel.id === 'ecosystem-media') {
+      seedMessages.push(
+        { id: '16', senderId: 'system', senderName: 'Signal', text: `DarkWave Media Studio channel. Video walkthroughs, property media, audio/video editing, and production coordination across the ecosystem.`, timestamp: formatTime(new Date(Date.now() - 14400000)), isOwn: false, channel: channel.id, sourceApp: 'mediastudio' },
+        { id: '17', senderId: 'ms-editor', senderName: 'Riley Park', text: 'New feature rolling out: agents can now request video walkthrough edits directly from their TrustHome dashboard. Full suite - cuts, transitions, audio overlay, branding.', timestamp: formatTime(new Date(Date.now() - 5400000)), isOwn: false, channel: channel.id, sourceApp: 'mediastudio' },
+        { id: '18', senderId: 'jennifer', senderName: 'Jennifer Lambert', text: 'This is exactly what we needed. I have three listings that need professional walkthrough videos before open house this weekend.', timestamp: formatTime(new Date(Date.now() - 3600000)), isOwn: false, channel: channel.id, sourceApp: 'trusthome' },
+        { id: '19', senderId: 'ms-editor', senderName: 'Riley Park', text: 'Send them over. We support raw footage upload, multi-angle stitching, background music, voiceover, and branded intro/outro. Turnaround is 24hrs through the tenant API.', timestamp: formatTime(new Date(Date.now() - 1800000)), isOwn: false, channel: channel.id, sourceApp: 'mediastudio' },
       );
     } else if (channel.id === 'support') {
       seedMessages.push(

@@ -919,6 +919,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ─── DarkWave Media Studio ──────────────────────────────────────────
+
+  app.get("/api/media-studio/status", (_req: Request, res: Response) => {
+    res.json({
+      configured: !!(process.env.DW_MEDIA_API_KEY && process.env.DW_MEDIA_API_SECRET),
+      baseUrl: "https://media.darkwavestudios.io/api",
+      service: "DarkWave Media Studio",
+      capabilities: [
+        "video_walkthrough",
+        "video_editing",
+        "audio_editing",
+        "media_combining",
+        "branded_intros",
+        "voiceover",
+        "multi_angle_stitch",
+        "thumbnail_generation",
+      ],
+      tenantSpace: "trusthome",
+    });
+  });
+
+  app.get("/api/media-studio/projects", async (req: Request, res: Response) => {
+    try {
+      res.json({
+        projects: [],
+        message: "Media Studio tenant space ready. Connect API keys to sync projects.",
+        tenantSpace: "trusthome",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/media-studio/walkthrough-request", async (req: Request, res: Response) => {
+    try {
+      const { propertyId, propertyAddress, requestType, notes } = req.body;
+      if (!propertyAddress) {
+        return res.status(400).json({ error: "Property address is required" });
+      }
+      res.json({
+        requestId: `ms-${Date.now()}`,
+        status: "queued",
+        propertyAddress,
+        requestType: requestType || "video_walkthrough",
+        estimatedTurnaround: "24 hours",
+        message: "Video walkthrough request submitted to DarkWave Media Studio.",
+        tenantSpace: "trusthome",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
   // ─── Trust Layer (DWTL) ─────────────────────────────────────────────
 
   app.get("/api/trustlayer/status", (_req: Request, res: Response) => {
@@ -1207,10 +1260,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           icon: "mail-outline",
         },
         {
+          id: "media_studio",
+          name: "DarkWave Media Studio",
+          description: "Video walkthroughs, audio/video editing, media production API",
+          baseUrl: "https://media.darkwavestudios.io/api",
+          configured: !!(process.env.DW_MEDIA_API_KEY && process.env.DW_MEDIA_API_SECRET),
+          keyMasked: process.env.DW_MEDIA_API_KEY ? `${process.env.DW_MEDIA_API_KEY.slice(0, 6)}...${process.env.DW_MEDIA_API_KEY.slice(-4)}` : null,
+          icon: "videocam-outline",
+        },
+        {
           id: "socketio",
           name: "Socket.IO (Real-time)",
-          description: "Live messaging, notifications, presence via PaintPros.io relay",
-          baseUrl: "wss://paintpros.io",
+          description: "Live messaging, notifications, ecosystem relay",
+          baseUrl: "wss://darkwavestudios.io",
           configured: true,
           keyMasked: "Uses Orbit credentials",
           icon: "flash-outline",

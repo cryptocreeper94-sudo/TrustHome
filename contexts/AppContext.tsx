@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useMemo, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, ReactNode, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getQueryFn, apiRequest } from '@/lib/query-client';
 
 interface AuthUser {
@@ -35,6 +36,9 @@ interface AppContextValue {
   openSignalChat: () => void;
   closeSignalChat: () => void;
   toggleSignalChat: () => void;
+  showWelcomeGuide: boolean;
+  setShowWelcomeGuide: (show: boolean) => void;
+  replayWelcomeGuide: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -66,6 +70,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [signalChatOpen, setSignalChatOpen] = useState(false);
+  const [showWelcomeGuide, setShowWelcomeGuide] = useState(false);
+  const [guideChecked, setGuideChecked] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && !guideChecked) {
+      AsyncStorage.getItem('trusthome_guide_seen').then((val) => {
+        if (!val) {
+          setShowWelcomeGuide(true);
+        }
+        setGuideChecked(true);
+      }).catch(() => setGuideChecked(true));
+    }
+  }, [isAuthenticated, guideChecked]);
 
   React.useEffect(() => {
     if (user) {
@@ -106,6 +123,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const closeSignalChat = useCallback(() => setSignalChatOpen(false), []);
   const toggleSignalChat = useCallback(() => setSignalChatOpen(prev => !prev), []);
 
+  const handleSetShowWelcomeGuide = useCallback((show: boolean) => {
+    setShowWelcomeGuide(show);
+    if (!show) {
+      AsyncStorage.setItem('trusthome_guide_seen', 'true').catch(() => {});
+    }
+  }, []);
+
+  const replayWelcomeGuide = useCallback(() => {
+    setShowWelcomeGuide(true);
+  }, []);
+
   const value = useMemo(() => ({
     user,
     isLoading,
@@ -129,7 +157,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openSignalChat,
     closeSignalChat,
     toggleSignalChat,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat]);
+    showWelcomeGuide,
+    setShowWelcomeGuide: handleSetShowWelcomeGuide,
+    replayWelcomeGuide,
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide]);
 
   return (
     <AppContext.Provider value={value}>

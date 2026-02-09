@@ -6,10 +6,11 @@ import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
 import { AgentDashboard } from '@/components/screens/AgentDashboard';
 import { ClientDashboard } from '@/components/screens/ClientDashboard';
+import { WelcomeGuide } from '@/components/ui/WelcomeGuide';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
-  const { currentRole, isAuthenticated, isLoading } = useApp();
+  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide } = useApp();
   const router = useRouter();
 
   React.useEffect(() => {
@@ -36,6 +37,10 @@ export default function HomeScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header />
       {isAgent ? <AgentDashboard /> : <ClientDashboard />}
+      <WelcomeGuide
+        visible={showWelcomeGuide}
+        onComplete={() => setShowWelcomeGuide(false)}
+      />
     </View>
   );
 }

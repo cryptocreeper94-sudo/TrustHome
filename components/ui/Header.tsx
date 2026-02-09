@@ -72,6 +72,32 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
               Powered by the DarkWave Trust Layer (DWTL) — a custom Layer 1 blockchain providing immutable transaction records, document verification, and professional certification.
             </Text>
 
+            <View style={[modalStyles.membershipCard, {
+              backgroundColor: isDark ? 'rgba(26,138,126,0.08)' : 'rgba(26,138,126,0.04)',
+              borderColor: colors.primary + '25',
+            }]}>
+              <View style={modalStyles.membershipHeader}>
+                <MaterialCommunityIcons name="card-account-details" size={22} color={colors.primary} />
+                <Text style={[modalStyles.membershipTitle, { color: colors.text }]}>Your Membership</Text>
+              </View>
+              <Text style={[modalStyles.membershipDesc, { color: colors.textSecondary }]}>
+                As a TrustHome subscriber, you are automatically a Trust Layer member. Your subscription includes full access to your Trust Layer dashboard, digital membership card, professional certifications, and blockchain-verified credentials.
+              </Text>
+              <Pressable
+                onPress={() => Linking.openURL('https://dwtl.io')}
+                style={[modalStyles.membershipCta, { backgroundColor: colors.primary }]}
+              >
+                <MaterialCommunityIcons name="login" size={18} color="#FFFFFF" />
+                <Text style={modalStyles.membershipCtaText}>Log in at dwtl.io</Text>
+                <Ionicons name="open-outline" size={14} color="rgba(255,255,255,0.7)" />
+              </Pressable>
+              <Text style={[modalStyles.membershipHint, { color: colors.textTertiary }]}>
+                Use the same credentials you use for TrustHome to access your Trust Layer dashboard, set up your membership card, and manage your verified professional profile.
+              </Text>
+            </View>
+
+            <Text style={[modalStyles.sectionTitle, { color: colors.text }]}>Ecosystem Links</Text>
+
             <View style={modalStyles.linksSection}>
               {links.map((link, i) => (
                 <Pressable
@@ -376,6 +402,51 @@ const modalStyles = StyleSheet.create({
   linkDesc: {
     fontSize: 12,
     marginTop: 2,
+  },
+  membershipCard: {
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  membershipHeader: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 10,
+    marginBottom: 10,
+  },
+  membershipTitle: {
+    fontSize: 17,
+    fontWeight: '700' as const,
+  },
+  membershipDesc: {
+    fontSize: 14,
+    lineHeight: 21,
+    marginBottom: 14,
+  },
+  membershipCta: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  membershipCtaText: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+  },
+  membershipHint: {
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'center' as const,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+    marginBottom: 4,
   },
   hashCard: {
     flexDirection: 'row' as const,

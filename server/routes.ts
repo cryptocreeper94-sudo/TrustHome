@@ -924,7 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/media-studio/status", (_req: Request, res: Response) => {
     res.json({
       configured: !!(process.env.DW_MEDIA_API_KEY && process.env.DW_MEDIA_API_SECRET),
-      baseUrl: "https://media.darkwavestudios.io/api",
+      baseUrl: "https://media.darkwavestudios.io/api/ecosystem",
       service: "DarkWave Media Studio",
       capabilities: [
         "video_walkthrough",
@@ -1263,7 +1263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: "media_studio",
           name: "DarkWave Media Studio",
           description: "Video walkthroughs, audio/video editing, media production API",
-          baseUrl: "https://media.darkwavestudios.io/api",
+          baseUrl: "https://media.darkwavestudios.io/api/ecosystem",
           configured: !!(process.env.DW_MEDIA_API_KEY && process.env.DW_MEDIA_API_SECRET),
           keyMasked: process.env.DW_MEDIA_API_KEY ? `${process.env.DW_MEDIA_API_KEY.slice(0, 6)}...${process.env.DW_MEDIA_API_KEY.slice(-4)}` : null,
           icon: "videocam-outline",

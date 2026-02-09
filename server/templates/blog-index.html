@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Blog - TrustHome | Real Estate Insights & Market Updates</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Stay informed with TrustHome's real estate blog. Expert insights on market trends, home buying tips, investment strategies, and industry updates." />
+    <meta name="author" content="DarkWave Studios LLC" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1A8A7E" />
+    <link rel="canonical" href="BASE_URL_PLACEHOLDER/blog" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="TrustHome Blog - Real Estate Insights" />
+    <meta property="og:description" content="Expert real estate insights, market analysis, home buying tips, and industry updates from TrustHome." />
+    <meta property="og:url" content="BASE_URL_PLACEHOLDER/blog" />
+    <meta property="og:site_name" content="TrustHome by DarkWave Studios" />
+    <meta property="og:image" content="BASE_URL_PLACEHOLDER/assets/images/icon.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TrustHome Blog - Real Estate Insights" />
+    <meta name="twitter:description" content="Expert real estate insights, market analysis, and home buying tips from TrustHome." />
+
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/assets/images/icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "TrustHome Blog",
+      "description": "Real estate insights, market analysis, and expert advice from TrustHome.",
+      "url": "BASE_URL_PLACEHOLDER/blog",
+      "publisher": {
+        "@type": "Organization",
+        "name": "TrustHome by DarkWave Studios",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "BASE_URL_PLACEHOLDER/assets/images/icon.png"
+        }
+      }
+    }
+    </script>
+
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        background: #0F1419;
+        color: #E8E8E8;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(15, 20, 25, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(26, 138, 126, 0.15);
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: #E8E8E8;
+      }
+      .nav-brand img {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+      }
+      .nav-brand span {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 24px;
+      }
+      .nav-links a {
+        color: #9CA3AF;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover { color: #1A8A7E; }
+      .hero {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 60px 24px 40px;
+      }
+      .hero h1 {
+        font-size: 42px;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #1A8A7E, #2DD4BF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hero p {
+        font-size: 18px;
+        color: #9CA3AF;
+        max-width: 600px;
+      }
+      .categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px 40px;
+      }
+      .cat-pill {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #9CA3AF;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .cat-pill:hover, .cat-pill.active {
+        background: rgba(26, 138, 126, 0.15);
+        border-color: rgba(26, 138, 126, 0.3);
+        color: #1A8A7E;
+      }
+      .posts-grid {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px 80px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+      }
+      .post-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+      }
+      .post-card:hover {
+        border-color: rgba(26, 138, 126, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      }
+      .card-cover {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: linear-gradient(135deg, rgba(26, 138, 126, 0.1), rgba(26, 138, 126, 0.03));
+      }
+      .card-body {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .card-category {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #1A8A7E;
+        margin-bottom: 8px;
+      }
+      .card-title {
+        font-size: 19px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        color: #FFFFFF;
+        letter-spacing: -0.3px;
+      }
+      .card-excerpt {
+        font-size: 14px;
+        color: #9CA3AF;
+        line-height: 1.5;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255,255,255,0.04);
+        font-size: 12px;
+        color: #6B7280;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        color: #6B7280;
+      }
+      .empty-state h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #9CA3AF;
+        margin-bottom: 8px;
+      }
+      .footer {
+        border-top: 1px solid rgba(255,255,255,0.06);
+        padding: 40px 24px;
+        text-align: center;
+        color: #6B7280;
+        font-size: 13px;
+      }
+      .footer a { color: #1A8A7E; text-decoration: none; }
+      @media (max-width: 640px) {
+        .hero h1 { font-size: 30px; }
+        .hero { padding: 32px 16px 24px; }
+        .posts-grid { grid-template-columns: 1fr; padding: 0 16px 60px; }
+        .nav-links { display: none; }
+        .categories { padding: 0 16px 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="/" class="nav-brand">
+        <img src="/assets/images/favicon.png" alt="TrustHome" />
+        <span>TrustHome</span>
+      </a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/blog">Blog</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <h1>TrustHome Blog</h1>
+      <p>Real estate insights, market analysis, and expert advice to help you navigate your next move.</p>
+    </section>
+
+    <div class="categories">
+      BLOG_CATEGORIES_HTML
+    </div>
+
+    <div class="posts-grid">
+      BLOG_POSTS_HTML
+    </div>
+
+    <footer class="footer">
+      <p>&copy; 2026 <a href="https://darkwavestudios.io">DarkWave Studios LLC</a>. All rights reserved.</p>
+      <p style="margin-top: 8px;">Powered by <a href="https://trustshield.tech">trustshield.tech</a></p>
+    </footer>
+  </body>
+</html>

@@ -23,9 +23,10 @@ import {
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
-import { registerSchema, loginSchema, verificationCodes, users } from "@shared/schema";
+import { registerSchema, loginSchema, verificationCodes, users, blogPosts } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import OpenAI from "openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -1305,6 +1306,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/blog/posts", async (req: Request, res: Response) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const conditions = [eq(blogPosts.status, 'published')];
+      if (category) {
+        conditions.push(eq(blogPosts.category, category));
+      }
+      const posts = await db.select().from(blogPosts).where(and(...conditions)).orderBy(desc(blogPosts.publishedAt));
+      return res.json(posts);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/blog/posts/:slug", async (req: Request, res: Response) => {
+    try {
+      const [post] = await db.select().from(blogPosts).where(
+        and(eq(blogPosts.slug, req.params.slug), eq(blogPosts.status, 'published'))
+      );
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/blog/admin/posts", async (_req: Request, res: Response) => {
+    try {
+      const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt));
+      return res.json(posts);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/blog/admin/posts", async (req: Request, res: Response) => {
+    try {
+      const [post] = await db.insert(blogPosts).values({
+        ...req.body,
+        publishedAt: req.body.status === 'published' ? new Date() : null,
+      }).returning();
+      return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.put("/api/blog/admin/posts/:id", async (req: Request, res: Response) => {
+    try {
+      const updateData = { ...req.body, updatedAt: new Date() };
+      if (req.body.status === 'published' && !req.body.publishedAt) {
+        updateData.publishedAt = new Date();
+      }
+      const [post] = await db.update(blogPosts).set(updateData).where(eq(blogPosts.id, req.params.id)).returning();
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.delete("/api/blog/admin/posts/:id", async (req: Request, res: Response) => {
+    try {
+      const [post] = await db.delete(blogPosts).where(eq(blogPosts.id, req.params.id)).returning();
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      return res.json({ message: "Post deleted" });
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/blog/admin/generate", async (req: Request, res: Response) => {
+    try {
+      const { topic, category, tone } = req.body;
+      if (!topic) {
+        return res.status(400).json({ error: "Topic is required" });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a real estate content writer for TrustHome, a premium real estate platform. Write professional, SEO-optimized blog posts. Output JSON with keys: title, excerpt, content (full HTML with paragraphs, headings h2/h3, lists), metaTitle (max 60 chars), metaDescription (max 160 chars), tags (array of strings).",
+          },
+          {
+            role: "user",
+            content: `Write a blog post about: ${topic}${category ? `. Category: ${category}` : ''}${tone ? `. Tone: ${tone}` : ''}`,
+          },
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const generated = JSON.parse(completion.choices[0].message.content || '{}');
+
+      const slug = generated.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/[\s]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      const [post] = await db.insert(blogPosts).values({
+        title: generated.title,
+        slug,
+        excerpt: generated.excerpt,
+        content: generated.content,
+        category: category || 'market-insights',
+        tags: JSON.stringify(generated.tags || []),
+        metaTitle: generated.metaTitle,
+        metaDescription: generated.metaDescription,
+        aiGenerated: 'true',
+        status: 'draft',
+        authorName: 'TrustHome AI',
+      }).returning();
+
+      return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 

@@ -47,6 +47,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: 'returnNull' }),
   });
 
+  const [currentRole, setCurrentRole] = useState<UserRole>('client_buyer');
+  const [demoMode, setDemoMode] = useState(false);
+
   const realUser = data?.user ?? null;
 
   const DEMO_USER: AuthUser = {
@@ -60,9 +63,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const user = demoMode ? DEMO_USER : realUser;
   const isAuthenticated = !!user;
   const isAgentAuthenticated = isAuthenticated && user?.role === 'agent';
-
-  const [currentRole, setCurrentRole] = useState<UserRole>('client_buyer');
-  const [demoMode, setDemoMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [signalChatOpen, setSignalChatOpen] = useState(false);

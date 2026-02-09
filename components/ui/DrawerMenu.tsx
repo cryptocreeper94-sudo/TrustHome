@@ -18,7 +18,7 @@ interface MenuItem {
 
 export function DrawerMenu() {
   const { colors, isDark, toggleTheme } = useTheme();
-  const { drawerOpen, closeDrawer, currentRole, isAuthenticated, isAgentAuthenticated, signOut, user } = useApp();
+  const { drawerOpen, closeDrawer, currentRole, isAuthenticated, isAgentAuthenticated, signOut, user, demoMode, exitDemo } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -100,8 +100,8 @@ export function DrawerMenu() {
                     <Text style={[styles.drawerTitle, { color: colors.text }]} numberOfLines={1}>
                       {user.firstName} {user.lastName}
                     </Text>
-                    <Text style={[styles.roleLabel, { color: colors.textSecondary }]}>
-                      {isAgent ? 'Agent Dashboard' : 'Client Portal'}
+                    <Text style={[styles.roleLabel, { color: demoMode ? colors.primary : colors.textSecondary }]}>
+                      {demoMode ? 'Demo Explorer' : isAgent ? 'Agent Dashboard' : 'Client Portal'}
                     </Text>
                   </View>
                 </>
@@ -145,7 +145,26 @@ export function DrawerMenu() {
               <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textSecondary} />
               <Text style={[styles.themeText, { color: colors.textSecondary }]}>{isDark ? 'Light Mode' : 'Dark Mode'}</Text>
             </Pressable>
-            {isAuthenticated ? (
+            {demoMode ? (
+              <>
+                <Pressable
+                  onPress={() => { closeDrawer(); exitDemo(); router.replace('/team'); }}
+                  style={styles.menuItem}
+                  testID="drawer-request-access"
+                >
+                  <Ionicons name="hand-right-outline" size={22} color={colors.primary} />
+                  <Text style={[styles.menuLabel, { color: colors.primary }]}>Request Access</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => { closeDrawer(); exitDemo(); router.replace('/team'); }}
+                  style={styles.menuItem}
+                  testID="drawer-exit-demo"
+                >
+                  <Ionicons name="exit-outline" size={22} color={colors.error} />
+                  <Text style={[styles.menuLabel, { color: colors.error }]}>Exit Demo</Text>
+                </Pressable>
+              </>
+            ) : isAuthenticated ? (
               <Pressable onPress={handleSignOut} style={styles.menuItem} testID="drawer-sign-out">
                 <Ionicons name="log-out-outline" size={22} color={colors.error} />
                 <Text style={[styles.menuLabel, { color: colors.error }]}>Sign Out</Text>

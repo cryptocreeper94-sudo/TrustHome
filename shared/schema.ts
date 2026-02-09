@@ -18,6 +18,7 @@ export const users = pgTable("users", {
   phone: text("phone"),
   brokerage: text("brokerage"),
   licenseNumber: text("license_number"),
+  mustResetPassword: text("must_reset_password").notNull().default('false'),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

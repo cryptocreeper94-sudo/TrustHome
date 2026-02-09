@@ -335,6 +335,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  const PIN_ACCOUNTS: Record<string, { email: string; firstName: string; lastName: string; role: string; brokerage: string; tempPassword: string; mustReset: boolean }> = {
+    "0424": {
+      email: "developer@trusthome.io",
+      firstName: "Developer",
+      lastName: "Admin",
+      role: "agent",
+      brokerage: "DarkWave Studios",
+      tempPassword: "DevAccess!2026",
+      mustReset: false,
+    },
+    "7777": {
+      email: "jennifer@trusthome.io",
+      firstName: "Jennifer",
+      lastName: "Lambert",
+      role: "agent",
+      brokerage: "DarkWave Studios",
+      tempPassword: "TempAccess!2026",
+      mustReset: true,
+    },
+  };
+
   app.post("/api/auth/dev-pin", async (req: Request, res: Response) => {
     try {
       const { pin } = req.body;
@@ -342,25 +363,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "PIN is required" });
       }
 
-      if (pin !== "0424") {
+      const account = PIN_ACCOUNTS[pin];
+      if (!account) {
         return res.status(401).json({ error: "Invalid PIN" });
       }
 
-      const devEmail = "developer@trusthome.io";
-      let user = await storage.getUserByEmail(devEmail);
+      let user = await storage.getUserByEmail(account.email);
 
       if (!user) {
-        const hashedPassword = await bcrypt.hash("DevAccess!2026", 12);
+        const hashedPassword = await bcrypt.hash(account.tempPassword, 12);
         user = await storage.createUser({
-          email: devEmail,
+          email: account.email,
           password: hashedPassword,
-          firstName: "Developer",
-          lastName: "Admin",
-          role: "agent",
+          firstName: account.firstName,
+          lastName: account.lastName,
+          role: account.role,
           phone: null,
-          brokerage: "DarkWave Studios",
+          brokerage: account.brokerage,
           licenseNumber: null,
         });
+        if (account.mustReset) {
+          await db.update(users).set({ mustResetPassword: 'true' }).where(eq(users.id, user.id));
+        }
       }
 
       req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
@@ -371,9 +395,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       return res.json({
         user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+        mustResetPassword: user.mustResetPassword === 'true',
       });
     } catch (error) {
       console.error("Dev PIN error:", error);
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/auth/set-password", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { password } = req.body;
+      if (!password) {
+        return res.status(400).json({ error: "Password is required" });
+      }
+
+      const pwRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+      if (!pwRegex.test(password)) {
+        return res.status(400).json({ error: "Password must have at least 8 characters, one uppercase letter, and one special character" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+      await db.update(users).set({ password: hashedPassword, mustResetPassword: 'false' }).where(eq(users.id, req.session.userId));
+
+      return res.json({ message: "Password set successfully" });
+    } catch (error) {
+      console.error("Set password error:", error);
       return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
@@ -391,6 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       return res.json({
         user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+        mustResetPassword: user.mustResetPassword === 'true',
       });
     } catch (error) {
       console.error("Auth me error:", error);

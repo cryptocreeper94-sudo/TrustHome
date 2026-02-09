@@ -27,6 +27,7 @@ function RootLayoutNav() {
         <Stack.Screen name="documents" />
         <Stack.Screen name="leads" />
         <Stack.Screen name="marketing" />
+        <Stack.Screen name="blog" />
         <Stack.Screen name="analytics" />
         <Stack.Screen name="network" />
         <Stack.Screen name="branding" />

@@ -33,6 +33,7 @@ export function DrawerMenu() {
     { icon: 'document-text-outline', label: 'Documents', route: '/documents' },
     { icon: 'people-outline', label: 'Leads', route: '/leads', agentOnly: true },
     { icon: 'megaphone-outline', label: 'Marketing', route: '/marketing', agentOnly: true },
+    { icon: 'newspaper-outline', label: 'Blog', route: '/blog', agentOnly: true },
     { icon: 'bar-chart-outline', label: 'Analytics', route: '/analytics', agentOnly: true },
     { icon: 'globe-outline', label: 'Network', route: '/network', agentOnly: true, dividerAfter: true },
     { icon: 'color-palette-outline', label: 'Branding', route: '/branding', agentOnly: true, dividerAfter: true },

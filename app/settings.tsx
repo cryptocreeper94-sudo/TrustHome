@@ -7,6 +7,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { TrustShieldBadge } from '@/components/ui/TrustShieldBadge';
+import { AccordionSection } from '@/components/ui/AccordionSection';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 import { Footer } from '@/components/ui/Footer';
@@ -22,6 +23,9 @@ interface SettingsItem {
 
 interface SettingsSection {
   title: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  defaultOpen?: boolean;
   items: SettingsItem[];
 }
 
@@ -57,6 +61,9 @@ export default function SettingsScreen() {
   const SECTIONS: SettingsSection[] = [
     {
       title: 'Account',
+      icon: 'person',
+      iconColor: '#007AFF',
+      defaultOpen: true,
       items: [
         { icon: 'person-outline', label: 'Edit Profile', type: 'nav' },
         { icon: 'lock-closed-outline', label: 'Change Password', type: 'nav' },
@@ -65,6 +72,8 @@ export default function SettingsScreen() {
     },
     {
       title: 'Notifications',
+      icon: 'notifications',
+      iconColor: '#FF9500',
       items: [
         { icon: 'notifications-outline', label: 'Push Notifications', type: 'toggle', toggleKey: 'pushNotifications' },
         { icon: 'mail-outline', label: 'Email Alerts', type: 'toggle', toggleKey: 'emailAlerts' },
@@ -74,6 +83,8 @@ export default function SettingsScreen() {
     },
     {
       title: 'Preferences',
+      icon: 'color-palette',
+      iconColor: '#AF52DE',
       items: [
         { icon: 'color-palette-outline', label: 'Theme', type: 'status', value: themeLabel },
         { icon: 'eye-outline', label: 'Default View', type: 'status', value: 'Agent' },
@@ -82,6 +93,8 @@ export default function SettingsScreen() {
     },
     {
       title: 'White Label Branding',
+      icon: 'brush',
+      iconColor: '#1A8A7E',
       items: [
         { icon: 'brush-outline', label: 'Brand Colors', type: 'nav' },
         { icon: 'image-outline', label: 'Logo Upload', type: 'nav' },
@@ -90,6 +103,8 @@ export default function SettingsScreen() {
     },
     {
       title: 'Integrations',
+      icon: 'git-network',
+      iconColor: '#34C759',
       items: [
         { icon: 'git-network-outline', label: 'CRM Connection', type: 'status', value: 'Connected', statusColor: colors.success },
         { icon: 'chatbubbles-outline', label: 'Signal Chat', type: 'status', value: 'Active', statusColor: colors.success },
@@ -99,6 +114,8 @@ export default function SettingsScreen() {
     },
     {
       title: 'Legal',
+      icon: 'document-text',
+      iconColor: '#FF3B30',
       items: [
         { icon: 'document-text-outline', label: 'Terms of Service', type: 'nav' },
         { icon: 'lock-open-outline', label: 'Privacy Policy', type: 'nav' },
@@ -106,6 +123,41 @@ export default function SettingsScreen() {
       ],
     },
   ];
+
+  const renderSettingsRow = (item: SettingsItem, index: number) => (
+    <Pressable
+      key={index}
+      onPress={() => {
+        if (item.label === 'Theme') cycleTheme();
+      }}
+      style={[
+        styles.settingsRow,
+        index > 0 && { borderTopWidth: 1, borderTopColor: colors.divider },
+      ]}
+    >
+      <View style={[styles.settingsIcon, { backgroundColor: colors.primaryLight }]}>
+        <Ionicons name={item.icon} size={18} color={colors.primary} />
+      </View>
+      <Text style={[styles.settingsLabel, { color: colors.text }]}>{item.label}</Text>
+      {item.type === 'toggle' && item.toggleKey && (
+        <Switch
+          value={toggles[item.toggleKey]}
+          onValueChange={() => handleToggle(item.toggleKey!)}
+          trackColor={{ false: colors.border, true: colors.primary + '60' }}
+          thumbColor={toggles[item.toggleKey] ? colors.primary : colors.textTertiary}
+        />
+      )}
+      {item.type === 'status' && (
+        <View style={styles.statusRow}>
+          <Text style={[styles.statusValue, { color: item.statusColor || colors.textSecondary }]}>{item.value}</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+        </View>
+      )}
+      {item.type === 'nav' && (
+        <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+      )}
+    </Pressable>
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -137,51 +189,24 @@ export default function SettingsScreen() {
             <TrustShieldBadge score={97.4} verified showLink />
           </View>
 
-          {SECTIONS.map((section, si) => (
-            <View key={si} style={styles.settingsGroup}>
-              <Text style={[styles.groupTitle, { color: colors.textSecondary }]}>{section.title}</Text>
-              <GlassCard>
-                {section.items.map((item, ii) => (
-                  <Pressable
-                    key={ii}
-                    onPress={() => {
-                      if (item.label === 'Theme') cycleTheme();
-                    }}
-                    style={[
-                      styles.settingsRow,
-                      ii > 0 && { borderTopWidth: 1, borderTopColor: colors.divider },
-                    ]}
-                  >
-                    <View style={[styles.settingsIcon, { backgroundColor: colors.primaryLight }]}>
-                      <Ionicons name={item.icon} size={18} color={colors.primary} />
-                    </View>
-                    <Text style={[styles.settingsLabel, { color: colors.text }]}>{item.label}</Text>
-                    {item.type === 'toggle' && item.toggleKey && (
-                      <Switch
-                        value={toggles[item.toggleKey]}
-                        onValueChange={() => handleToggle(item.toggleKey!)}
-                        trackColor={{ false: colors.border, true: colors.primary + '60' }}
-                        thumbColor={toggles[item.toggleKey] ? colors.primary : colors.textTertiary}
-                      />
-                    )}
-                    {item.type === 'status' && (
-                      <View style={styles.statusRow}>
-                        <Text style={[styles.statusValue, { color: item.statusColor || colors.textSecondary }]}>{item.value}</Text>
-                        <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-                      </View>
-                    )}
-                    {item.type === 'nav' && (
-                      <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-                    )}
-                  </Pressable>
-                ))}
-              </GlassCard>
-            </View>
-          ))}
+          <View style={styles.accordionGroup}>
+            {SECTIONS.map((section, si) => (
+              <AccordionSection
+                key={si}
+                title={section.title}
+                icon={section.icon}
+                iconColor={section.iconColor}
+                defaultOpen={section.defaultOpen}
+              >
+                {section.items.map((item, ii) => renderSettingsRow(item, ii))}
+              </AccordionSection>
+            ))}
 
-          <View style={styles.settingsGroup}>
-            <Text style={[styles.groupTitle, { color: colors.textSecondary }]}>Help</Text>
-            <GlassCard>
+            <AccordionSection
+              title="Help"
+              icon="help-circle"
+              iconColor="#007AFF"
+            >
               <Pressable
                 onPress={replayWelcomeGuide}
                 style={styles.settingsRow}
@@ -202,7 +227,7 @@ export default function SettingsScreen() {
                 <Text style={[styles.settingsLabel, { color: colors.text }]}>About This Screen</Text>
                 <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
               </Pressable>
-            </GlassCard>
+            </AccordionSection>
           </View>
 
           <Pressable style={[styles.signOutBtn, { borderColor: colors.error }]}>
@@ -277,16 +302,8 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 13,
   },
-  settingsGroup: {
+  accordionGroup: {
     marginTop: 24,
-  },
-  groupTitle: {
-    fontSize: 12,
-    fontWeight: '600' as const,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    marginLeft: 4,
   },
   settingsRow: {
     flexDirection: 'row',

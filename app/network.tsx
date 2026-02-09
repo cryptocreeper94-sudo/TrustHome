@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +9,9 @@ import { TrustShieldInline } from '@/components/ui/TrustShieldBadge';
 import { Footer } from '@/components/ui/Footer';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
+import { BentoGrid } from '@/components/ui/BentoGrid';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
+import { AccordionSection } from '@/components/ui/AccordionSection';
 
 const CATEGORIES = ['All', 'Inspectors', 'Lenders', 'Title', 'Appraisers', 'Contractors'] as const;
 type Category = typeof CATEGORIES[number];
@@ -19,6 +22,14 @@ const CATEGORY_COLORS: Record<string, string> = {
   Title: '#9B59B6',
   Appraisers: '#F39C12',
   Contractors: '#2ECC71',
+};
+
+const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  Inspectors: 'search',
+  Lenders: 'card',
+  Title: 'shield',
+  Appraisers: 'calculator',
+  Contractors: 'hammer',
 };
 
 interface Vendor {
@@ -61,6 +72,97 @@ const REFERRAL_PARTNERS: ReferralPartner[] = [
   { name: 'David Park', company: 'ClearTitle Services', initial: 'DP', referrals: 6, commission: '$3,200' },
 ];
 
+function VendorCard({ vendor, isExpanded, onToggle, catColor, colors }: {
+  vendor: Vendor;
+  isExpanded: boolean;
+  onToggle: () => void;
+  catColor: string;
+  colors: any;
+}) {
+  return (
+    <GlassCard style={{ marginBottom: 12 }} onPress={onToggle}>
+      <View style={styles.vendorCard}>
+        <View style={styles.vendorTop}>
+          <View style={[styles.vendorAvatar, { backgroundColor: catColor }]}>
+            <Text style={styles.vendorAvatarText}>{vendor.initial}</Text>
+          </View>
+          <View style={styles.vendorInfo}>
+            <Text style={[styles.vendorName, { color: colors.text }]}>{vendor.name}</Text>
+            <Text style={[styles.vendorCompany, { color: colors.textSecondary }]}>{vendor.company}</Text>
+          </View>
+          <View style={[styles.categoryBadge, { backgroundColor: catColor + '20' }]}>
+            <Text style={[styles.categoryBadgeText, { color: catColor }]}>{vendor.category}</Text>
+          </View>
+        </View>
+
+        <View style={styles.vendorMetrics}>
+          <View style={styles.metricItem}>
+            <TrustShieldInline score={vendor.trustScore} showTier />
+          </View>
+          <View style={styles.metricItem}>
+            <Ionicons name="briefcase" size={14} color={colors.primary} />
+            <Text style={[styles.metricValue, { color: colors.text }]}>{vendor.activeTransactions}</Text>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Active</Text>
+          </View>
+          <View style={styles.metricItem}>
+            <Ionicons name="call" size={14} color={colors.primary} />
+            <Text style={[styles.metricPhone, { color: colors.text }]}>{vendor.phone}</Text>
+          </View>
+          <Text style={[styles.lastUsed, { color: colors.textTertiary }]}>{vendor.lastUsed}</Text>
+        </View>
+
+        {isExpanded && (
+          <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
+            <Text style={[styles.expandedTitle, { color: colors.text }]}>Specialties</Text>
+            <View style={styles.tagRow}>
+              {vendor.specialties.map((s: string, i: number) => (
+                <View key={i} style={[styles.tag, { backgroundColor: colors.primaryLight }]}>
+                  <Text style={[styles.tagText, { color: colors.primary }]}>{s}</Text>
+                </View>
+              ))}
+            </View>
+
+            <Text style={[styles.expandedTitle, { color: colors.text, marginTop: 12 }]}>Recent Transactions</Text>
+            {vendor.recentTransactions.map((t: string, i: number) => (
+              <View key={i} style={styles.txRow}>
+                <Ionicons name="document-text-outline" size={14} color={colors.textSecondary} />
+                <Text style={[styles.txText, { color: colors.textSecondary }]}>{t}</Text>
+              </View>
+            ))}
+
+            <View style={styles.expandedActions}>
+              <Pressable style={[styles.expandedBtn, { backgroundColor: colors.success }]}>
+                <Ionicons name="call" size={16} color="#FFF" />
+                <Text style={styles.expandedBtnText}>Call</Text>
+              </Pressable>
+              <Pressable style={[styles.expandedBtn, { backgroundColor: colors.info }]}>
+                <Ionicons name="chatbubble" size={16} color="#FFF" />
+                <Text style={styles.expandedBtnText}>Message</Text>
+              </Pressable>
+              <Pressable style={[styles.expandedBtn, { backgroundColor: colors.primary }]}>
+                <Ionicons name="add-circle" size={16} color="#FFF" />
+                <Text style={styles.expandedBtnText}>Assign to Deal</Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              onPress={() => Linking.openURL(`https://dwtl.io/verify/${vendor.id}`)}
+              style={styles.verifyLink}
+            >
+              <Ionicons name="link-outline" size={13} color={colors.primary} />
+              <Text style={[styles.verifyLinkText, { color: colors.primary }]}>Verify on dwtl.io</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <View style={styles.expandIndicator}>
+          <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textTertiary} />
+        </View>
+      </View>
+    </GlassCard>
+  );
+}
+
 export default function NetworkScreen() {
   const { colors } = useTheme();
   const [activeCategory, setActiveCategory] = useState<Category>('All');
@@ -77,11 +179,31 @@ export default function NetworkScreen() {
 
   const vendorsList = apiSubcontractors || SAMPLE_VENDORS;
 
-  const filteredVendors = activeCategory === 'All'
-    ? vendorsList
-    : vendorsList.filter(v => v.category === activeCategory);
-
   const catColor = (cat: string) => CATEGORY_COLORS[cat] || colors.primary;
+
+  const topVendors = useMemo(() =>
+    [...vendorsList].sort((a, b) => b.trustScore - a.trustScore).slice(0, 5),
+    [vendorsList]
+  );
+
+  const vendorsByCategory = useMemo(() => {
+    const groups: Record<string, Vendor[]> = {};
+    const cats = ['Inspectors', 'Lenders', 'Title', 'Appraisers', 'Contractors'];
+    cats.forEach(c => { groups[c] = []; });
+    vendorsList.forEach(v => {
+      if (groups[v.category]) groups[v.category].push(v);
+    });
+    return groups;
+  }, [vendorsList]);
+
+  const visibleCategories = useMemo(() => {
+    if (activeCategory === 'All') {
+      return ['Inspectors', 'Lenders', 'Title', 'Appraisers', 'Contractors'].filter(
+        c => vendorsByCategory[c] && vendorsByCategory[c].length > 0
+      );
+    }
+    return [activeCategory];
+  }, [activeCategory, vendorsByCategory]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -94,7 +216,7 @@ export default function NetworkScreen() {
       )}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <View style={styles.statsRow}>
+          <BentoGrid columns={3} gap={10}>
             {[
               { label: 'Connected Vendors', value: '24', icon: 'people' as const },
               { label: 'Referrals This Month', value: '7', icon: 'swap-horizontal' as const },
@@ -106,7 +228,24 @@ export default function NetworkScreen() {
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
               </GlassCard>
             ))}
-          </View>
+          </BentoGrid>
+
+          <HorizontalCarousel title="Top Trust Scores" itemWidth={180} style={{ marginTop: 16 }}>
+            {topVendors.map(vendor => (
+              <GlassCard key={vendor.id} compact style={styles.carouselCard}>
+                <View style={styles.carouselCardInner}>
+                  <View style={[styles.carouselAvatar, { backgroundColor: catColor(vendor.category) }]}>
+                    <Text style={styles.carouselAvatarText}>{vendor.initial}</Text>
+                  </View>
+                  <Text style={[styles.carouselName, { color: colors.text }]} numberOfLines={1}>{vendor.name}</Text>
+                  <Text style={[styles.carouselCompany, { color: colors.textSecondary }]} numberOfLines={1}>{vendor.company}</Text>
+                  <View style={styles.carouselBadge}>
+                    <TrustShieldInline score={vendor.trustScore} showTier />
+                  </View>
+                </View>
+              </GlassCard>
+            ))}
+          </HorizontalCarousel>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillScroll} contentContainerStyle={styles.pillRow}>
             {CATEGORIES.map(cat => (
@@ -132,116 +271,63 @@ export default function NetworkScreen() {
             </View>
           )}
 
-          {filteredVendors.map(vendor => {
-            const isExpanded = expandedId === vendor.id;
+          {visibleCategories.map((category, catIdx) => {
+            const vendors = vendorsByCategory[category] || [];
+            if (vendors.length === 0) return null;
             return (
-              <GlassCard key={vendor.id} style={{ marginBottom: 12 }} onPress={() => setExpandedId(isExpanded ? null : vendor.id)}>
-                <View style={styles.vendorCard}>
-                  <View style={styles.vendorTop}>
-                    <View style={[styles.vendorAvatar, { backgroundColor: catColor(vendor.category) }]}>
-                      <Text style={styles.vendorAvatarText}>{vendor.initial}</Text>
-                    </View>
-                    <View style={styles.vendorInfo}>
-                      <Text style={[styles.vendorName, { color: colors.text }]}>{vendor.name}</Text>
-                      <Text style={[styles.vendorCompany, { color: colors.textSecondary }]}>{vendor.company}</Text>
-                    </View>
-                    <View style={[styles.categoryBadge, { backgroundColor: catColor(vendor.category) + '20' }]}>
-                      <Text style={[styles.categoryBadgeText, { color: catColor(vendor.category) }]}>{vendor.category}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.vendorMetrics}>
-                    <View style={styles.metricItem}>
-                      <TrustShieldInline score={vendor.trustScore} showTier />
-                    </View>
-                    <View style={styles.metricItem}>
-                      <Ionicons name="briefcase" size={14} color={colors.primary} />
-                      <Text style={[styles.metricValue, { color: colors.text }]}>{vendor.activeTransactions}</Text>
-                      <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Active</Text>
-                    </View>
-                    <View style={styles.metricItem}>
-                      <Ionicons name="call" size={14} color={colors.primary} />
-                      <Text style={[styles.metricPhone, { color: colors.text }]}>{vendor.phone}</Text>
-                    </View>
-                    <Text style={[styles.lastUsed, { color: colors.textTertiary }]}>{vendor.lastUsed}</Text>
-                  </View>
-
-                  {isExpanded && (
-                    <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
-                      <Text style={[styles.expandedTitle, { color: colors.text }]}>Specialties</Text>
-                      <View style={styles.tagRow}>
-                        {vendor.specialties.map((s: string, i: number) => (
-                          <View key={i} style={[styles.tag, { backgroundColor: colors.primaryLight }]}>
-                            <Text style={[styles.tagText, { color: colors.primary }]}>{s}</Text>
-                          </View>
-                        ))}
-                      </View>
-
-                      <Text style={[styles.expandedTitle, { color: colors.text, marginTop: 12 }]}>Recent Transactions</Text>
-                      {vendor.recentTransactions.map((t: string, i: number) => (
-                        <View key={i} style={styles.txRow}>
-                          <Ionicons name="document-text-outline" size={14} color={colors.textSecondary} />
-                          <Text style={[styles.txText, { color: colors.textSecondary }]}>{t}</Text>
-                        </View>
-                      ))}
-
-                      <View style={styles.expandedActions}>
-                        <Pressable style={[styles.expandedBtn, { backgroundColor: colors.success }]}>
-                          <Ionicons name="call" size={16} color="#FFF" />
-                          <Text style={styles.expandedBtnText}>Call</Text>
-                        </Pressable>
-                        <Pressable style={[styles.expandedBtn, { backgroundColor: colors.info }]}>
-                          <Ionicons name="chatbubble" size={16} color="#FFF" />
-                          <Text style={styles.expandedBtnText}>Message</Text>
-                        </Pressable>
-                        <Pressable style={[styles.expandedBtn, { backgroundColor: colors.primary }]}>
-                          <Ionicons name="add-circle" size={16} color="#FFF" />
-                          <Text style={styles.expandedBtnText}>Assign to Deal</Text>
-                        </Pressable>
-                      </View>
-
-                      <Pressable
-                        onPress={() => Linking.openURL(`https://dwtl.io/verify/${vendor.id}`)}
-                        style={styles.verifyLink}
-                      >
-                        <Ionicons name="link-outline" size={13} color={colors.primary} />
-                        <Text style={[styles.verifyLinkText, { color: colors.primary }]}>Verify on dwtl.io</Text>
-                      </Pressable>
-                    </View>
-                  )}
-
-                  <View style={styles.expandIndicator}>
-                    <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textTertiary} />
-                  </View>
-                </View>
-              </GlassCard>
+              <AccordionSection
+                key={category}
+                title={category}
+                icon={CATEGORY_ICONS[category]}
+                iconColor={CATEGORY_COLORS[category]}
+                badge={vendors.length}
+                defaultOpen={activeCategory === 'All' ? true : catIdx === 0}
+              >
+                {vendors.map(vendor => (
+                  <VendorCard
+                    key={vendor.id}
+                    vendor={vendor}
+                    isExpanded={expandedId === vendor.id}
+                    onToggle={() => setExpandedId(expandedId === vendor.id ? null : vendor.id)}
+                    catColor={catColor(vendor.category)}
+                    colors={colors}
+                  />
+                ))}
+              </AccordionSection>
             );
           })}
 
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Referral Partners</Text>
-          {REFERRAL_PARTNERS.map((partner, i) => (
-            <GlassCard key={i} style={{ marginBottom: 10 }}>
-              <View style={styles.referralCard}>
-                <View style={[styles.referralAvatar, { backgroundColor: colors.primary }]}>
-                  <Text style={styles.referralAvatarText}>{partner.initial}</Text>
-                </View>
-                <View style={styles.referralInfo}>
-                  <Text style={[styles.referralName, { color: colors.text }]}>{partner.name}</Text>
-                  <Text style={[styles.referralCompany, { color: colors.textSecondary }]}>{partner.company}</Text>
-                </View>
-                <View style={styles.referralStats}>
-                  <View style={styles.referralStatItem}>
-                    <Text style={[styles.referralStatValue, { color: colors.text }]}>{partner.referrals}</Text>
-                    <Text style={[styles.referralStatLabel, { color: colors.textSecondary }]}>Referrals</Text>
+          <AccordionSection
+            title="Referral Partners"
+            icon="swap-horizontal"
+            iconColor="#1A8A7E"
+            badge={REFERRAL_PARTNERS.length}
+            defaultOpen={activeCategory === 'All'}
+          >
+            {REFERRAL_PARTNERS.map((partner, i) => (
+              <GlassCard key={i} style={{ marginBottom: 10 }}>
+                <View style={styles.referralCard}>
+                  <View style={[styles.referralAvatar, { backgroundColor: colors.primary }]}>
+                    <Text style={styles.referralAvatarText}>{partner.initial}</Text>
                   </View>
-                  <View style={styles.referralStatItem}>
-                    <Text style={[styles.referralStatValue, { color: colors.success }]}>{partner.commission}</Text>
-                    <Text style={[styles.referralStatLabel, { color: colors.textSecondary }]}>Earned</Text>
+                  <View style={styles.referralInfo}>
+                    <Text style={[styles.referralName, { color: colors.text }]}>{partner.name}</Text>
+                    <Text style={[styles.referralCompany, { color: colors.textSecondary }]}>{partner.company}</Text>
+                  </View>
+                  <View style={styles.referralStats}>
+                    <View style={styles.referralStatItem}>
+                      <Text style={[styles.referralStatValue, { color: colors.text }]}>{partner.referrals}</Text>
+                      <Text style={[styles.referralStatLabel, { color: colors.textSecondary }]}>Referrals</Text>
+                    </View>
+                    <View style={styles.referralStatItem}>
+                      <Text style={[styles.referralStatValue, { color: colors.success }]}>{partner.commission}</Text>
+                      <Text style={[styles.referralStatLabel, { color: colors.textSecondary }]}>Earned</Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </GlassCard>
-          ))}
+              </GlassCard>
+            ))}
+          </AccordionSection>
         </View>
         <Footer />
       </ScrollView>
@@ -270,10 +356,6 @@ const styles = StyleSheet.create({
   section: {
     padding: 16,
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
   statCard: {
     minHeight: 80,
   },
@@ -284,6 +366,38 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 10,
+    marginTop: 2,
+  },
+  carouselCard: {
+    width: 180,
+    minHeight: 140,
+  },
+  carouselCardInner: {
+    alignItems: 'center' as const,
+    gap: 6,
+  },
+  carouselAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  carouselAvatarText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700' as const,
+  },
+  carouselName: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    textAlign: 'center' as const,
+  },
+  carouselCompany: {
+    fontSize: 11,
+    textAlign: 'center' as const,
+  },
+  carouselBadge: {
     marginTop: 2,
   },
   pillScroll: {
@@ -435,12 +549,6 @@ const styles = StyleSheet.create({
   expandIndicator: {
     alignItems: 'center' as const,
     marginTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    marginTop: 24,
-    marginBottom: 12,
   },
   referralCard: {
     flexDirection: 'row',

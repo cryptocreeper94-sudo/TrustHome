@@ -7,10 +7,11 @@ import { Header } from '@/components/ui/Header';
 import { AgentDashboard } from '@/components/screens/AgentDashboard';
 import { ClientDashboard } from '@/components/screens/ClientDashboard';
 import { WelcomeGuide } from '@/components/ui/WelcomeGuide';
+import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
-  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide } = useApp();
+  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding } = useApp();
   const router = useRouter();
 
   React.useEffect(() => {
@@ -40,6 +41,10 @@ export default function HomeScreen() {
       <WelcomeGuide
         visible={showWelcomeGuide}
         onComplete={() => setShowWelcomeGuide(false)}
+      />
+      <PartnerOnboardingModal
+        visible={showPartnerOnboarding && !showWelcomeGuide}
+        onComplete={() => setShowPartnerOnboarding(false)}
       />
     </View>
   );

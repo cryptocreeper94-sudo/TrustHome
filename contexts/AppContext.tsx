@@ -39,6 +39,8 @@ interface AppContextValue {
   showWelcomeGuide: boolean;
   setShowWelcomeGuide: (show: boolean) => void;
   replayWelcomeGuide: () => void;
+  showPartnerOnboarding: boolean;
+  setShowPartnerOnboarding: (show: boolean) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -72,6 +74,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [signalChatOpen, setSignalChatOpen] = useState(false);
   const [showWelcomeGuide, setShowWelcomeGuide] = useState(false);
   const [guideChecked, setGuideChecked] = useState(false);
+  const [showPartnerOnboarding, setShowPartnerOnboarding] = useState(false);
+  const [partnerChecked, setPartnerChecked] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !guideChecked) {
@@ -83,6 +87,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }).catch(() => setGuideChecked(true));
     }
   }, [isAuthenticated, guideChecked]);
+
+  useEffect(() => {
+    if (isAuthenticated && user && !partnerChecked) {
+      const isJennifer = user.email === 'jennifer@trusthome.io' || (user.firstName === 'Jennifer' && user.lastName === 'Lambert');
+      if (isJennifer) {
+        AsyncStorage.getItem('trusthome_partner_onboarding_seen').then((val) => {
+          if (!val) {
+            setShowPartnerOnboarding(true);
+          }
+          setPartnerChecked(true);
+        }).catch(() => setPartnerChecked(true));
+      } else {
+        setPartnerChecked(true);
+      }
+    }
+  }, [isAuthenticated, user, partnerChecked]);
 
   React.useEffect(() => {
     if (user) {
@@ -134,6 +154,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setShowWelcomeGuide(true);
   }, []);
 
+  const handleSetShowPartnerOnboarding = useCallback((show: boolean) => {
+    setShowPartnerOnboarding(show);
+    if (!show) {
+      AsyncStorage.setItem('trusthome_partner_onboarding_seen', 'true').catch(() => {});
+    }
+  }, []);
+
   const value = useMemo(() => ({
     user,
     isLoading,
@@ -160,7 +187,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     showWelcomeGuide,
     setShowWelcomeGuide: handleSetShowWelcomeGuide,
     replayWelcomeGuide,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide]);
+    showPartnerOnboarding,
+    setShowPartnerOnboarding: handleSetShowPartnerOnboarding,
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding]);
 
   return (
     <AppContext.Provider value={value}>

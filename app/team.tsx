@@ -58,6 +58,8 @@ export default function TeamScreen() {
   const [reqBrokerage, setReqBrokerage] = useState('');
   const [reqMessage, setReqMessage] = useState('');
 
+  const [pinUserName, setPinUserName] = useState('');
+
   const [demoFirstName, setDemoFirstName] = useState('');
   const [demoLastName, setDemoLastName] = useState('');
   const [demoEmail, setDemoEmail] = useState('');
@@ -150,6 +152,7 @@ export default function TeamScreen() {
         const res = await apiRequest('POST', '/api/auth/dev-pin', { pin: entered });
         const data = await res.json();
         await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        setPinUserName(data.user?.firstName || 'Team Member');
         if (data.mustResetPassword) {
           goToStep('set_password');
         } else {
@@ -898,14 +901,14 @@ export default function TeamScreen() {
 
             {step === 'set_password' && (
               <Animated.View entering={FadeInDown.duration(400)}>
-                <View style={[styles.setupBanner, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
-                  <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
-                  <Text style={[styles.setupBannerText, { color: colors.primary }]}>Welcome! Set up your secure password to continue.</Text>
+                <View style={[styles.setupBanner, { backgroundColor: colors.success + '15', borderColor: colors.success + '30' }]}>
+                  <Ionicons name="shield-checkmark" size={20} color={colors.success} />
+                  <Text style={[styles.setupBannerText, { color: colors.success }]}>PIN verified successfully</Text>
                 </View>
 
-                <Text style={[styles.cardTitle, { color: colors.text }]}>Create Your Password</Text>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Welcome, {pinUserName}</Text>
                 <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-                  Choose a strong password for your account. You will use this to sign in going forward.
+                  Create a secure password to complete your account setup. This will be your SSO credential across the entire DarkWave ecosystem.
                 </Text>
 
                 <View style={styles.inputGroup}>
@@ -952,6 +955,13 @@ export default function TeamScreen() {
                 >
                   {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.primaryBtnText}>Set Password & Continue</Text>}
                 </Pressable>
+
+                <View style={[styles.ssoNote, { backgroundColor: colors.primary + '08', borderColor: colors.primary + '20' }]}>
+                  <Ionicons name="globe-outline" size={16} color={colors.primary} />
+                  <Text style={[styles.ssoNoteText, { color: colors.textSecondary }]}>
+                    This password works with SSO across TrustHome, PaintPros, and all DarkWave ecosystem platforms.
+                  </Text>
+                </View>
               </Animated.View>
             )}
 
@@ -1454,6 +1464,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '500' as const,
+  },
+  ssoNote: {
+    flexDirection: 'row' as const,
+    alignItems: 'flex-start' as const,
+    gap: 10,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 20,
+  },
+  ssoNoteText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 18,
   },
   footerArea: {
     flexDirection: 'row',

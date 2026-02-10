@@ -702,6 +702,15 @@ export default function AuthScreen() {
             ) : null}
           </View>
 
+          <Pressable
+            style={styles.teamLinkArea}
+            onPress={() => router.push('/team')}
+            testID="team-login-link"
+          >
+            <Ionicons name="people-outline" size={16} color={colors.primary} />
+            <Text style={[styles.teamLinkText, { color: colors.primary }]}>Team Login</Text>
+          </Pressable>
+
           <View style={styles.footerArea}>
             <Ionicons name="shield-checkmark-outline" size={14} color={colors.textTertiary} />
             <Text style={[styles.footerText, { color: colors.textTertiary }]}>Powered by TrustShield</Text>
@@ -980,12 +989,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
+  teamLinkArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 20,
+    paddingVertical: 12,
+  },
+  teamLinkText: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+  },
   footerArea: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    marginTop: 24,
+    marginTop: 12,
     paddingBottom: 8,
   },
   footerText: {

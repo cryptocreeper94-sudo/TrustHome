@@ -13,7 +13,6 @@ import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
 import { getQueryFn, apiRequest, queryClient } from '@/lib/query-client';
 
-const DEV_PIN = '0424';
 
 interface ServiceStatus {
   name: string;
@@ -116,8 +115,8 @@ export default function DeveloperScreen() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.replace('/auth');
+    if (!authLoading && isAuthenticated) {
+      setPinUnlocked(true);
     }
   }, [authLoading, isAuthenticated]);
 
@@ -538,7 +537,9 @@ export default function DeveloperScreen() {
     );
   };
 
-  const handlePinDigit = useCallback((text: string, index: number) => {
+  const [pinChecking, setPinChecking] = useState(false);
+
+  const handlePinDigit = useCallback(async (text: string, index: number) => {
     if (text.length > 1) text = text.slice(-1);
     if (text && !/^\d$/.test(text)) return;
 
@@ -553,9 +554,12 @@ export default function DeveloperScreen() {
 
     if (newDigits.every(d => d.length === 1)) {
       const entered = newDigits.join('');
-      if (entered === DEV_PIN) {
+      setPinChecking(true);
+      try {
+        await apiRequest('POST', '/api/auth/dev-pin', { pin: entered });
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
         setPinUnlocked(true);
-      } else {
+      } catch (err) {
         setPinError(true);
         setPinShake(true);
         setTimeout(() => {
@@ -563,6 +567,8 @@ export default function DeveloperScreen() {
           setPinShake(false);
           pinInputRefs.current[0]?.focus();
         }, 600);
+      } finally {
+        setPinChecking(false);
       }
     }
   }, [pinDigits]);
@@ -625,6 +631,13 @@ export default function DeveloperScreen() {
                 </View>
               ))}
             </View>
+
+            {pinChecking && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={[styles.pinErrorText, { color: colors.textSecondary }]}>Authenticating...</Text>
+              </View>
+            )}
 
             {pinError && (
               <Animated.View entering={FadeInDown.duration(200)}>

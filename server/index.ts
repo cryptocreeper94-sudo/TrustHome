@@ -253,6 +253,13 @@ function configureExpoAndLanding(app: express.Application) {
     res.sendFile(manifestJsonPath);
   });
 
+  const swPath = path.resolve(process.cwd(), "server", "templates", "sw.js");
+  app.get("/sw.js", (_req: Request, res: Response) => {
+    res.setHeader("Content-Type", "application/javascript");
+    res.setHeader("Service-Worker-Allowed", "/");
+    res.sendFile(swPath);
+  });
+
   const blogIndexTemplate = fs.readFileSync(
     path.resolve(process.cwd(), "server", "templates", "blog-index.html"),
     "utf-8"

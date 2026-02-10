@@ -555,5 +555,14 @@
         }
       })();
     </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(function(reg) { console.log('[PWA] Service worker registered:', reg.scope); })
+            .catch(function(err) { console.log('[PWA] Service worker registration failed:', err); });
+        });
+      }
+    </script>
   </body>
 </html>

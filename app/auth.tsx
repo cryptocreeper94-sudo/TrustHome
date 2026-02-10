@@ -395,6 +395,21 @@ export default function AuthScreen() {
                 <Pressable onPress={() => goToStep('register')} style={[styles.secondaryBtn, { borderColor: colors.primary }]} testID="go-register">
                   <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>Create Account</Text>
                 </Pressable>
+
+                <View style={[styles.dividerRow, { marginTop: 12 }]}>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+                  <Text style={[styles.dividerText, { color: colors.textTertiary }]}>team member?</Text>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+                </View>
+
+                <Pressable
+                  style={[styles.teamLoginBtn, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' }]}
+                  onPress={() => router.push('/team')}
+                  testID="team-login-link"
+                >
+                  <Ionicons name="people" size={18} color={colors.primary} />
+                  <Text style={[styles.teamLoginBtnText, { color: colors.primary }]}>Team Login</Text>
+                </Pressable>
               </>
             )}
 
@@ -702,15 +717,6 @@ export default function AuthScreen() {
             ) : null}
           </View>
 
-          <Pressable
-            style={styles.teamLinkArea}
-            onPress={() => router.push('/team')}
-            testID="team-login-link"
-          >
-            <Ionicons name="people-outline" size={16} color={colors.primary} />
-            <Text style={[styles.teamLinkText, { color: colors.primary }]}>Team Login</Text>
-          </Pressable>
-
           <View style={styles.footerArea}>
             <Ionicons name="shield-checkmark-outline" size={14} color={colors.textTertiary} />
             <Text style={[styles.footerText, { color: colors.textTertiary }]}>Powered by TrustShield</Text>
@@ -989,15 +995,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  teamLinkArea: {
+  teamLoginBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 20,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 4,
   },
-  teamLinkText: {
+  teamLoginBtnText: {
     fontSize: 15,
     fontWeight: '600' as const,
   },

@@ -56,8 +56,16 @@ TrustHome is a real estate platform designed to be a central hub for all parties
   - Royalty split: 51% Jennifer / 49% Jason — enforced by ORBIT Financial Hub
   - App ID: dw_app_trusthome
 
+- MLS Integration Setup — per-agent self-service MLS credential configuration
+  - Screen: app/mls-setup.tsx (ultra-premium UI with Bento grid, carousels, accordions, glassmorphism)
+  - Database: mls_configurations table (per-agent MLS credentials, provider, status, sync settings)
+  - API: /api/mls/config (GET/POST/PUT/DELETE), /api/mls/test-connection (POST)
+  - Supports 10+ providers: Bridge, Spark, Trestle, CRMLS, Bright, Stellar, NWMLS, HAR, RETS, Custom
+  - Settings integration: MLS Connection row in Settings > Integrations navigates to setup
+  - Architecture: Platform provides capability, each agent connects their own MLS credentials
+
 **Upcoming:**
-- MLS/RESO Web API integration
+- MLS/RESO actual data sync (once agents provide real credentials)
 - DocuSign/Dotloop e-signatures
 - Calendar sync (Google/Apple)
 - ShowingTime API sync

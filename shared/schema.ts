@@ -195,4 +195,40 @@ export const insertMileageSchema = createInsertSchema(mileageEntries).pick({
 export type InsertMileage = z.infer<typeof insertMileageSchema>;
 export type MileageEntry = typeof mileageEntries.$inferSelect;
 
+export const mlsConfigurations = pgTable("mls_configurations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  provider: text("provider").notNull(),
+  mlsBoardName: text("mls_board_name").notNull(),
+  mlsAgentId: text("mls_agent_id"),
+  licenseNumber: text("license_number"),
+  apiKey: text("api_key"),
+  apiSecret: text("api_secret"),
+  serverUrl: text("server_url"),
+  loginUrl: text("login_url"),
+  mediaUrl: text("media_url"),
+  status: text("status").notNull().default('pending'),
+  lastSyncAt: timestamp("last_sync_at"),
+  syncEnabled: text("sync_enabled").notNull().default('false'),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertMlsConfigSchema = createInsertSchema(mlsConfigurations).pick({
+  provider: true,
+  mlsBoardName: true,
+  mlsAgentId: true,
+  licenseNumber: true,
+  apiKey: true,
+  apiSecret: true,
+  serverUrl: true,
+  loginUrl: true,
+  mediaUrl: true,
+  notes: true,
+});
+
+export type InsertMlsConfig = z.infer<typeof insertMlsConfigSchema>;
+export type MlsConfiguration = typeof mlsConfigurations.$inferSelect;
+
 export * from "./models/chat";

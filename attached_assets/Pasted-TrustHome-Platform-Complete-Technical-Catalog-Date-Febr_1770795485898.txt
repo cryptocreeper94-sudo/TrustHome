@@ -1,0 +1,322 @@
+TrustHome Platform -- Complete Technical Catalog
+Date: February 11, 2026
+Owner: DarkWave Studios LLC (Jennifer Lambert 51% / Founder 49%)
+Status: MVP Complete -- Pre-Launch
+
+CODEBASE SUMMARY
+Metric	Count
+Total Source Files	~82 files (TS/TSX/JS/HTML/JSON/MD)
+Total Lines of Code (application)	~23,478 lines TypeScript/TSX
+Total Lines (all files incl. config)	~54,829 lines
+TypeScript (.ts) files	35
+TypeScript React (.tsx) files	46
+JavaScript (.js) files	5
+HTML template files	4
+Database Tables	10 (PostgreSQL)
+API Endpoints	90+ REST routes
+App Screens	20 screens
+Reusable Components	21 components
+Context Providers	3
+TECH STACK
+Layer	Technology	Details
+Frontend Framework	Expo React Native (SDK 54)	iOS, Android, Web from one codebase
+Frontend Language	TypeScript 5.9	Strict typing throughout
+UI Framework	React Native 0.81.5 + React 19.1	Latest stable
+Routing	Expo Router 6.0	File-based routing (Next.js style)
+State Management	React Query 5.83 + React Context	Server state + shared app state
+Animations	react-native-reanimated 4.1	60fps native animations
+Backend Runtime	Node.js + Express 5.0	TypeScript via tsx
+Database	PostgreSQL (Neon-backed)	Cloud-hosted, rollback-capable
+ORM	Drizzle ORM 0.39	Type-safe queries, schema-first
+Validation	Zod 3.25 + drizzle-zod	End-to-end type safety
+Authentication	Custom PIN + password (bcryptjs)	No Firebase/Google dependency
+Sessions	express-session + connect-pg-simple	PostgreSQL-backed sessions
+Real-time	Socket.IO 4.8	WebSocket messaging
+AI/LLM	OpenAI (gpt-4o-mini / gpt-5.2)	Text, voice, TTS via Replit AI Integrations
+Voice AI	OpenAI STT/TTS + ElevenLabs	Speech-to-text, text-to-speech
+Email	Resend 4.0	Transactional email
+PWA	Service Worker + manifest.json	Installable web app
+Design System	Glassmorphism + TrustHome Teal (#1A8A7E)	Premium, mobile-native aesthetic
+DATABASE SCHEMA (10 Tables)
+Table	Purpose	Key Fields
+users	User accounts (agents, clients, vendors)	id, email, password, firstName, lastName, role, phone, brokerage, licenseNumber, mustResetPassword
+verification_codes	Email verification & password reset codes	id, email, code, type, expiresAt, used
+blog_posts	AI-generated blog content management	id, title, slug, excerpt, content, coverImage, category, tags, authorName, status, aiGenerated, publishedAt
+access_requests	Developer/agent access request queue	id, firstName, lastName, email, role, brokerage, licenseNumber, message, source, status, notes
+expenses	Agent expense tracking (business suite)	id, agentId, category, description, amount, vendor, date, receiptUrl, ocrData, propertyAddress, transactionId
+mileage_entries	Agent mileage tracking (business suite)	id, agentId, date, startAddress, endAddress, miles, purpose, category, startLat/Lng, endLat/Lng
+mls_configurations	Per-agent MLS credential storage	id, agentId, provider, mlsBoardName, mlsAgentId, apiKey, apiSecret, serverUrl, status, syncEnabled, lastSyncAt
+session	PostgreSQL session store	sid, sess, expire
+conversations	Signal Chat conversation threads	(via chat integration)
+messages	Signal Chat message storage	(via chat integration)
+API ENDPOINTS (90+ Routes)
+Authentication (11 routes)
+Method	Path	Purpose
+POST	/api/auth/register	New user registration
+POST	/api/auth/verify-email	Email verification code check
+POST	/api/auth/resend-code	Resend verification code
+POST	/api/auth/login	Email/password login
+POST	/api/auth/login/verify	2FA login verification
+POST	/api/auth/forgot-password	Password reset request
+POST	/api/auth/reset-password	Password reset completion
+POST	/api/auth/dev-pin	Developer PIN access (0424)
+POST	/api/auth/set-password	Set password after PIN login
+GET	/api/auth/me	Current session user
+POST	/api/auth/logout	Session logout
+POST	/api/auth/pin/verify	Team PIN verification (7777)
+CRM & Leads (7 routes)
+Method	Path	Purpose
+GET	/api/leads	Fetch all leads
+POST	/api/leads	Create new lead
+PUT	/api/leads/:id	Update lead
+POST	/api/crm/deals	Create CRM deal
+PUT	/api/crm/deals/:id	Update deal
+POST	/api/crm/activities	Log CRM activity
+POST	/api/leads/score	Score a lead
+POST	/api/leads/score-ai	AI-powered lead scoring
+GET	/api/lead-sources	Lead source analytics
+Calendar & Bookings (7 routes)
+Method	Path	Purpose
+GET	/api/calendar/events	Fetch calendar events
+POST	/api/calendar/events	Create event
+PUT	/api/calendar/events/:id	Update event
+DELETE	/api/calendar/events/:id	Delete event
+GET	/api/bookings	Fetch bookings
+POST	/api/bookings	Create booking
+PUT	/api/bookings/:id	Update booking
+PATCH	/api/bookings/:id/status	Update booking status
+GET	/api/availability	Check availability
+Jobs/Transactions (6 routes)
+Method	Path	Purpose
+GET	/api/jobs	Fetch all jobs
+GET	/api/jobs/:id	Get single job
+POST	/api/jobs	Create job
+PUT	/api/jobs/:id	Update job
+GET	/api/jobs/:id/updates	Get job updates
+POST	/api/jobs/:id/updates	Post job update
+Marketing Hub (6 routes)
+Method	Path	Purpose
+GET	/api/marketing/images	Fetch marketing images
+POST	/api/marketing/images	Upload marketing image
+GET	/api/marketing/posts	Fetch marketing posts
+POST	/api/marketing/posts	Create marketing post
+GET	/api/marketing/live-posts	Live/scheduled posts
+POST	/api/marketing/quick-post	Quick-create a post
+POST	/api/marketing/generate-captions	AI caption generation
+Analytics (3 routes)
+Method	Path	Purpose
+GET	/api/analytics/dashboard	Dashboard metrics
+GET	/api/analytics/live	Real-time analytics
+GET	/api/analytics/geography	Geographic analytics
+Blockchain / Trust Layer (4 routes)
+Method	Path	Purpose
+POST	/api/blockchain/stamp	Create blockchain stamp
+POST	/api/blockchain/hash	Hash document
+GET	/api/blockchain/stamps	Fetch stamps
+GET	/api/blockchain/wallet/balance	Wallet balance
+Trust Layer Integration (9 routes)
+Method	Path	Purpose
+GET	/api/trustlayer/status	Connection status
+POST	/api/trustlayer/sync-user	Sync user to Trust Layer
+POST	/api/trustlayer/sync-password	Sync password
+POST	/api/trustlayer/verify-credentials	Verify credentials
+GET	/api/trustlayer/tiers	Membership tiers
+POST	/api/trustlayer/certifications	Submit certification
+GET	/api/trustlayer/certifications/:id	Get certification
+GET	/api/trustlayer/registry	Professional registry
+GET	/api/trustlayer/stamps	Transaction stamps
+POST	/api/trustlayer/checkout	Membership checkout
+Blog System (6 routes)
+Method	Path	Purpose
+GET	/api/blog/posts	Public blog listing
+GET	/api/blog/posts/:slug	Single blog post
+GET	/api/blog/admin/posts	Admin post list
+POST	/api/blog/admin/posts	Create blog post
+PUT	/api/blog/admin/posts/:id	Update blog post
+DELETE	/api/blog/admin/posts/:id	Delete blog post
+POST	/api/blog/admin/generate	AI blog generation
+Business Suite -- Expenses (5 routes)
+Method	Path	Purpose
+GET	/api/expenses	Fetch expenses
+POST	/api/expenses	Create expense
+PUT	/api/expenses/:id	Update expense
+DELETE	/api/expenses/:id	Delete expense
+POST	/api/expenses/ocr	OCR receipt scanning
+Business Suite -- Mileage (4 routes)
+Method	Path	Purpose
+GET	/api/mileage	Fetch mileage entries
+POST	/api/mileage	Log mileage
+PUT	/api/mileage/:id	Update entry
+DELETE	/api/mileage/:id	Delete entry
+MLS Integration (5 routes)
+Method	Path	Purpose
+GET	/api/mls/config	Fetch MLS configs
+POST	/api/mls/config	Create MLS config
+PUT	/api/mls/config/:id	Update MLS config
+DELETE	/api/mls/config/:id	Delete MLS config
+POST	/api/mls/test-connection	Test MLS connection
+Media Studio (3 routes)
+Method	Path	Purpose
+GET	/api/media-studio/status	Studio status
+GET	/api/media-studio/projects	Fetch projects
+POST	/api/media-studio/walkthrough-request	Request walkthrough
+Messaging & Network (4 routes)
+Method	Path	Purpose
+POST	/api/messages/send-message	Send message
+GET	/api/messages/online-users	Online users
+GET	/api/referrals	Fetch referrals
+POST	/api/referrals	Create referral
+GET	/api/subcontractors	Subcontractor list
+Payments & Webhooks (4 routes)
+Method	Path	Purpose
+GET	/api/payments	Fetch payments
+GET	/api/payments/:id	Single payment
+GET	/api/webhooks	Webhook configs
+POST	/api/webhooks	Create webhook
+Admin & System (5 routes)
+Method	Path	Purpose
+GET	/api/health	Health check
+GET	/api/tenant	Tenant info
+GET	/api/admin/system-health	Full system diagnostics
+GET	/api/admin/api-connections	API connection status
+GET	/api/admin/overview	Admin overview
+POST	/api/access-requests	Submit access request
+GET	/api/admin/access-requests	View requests
+PUT	/api/admin/access-requests/:id	Approve/deny request
+AI & Voice (3 routes)
+Method	Path	Purpose
+POST	/api/ai/chat	Streaming AI chat
+POST	/api/ai/voice	Full voice interaction (STT -> AI -> TTS)
+POST	/api/ai/tts	Text-to-speech only
+Orbit Staffing (10 routes)
+Method	Path	Purpose
+GET	/api/orbit/status	Orbit connection status
+GET	/api/orbit/financial-statement	Financial statement
+POST	/api/orbit/sync/workers	Sync workers
+POST	/api/orbit/sync/contractors	Sync contractors
+POST	/api/orbit/sync/timesheets	Sync timesheets
+POST	/api/orbit/sync/certifications	Sync certifications
+POST	/api/orbit/report-transaction	Report transaction
+GET	/api/orbit/logs	Fetch audit logs
+POST	/api/orbit/logs	Create audit log
+POST	/webhooks/orbit	Orbit webhook receiver
+Server-Rendered Pages (5 routes)
+Method	Path	Purpose
+GET	/	Production landing page
+GET	/invite/jennifer	Jennifer Lambert partner invitation
+GET	/blog	Public blog index (SEO)
+GET	/blog/:slug	Individual blog post (SEO)
+GET	/manifest.json	PWA manifest
+GET	/sw.js	Service worker
+FRONTEND SCREENS (20 Screens)
+File	Screen	Lines	Purpose
+app/_layout.tsx	Root Layout	70	Providers, navigation config, theme
+app/index.tsx	Home / Dashboard	62	Entry point, role-based routing
+app/auth.tsx	Authentication	1,023	Login, register, forgot password, email verification
+app/team.tsx	Team Portal	1,544	PIN-based team login (Developer 0424, Jennifer 7777)
+app/mls-setup.tsx	MLS Integration	1,352	Self-service MLS credential setup, 10+ providers
+app/developer.tsx	Developer Console	1,023	Access requests, system health, API connections
+app/blog.tsx	Blog Management	952	AI-powered blog creation and management
+app/marketing.tsx	Marketing Hub	783	Social media, content creation, AI captions
+app/network.tsx	Professional Network	596	Referrals, vendor connections, subcontractors
+app/leads.tsx	Lead Management	416	CRM leads, scoring, follow-ups
+app/settings.tsx	Settings	404	App config, integrations, MLS status, branding
+app/showings.tsx	Showings	401	Showing scheduling & management
+app/messages.tsx	Messages	359	Direct messaging interface
+app/analytics.tsx	Analytics	359	Performance metrics, charts, geography
+app/properties.tsx	Properties	336	Property listings, shortlists, comparison
+app/transactions.tsx	Transactions	267	Transaction pipeline, timeline, parties
+app/documents.tsx	Documents	260	Document vault, blockchain verification
+app/support.tsx	Support	19	Help & support resources
+app/branding.tsx	Branding	19	White-label customization
+app/business.tsx	Business Suite	5	Routes to BusinessSuiteScreen component
+REUSABLE COMPONENTS (21 Components)
+File	Component	Lines	Purpose
+Screen Components			
+components/screens/AgentDashboard.tsx	AgentDashboard	683	Full agent dashboard with CRM, Bento grid cards
+components/screens/ClientDashboard.tsx	ClientDashboard	524	Client portal with property cards, timeline
+components/screens/BusinessSuiteScreen.tsx	BusinessSuiteScreen	839	Expense/mileage tracking with OCR
+components/screens/PlaceholderScreen.tsx	PlaceholderScreen	100	Placeholder for upcoming features
+UI Components			
+components/ui/PartnerOnboardingModal.tsx	PartnerOnboardingModal	931	Jennifer Lambert 9-slide partner onboarding
+components/ui/SignalChat.tsx	SignalChat	773	Cross-ecosystem messaging (PaintPros.io)
+components/ui/AiAssistant.tsx	AiAssistant	766	Voice-capable AI chat (STT/TTS)
+components/ui/Header.tsx	Header	464	App header with Trust Shield, navigation
+components/ui/WelcomeGuide.tsx	WelcomeGuide	454	8-slide first-login onboarding
+components/ui/DrawerMenu.tsx	DrawerMenu	277	Hamburger navigation drawer
+components/ui/Footer.tsx	Footer	171	Two-tier footer with ecosystem links
+components/ui/TrustShieldBadge.tsx	TrustShieldBadge	169	Animated Trust Shield indicator
+components/ui/InfoModal.tsx	InfoModal	165	Contextual help modal system
+components/ui/PillButton.tsx	PillButton	137	Pill-shaped action buttons
+components/ui/HorizontalCarousel.tsx	HorizontalCarousel	127	Horizontal card scroll carousel
+components/ui/AccordionSection.tsx	AccordionSection	125	Animated accordion/dropdown
+components/ui/GlassCard.tsx	GlassCard	119	Glassmorphism card with blur
+components/ui/BentoGrid.tsx	BentoGrid	59	3-column Bento grid layout
+Error Handling			
+components/ErrorBoundary.tsx	ErrorBoundary	54	React error boundary wrapper
+components/ErrorFallback.tsx	ErrorFallback	286	Crash recovery UI
+components/KeyboardAwareScrollViewCompat.tsx	KeyboardAware	30	Cross-platform keyboard handling
+CONTEXT PROVIDERS (3)
+File	Context	Lines	Purpose
+contexts/AppContext.tsx	AppContext	220	Auth state, user data, role management
+contexts/LocationContext.tsx	LocationContext	244	GPS location tracking for mileage
+contexts/ThemeContext.tsx	ThemeContext	50	Light/dark theme toggling
+SERVER-SIDE SERVICES
+File	Service	Lines	Purpose
+server/index.ts	Main Server	454	Express app, middleware, static serving, blog SSR
+server/routes.ts	API Routes	1,910	All REST API endpoint handlers
+server/voice-ai-routes.ts	Voice AI	155	STT/TTS/Chat AI endpoints
+server/orbit-routes.ts	Orbit Staffing	138	Ecosystem HR/payroll integration
+server/db.ts	Database Connection	10	PostgreSQL/Drizzle setup
+server/storage.ts	Data Storage	28	Database query abstractions
+server/trustlayer-client.ts	Trust Layer Client	169	Blockchain API integration
+server/ecosystem-client.ts	Ecosystem Client	149	PaintPros.io API client
+server/elevenlabs-client.ts	ElevenLabs Client	192	Voice synthesis integration
+server/resend-client.ts	Resend Client	113	Email sending service
+server/socket-proxy.ts	Socket Proxy	110	WebSocket proxy for Signal Chat
+server/services/orbitClient.ts	OrbitEcosystemClient	149	Orbit Staffing API wrapper
+EXTERNAL INTEGRATIONS & ENVIRONMENT VARIABLES
+Variable	Service	Status
+DATABASE_URL	PostgreSQL (Neon)	Active
+SESSION_SECRET	Express Sessions	Active
+DARKWAVE_API_KEY / _SECRET	DarkWave Ecosystem	Active
+TRUSTLAYER_API_KEY / _SECRET	Trust Layer Blockchain	Active
+DW_MEDIA_API_KEY / _SECRET	DarkWave Media Studio	Active
+ORBIT_ECOSYSTEM_API_KEY / _SECRET	Orbit Staffing	Ready (pending server)
+ORBIT_FINANCIAL_HUB_SECRET	Orbit Financial Hub	Ready (pending server)
+AI_INTEGRATIONS_OPENAI_*	OpenAI via Replit	Active (auto-managed)
+STRIPE_SECRET_KEY / _PUBLISHABLE	Stripe Payments	Configured
+INSTALLED INTEGRATIONS (Replit-Managed)
+Resend (v1.0.0) -- Transactional email
+OpenAI AI Integrations (v2.0.0) -- LLM, STT, TTS (no API key needed)
+ElevenLabs (v1.0.0) -- Premium voice synthesis
+KEY CAPABILITIES SUMMARY
+Multi-tenant architecture -- agent_id boundary isolates all data per agent
+Custom PIN authentication -- Developer (0424), Jennifer Lambert (7777), plus full email/password with 2FA
+Blockchain integration -- DarkWave Trust Layer (DWTL) for document verification, transaction stamps, identity, Trust Score
+Voice-capable AI assistant -- Record speech, AI processes, responds with voice (OpenAI + ElevenLabs)
+Full CRM -- Leads, scoring, AI-powered scoring, deals, activities, follow-ups
+Transaction pipeline -- Timeline, party management, deadlines, document tracking
+Marketing hub -- AI blog generation, social media posts, AI caption generation
+Business suite -- Expense tracking with OCR receipt scanning, mileage tracking with GPS
+Self-service MLS integration -- 10+ providers (Bridge, Spark, Trestle, CRMLS, etc.), per-agent credentials
+Signal Chat -- Cross-ecosystem messaging via PaintPros.io WebSocket
+WelcomeGuide onboarding -- 8-slide first-login walkthrough
+Partner onboarding -- 9-slide Jennifer Lambert partner modal with Founders Program
+Developer console -- Access request management, system health monitoring, API connection status
+Blog system -- Full CMS with AI generation, SEO-optimized server-rendered pages
+Professional network -- Referral management, vendor connections (inspectors, lenders, title, appraisers)
+PWA capabilities -- Service worker, manifest, installable on any device
+Light/dark theme -- Premium glassmorphism with TrustHome teal
+Contextual help -- InfoModal system across 9+ screens
+Orbit Staffing -- HR/payroll/bookkeeping integration (client ready, pending server)
+White-label ready -- Branding customization for agencies/brokerages
+FOUNDERS PROGRAM PRICING
+Tier	Early Bird (First 100)	Standard
+Individual Agent	$49/month	$99/month
+Brokerage	$299/month	$599/month
+White-Label	$1,499/month	$2,999/month
+ASSET FILES (21 images)
+App icon set (icon.png, splash-icon.png, favicon.png, PWA icons 192/512)
+Android adaptive icons (foreground, background, monochrome)
+Dashboard card images (11 cards: home, inspector, leads, lender, messages, revenue, team, title, transaction, trust)

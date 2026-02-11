@@ -188,21 +188,35 @@ function configureExpoAndLanding(app: express.Application) {
 
   log("Serving static Expo files with dynamic manifest routing");
 
+  const expoAppRoutes = ['/team', '/auth', '/settings', '/leads', '/messages', '/transactions', '/documents', '/properties', '/showings', '/analytics', '/marketing', '/blog', '/network', '/developer', '/mls-setup', '/business', '/branding', '/support'];
+
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api")) {
       return next();
     }
 
-    if (req.path !== "/" && req.path !== "/manifest" && !req.path.startsWith("/app")) {
+    if (req.path.startsWith("/blog")) {
+      return next();
+    }
+
+    if (req.path.startsWith("/invite")) {
+      return next();
+    }
+
+    if (req.path === "/manifest.json" || req.path === "/sw.js") {
       return next();
     }
 
     const platform = req.header("expo-platform");
     if (platform && (platform === "ios" || platform === "android")) {
-      return serveExpoManifest(platform, res);
+      if (req.path === "/" || req.path === "/manifest") {
+        return serveExpoManifest(platform, res);
+      }
     }
 
-    if (req.path.startsWith("/app")) {
+    const isExpoRoute = req.path.startsWith("/app") || expoAppRoutes.some(r => req.path === r || req.path.startsWith(r + '/'));
+
+    if (isExpoRoute) {
       const webIndex = path.resolve(process.cwd(), "static-build", "index.html");
       if (fs.existsSync(webIndex)) {
         return res.sendFile(webIndex);

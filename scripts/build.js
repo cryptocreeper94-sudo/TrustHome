@@ -496,6 +496,28 @@ function updateManifests(manifests, timestamp, baseUrl, assetsByHash) {
   console.log("Manifests updated");
 }
 
+async function buildWebExport(domain) {
+  console.log("Building Expo web export...");
+  const webBuild = spawn("npx", ["expo", "export", "--platform", "web", "--output-dir", "static-build"], {
+    stdio: ["ignore", "pipe", "pipe"],
+    env: { ...process.env, EXPO_PUBLIC_DOMAIN: domain },
+  });
+
+  return new Promise((resolve, reject) => {
+    let output = "";
+    if (webBuild.stdout) webBuild.stdout.on("data", (d) => { output += d.toString(); console.log(`[Web] ${d.toString().trim()}`); });
+    if (webBuild.stderr) webBuild.stderr.on("data", (d) => { output += d.toString(); console.error(`[Web] ${d.toString().trim()}`); });
+    webBuild.on("close", (code) => {
+      if (code === 0) {
+        console.log("Web export complete");
+        resolve();
+      } else {
+        reject(new Error(`Web export failed with code ${code}\n${output}`));
+      }
+    });
+  });
+}
+
 async function main() {
   console.log("Building static Expo Go deployment...");
 
@@ -505,8 +527,42 @@ async function main() {
   const baseUrl = `https://${domain}`;
   const timestamp = `${Date.now()}-${process.pid}`;
 
+  await buildWebExport(domain);
+
+  const webIndexBackup = path.join("static-build", "index.html");
+  const webIndexContent = fs.existsSync(webIndexBackup) ? fs.readFileSync(webIndexBackup, "utf-8") : null;
+  const webFaviconPath = path.join("static-build", "favicon.ico");
+  const webFaviconContent = fs.existsSync(webFaviconPath) ? fs.readFileSync(webFaviconPath) : null;
+  const webMetadataPath = path.join("static-build", "metadata.json");
+  const webMetadataContent = fs.existsSync(webMetadataPath) ? fs.readFileSync(webMetadataPath, "utf-8") : null;
+  const webExpoDir = path.join("static-build", "_expo");
+  const webAssetsDir = path.join("static-build", "assets");
+  let webExpoDirBackup = null;
+  let webAssetsDirBackup = null;
+
+  if (fs.existsSync(webExpoDir)) {
+    webExpoDirBackup = path.join(process.cwd(), "_expo_web_backup");
+    fs.cpSync(webExpoDir, webExpoDirBackup, { recursive: true });
+  }
+  if (fs.existsSync(webAssetsDir)) {
+    webAssetsDirBackup = path.join(process.cwd(), "_assets_web_backup");
+    fs.cpSync(webAssetsDir, webAssetsDirBackup, { recursive: true });
+  }
+
   prepareDirectories(timestamp);
   clearMetroCache();
+
+  if (webIndexContent) fs.writeFileSync(path.join("static-build", "index.html"), webIndexContent);
+  if (webFaviconContent) fs.writeFileSync(path.join("static-build", "favicon.ico"), webFaviconContent);
+  if (webMetadataContent) fs.writeFileSync(path.join("static-build", "metadata.json"), webMetadataContent);
+  if (webExpoDirBackup) {
+    fs.cpSync(webExpoDirBackup, path.join("static-build", "_expo"), { recursive: true });
+    fs.rmSync(webExpoDirBackup, { recursive: true });
+  }
+  if (webAssetsDirBackup) {
+    fs.cpSync(webAssetsDirBackup, path.join("static-build", "assets"), { recursive: true });
+    fs.rmSync(webAssetsDirBackup, { recursive: true });
+  }
 
   await startMetro(domain);
 

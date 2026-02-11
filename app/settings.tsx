@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
@@ -33,10 +34,20 @@ export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
   const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard } = useApp();
   const [showHelp, setShowHelp] = useState<boolean>(false);
+  const router = useRouter();
 
   const trustLayerQuery = useQuery<any>({
     queryKey: ['/api/trustlayer/status'],
   });
+
+  const mlsQuery = useQuery<any[]>({
+    queryKey: ['/api/mls/config?agentId=demo'],
+  });
+
+  const mlsConfigs = mlsQuery.data || [];
+  const mlsConnected = mlsConfigs.length > 0;
+  const mlsStatus = mlsConnected ? (mlsConfigs.some((c: any) => c.status === 'connected') ? 'Connected' : 'Pending') : 'Not Connected';
+  const mlsStatusColor = mlsConnected ? (mlsConfigs.some((c: any) => c.status === 'connected') ? colors.success : colors.warning) : colors.textSecondary;
 
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     twoFactor: true,
@@ -109,7 +120,7 @@ export default function SettingsScreen() {
         { icon: 'git-network-outline', label: 'CRM Connection', type: 'status', value: 'Connected', statusColor: colors.success },
         { icon: 'chatbubbles-outline', label: 'Signal Chat', type: 'status', value: 'Active', statusColor: colors.success },
         { icon: 'shield-outline', label: 'Trust Layer (DWTL)', type: 'status', value: trustLayerQuery.data?.configured ? 'Connected' : 'Not Configured', statusColor: trustLayerQuery.data?.configured ? colors.success : colors.warning },
-        { icon: 'home-outline', label: 'MLS Connection', type: 'status', value: 'Synced', statusColor: colors.success },
+        { icon: 'home-outline', label: 'MLS Connection', type: 'status', value: mlsStatus, statusColor: mlsStatusColor },
       ],
     },
     {
@@ -129,6 +140,7 @@ export default function SettingsScreen() {
       key={index}
       onPress={() => {
         if (item.label === 'Theme') cycleTheme();
+        if (item.label === 'MLS Connection') router.push('/mls-setup');
       }}
       style={[
         styles.settingsRow,

@@ -147,4 +147,16 @@ export const SCREEN_HELP: Record<string, FeatureHelp> = {
       'Score is updated in real-time as transactions complete',
     ],
   },
+  mlsSetup: {
+    title: 'MLS Integration',
+    description: 'Connect your MLS board to automatically sync listings and market data into TrustHome. Each agent connects their own MLS credentials.',
+    details: [
+      'Select your MLS data provider (Bridge, Spark, Trestle, or other)',
+      'Enter your API credentials from your MLS board',
+      'Test the connection before activating auto-sync',
+      'TrustHome supports RESO Web API 2.0 standard',
+      'Listings, photos, market data, and agent rosters all sync automatically',
+      'Your credentials are encrypted and stored securely per-agent',
+    ],
+  },
 };

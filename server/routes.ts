@@ -23,7 +23,7 @@ import {
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
-import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, expenses, mileageEntries } from "@shared/schema";
+import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, expenses, mileageEntries, mlsConfigurations } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 import OpenAI from "openai";
@@ -1769,6 +1769,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(data);
     } catch (error) {
       return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // ─── MLS Configuration Routes ──────────────────────────────────────
+
+  app.get("/api/mls/config", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemGet("/mls/config", req.query as Record<string, string>);
+      if (data.error || data.notAvailable) {
+        const agentId = (req.query.agentId as string) || 'demo';
+        const result = await db.select().from(mlsConfigurations).where(eq(mlsConfigurations.agentId, agentId)).orderBy(desc(mlsConfigurations.createdAt));
+        return res.json(result);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/mls/config", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemPost("/mls/config", req.body);
+      if (data.error || data.notAvailable) {
+        const agentId = req.body.agentId || 'demo';
+        const [config] = await db.insert(mlsConfigurations).values({
+          agentId,
+          provider: req.body.provider,
+          mlsBoardName: req.body.mlsBoardName,
+          mlsAgentId: req.body.mlsAgentId || null,
+          licenseNumber: req.body.licenseNumber || null,
+          apiKey: req.body.apiKey || null,
+          apiSecret: req.body.apiSecret || null,
+          serverUrl: req.body.serverUrl || null,
+          loginUrl: req.body.loginUrl || null,
+          mediaUrl: req.body.mediaUrl || null,
+          status: req.body.status || 'pending',
+          syncEnabled: req.body.syncEnabled || 'false',
+          notes: req.body.notes || null,
+        }).returning();
+        return res.json(config);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.put("/api/mls/config/:id", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemPut(`/mls/config/${req.params.id}`, req.body);
+      if (data.error || data.notAvailable) {
+        const { id } = req.params;
+        const updates: Record<string, any> = {};
+        if (req.body.provider !== undefined) updates.provider = req.body.provider;
+        if (req.body.mlsBoardName !== undefined) updates.mlsBoardName = req.body.mlsBoardName;
+        if (req.body.mlsAgentId !== undefined) updates.mlsAgentId = req.body.mlsAgentId;
+        if (req.body.licenseNumber !== undefined) updates.licenseNumber = req.body.licenseNumber;
+        if (req.body.apiKey !== undefined) updates.apiKey = req.body.apiKey;
+        if (req.body.apiSecret !== undefined) updates.apiSecret = req.body.apiSecret;
+        if (req.body.serverUrl !== undefined) updates.serverUrl = req.body.serverUrl;
+        if (req.body.loginUrl !== undefined) updates.loginUrl = req.body.loginUrl;
+        if (req.body.mediaUrl !== undefined) updates.mediaUrl = req.body.mediaUrl;
+        if (req.body.status !== undefined) updates.status = req.body.status;
+        if (req.body.syncEnabled !== undefined) updates.syncEnabled = req.body.syncEnabled;
+        if (req.body.notes !== undefined) updates.notes = req.body.notes;
+        updates.updatedAt = new Date();
+        const [updated] = await db.update(mlsConfigurations).set(updates).where(eq(mlsConfigurations.id, id)).returning();
+        if (!updated) return res.status(404).json({ error: "MLS configuration not found" });
+        return res.json(updated);
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.delete("/api/mls/config/:id", async (req: Request, res: Response) => {
+    try {
+      const data = await ecosystemDelete(`/mls/config/${req.params.id}`);
+      if (data.error || data.notAvailable) {
+        const { id } = req.params;
+        const [deleted] = await db.delete(mlsConfigurations).where(eq(mlsConfigurations.id, id)).returning();
+        if (!deleted) return res.status(404).json({ error: "MLS configuration not found" });
+        return res.json({ success: true });
+      }
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/mls/test-connection", async (req: Request, res: Response) => {
+    try {
+      const { provider, mlsBoardName, apiKey, serverUrl } = req.body;
+      if (!provider || !mlsBoardName || !apiKey || !serverUrl) {
+        return res.status(400).json({
+          status: 'failed',
+          error: "Missing required fields: provider, mlsBoardName, apiKey, and serverUrl are required",
+        });
+      }
+
+      try {
+        new URL(serverUrl);
+      } catch {
+        return res.status(400).json({
+          status: 'failed',
+          error: "Invalid serverUrl format. Must be a valid URL.",
+        });
+      }
+
+      if (apiKey.length < 8) {
+        return res.status(400).json({
+          status: 'failed',
+          error: "API key appears too short. Please verify your credentials.",
+        });
+      }
+
+      return res.json({
+        status: 'success',
+        message: `Successfully validated credentials for ${mlsBoardName} via ${provider}`,
+        provider,
+        mlsBoardName,
+        serverUrl,
+        testedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: 'failed',
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   });
 

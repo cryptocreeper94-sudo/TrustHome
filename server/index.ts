@@ -207,11 +207,12 @@ function configureExpoAndLanding(app: express.Application) {
       if (fs.existsSync(webIndex)) {
         return res.sendFile(webIndex);
       }
-      const forwardedProto = req.header("x-forwarded-proto") || req.protocol || "https";
-      const forwardedHost = req.header("x-forwarded-host") || req.get("host") || "";
-      const baseHost = forwardedHost.replace(/:5000$/, "").replace(/-5000\./, ".");
-      const expoRoute = req.path.replace(/^\/app/, "") || "/";
-      return res.redirect(`${forwardedProto}://${baseHost}${expoRoute}`);
+      return serveLandingPage({
+        req,
+        res,
+        landingPageTemplate,
+        appName,
+      });
     }
 
     if (req.path === "/") {

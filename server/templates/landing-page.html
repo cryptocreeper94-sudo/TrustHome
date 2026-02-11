@@ -343,13 +343,13 @@
           A premium platform connecting agents, buyers, sellers, and vendors with blockchain-verified trust at every step.
         </p>
 
-        <a href="/app/auth" class="open-app-btn">
+        <a href="#" onclick="navigateToApp('/auth'); return false;" class="open-app-btn">
           <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
           Open TrustHome
         </a>
 
         <div class="action-row">
-          <a href="/app/team" class="action-btn team-btn">
+          <a href="#" onclick="navigateToApp('/team'); return false;" class="action-btn team-btn">
             <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
             Team Login
           </a>
@@ -405,6 +405,26 @@
             .then(function(reg) { console.log('[PWA] Service worker registered:', reg.scope); })
             .catch(function(err) { console.log('[PWA] Service worker registration failed:', err); });
         });
+      }
+
+      function navigateToApp(route) {
+        var host = window.location.hostname;
+        var proto = window.location.protocol;
+        var appHost = host;
+        if (host.indexOf('-5000') !== -1) {
+          appHost = host.replace(/-5000\b/, '');
+        }
+        var port = window.location.port;
+        if (port === '5000') {
+          var appUrl = proto + '//' + appHost + route;
+          window.location.href = appUrl;
+          return;
+        }
+        if (host.indexOf('.replit.app') !== -1 || host.indexOf('.repl.co') !== -1) {
+          window.location.href = proto + '//' + appHost + route;
+          return;
+        }
+        window.location.href = proto + '//' + host + (port ? ':' + port : '') + route;
       }
 
       var deferredPrompt = null;

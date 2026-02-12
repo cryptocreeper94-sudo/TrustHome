@@ -36,6 +36,7 @@ function RootLayoutNav() {
         <Stack.Screen name="developer" />
         <Stack.Screen name="team" />
         <Stack.Screen name="business" />
+        <Stack.Screen name="media-studio" />
         <Stack.Screen name="support" />
       </Stack>
       <DrawerMenu />

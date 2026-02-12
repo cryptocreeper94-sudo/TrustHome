@@ -109,6 +109,6 @@ const dark = {
   tabIconSelected: palette.teal[400],
 };
 
-export type ThemeColors = typeof light;
+export type ThemeColors = Omit<typeof light, 'statusBar'> & { statusBar: 'light' | 'dark' };
 
 export default { light, dark, palette };

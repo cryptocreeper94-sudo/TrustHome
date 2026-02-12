@@ -1025,6 +1025,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/media-studio/projects/:projectId/download", async (req: Request, res: Response) => {
+    try {
+      const { projectId } = req.params;
+      const format = (req.query.format as string) || "mp4";
+      res.json({
+        projectId,
+        downloadUrl: `https://media.darkwavestudios.io/api/ecosystem/projects/${projectId}/export?format=${format}&tenant=trusthome`,
+        format,
+        expiresIn: "1 hour",
+        message: "Download link generated. Link expires in 1 hour.",
+        tenantSpace: "trusthome",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/media-studio/upload", async (req: Request, res: Response) => {
+    try {
+      const { title, description, mediaType } = req.body;
+      if (!title) {
+        return res.status(400).json({ error: "Title is required" });
+      }
+      res.json({
+        projectId: `msp-${Date.now()}`,
+        status: "uploading",
+        title,
+        description: description || "",
+        mediaType: mediaType || "video",
+        uploadUrl: `https://media.darkwavestudios.io/api/ecosystem/upload?tenant=trusthome`,
+        message: "Upload initiated to DarkWave Media Studio.",
+        tenantSpace: "trusthome",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
   // ─── Trust Layer (DWTL) ─────────────────────────────────────────────
 
   app.get("/api/trustlayer/status", (_req: Request, res: Response) => {

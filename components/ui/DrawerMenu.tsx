@@ -42,7 +42,7 @@ export function DrawerMenu() {
     { icon: 'brush-outline', label: 'Room Visualizer', onPress: () => Linking.openURL('https://paintpros.io/npp/estimate'), dividerAfter: true },
     { icon: 'person-outline', label: 'Profile & Settings', route: '/settings' },
     { icon: 'code-slash-outline', label: 'Developer Console', route: '/developer', agentOnly: true },
-    { icon: 'map-outline', label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); } },
+    { icon: 'map-outline', label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); }, agentOnly: true },
     { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
   ];
 

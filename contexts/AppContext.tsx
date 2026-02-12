@@ -83,7 +83,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [greetingName, setGreetingNameState] = useState<string>('');
 
   useEffect(() => {
-    if (isAuthenticated && !guideChecked) {
+    if (isAuthenticated && isAgentAuthenticated && !guideChecked) {
       AsyncStorage.getItem('trusthome_guide_seen').then((val) => {
         if (!val) {
           setShowWelcomeGuide(true);
@@ -91,7 +91,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setGuideChecked(true);
       }).catch(() => setGuideChecked(true));
     }
-  }, [isAuthenticated, guideChecked]);
+  }, [isAuthenticated, isAgentAuthenticated, guideChecked]);
 
   useEffect(() => {
     if (isAuthenticated && user && !partnerChecked) {

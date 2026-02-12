@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Pressable, Modal, Dimensions,
   FlatList, Platform, ViewToken, Image, ImageSourcePropType,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,6 +14,7 @@ import Animated, {
 import { useTheme } from '@/contexts/ThemeContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
 
 interface GuideSlide {
   id: string;
@@ -325,6 +327,8 @@ const SLIDES: GuideSlide[] = [
   },
 ];
 
+const CONTROLS_HEIGHT = 80;
+
 interface SlideItemProps {
   item: GuideSlide;
   index: number;
@@ -336,6 +340,9 @@ function SlideItem({ item, index, isActive, totalSlides }: SlideItemProps) {
   const insets = useSafeAreaInsets();
   const isFirst = index === 0;
   const isLast = index === totalSlides - 1;
+  const topPad = Platform.OS === 'web' ? 67 + 16 : insets.top + 16;
+  const bottomPad = Platform.OS === 'web' ? 34 + CONTROLS_HEIGHT + 8 : insets.bottom + CONTROLS_HEIGHT + 8;
+  const iconSize = IS_SMALL_SCREEN ? 64 : 76;
 
   return (
     <View style={[styles.slide, { width: SCREEN_WIDTH }]}>
@@ -348,10 +355,15 @@ function SlideItem({ item, index, isActive, totalSlides }: SlideItemProps) {
         style={StyleSheet.absoluteFill}
       />
 
-      <View style={[
-        styles.slideContent,
-        { paddingTop: Platform.OS === 'web' ? 67 + 20 : insets.top + 20 },
-      ]}>
+      <ScrollView
+        style={styles.slideScroll}
+        contentContainerStyle={[
+          styles.slideContent,
+          { paddingTop: topPad, paddingBottom: bottomPad },
+        ]}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
         {item.badge && (
           <View style={styles.badgeRow}>
             <View style={styles.badge}>
@@ -368,17 +380,17 @@ function SlideItem({ item, index, isActive, totalSlides }: SlideItemProps) {
         </View>
 
         <View style={styles.iconCluster}>
-          <View style={styles.mainIconCircle}>
-            <Ionicons name={item.icon} size={48} color="#FFFFFF" />
+          <View style={[styles.mainIconCircle, { width: iconSize, height: iconSize, borderRadius: iconSize / 2 }]}>
+            <Ionicons name={item.icon} size={IS_SMALL_SCREEN ? 32 : 40} color="#FFFFFF" />
           </View>
           {item.secondaryIcon && (
             <View style={styles.secondaryIconCircle}>
-              <Ionicons name={item.secondaryIcon} size={18} color="#FFFFFF" />
+              <Ionicons name={item.secondaryIcon} size={16} color="#FFFFFF" />
             </View>
           )}
         </View>
 
-        <Text style={styles.slideTitle}>{item.title}</Text>
+        <Text style={[styles.slideTitle, IS_SMALL_SCREEN && { fontSize: 24, lineHeight: 30 }]}>{item.title}</Text>
 
         <View style={styles.subtitleCard}>
           <Text style={styles.slideSubtitle}>{item.subtitle}</Text>
@@ -388,13 +400,12 @@ function SlideItem({ item, index, isActive, totalSlides }: SlideItemProps) {
           <View style={styles.bulletCard}>
             {item.bullets.map((bullet, bi) => (
               <View key={bi} style={styles.bulletRow}>
-                <View style={styles.bulletIconWrap}>
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={18}
-                    color={item.accentColor}
-                  />
-                </View>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={16}
+                  color={item.accentColor}
+                  style={{ marginTop: 1 }}
+                />
                 <Text style={styles.bulletText}>{bullet}</Text>
               </View>
             ))}
@@ -404,9 +415,9 @@ function SlideItem({ item, index, isActive, totalSlides }: SlideItemProps) {
         {isFirst && (
           <View style={styles.welcomeHint}>
             <View style={styles.swipeIndicator}>
-              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.4)" />
-              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.6)" style={{ marginLeft: -8 }} />
-              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.8)" style={{ marginLeft: -8 }} />
+              <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.4)" />
+              <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.6)" style={{ marginLeft: -6 }} />
+              <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.8)" style={{ marginLeft: -6 }} />
             </View>
             <Text style={styles.welcomeHintText}>Swipe to explore all features</Text>
           </View>
@@ -414,11 +425,11 @@ function SlideItem({ item, index, isActive, totalSlides }: SlideItemProps) {
 
         {isLast && (
           <View style={styles.finalCta}>
-            <Ionicons name="sparkles" size={20} color="#1A8A7E" />
+            <Ionicons name="sparkles" size={18} color="#1A8A7E" />
             <Text style={styles.finalCtaText}>Your TrustHome journey begins now</Text>
           </View>
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -488,68 +499,76 @@ export function WelcomeGuide({ visible, onComplete }: WelcomeGuideProps) {
 
         <View style={[
           styles.progressBarContainer,
-          { top: Platform.OS === 'web' ? 67 + 8 : insets.top + 8 },
+          { top: Platform.OS === 'web' ? 67 + 6 : insets.top + 6 },
         ]}>
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${progress}%` as any }]} />
           </View>
         </View>
 
-        <View style={[styles.controls, {
-          paddingBottom: Platform.OS === 'web' ? 34 + 16 : insets.bottom + 16
-        }]}>
-          <Pressable
-            onPress={isFirstSlide ? onComplete : goToPrev}
-            style={styles.controlBtn}
-            hitSlop={12}
-          >
-            {isFirstSlide ? (
-              <Text style={styles.skipText}>Skip</Text>
-            ) : (
-              <View style={styles.navCircle}>
-                <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
-              </View>
-            )}
-          </Pressable>
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.85)'] as [string, string, ...string[]]}
+          style={[styles.controlsGradient, {
+            paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom,
+          }]}
+          pointerEvents="box-none"
+        >
+          <View style={styles.controls}>
+            <Pressable
+              onPress={isFirstSlide ? onComplete : goToPrev}
+              style={styles.controlBtn}
+              hitSlop={12}
+            >
+              {isFirstSlide ? (
+                <Text style={styles.skipText}>Skip</Text>
+              ) : (
+                <View style={styles.navCircle}>
+                  <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
+                </View>
+              )}
+            </Pressable>
 
-          <View style={styles.dots}>
-            {SLIDES.map((_, i) => {
-              const isGroup = Math.floor(i / 3);
-              const currentGroup = Math.floor(currentIndex / 3);
-              const isCurrentGroupDot = isGroup === currentGroup;
-              return (
-                <View
-                  key={i}
-                  style={[
-                    styles.dot,
-                    i === currentIndex
-                      ? styles.dotActive
-                      : isCurrentGroupDot
-                        ? styles.dotNear
-                        : styles.dotInactive,
-                  ]}
-                />
-              );
-            })}
+            <View style={styles.centerNav}>
+              <Text style={styles.pageIndicator}>
+                <Text style={styles.pageIndicatorCurrent}>{currentIndex + 1}</Text>
+                <Text style={styles.pageIndicatorSep}> / </Text>
+                <Text style={styles.pageIndicatorTotal}>{SLIDES.length}</Text>
+              </Text>
+              <View style={styles.miniProgressRow}>
+                {Array.from({ length: Math.ceil(SLIDES.length / 3) }).map((_, groupIdx) => {
+                  const groupStart = groupIdx * 3;
+                  const isCurrentGroup = currentIndex >= groupStart && currentIndex < groupStart + 3;
+                  return (
+                    <View
+                      key={groupIdx}
+                      style={[
+                        styles.miniDot,
+                        isCurrentGroup ? styles.miniDotActive : styles.miniDotInactive,
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+
+            <Pressable
+              onPress={goToNext}
+              style={[styles.controlBtn, { alignItems: 'flex-end' as const }]}
+              hitSlop={12}
+            >
+              {isLastSlide ? (
+                <View style={styles.getStartedBtn}>
+                  <Text style={styles.getStartedText}>Let's Go</Text>
+                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+                </View>
+              ) : (
+                <View style={styles.navCircle}>
+                  <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+                </View>
+              )}
+            </Pressable>
           </View>
-
-          <Pressable
-            onPress={goToNext}
-            style={[styles.controlBtn, { alignItems: 'flex-end' as const }]}
-            hitSlop={12}
-          >
-            {isLastSlide ? (
-              <View style={styles.getStartedBtn}>
-                <Text style={styles.getStartedText}>Let's Go</Text>
-                <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
-              </View>
-            ) : (
-              <View style={styles.navCircle}>
-                <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
-              </View>
-            )}
-          </Pressable>
-        </View>
+        </LinearGradient>
       </View>
     </Modal>
   );
@@ -563,65 +582,64 @@ const styles = StyleSheet.create({
   slide: {
     flex: 1,
   },
-  slideContent: {
+  slideScroll: {
     flex: 1,
-    paddingHorizontal: 28,
-    justifyContent: 'flex-start',
+  },
+  slideContent: {
+    paddingHorizontal: 24,
+    alignItems: 'stretch',
   },
   badgeRow: {
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.12)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
   },
   badgeText: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '700' as const,
     color: 'rgba(255,255,255,0.85)',
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
   },
   slideNumber: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'center',
-    gap: 8,
-    marginBottom: 16,
+    gap: 6,
+    marginBottom: 10,
   },
   slideNumberText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700' as const,
     color: 'rgba(255,255,255,0.7)',
     letterSpacing: 1,
   },
   slideNumberLine: {
-    width: 20,
+    width: 16,
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.3)',
   },
   slideNumberTotal: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500' as const,
     color: 'rgba(255,255,255,0.35)',
     letterSpacing: 1,
   },
   iconCluster: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 14,
     position: 'relative' as const,
   },
   mainIconCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.12)',
@@ -629,64 +647,61 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.2)',
   },
   secondaryIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute' as const,
     bottom: -2,
-    right: '32%' as any,
+    right: '33%' as any,
     backgroundColor: 'rgba(255,255,255,0.18)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
   },
   slideTitle: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '800' as const,
     color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 36,
+    lineHeight: 34,
     letterSpacing: -0.5,
-    marginBottom: 12,
+    marginBottom: 10,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
   subtitleCard: {
     backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 16,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
   slideSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
-    lineHeight: 21,
+    lineHeight: 19,
   },
   bulletCard: {
     backgroundColor: 'rgba(0,0,0,0.2)',
-    borderRadius: 16,
-    padding: 16,
-    gap: 12,
+    borderRadius: 14,
+    padding: 14,
+    gap: 10,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
   },
   bulletRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 10,
-  },
-  bulletIconWrap: {
-    marginTop: 1,
+    gap: 8,
   },
   bulletText: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 12,
+    lineHeight: 17,
     flex: 1,
     color: 'rgba(255,255,255,0.85)',
   },
@@ -694,10 +709,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    marginTop: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.08)',
     alignSelf: 'center',
@@ -707,7 +722,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   welcomeHintText: {
-    fontSize: 13,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.6)',
     fontWeight: '500' as const,
   },
@@ -715,25 +730,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    marginTop: 24,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 16,
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 14,
     backgroundColor: 'rgba(255,255,255,0.12)',
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: 'rgba(26,138,126,0.3)',
   },
   finalCtaText: {
-    fontSize: 14,
+    fontSize: 13,
     color: 'rgba(255,255,255,0.85)',
     fontWeight: '600' as const,
   },
   progressBarContainer: {
     position: 'absolute',
-    left: 24,
-    right: 24,
+    left: 20,
+    right: 20,
     height: 3,
     zIndex: 10,
   },
@@ -744,23 +759,26 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressBarFill: {
-    height: '100%',
+    height: '100%' as any,
     backgroundColor: '#1A8A7E',
     borderRadius: 2,
   },
-  controls: {
+  controlsGradient: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    paddingTop: 30,
+  },
+  controls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   controlBtn: {
-    width: 90,
+    minWidth: 80,
     justifyContent: 'center',
   },
   skipText: {
@@ -778,42 +796,54 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.12)',
   },
-  dots: {
+  centerNav: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  pageIndicator: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+  },
+  pageIndicatorCurrent: {
+    color: '#FFFFFF',
+    fontWeight: '700' as const,
+  },
+  pageIndicatorSep: {
+    color: 'rgba(255,255,255,0.35)',
+  },
+  pageIndicatorTotal: {
+    color: 'rgba(255,255,255,0.45)',
+    fontWeight: '500' as const,
+  },
+  miniProgressRow: {
     flexDirection: 'row',
     gap: 4,
-    flex: 1,
-    justifyContent: 'center',
-    flexWrap: 'wrap',
   },
-  dot: {
-    height: 6,
-    borderRadius: 3,
+  miniDot: {
+    height: 4,
+    borderRadius: 2,
   },
-  dotActive: {
-    width: 18,
-    backgroundColor: '#FFFFFF',
+  miniDotActive: {
+    width: 16,
+    backgroundColor: '#1A8A7E',
   },
-  dotNear: {
-    width: 6,
-    backgroundColor: 'rgba(255,255,255,0.45)',
-  },
-  dotInactive: {
-    width: 6,
+  miniDotInactive: {
+    width: 8,
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
   getStartedBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 22,
     backgroundColor: '#1A8A7E',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
   },
   getStartedText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700' as const,
     color: '#FFFFFF',
   },

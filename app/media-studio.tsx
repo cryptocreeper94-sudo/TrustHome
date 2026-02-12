@@ -405,6 +405,45 @@ export default function MediaStudioScreen() {
     }
   }, []);
 
+  const handleRequestVoiceover = useCallback(async () => {
+    try {
+      await apiRequest('POST', '/api/media-studio/walkthrough-request', {
+        propertyAddress: 'New Property',
+        requestType: 'voiceover_narration',
+        notes: 'Professional voiceover narration for property tour',
+      });
+      Alert.alert('Request Submitted', 'Your voiceover narration request has been sent to DarkWave Media Studio. Estimated turnaround: 24 hours.');
+    } catch (err) {
+      Alert.alert('Error', 'Could not submit request. Please try again.');
+    }
+  }, []);
+
+  const handleRequestAerial = useCallback(async () => {
+    try {
+      await apiRequest('POST', '/api/media-studio/walkthrough-request', {
+        propertyAddress: 'New Property',
+        requestType: 'aerial_drone',
+        notes: 'Aerial/drone footage of property and surrounding neighborhood',
+      });
+      Alert.alert('Request Submitted', 'Your aerial/drone request has been sent to DarkWave Media Studio. A coordinator will reach out to schedule the shoot.');
+    } catch (err) {
+      Alert.alert('Error', 'Could not submit request. Please try again.');
+    }
+  }, []);
+
+  const handleRequestInterior = useCallback(async () => {
+    try {
+      await apiRequest('POST', '/api/media-studio/walkthrough-request', {
+        propertyAddress: 'New Property',
+        requestType: 'interior_photography',
+        notes: 'HDR interior photography with professional lighting',
+      });
+      Alert.alert('Request Submitted', 'Your interior photography request has been sent to DarkWave Media Studio. Estimated turnaround: 48 hours.');
+    } catch (err) {
+      Alert.alert('Error', 'Could not submit request. Please try again.');
+    }
+  }, []);
+
   const handleOpenStudio = useCallback(() => {
     Linking.openURL('https://media.darkwavestudios.io');
   }, []);
@@ -575,7 +614,7 @@ export default function MediaStudioScreen() {
               image={REQUEST_IMAGES.voiceover}
               gradient={['#6366F1', '#818CF8']}
               icon="mic-outline"
-              onPress={() => Alert.alert('Coming Soon', 'Voiceover requests will be available in the next update.')}
+              onPress={handleRequestVoiceover}
               colors={colors}
               isDark={isDark}
               index={1}
@@ -586,7 +625,7 @@ export default function MediaStudioScreen() {
               image={REQUEST_IMAGES.aerial}
               gradient={['#00B4DB', '#0083B0']}
               icon="airplane-outline"
-              onPress={() => Alert.alert('Coming Soon', 'Aerial/drone requests will be available in the next update.')}
+              onPress={handleRequestAerial}
               colors={colors}
               isDark={isDark}
               index={2}
@@ -597,7 +636,7 @@ export default function MediaStudioScreen() {
               image={REQUEST_IMAGES.interior}
               gradient={['#F2994A', '#F2C94C']}
               icon="camera-outline"
-              onPress={() => Alert.alert('Coming Soon', 'Interior photography requests will be available in the next update.')}
+              onPress={handleRequestInterior}
               colors={colors}
               isDark={isDark}
               index={3}

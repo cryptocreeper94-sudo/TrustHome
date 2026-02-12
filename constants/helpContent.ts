@@ -147,6 +147,18 @@ export const SCREEN_HELP: Record<string, FeatureHelp> = {
       'Score is updated in real-time as transactions complete',
     ],
   },
+  branding: {
+    title: 'Branding & Profile',
+    description: 'Customize your agent profile, brand identity, and client-facing materials. All branding changes sync across the TrustHome ecosystem.',
+    details: [
+      'Update your agent profile with photo, contact info, and license details',
+      'Choose a primary brand color to personalize your experience',
+      'Upload a custom logo for your brokerage or personal brand',
+      'Share your agent landing page with clients via link or QR code',
+      'Configure white-label settings for custom domains and email templates',
+      'All changes sync with your DarkWave ecosystem account',
+    ],
+  },
   mlsSetup: {
     title: 'MLS Integration',
     description: 'Connect your MLS board to automatically sync listings and market data into TrustHome. Each agent connects their own MLS credentials.',
@@ -157,6 +169,18 @@ export const SCREEN_HELP: Record<string, FeatureHelp> = {
       'TrustHome supports RESO Web API 2.0 standard',
       'Listings, photos, market data, and agent rosters all sync automatically',
       'Your credentials are encrypted and stored securely per-agent',
+    ],
+  },
+  support: {
+    title: 'Help & Support',
+    description: 'Access help resources, frequently asked questions, contact support, and explore ecosystem links all in one place.',
+    details: [
+      'Quick Help provides one-tap access to getting started guides and video tutorials',
+      'Browse frequently asked questions for instant answers to common topics',
+      'Contact support via email, phone, or live chat during business hours',
+      'Ecosystem Resources link to DarkWave Studios, Trust Layer, Trust Shield, and more',
+      'Submit feature requests directly to the product team',
+      'App Info displays the current version and build details',
     ],
   },
 };

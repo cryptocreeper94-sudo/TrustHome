@@ -1416,7 +1416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/blog/posts/:slug", async (req: Request, res: Response) => {
     try {
       const [post] = await db.select().from(blogPosts).where(
-        and(eq(blogPosts.slug, req.params.slug), eq(blogPosts.status, 'published'))
+        and(eq(blogPosts.slug, req.params.slug as string), eq(blogPosts.status, 'published'))
       );
       if (!post) {
         return res.status(404).json({ error: "Post not found" });
@@ -1454,7 +1454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.body.status === 'published' && !req.body.publishedAt) {
         updateData.publishedAt = new Date();
       }
-      const [post] = await db.update(blogPosts).set(updateData).where(eq(blogPosts.id, req.params.id)).returning();
+      const [post] = await db.update(blogPosts).set(updateData).where(eq(blogPosts.id, req.params.id as string)).returning();
       if (!post) {
         return res.status(404).json({ error: "Post not found" });
       }
@@ -1466,7 +1466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/blog/admin/posts/:id", async (req: Request, res: Response) => {
     try {
-      const [post] = await db.delete(blogPosts).where(eq(blogPosts.id, req.params.id)).returning();
+      const [post] = await db.delete(blogPosts).where(eq(blogPosts.id, req.params.id as string)).returning();
       if (!post) {
         return res.status(404).json({ error: "Post not found" });
       }
@@ -1585,7 +1585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, notes } = req.body;
       const [updated] = await db.update(accessRequests)
         .set({ status, notes, reviewedAt: new Date() })
-        .where(eq(accessRequests.id, req.params.id))
+        .where(eq(accessRequests.id, req.params.id as string))
         .returning();
 
       if (!updated) {
@@ -1654,7 +1654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (req.body.notes !== undefined) updates.notes = req.body.notes;
         if (req.body.propertyAddress !== undefined) updates.propertyAddress = req.body.propertyAddress;
         updates.updatedAt = new Date();
-        const [updated] = await db.update(expenses).set(updates).where(eq(expenses.id, id)).returning();
+        const [updated] = await db.update(expenses).set(updates).where(eq(expenses.id, id as string)).returning();
         if (!updated) return res.status(404).json({ error: "Expense not found" });
         return res.json(updated);
       }
@@ -1669,7 +1669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = await ecosystemDelete(`/expenses/${req.params.id}`);
       if (data.error || data.notAvailable) {
         const { id } = req.params;
-        const [deleted] = await db.delete(expenses).where(eq(expenses.id, id)).returning();
+        const [deleted] = await db.delete(expenses).where(eq(expenses.id, id as string)).returning();
         if (!deleted) return res.status(404).json({ error: "Expense not found" });
         return res.json({ success: true });
       }
@@ -1785,7 +1785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (req.body.category !== undefined) updates.category = req.body.category;
         if (req.body.notes !== undefined) updates.notes = req.body.notes;
         updates.updatedAt = new Date();
-        const [updated] = await db.update(mileageEntries).set(updates).where(eq(mileageEntries.id, id)).returning();
+        const [updated] = await db.update(mileageEntries).set(updates).where(eq(mileageEntries.id, id as string)).returning();
         if (!updated) return res.status(404).json({ error: "Mileage entry not found" });
         return res.json(updated);
       }
@@ -1800,7 +1800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = await ecosystemDelete(`/mileage/${req.params.id}`);
       if (data.error || data.notAvailable) {
         const { id } = req.params;
-        const [deleted] = await db.delete(mileageEntries).where(eq(mileageEntries.id, id)).returning();
+        const [deleted] = await db.delete(mileageEntries).where(eq(mileageEntries.id, id as string)).returning();
         if (!deleted) return res.status(404).json({ error: "Mileage entry not found" });
         return res.json({ success: true });
       }
@@ -1873,7 +1873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (req.body.syncEnabled !== undefined) updates.syncEnabled = req.body.syncEnabled;
         if (req.body.notes !== undefined) updates.notes = req.body.notes;
         updates.updatedAt = new Date();
-        const [updated] = await db.update(mlsConfigurations).set(updates).where(eq(mlsConfigurations.id, id)).returning();
+        const [updated] = await db.update(mlsConfigurations).set(updates).where(eq(mlsConfigurations.id, id as string)).returning();
         if (!updated) return res.status(404).json({ error: "MLS configuration not found" });
         return res.json(updated);
       }
@@ -1888,7 +1888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = await ecosystemDelete(`/mls/config/${req.params.id}`);
       if (data.error || data.notAvailable) {
         const { id } = req.params;
-        const [deleted] = await db.delete(mlsConfigurations).where(eq(mlsConfigurations.id, id)).returning();
+        const [deleted] = await db.delete(mlsConfigurations).where(eq(mlsConfigurations.id, id as string)).returning();
         if (!deleted) return res.status(404).json({ error: "MLS configuration not found" });
         return res.json({ success: true });
       }

@@ -126,7 +126,7 @@ const partnerStyles = StyleSheet.create({
 
 export function AgentDashboard() {
   const { colors, isDark } = useTheme();
-  const { user, isJenniferUser, replayPartnerDashboard } = useApp();
+  const { user, isJenniferUser, replayPartnerDashboard, greetingName } = useApp();
   const { safetyModeActive, toggleSafetyMode, currentLocation, hasPermission, requestPermission } = useLocation();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; description: string; details?: string[]; examples?: string[] }>({
@@ -168,7 +168,7 @@ export function AgentDashboard() {
       <View style={styles.greetingRow}>
         <View>
           <Text style={[styles.greeting, { color: colors.textSecondary }]}>{new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}</Text>
-          <Text style={[styles.name, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : MOCK_AGENT.name}</Text>
+          <Text style={[styles.name, { color: colors.text }]}>{greetingName || (user ? `${user.firstName} ${user.lastName}` : MOCK_AGENT.name)}</Text>
         </View>
         <TrustShieldBadge score={MOCK_AGENT.trustScore} compact showLink />
       </View>

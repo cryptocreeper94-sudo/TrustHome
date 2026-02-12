@@ -43,6 +43,8 @@ interface AppContextValue {
   setShowPartnerOnboarding: (show: boolean) => void;
   isJenniferUser: boolean;
   replayPartnerDashboard: () => void;
+  greetingName: string;
+  setGreetingName: (name: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -78,6 +80,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [guideChecked, setGuideChecked] = useState(false);
   const [showPartnerOnboarding, setShowPartnerOnboarding] = useState(false);
   const [partnerChecked, setPartnerChecked] = useState(false);
+  const [greetingName, setGreetingNameState] = useState<string>('');
 
   useEffect(() => {
     if (isAuthenticated && !guideChecked) {
@@ -106,13 +109,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, user, partnerChecked]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       if (user.role === 'agent') {
         setCurrentRole('agent');
       } else {
         setCurrentRole('client_buyer');
       }
+      AsyncStorage.getItem(`trusthome_greeting_${user.id}`).then((val) => {
+        if (val) setGreetingNameState(val);
+        else setGreetingNameState(`${user.firstName} ${user.lastName}`);
+      }).catch(() => setGreetingNameState(`${user.firstName} ${user.lastName}`));
+    } else {
+      setGreetingNameState('');
     }
   }, [user]);
 
@@ -172,6 +181,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setShowPartnerOnboarding(true);
   }, []);
 
+  const setGreetingName = useCallback((name: string) => {
+    setGreetingNameState(name);
+    if (user) {
+      AsyncStorage.setItem(`trusthome_greeting_${user.id}`, name).catch(() => {});
+    }
+  }, [user]);
+
   const value = useMemo(() => ({
     user,
     isLoading,
@@ -202,7 +218,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setShowPartnerOnboarding: handleSetShowPartnerOnboarding,
     isJenniferUser,
     replayPartnerDashboard,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard]);
+    greetingName,
+    setGreetingName,
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard, greetingName, setGreetingName]);
 
   return (
     <AppContext.Provider value={value}>

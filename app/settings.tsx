@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Switch } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Switch, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -32,8 +32,10 @@ interface SettingsSection {
 
 export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
-  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard } = useApp();
+  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard, greetingName, setGreetingName } = useApp();
   const [showHelp, setShowHelp] = useState<boolean>(false);
+  const [showGreetingModal, setShowGreetingModal] = useState(false);
+  const [greetingInput, setGreetingInput] = useState('');
   const router = useRouter();
 
   const trustLayerQuery = useQuery<any>({
@@ -97,6 +99,7 @@ export default function SettingsScreen() {
       icon: 'color-palette',
       iconColor: '#AF52DE',
       items: [
+        { icon: 'hand-left-outline', label: 'Greeting Name', type: 'status', value: greetingName || 'Not Set' },
         { icon: 'color-palette-outline', label: 'Theme', type: 'status', value: themeLabel },
         { icon: 'eye-outline', label: 'Default View', type: 'status', value: 'Agent' },
         { icon: 'calendar-outline', label: 'Calendar Sync', type: 'status', value: 'Connected', statusColor: colors.success },
@@ -141,6 +144,10 @@ export default function SettingsScreen() {
       onPress={() => {
         if (item.label === 'Theme') cycleTheme();
         if (item.label === 'MLS Connection') router.push('/mls-setup');
+        if (item.label === 'Greeting Name') {
+          setGreetingInput(greetingName);
+          setShowGreetingModal(true);
+        }
       }}
       style={[
         styles.settingsRow,
@@ -299,6 +306,51 @@ export default function SettingsScreen() {
         description={SCREEN_HELP.settings.description}
         details={SCREEN_HELP.settings.details}
       />
+      <Modal visible={showGreetingModal} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, width: '100%', maxWidth: 360 }}>
+            <Text style={{ fontSize: 18, fontWeight: '700' as const, color: colors.text, marginBottom: 4 }}>Greeting Name</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 16 }}>Choose how you'd like to be greeted on the dashboard</Text>
+            <TextInput
+              value={greetingInput}
+              onChangeText={setGreetingInput}
+              placeholder="e.g. Jenn, Boss, Captain"
+              placeholderTextColor={colors.textTertiary}
+              style={{
+                backgroundColor: colors.background,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: colors.border,
+                paddingHorizontal: 14,
+                paddingVertical: 12,
+                fontSize: 16,
+                color: colors.text,
+                marginBottom: 20,
+              }}
+              autoFocus
+            />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <Pressable
+                onPress={() => setShowGreetingModal(false)}
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: colors.border, alignItems: 'center' as const }}
+              >
+                <Text style={{ color: colors.textSecondary, fontWeight: '600' as const }}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  if (greetingInput.trim()) {
+                    setGreetingName(greetingInput.trim());
+                  }
+                  setShowGreetingModal(false);
+                }}
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: colors.primary, alignItems: 'center' as const }}
+              >
+                <Text style={{ color: '#fff', fontWeight: '600' as const }}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

@@ -755,7 +755,7 @@ const s = StyleSheet.create({
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12 },
       android: { elevation: 4 },
-      web: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12 },
+      web: { boxShadow: '0px 4px 12px rgba(0,0,0,0.1)' } as any,
     }),
   },
   projectImageWrap: { height: 130, position: 'relative' as const },
@@ -800,7 +800,7 @@ const s = StyleSheet.create({
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12 },
       android: { elevation: 4 },
-      web: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12 },
+      web: { boxShadow: '0px 4px 12px rgba(0,0,0,0.1)' } as any,
     }),
   },
   requestImageWrap: { height: 120, position: 'relative' as const },
@@ -828,7 +828,7 @@ const s = StyleSheet.create({
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
       android: { elevation: 3 },
-      web: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
+      web: { boxShadow: '0px 2px 8px rgba(0,0,0,0.08)' } as any,
     }),
   },
   toolImageWrap: { height: 80, position: 'relative' as const },

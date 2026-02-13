@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: -2, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6 },
       android: { elevation: 6 },
-      web: { shadowColor: '#000', shadowOffset: { width: -2, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6 },
+      web: { boxShadow: '-2px 2px 6px rgba(0,0,0,0.15)' } as any,
     }),
   },
   tabText: {
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: -4, height: 0 }, shadowOpacity: 0.15, shadowRadius: 12 },
       android: { elevation: 12 },
-      web: { shadowColor: '#000', shadowOffset: { width: -4, height: 0 }, shadowOpacity: 0.15, shadowRadius: 12 },
+      web: { boxShadow: '-4px 0px 12px rgba(0,0,0,0.15)' } as any,
     }),
   },
   panelHeader: {

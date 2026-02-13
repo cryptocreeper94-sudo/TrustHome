@@ -848,7 +848,7 @@ const providerStyles = StyleSheet.create({
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 8 },
       android: { elevation: 3 },
-      web: { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 8 },
+      web: { boxShadow: '0px 3px 8px rgba(0,0,0,0.08)' } as any,
     }),
   },
   iconWrap: {

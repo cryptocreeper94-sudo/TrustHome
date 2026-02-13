@@ -120,11 +120,8 @@ const styles = StyleSheet.create({
       },
       android: { elevation: 2 },
       web: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-      },
+        boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
+      } as any,
     }),
   },
   text: {

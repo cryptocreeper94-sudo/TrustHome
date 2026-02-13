@@ -667,9 +667,21 @@ const styles = StyleSheet.create({
     lineHeight: 34,
     letterSpacing: -0.5,
     marginBottom: 10,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    ...Platform.select({
+      ios: {
+        textShadowColor: 'rgba(0,0,0,0.3)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 4,
+      },
+      web: {
+        textShadow: '0px 1px 4px rgba(0,0,0,0.3)',
+      } as any,
+      default: {
+        textShadowColor: 'rgba(0,0,0,0.3)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 4,
+      },
+    }),
   },
   subtitleCard: {
     backgroundColor: 'rgba(255,255,255,0.08)',

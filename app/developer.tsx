@@ -741,9 +741,7 @@ const styles = StyleSheet.create({
     gap: 14,
     marginBottom: 20,
   },
-  pinShake: {
-    ...(Platform.OS === 'web' ? { animation: 'shake 0.4s ease-in-out' } : {}) as any,
-  },
+  pinShake: {} as any,
   pinCell: {
     width: 56,
     height: 64,
@@ -1018,6 +1016,4 @@ const styles = StyleSheet.create({
   reqNameRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6 },
   reqSourceBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
   reqSourceText: { fontSize: 10, fontWeight: '600' as const },
-  reqDetailRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6, marginTop: 6, paddingLeft: 42 },
-  reqDetailText: { fontSize: 12 },
 });

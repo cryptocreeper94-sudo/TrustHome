@@ -59,7 +59,7 @@ export function DrawerMenu() {
   const handleSignOut = async () => {
     closeDrawer();
     await signOut();
-    router.replace('/auth');
+    router.replace('/');
   };
 
   const handleSignIn = () => {

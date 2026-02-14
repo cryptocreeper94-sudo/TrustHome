@@ -39,6 +39,7 @@ function RootLayoutNav() {
         <Stack.Screen name="media-studio" />
         <Stack.Screen name="mls-setup" />
         <Stack.Screen name="support" />
+        <Stack.Screen name="command-center" />
       </Stack>
       <DrawerMenu />
       <SignalChat />

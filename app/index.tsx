@@ -19,6 +19,36 @@ import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
 
 type HomeView = 'hub' | 'dashboard';
 
+interface FeatureCategory {
+  title: string;
+  items: {
+    icon: keyof typeof Ionicons.glyphMap;
+    label: string;
+    color: string;
+  }[];
+}
+
+const FEATURE_CATEGORIES: FeatureCategory[] = [
+  {
+    title: 'Your Home Journey',
+    items: [
+      { icon: 'business-outline', label: 'Browse Properties', color: '#0E7490' },
+      { icon: 'calendar-outline', label: 'Schedule Showings', color: '#1A8A7E' },
+      { icon: 'swap-horizontal-outline', label: 'Track Transactions', color: '#0D9488' },
+      { icon: 'map-outline', label: 'Neighborhood Intel', color: '#059669' },
+    ],
+  },
+  {
+    title: 'Tools & Security',
+    items: [
+      { icon: 'lock-closed-outline', label: 'Document Vault', color: '#047857' },
+      { icon: 'calculator-outline', label: 'Mortgage Tools', color: '#0369A1' },
+      { icon: 'chatbubbles-outline', label: 'Direct Messaging', color: '#1E40AF' },
+      { icon: 'sparkles-outline', label: 'AI Assistant', color: '#7C3AED' },
+    ],
+  },
+];
+
 function UserCommandCenter() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -56,51 +86,98 @@ function UserCommandCenter() {
             end={{ x: 1, y: 1 }}
             style={styles.heroGradient}
           >
-            <Text style={styles.heroTitle}>Welcome to the Command Center</Text>
+            <Text style={styles.heroTitle}>Your Command Center</Text>
             <Text style={styles.heroSub}>
-              Transparent, blockchain-verified real estate transactions. Sign in or create an account to get started.
+              Transparent, blockchain-verified real estate — from first showing to closing day. Everything you need, all in one place.
             </Text>
-            <Pressable
-              style={styles.heroCta}
-              onPress={() => router.push('/auth')}
-            >
-              <Text style={styles.heroCtaText}>Get Started</Text>
-              <Ionicons name="arrow-forward" size={16} color="#1A8A7E" />
-            </Pressable>
+            <View style={styles.heroActions}>
+              <Pressable
+                style={styles.heroCta}
+                onPress={() => router.push('/auth')}
+              >
+                <Text style={styles.heroCtaText}>Sign In</Text>
+                <Ionicons name="log-in-outline" size={16} color="#1A8A7E" />
+              </Pressable>
+              <Pressable
+                style={styles.heroCtaSecondary}
+                onPress={() => router.push('/auth')}
+              >
+                <Text style={styles.heroCtaSecondaryText}>Create Account</Text>
+                <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
+              </Pressable>
+            </View>
           </LinearGradient>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(350).duration(400)} style={styles.featuresSection}>
-          <View style={[styles.featureRow, { borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
-            <View style={[styles.featureIcon, { backgroundColor: 'rgba(26,138,126,0.12)' }]}>
-              <Ionicons name="shield-checkmark-outline" size={18} color="#1A8A7E" />
+        {FEATURE_CATEGORIES.map((cat, catIndex) => (
+          <Animated.View
+            key={cat.title}
+            entering={FadeInDown.delay(300 + catIndex * 120).duration(400)}
+            style={styles.categorySection}
+          >
+            <Text style={[styles.categoryTitle, { color: colors.textSecondary }]}>{cat.title}</Text>
+            <View style={styles.categoryGrid}>
+              {cat.items.map((item) => (
+                <Pressable
+                  key={item.label}
+                  style={[
+                    styles.catTile,
+                    {
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                    },
+                  ]}
+                  onPress={() => router.push('/auth')}
+                >
+                  <View style={[styles.catTileIcon, { backgroundColor: item.color + (isDark ? '25' : '14') }]}>
+                    <Ionicons name={item.icon} size={18} color={item.color} />
+                  </View>
+                  <Text style={[styles.catTileLabel, { color: colors.text }]} numberOfLines={1}>{item.label}</Text>
+                </Pressable>
+              ))}
             </View>
-            <View style={styles.featureText}>
-              <Text style={[styles.featureTitle, { color: colors.text }]}>Blockchain Verified</Text>
-              <Text style={[styles.featureSub, { color: colors.textSecondary }]}>Every transaction secured by DarkWave Trust Layer</Text>
+          </Animated.View>
+        ))}
+
+        <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.trustBanner}>
+          <LinearGradient
+            colors={isDark
+              ? ['rgba(26,138,126,0.1)', 'rgba(26,138,126,0.03)']
+              : ['rgba(26,138,126,0.07)', 'rgba(26,138,126,0.02)']
+            }
+            style={styles.trustBannerInner}
+          >
+            <View style={styles.trustBannerRow}>
+              <View style={styles.trustBadge}>
+                <Ionicons name="shield-checkmark" size={16} color="#1A8A7E" />
+              </View>
+              <View style={styles.trustBannerText}>
+                <Text style={[styles.trustBannerTitle, { color: colors.text }]}>Blockchain Verified</Text>
+                <Text style={[styles.trustBannerSub, { color: colors.textSecondary }]}>Every transaction secured by DarkWave Trust Layer</Text>
+              </View>
             </View>
-          </View>
-          <View style={[styles.featureRow, { borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
-            <View style={[styles.featureIcon, { backgroundColor: 'rgba(124,58,237,0.12)' }]}>
-              <Ionicons name="sparkles-outline" size={18} color="#7C3AED" />
+            <View style={styles.trustBannerRow}>
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(124,58,237,0.12)' }]}>
+                <Ionicons name="sparkles" size={16} color="#7C3AED" />
+              </View>
+              <View style={styles.trustBannerText}>
+                <Text style={[styles.trustBannerTitle, { color: colors.text }]}>AI-Powered Platform</Text>
+                <Text style={[styles.trustBannerSub, { color: colors.textSecondary }]}>Smart marketing, analytics, and voice assistant</Text>
+              </View>
             </View>
-            <View style={styles.featureText}>
-              <Text style={[styles.featureTitle, { color: colors.text }]}>AI-Powered</Text>
-              <Text style={[styles.featureSub, { color: colors.textSecondary }]}>Smart marketing, analytics, and voice assistant</Text>
+            <View style={styles.trustBannerRow}>
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(37,99,235,0.12)' }]}>
+                <Ionicons name="globe" size={16} color="#2563EB" />
+              </View>
+              <View style={styles.trustBannerText}>
+                <Text style={[styles.trustBannerTitle, { color: colors.text }]}>Full Ecosystem</Text>
+                <Text style={[styles.trustBannerSub, { color: colors.textSecondary }]}>CRM, media studio, staffing, and cross-platform chat</Text>
+              </View>
             </View>
-          </View>
-          <View style={[styles.featureRow, { borderColor: 'transparent' }]}>
-            <View style={[styles.featureIcon, { backgroundColor: 'rgba(37,99,235,0.12)' }]}>
-              <Ionicons name="globe-outline" size={18} color="#2563EB" />
-            </View>
-            <View style={styles.featureText}>
-              <Text style={[styles.featureTitle, { color: colors.text }]}>Full Ecosystem</Text>
-              <Text style={[styles.featureSub, { color: colors.textSecondary }]}>Connected to CRM, media, staffing, and more</Text>
-            </View>
-          </View>
+          </LinearGradient>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(500).duration(400)} style={styles.adminFooter}>
+        <Animated.View entering={FadeInUp.delay(650).duration(400)} style={styles.adminFooter}>
           <View style={[styles.adminDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
           <View style={styles.adminRow}>
             <Pressable style={styles.adminLink} onPress={() => router.push('/team')}>
@@ -279,49 +356,111 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: '400' as const,
   },
+  heroActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 6,
+  },
   heroCta: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 12,
     gap: 6,
-    marginTop: 4,
   },
   heroCtaText: {
     color: '#1A8A7E',
     fontSize: 14,
     fontWeight: '700' as const,
   },
-  featuresSection: {
-    marginBottom: 28,
-  },
-  featureRow: {
+  heroCtaSecondary: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+    gap: 5,
   },
-  featureIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+  heroCtaSecondaryText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  categorySection: {
+    marginBottom: 20,
+  },
+  categoryTitle: {
+    fontSize: 12,
+    fontWeight: '700' as const,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  catTile: {
+    width: '48%' as any,
+    flexGrow: 1,
+    flexBasis: '46%' as any,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  catTileIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  featureText: {
+  catTileLabel: {
+    fontSize: 13,
+    fontWeight: '600' as const,
     flex: 1,
-    gap: 2,
   },
-  featureTitle: {
-    fontSize: 14,
+  trustBanner: {
+    marginBottom: 24,
+  },
+  trustBannerInner: {
+    borderRadius: 16,
+    padding: 16,
+    gap: 14,
+  },
+  trustBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  trustBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: 'rgba(26,138,126,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trustBannerText: {
+    flex: 1,
+    gap: 1,
+  },
+  trustBannerTitle: {
+    fontSize: 13,
     fontWeight: '600' as const,
   },
-  featureSub: {
-    fontSize: 12,
+  trustBannerSub: {
+    fontSize: 11,
     fontWeight: '400' as const,
   },
   adminFooter: {

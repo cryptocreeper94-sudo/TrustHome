@@ -316,10 +316,10 @@ const SLIDES: GuideSlide[] = [
     title: 'You\'re\nAll Set',
     subtitle: 'Your platform is ready. Every tool, every advantage, at your fingertips.',
     bullets: [
+      'Your landing page is your public Command Center — clients see every feature before they sign in',
+      'Social media links are displayed in the footer — your agent profiles are added during setup',
       'Access this tour anytime from the Platform Tour menu',
-      'Look for info buttons throughout the app for quick help',
       'Your data is secure, verified, and backed by blockchain',
-      'Welcome to the future of real estate — welcome to TrustHome',
     ],
     gradient: ['rgba(26,138,126,0.92)', 'rgba(15,107,98,0.9)', 'rgba(6,74,68,0.97)'],
     accentColor: '#B3E0DA',

@@ -120,7 +120,7 @@ const SLIDES: SlideData[] = [
     iconLib: 'ion',
     title: 'White-Label Ready',
     subtitle: 'Your Brand, Their Business',
-    body: "TrustHome is built from the ground up to be white-labeled. Any brokerage or real estate company can run their own branded version — their logo, their colors, their domain — all powered by TrustHome's engine underneath.\n\nThis means every brokerage that signs up gets a premium platform without building anything. They pay monthly, and we handle the tech. Their agents see their brand. We see recurring revenue.\n\nThe multi-tenant architecture is already live. Each agent operates in their own secure space. Branding controls are built into the settings. Custom domains are supported. This isn't a feature on the roadmap — it's done.",
+    body: "TrustHome is built from the ground up to be white-labeled. Any brokerage or real estate company can run their own branded version — their logo, their colors, their domain, their social media links — all powered by TrustHome's engine underneath.\n\nThis means every brokerage that signs up gets a premium platform without building anything. They pay monthly, and we handle the tech. Their agents see their brand. We see recurring revenue.\n\nThe multi-tenant architecture is already live. Each agent operates in their own secure space. Branding controls are built into the settings. Custom domains are supported. Social media profiles are displayed in each tenant's footer — their Facebook, X, and other accounts front and center for their clients. This isn't a feature on the roadmap — it's done.",
     accent: '#9B59B6',
     type: 'whitelabel',
   },

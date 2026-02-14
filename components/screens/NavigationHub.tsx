@@ -528,6 +528,52 @@ export function NavigationHub() {
         ))}
       </View>
 
+      <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.accessSection}>
+        <View style={styles.accessHeader}>
+          <View style={[styles.accessDivider, { backgroundColor: colors.divider }]} />
+          <Text style={[styles.accessDividerText, { color: colors.textTertiary }]}>quick access</Text>
+          <View style={[styles.accessDivider, { backgroundColor: colors.divider }]} />
+        </View>
+        <View style={styles.accessGrid}>
+          <Pressable
+            style={[styles.accessCard, { backgroundColor: isDark ? 'rgba(26,138,126,0.08)' : 'rgba(26,138,126,0.05)', borderColor: isDark ? 'rgba(26,138,126,0.2)' : 'rgba(26,138,126,0.15)' }]}
+            onPress={() => router.push('/team')}
+          >
+            <View style={[styles.accessIcon, { backgroundColor: 'rgba(26,138,126,0.15)' }]}>
+              <Ionicons name="briefcase-outline" size={16} color="#1A8A7E" />
+            </View>
+            <Text style={[styles.accessLabel, { color: colors.text }]}>Agent</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.accessCard, { backgroundColor: isDark ? 'rgba(212,175,55,0.06)' : 'rgba(212,175,55,0.04)', borderColor: isDark ? 'rgba(212,175,55,0.18)' : 'rgba(212,175,55,0.12)' }]}
+            onPress={() => router.push('/team')}
+          >
+            <View style={[styles.accessIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
+              <Ionicons name="diamond-outline" size={16} color="#D4AF37" />
+            </View>
+            <Text style={[styles.accessLabel, { color: colors.text }]}>Partner</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.accessCard, { backgroundColor: isDark ? 'rgba(124,58,237,0.06)' : 'rgba(124,58,237,0.04)', borderColor: isDark ? 'rgba(124,58,237,0.15)' : 'rgba(124,58,237,0.1)' }]}
+            onPress={() => router.push('/team')}
+          >
+            <View style={[styles.accessIcon, { backgroundColor: 'rgba(124,58,237,0.12)' }]}>
+              <Ionicons name="code-slash-outline" size={16} color="#7C3AED" />
+            </View>
+            <Text style={[styles.accessLabel, { color: colors.text }]}>Developer</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.accessCard, { backgroundColor: isDark ? 'rgba(59,130,246,0.05)' : 'rgba(59,130,246,0.03)', borderColor: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.08)', opacity: 0.5 }]}
+            disabled
+          >
+            <View style={[styles.accessIcon, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
+              <Ionicons name="layers-outline" size={16} color="#3B82F6" />
+            </View>
+            <Text style={[styles.accessLabel, { color: colors.text }]}>Verticals</Text>
+          </Pressable>
+        </View>
+      </Animated.View>
+
       <Animated.View entering={FadeInDown.delay(600).duration(400)} style={styles.trustFooter}>
         <LinearGradient
           colors={isDark
@@ -665,5 +711,49 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  accessSection: {
+    marginTop: 24,
+    paddingHorizontal: GRID_PADDING,
+  },
+  accessHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  accessDivider: {
+    flex: 1,
+    height: 1,
+  },
+  accessDividerText: {
+    fontSize: 11,
+    fontWeight: '600' as const,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
+  },
+  accessGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  accessCard: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 6,
+  },
+  accessIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accessLabel: {
+    fontSize: 11,
+    fontWeight: '600' as const,
   },
 });

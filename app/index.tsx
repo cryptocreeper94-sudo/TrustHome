@@ -196,6 +196,24 @@ function UserCommandCenter() {
             </Pressable>
           </View>
 
+          <View style={styles.socialSection}>
+            <Text style={[styles.socialLabel, { color: colors.textTertiary }]}>TrustHome Demo</Text>
+            <View style={styles.socialRow}>
+              <Pressable
+                style={[styles.socialBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}
+                onPress={() => Linking.openURL('https://www.facebook.com/profile.php?id=61585553137979')}
+              >
+                <Ionicons name="logo-facebook" size={16} color={isDark ? '#8B9CF7' : '#1877F2'} />
+              </Pressable>
+              <Pressable
+                style={[styles.socialBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}
+                onPress={() => Linking.openURL('https://x.com/TrustSignal26')}
+              >
+                <Ionicons name="logo-twitter" size={16} color={isDark ? '#A0AEC0' : '#14171A'} />
+              </Pressable>
+            </View>
+          </View>
+
           <View style={styles.copyrightArea}>
             <View style={styles.copyrightRow}>
               <Ionicons name="shield-checkmark-outline" size={12} color={colors.textTertiary} />
@@ -462,6 +480,28 @@ const styles = StyleSheet.create({
   trustBannerSub: {
     fontSize: 11,
     fontWeight: '400' as const,
+  },
+  socialSection: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  socialLabel: {
+    fontSize: 10,
+    fontWeight: '600' as const,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  socialBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   adminFooter: {
     paddingTop: 4,

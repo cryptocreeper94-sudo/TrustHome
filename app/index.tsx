@@ -19,45 +19,6 @@ import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
 
 type HomeView = 'hub' | 'dashboard';
 
-interface CommandTile {
-  label: string;
-  subtitle: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  gradient: [string, string];
-  route: string;
-}
-
-const userTiles: CommandTile[] = [
-  {
-    label: 'Sign In',
-    subtitle: 'Access your account',
-    icon: 'log-in-outline',
-    gradient: ['#1A8A7E', '#0EA5E9'],
-    route: '/auth',
-  },
-  {
-    label: 'Create Account',
-    subtitle: 'Get started free',
-    icon: 'person-add-outline',
-    gradient: ['#0D9488', '#059669'],
-    route: '/auth',
-  },
-  {
-    label: 'Browse Properties',
-    subtitle: 'Explore listings',
-    icon: 'business-outline',
-    gradient: ['#7C3AED', '#A855F7'],
-    route: '/auth',
-  },
-  {
-    label: 'Learn More',
-    subtitle: 'How TrustHome works',
-    icon: 'information-circle-outline',
-    gradient: ['#2563EB', '#4F46E5'],
-    route: '/auth',
-  },
-];
-
 function UserCommandCenter() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -109,43 +70,7 @@ function UserCommandCenter() {
           </LinearGradient>
         </Animated.View>
 
-        <View style={styles.tilesGrid}>
-          {userTiles.map((tile, i) => (
-            <Animated.View
-              key={tile.label}
-              entering={FadeInDown.delay(250 + i * 60).duration(400)}
-              style={styles.tileWrap}
-            >
-              <Pressable
-                style={[
-                  styles.tile,
-                  {
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                    borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-                  },
-                ]}
-                onPress={() => router.push(tile.route as any)}
-              >
-                <LinearGradient
-                  colors={isDark
-                    ? [tile.gradient[0] + '25', tile.gradient[1] + '10']
-                    : [tile.gradient[0] + '15', tile.gradient[1] + '08']
-                  }
-                  style={StyleSheet.absoluteFill}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                />
-                <View style={[styles.tileIcon, { backgroundColor: tile.gradient[0] + (isDark ? '30' : '18') }]}>
-                  <Ionicons name={tile.icon} size={20} color={tile.gradient[0]} />
-                </View>
-                <Text style={[styles.tileLabel, { color: colors.text }]} numberOfLines={1}>{tile.label}</Text>
-                <Text style={[styles.tileSub, { color: colors.textSecondary }]} numberOfLines={1}>{tile.subtitle}</Text>
-              </Pressable>
-            </Animated.View>
-          ))}
-        </View>
-
-        <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.featuresSection}>
+        <Animated.View entering={FadeInDown.delay(350).duration(400)} style={styles.featuresSection}>
           <View style={[styles.featureRow, { borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
             <View style={[styles.featureIcon, { backgroundColor: 'rgba(26,138,126,0.12)' }]}>
               <Ionicons name="shield-checkmark-outline" size={18} color="#1A8A7E" />
@@ -175,7 +100,7 @@ function UserCommandCenter() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(650).duration(400)} style={styles.adminFooter}>
+        <Animated.View entering={FadeInUp.delay(500).duration(400)} style={styles.adminFooter}>
           <View style={[styles.adminDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
           <View style={styles.adminRow}>
             <Pressable style={styles.adminLink} onPress={() => router.push('/team')}>
@@ -369,42 +294,6 @@ const styles = StyleSheet.create({
     color: '#1A8A7E',
     fontSize: 14,
     fontWeight: '700' as const,
-  },
-  tilesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 24,
-  },
-  tileWrap: {
-    width: '48%' as any,
-    flexGrow: 1,
-    flexBasis: '46%' as any,
-  },
-  tile: {
-    borderRadius: 14,
-    borderWidth: 1,
-    overflow: 'hidden',
-    padding: 14,
-    gap: 6,
-    minHeight: 110,
-  },
-  tileIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  tileLabel: {
-    fontSize: 15,
-    fontWeight: '700' as const,
-    letterSpacing: -0.2,
-  },
-  tileSub: {
-    fontSize: 11,
-    fontWeight: '500' as const,
   },
   featuresSection: {
     marginBottom: 28,

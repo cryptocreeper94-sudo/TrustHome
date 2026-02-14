@@ -707,6 +707,14 @@ export default function AuthScreen() {
             <Ionicons name="shield-checkmark-outline" size={14} color={colors.textTertiary} />
             <Text style={[styles.footerText, { color: colors.textTertiary }]}>Powered by TrustShield</Text>
           </View>
+
+          <Pressable
+            style={styles.footerArea}
+            onPress={() => router.push('/team')}
+          >
+            <Ionicons name="people-outline" size={14} color={colors.textTertiary} />
+            <Text style={[styles.footerText, { color: colors.textTertiary }]}>Agent / Team Login</Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>

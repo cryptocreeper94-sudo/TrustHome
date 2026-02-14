@@ -396,58 +396,6 @@ export default function AuthScreen() {
                   <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>Create Account</Text>
                 </Pressable>
 
-                <View style={[styles.dividerRow, { marginTop: 16 }]}>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-                  <Text style={[styles.dividerText, { color: colors.textTertiary }]}>access as</Text>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-                </View>
-
-                <View style={styles.roleCardsGrid}>
-                  <Pressable
-                    style={[styles.roleCard, { backgroundColor: 'rgba(26,138,126,0.08)', borderColor: 'rgba(26,138,126,0.2)' }]}
-                    onPress={() => router.push('/team')}
-                    testID="role-card-agent"
-                  >
-                    <View style={[styles.roleCardIcon, { backgroundColor: 'rgba(26,138,126,0.15)' }]}>
-                      <Ionicons name="briefcase-outline" size={18} color="#1A8A7E" />
-                    </View>
-                    <Text style={[styles.roleCardLabel, { color: colors.text }]}>Agent</Text>
-                    <Text style={[styles.roleCardSub, { color: colors.textSecondary }]}>Licensed professional</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.roleCard, { backgroundColor: 'rgba(212,175,55,0.06)', borderColor: 'rgba(212,175,55,0.2)' }]}
-                    onPress={() => router.push('/team')}
-                    testID="role-card-partner"
-                  >
-                    <View style={[styles.roleCardIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
-                      <Ionicons name="diamond-outline" size={18} color="#D4AF37" />
-                    </View>
-                    <Text style={[styles.roleCardLabel, { color: colors.text }]}>Partner</Text>
-                    <Text style={[styles.roleCardSub, { color: colors.textSecondary }]}>Managing member</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.roleCard, { backgroundColor: 'rgba(124,58,237,0.06)', borderColor: 'rgba(124,58,237,0.18)' }]}
-                    onPress={() => router.push('/team')}
-                    testID="role-card-developer"
-                  >
-                    <View style={[styles.roleCardIcon, { backgroundColor: 'rgba(124,58,237,0.12)' }]}>
-                      <Ionicons name="code-slash-outline" size={18} color="#7C3AED" />
-                    </View>
-                    <Text style={[styles.roleCardLabel, { color: colors.text }]}>Developer</Text>
-                    <Text style={[styles.roleCardSub, { color: colors.textSecondary }]}>Technical access</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.roleCard, { backgroundColor: 'rgba(59,130,246,0.06)', borderColor: 'rgba(59,130,246,0.18)', opacity: 0.5 }]}
-                    disabled
-                    testID="role-card-verticals"
-                  >
-                    <View style={[styles.roleCardIcon, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
-                      <Ionicons name="layers-outline" size={18} color="#3B82F6" />
-                    </View>
-                    <Text style={[styles.roleCardLabel, { color: colors.text }]}>Verticals</Text>
-                    <Text style={[styles.roleCardSub, { color: colors.textSecondary }]}>Coming soon</Text>
-                  </Pressable>
-                </View>
               </>
             )}
 
@@ -1032,51 +980,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 18,
-  },
-  roleCardsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 4,
-  },
-  roleCard: {
-    width: '48%' as any,
-    flexGrow: 1,
-    flexBasis: '46%' as any,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 4,
-  },
-  roleCardIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
-  },
-  roleCardLabel: {
-    fontSize: 14,
-    fontWeight: '700' as const,
-  },
-  roleCardSub: {
-    fontSize: 11,
-    fontWeight: '400' as const,
-  },
-  teamLoginBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: 4,
-  },
-  teamLoginBtnText: {
-    fontSize: 15,
-    fontWeight: '600' as const,
   },
   footerArea: {
     flexDirection: 'row',

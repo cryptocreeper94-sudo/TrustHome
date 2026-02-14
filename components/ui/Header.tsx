@@ -13,6 +13,7 @@ interface HeaderProps {
   showClose?: boolean;
   onClose?: () => void;
   rightAction?: React.ReactNode;
+  extraAction?: React.ReactNode;
 }
 
 function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
@@ -130,7 +131,7 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
   );
 }
 
-export function Header({ title = 'TrustHome', showBack = false, showClose = false, onClose, rightAction }: HeaderProps) {
+export function Header({ title = 'TrustHome', showBack = false, showClose = false, onClose, rightAction, extraAction }: HeaderProps) {
   const { colors } = useTheme();
   const { toggleDrawer, demoMode, exitDemo, isAuthenticated } = useApp();
   const insets = useSafeAreaInsets();
@@ -168,9 +169,12 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
 
           <View style={styles.right}>
             {rightAction || (
-              <Pressable onPress={toggleDrawer} style={styles.iconButton} testID="header-menu">
-                <Ionicons name="menu" size={24} color="#FFFFFF" />
-              </Pressable>
+              <>
+                {extraAction}
+                <Pressable onPress={toggleDrawer} style={styles.iconButton} testID="header-menu">
+                  <Ionicons name="menu" size={24} color="#FFFFFF" />
+                </Pressable>
+              </>
             )}
           </View>
         </View>

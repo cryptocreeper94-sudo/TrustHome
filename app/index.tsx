@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
@@ -49,6 +49,124 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
   },
 ];
 
+function FeatureTile({ item, index }: { item: typeof FEATURE_CATEGORIES[0]['items'][0]; index: number }) {
+  const { isDark } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(300 + index * 60).duration(400)}
+      style={animatedStyle}
+    >
+      <Pressable
+        onPressIn={() => { scale.value = withSpring(0.95); }}
+        onPressOut={() => { scale.value = withSpring(1); }}
+        style={[
+          styles.catTile,
+          {
+            backgroundColor: 'rgba(12,18,36,0.65)',
+            borderColor: 'rgba(255,255,255,0.08)',
+          },
+        ]}
+        onPress={() => {
+          const router = useRouter();
+          router.push('/auth');
+        }}
+      >
+        <View style={[styles.catTileIcon, { backgroundColor: item.color + '20' }]}>
+          <Ionicons name={item.icon} size={20} color={item.color} />
+        </View>
+        <Text style={styles.catTileLabel} numberOfLines={1}>{item.label}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function CTAButton({ text, icon, onPress, variant = 'primary' }: { text: string; icon: keyof typeof Ionicons.glyphMap; onPress: () => void; variant?: 'primary' | 'secondary' }) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const isPrimary = variant === 'primary';
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        onPressIn={() => { scale.value = withSpring(0.95); }}
+        onPressOut={() => { scale.value = withSpring(1); }}
+        style={[
+          styles.ctaButton,
+          isPrimary ? styles.ctaButtonPrimary : styles.ctaButtonSecondary,
+        ]}
+        onPress={onPress}
+      >
+        <Text style={isPrimary ? styles.ctaButtonTextPrimary : styles.ctaButtonTextSecondary}>
+          {text}
+        </Text>
+        <Ionicons name={icon} size={16} color={isPrimary ? '#1A8A7E' : '#FFFFFF'} />
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function AdminLink({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        onPressIn={() => { scale.value = withSpring(0.95); }}
+        onPressOut={() => { scale.value = withSpring(1); }}
+        style={[styles.adminLink, { minHeight: 44, justifyContent: 'center' }]}
+        onPress={onPress}
+      >
+        <Ionicons name={icon} size={14} color="rgba(255,255,255,0.5)" />
+        <Text style={styles.adminText}>{label}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function SocialButton({ icon, url }: { icon: keyof typeof Ionicons.glyphMap; url: string }) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        onPressIn={() => { scale.value = withSpring(0.95); }}
+        onPressOut={() => { scale.value = withSpring(1); }}
+        style={[
+          styles.socialBadge,
+          {
+            backgroundColor: 'rgba(12,18,36,0.65)',
+            borderColor: 'rgba(255,255,255,0.08)',
+            borderWidth: 1,
+            minHeight: 44,
+            minWidth: 44,
+          },
+        ]}
+        onPress={() => Linking.openURL(url)}
+      >
+        <Ionicons name={icon} size={18} color="#FFFFFF" />
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 function UserCommandCenter() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -57,28 +175,32 @@ function UserCommandCenter() {
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
+  const allTiles = FEATURE_CATEGORIES.flatMap(cat => cat.items);
+
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? '#0A0F14' : '#F8FAFB' }]}>
+    <View style={[styles.container, { backgroundColor: '#020617' }]}>
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={[styles.publicScroll, { paddingTop: topPad + 20, paddingBottom: bottomPad + 20 }]}
+        contentContainerStyle={[styles.publicScroll, { paddingTop: topPad + 16, paddingBottom: bottomPad + 20 }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Brand Section */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.brandArea}>
           <LinearGradient
-            colors={isDark ? ['rgba(26,138,126,0.15)', 'rgba(26,138,126,0.03)'] : ['rgba(26,138,126,0.08)', 'rgba(26,138,126,0.02)']}
+            colors={['rgba(26,138,126,0.25)', 'rgba(26,138,126,0.08)']}
             style={styles.brandGlow}
           >
             <View style={styles.brandIcon}>
               <Ionicons name="shield-checkmark" size={44} color="#FFFFFF" />
             </View>
           </LinearGradient>
-          <Text style={[styles.brandTitle, { color: colors.text }]}>TrustHome</Text>
-          <Text style={[styles.brandTagline, { color: colors.textSecondary }]}>
+          <Text style={styles.brandTitle}>TrustHome</Text>
+          <Text style={styles.brandTagline}>
             Your Trusted Real Estate Partner
           </Text>
         </Animated.View>
 
+        {/* Hero Card */}
         <Animated.View entering={FadeInDown.delay(150).duration(500)} style={styles.heroCard}>
           <LinearGradient
             colors={['#1A8A7E', '#0F766E']}
@@ -91,152 +213,116 @@ function UserCommandCenter() {
               Transparent, blockchain-verified real estate — from first showing to closing day. Everything you need, all in one place.
             </Text>
             <View style={styles.heroActions}>
-              <Pressable
-                style={styles.heroCta}
+              <CTAButton
+                text="Sign In"
+                icon="log-in-outline"
                 onPress={() => router.push('/auth')}
-              >
-                <Text style={styles.heroCtaText}>Sign In</Text>
-                <Ionicons name="log-in-outline" size={16} color="#1A8A7E" />
-              </Pressable>
-              <Pressable
-                style={styles.heroCtaSecondary}
+                variant="primary"
+              />
+              <CTAButton
+                text="Create Account"
+                icon="arrow-forward"
                 onPress={() => router.push('/auth')}
-              >
-                <Text style={styles.heroCtaSecondaryText}>Create Account</Text>
-                <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
-              </Pressable>
+                variant="secondary"
+              />
             </View>
           </LinearGradient>
         </Animated.View>
 
-        {FEATURE_CATEGORIES.map((cat, catIndex) => (
-          <Animated.View
-            key={cat.title}
-            entering={FadeInDown.delay(300 + catIndex * 120).duration(400)}
-            style={styles.categorySection}
-          >
-            <Text style={[styles.categoryTitle, { color: colors.textSecondary }]}>{cat.title}</Text>
-            <View style={styles.categoryGrid}>
-              {cat.items.map((item) => (
-                <Pressable
-                  key={item.label}
-                  style={[
-                    styles.catTile,
-                    {
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-                    },
-                  ]}
-                  onPress={() => router.push('/auth')}
-                >
-                  <View style={[styles.catTileIcon, { backgroundColor: item.color + (isDark ? '25' : '14') }]}>
-                    <Ionicons name={item.icon} size={18} color={item.color} />
-                  </View>
-                  <Text style={[styles.catTileLabel, { color: colors.text }]} numberOfLines={1}>{item.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </Animated.View>
-        ))}
+        {/* Features Grid */}
+        <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.featuresSection}>
+          <Text style={styles.sectionTitle}>Explore Features</Text>
+          <View style={styles.categoryGrid}>
+            {allTiles.map((item, index) => (
+              <FeatureTile key={item.label} item={item} index={index} />
+            ))}
+          </View>
+        </Animated.View>
 
+        {/* Trust Banner */}
         <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.trustBanner}>
           <LinearGradient
-            colors={isDark
-              ? ['rgba(26,138,126,0.1)', 'rgba(26,138,126,0.03)']
-              : ['rgba(26,138,126,0.07)', 'rgba(26,138,126,0.02)']
-            }
-            style={styles.trustBannerInner}
+            colors={['rgba(26,138,126,0.15)', 'rgba(26,138,126,0.05)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[
+              styles.trustBannerInner,
+              {
+                backgroundColor: 'rgba(12,18,36,0.65)',
+                borderColor: 'rgba(255,255,255,0.08)',
+                borderWidth: 1,
+              },
+            ]}
           >
             <View style={styles.trustBannerRow}>
-              <View style={styles.trustBadge}>
-                <Ionicons name="shield-checkmark" size={16} color="#1A8A7E" />
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(26,138,126,0.2)' }]}>
+                <Ionicons name="shield-checkmark" size={18} color="#1A8A7E" />
               </View>
               <View style={styles.trustBannerText}>
-                <Text style={[styles.trustBannerTitle, { color: colors.text }]}>Blockchain Verified</Text>
-                <Text style={[styles.trustBannerSub, { color: colors.textSecondary }]}>Every transaction secured by DarkWave Trust Layer</Text>
+                <Text style={styles.trustBannerTitle}>Blockchain Verified</Text>
+                <Text style={styles.trustBannerSub}>Every transaction secured by DarkWave Trust Layer</Text>
               </View>
             </View>
             <View style={styles.trustBannerRow}>
-              <View style={[styles.trustBadge, { backgroundColor: 'rgba(124,58,237,0.12)' }]}>
-                <Ionicons name="sparkles" size={16} color="#7C3AED" />
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(124,58,237,0.2)' }]}>
+                <Ionicons name="sparkles" size={18} color="#7C3AED" />
               </View>
               <View style={styles.trustBannerText}>
-                <Text style={[styles.trustBannerTitle, { color: colors.text }]}>AI-Powered Platform</Text>
-                <Text style={[styles.trustBannerSub, { color: colors.textSecondary }]}>Smart marketing, analytics, and voice assistant</Text>
+                <Text style={styles.trustBannerTitle}>AI-Powered Platform</Text>
+                <Text style={styles.trustBannerSub}>Smart marketing, analytics, and voice assistant</Text>
               </View>
             </View>
             <View style={styles.trustBannerRow}>
-              <View style={[styles.trustBadge, { backgroundColor: 'rgba(37,99,235,0.12)' }]}>
-                <Ionicons name="globe" size={16} color="#2563EB" />
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(37,99,235,0.2)' }]}>
+                <Ionicons name="globe" size={18} color="#2563EB" />
               </View>
               <View style={styles.trustBannerText}>
-                <Text style={[styles.trustBannerTitle, { color: colors.text }]}>Full Ecosystem</Text>
-                <Text style={[styles.trustBannerSub, { color: colors.textSecondary }]}>CRM, media studio, staffing, and cross-platform chat</Text>
+                <Text style={styles.trustBannerTitle}>Full Ecosystem</Text>
+                <Text style={styles.trustBannerSub}>CRM, media studio, staffing, and cross-platform chat</Text>
               </View>
             </View>
           </LinearGradient>
         </Animated.View>
 
+        {/* Admin Footer */}
         <Animated.View entering={FadeInUp.delay(650).duration(400)} style={styles.adminFooter}>
-          <View style={[styles.adminDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
+          <View style={[styles.adminDivider, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
+          
           <View style={styles.adminRow}>
-            <Pressable style={styles.adminLink} onPress={() => router.push('/team')}>
-              <Ionicons name="briefcase-outline" size={13} color={colors.textTertiary} />
-              <Text style={[styles.adminText, { color: colors.textTertiary }]}>Agent Login</Text>
-            </Pressable>
-            <View style={[styles.adminDot, { backgroundColor: colors.textTertiary }]} />
-            <Pressable style={styles.adminLink} onPress={() => router.push('/team')}>
-              <Ionicons name="diamond-outline" size={13} color={colors.textTertiary} />
-              <Text style={[styles.adminText, { color: colors.textTertiary }]}>Owner / Partner</Text>
-            </Pressable>
-            <View style={[styles.adminDot, { backgroundColor: colors.textTertiary }]} />
-            <Pressable style={styles.adminLink} onPress={() => router.push('/team')}>
-              <Ionicons name="code-slash-outline" size={13} color={colors.textTertiary} />
-              <Text style={[styles.adminText, { color: colors.textTertiary }]}>Developer</Text>
-            </Pressable>
+            <AdminLink icon="briefcase-outline" label="Agent Login" onPress={() => router.push('/team')} />
+            <View style={[styles.adminDot]} />
+            <AdminLink icon="diamond-outline" label="Owner / Partner" onPress={() => router.push('/team')} />
+            <View style={[styles.adminDot]} />
+            <AdminLink icon="code-slash-outline" label="Developer" onPress={() => router.push('/team')} />
           </View>
 
           <View style={styles.socialSection}>
-            <Text style={[styles.socialLabel, { color: colors.textTertiary }]}>TrustHome Demo</Text>
+            <Text style={styles.socialLabel}>TrustHome Demo</Text>
             <View style={styles.socialRow}>
-              <Pressable
-                style={[styles.socialBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}
-                onPress={() => Linking.openURL('https://www.facebook.com/profile.php?id=61585553137979')}
-              >
-                <Ionicons name="logo-facebook" size={16} color={isDark ? '#8B9CF7' : '#1877F2'} />
-              </Pressable>
-              <Pressable
-                style={[styles.socialBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}
-                onPress={() => Linking.openURL('https://x.com/TrustSignal26')}
-              >
-                <Ionicons name="logo-twitter" size={16} color={isDark ? '#A0AEC0' : '#14171A'} />
-              </Pressable>
+              <SocialButton icon="logo-facebook" url="https://www.facebook.com/profile.php?id=61585553137979" />
+              <SocialButton icon="logo-twitter" url="https://x.com/TrustSignal26" />
             </View>
           </View>
 
           <View style={styles.copyrightArea}>
             <View style={styles.copyrightRow}>
-              <Ionicons name="shield-checkmark-outline" size={12} color={colors.textTertiary} />
-              <Text style={[styles.copyrightText, { color: colors.textTertiary }]}>
-                Powered by TrustShield
-              </Text>
+              <Ionicons name="shield-checkmark-outline" size={12} color="rgba(255,255,255,0.5)" />
+              <Text style={styles.copyrightText}>Powered by TrustShield</Text>
             </View>
-            <Text style={[styles.copyrightText, { color: colors.textTertiary }]}>
-              2026 DarkWave Studios LLC
-            </Text>
+            <Text style={styles.copyrightText}>2026 DarkWave Studios LLC</Text>
           </View>
 
           <View style={styles.ecosystemLinks}>
             <Pressable onPress={() => Linking.openURL('https://dwtl.io')}>
-              <Text style={[styles.ecoLink, { color: colors.textTertiary }]}>dwtl.io</Text>
+              <Text style={styles.ecoLink}>dwtl.io</Text>
             </Pressable>
-            <View style={[styles.adminDot, { backgroundColor: colors.textTertiary }]} />
+            <View style={[styles.adminDot]} />
             <Pressable onPress={() => Linking.openURL('https://trustshield.tech')}>
-              <Text style={[styles.ecoLink, { color: colors.textTertiary }]}>trustshield.tech</Text>
+              <Text style={styles.ecoLink}>trustshield.tech</Text>
             </Pressable>
-            <View style={[styles.adminDot, { backgroundColor: colors.textTertiary }]} />
+            <View style={[styles.adminDot]} />
             <Pressable onPress={() => Linking.openURL('https://darkwavestudios.io')}>
-              <Text style={[styles.ecoLink, { color: colors.textTertiary }]}>darkwavestudios.io</Text>
+              <Text style={styles.ecoLink}>darkwavestudios.io</Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -325,11 +411,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   publicScroll: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   brandArea: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 32,
   },
   brandGlow: {
     width: 88,
@@ -337,7 +423,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   brandIcon: {
     width: 72,
@@ -350,83 +436,82 @@ const styles = StyleSheet.create({
   brandTitle: {
     fontSize: 32,
     fontWeight: '800' as const,
+    color: '#FFFFFF',
     letterSpacing: -0.8,
   },
   brandTagline: {
     fontSize: 14,
     fontWeight: '400' as const,
-    marginTop: 4,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 6,
   },
   heroCard: {
-    borderRadius: 18,
+    borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: 28,
   },
   heroGradient: {
-    padding: 22,
-    gap: 10,
+    padding: 24,
+    gap: 12,
   },
   heroTitle: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: '700' as const,
-    letterSpacing: -0.3,
+    letterSpacing: -0.5,
   },
   heroSub: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
-    lineHeight: 20,
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 15,
+    lineHeight: 22,
     fontWeight: '400' as const,
   },
   heroActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginTop: 6,
+    gap: 12,
+    marginTop: 12,
   },
-  heroCta: {
+  ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    gap: 8,
+    minHeight: 44,
     paddingHorizontal: 18,
-    paddingVertical: 10,
     borderRadius: 12,
-    gap: 6,
   },
-  heroCtaText: {
+  ctaButtonPrimary: {
+    backgroundColor: '#FFFFFF',
+  },
+  ctaButtonSecondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+    paddingHorizontal: 16,
+  },
+  ctaButtonTextPrimary: {
     color: '#1A8A7E',
     fontSize: 14,
     fontWeight: '700' as const,
   },
-  heroCtaSecondary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-    gap: 5,
-  },
-  heroCtaSecondaryText: {
+  ctaButtonTextSecondary: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600' as const,
   },
-  categorySection: {
-    marginBottom: 20,
+  featuresSection: {
+    marginBottom: 28,
   },
-  categoryTitle: {
-    fontSize: 12,
+  sectionTitle: {
+    fontSize: 20,
     fontWeight: '700' as const,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 1,
-    marginBottom: 10,
+    color: '#FFFFFF',
+    marginBottom: 16,
   },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   catTile: {
     width: '48%' as any,
@@ -434,115 +519,120 @@ const styles = StyleSheet.create({
     flexBasis: '46%' as any,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 14,
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 16,
     borderWidth: 1,
   },
   catTileIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  catTileLabel: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-    flex: 1,
-  },
-  trustBanner: {
-    marginBottom: 24,
-  },
-  trustBannerInner: {
-    borderRadius: 16,
-    padding: 16,
-    gap: 14,
-  },
-  trustBannerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  trustBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: 'rgba(26,138,126,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trustBannerText: {
-    flex: 1,
-    gap: 1,
-  },
-  trustBannerTitle: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-  },
-  trustBannerSub: {
-    fontSize: 11,
-    fontWeight: '400' as const,
-  },
-  socialSection: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  socialLabel: {
-    fontSize: 10,
-    fontWeight: '600' as const,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.8,
-    marginBottom: 8,
-  },
-  socialRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  socialBadge: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  catTileLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  trustBanner: {
+    marginBottom: 28,
+  },
+  trustBannerInner: {
+    borderRadius: 16,
+    padding: 16,
+    gap: 16,
+  },
+  trustBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  trustBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  trustBannerText: {
+    flex: 1,
+    gap: 2,
+  },
+  trustBannerTitle: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
+  },
+  trustBannerSub: {
+    fontSize: 12,
+    fontWeight: '400' as const,
+    color: 'rgba(255,255,255,0.65)',
+  },
+  socialSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  socialLabel: {
+    fontSize: 11,
+    fontWeight: '700' as const,
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  socialBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   adminFooter: {
-    paddingTop: 4,
+    paddingTop: 8,
   },
   adminDivider: {
     height: 1,
-    marginBottom: 16,
+    marginBottom: 18,
   },
   adminRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 16,
+    gap: 8,
+    marginBottom: 20,
   },
   adminLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 2,
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   adminText: {
     fontSize: 12,
     fontWeight: '500' as const,
+    color: 'rgba(255,255,255,0.6)',
   },
   adminDot: {
     width: 3,
     height: 3,
     borderRadius: 1.5,
-    opacity: 0.4,
+    backgroundColor: 'rgba(255,255,255,0.25)',
   },
   copyrightArea: {
     alignItems: 'center',
     gap: 4,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   copyrightRow: {
     flexDirection: 'row',
@@ -552,6 +642,7 @@ const styles = StyleSheet.create({
   copyrightText: {
     fontSize: 11,
     fontWeight: '400' as const,
+    color: 'rgba(255,255,255,0.5)',
   },
   ecosystemLinks: {
     flexDirection: 'row',
@@ -563,5 +654,6 @@ const styles = StyleSheet.create({
   ecoLink: {
     fontSize: 11,
     fontWeight: '500' as const,
+    color: 'rgba(255,255,255,0.5)',
   },
 });

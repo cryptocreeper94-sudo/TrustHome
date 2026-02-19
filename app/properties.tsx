@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -47,10 +48,10 @@ const PROPERTIES: Property[] = [
 const FILTER_TABS: FilterTab[] = ['All', 'My Listings', 'Buyer Shortlist', 'Under Contract', 'Sold'];
 
 const statusColors: Record<PropertyStatus, string> = {
-  Active: '#34C759',
-  'Under Contract': '#FF9500',
-  'Buyer Shortlist': '#007AFF',
-  Sold: '#AF52DE',
+  Active: '#34D399',
+  'Under Contract': '#FBBF24',
+  'Buyer Shortlist': '#60A5FA',
+  Sold: '#A78BFA',
 };
 
 function formatPrice(price: number): string {
@@ -59,72 +60,81 @@ function formatPrice(price: number): string {
 }
 
 const STATUS_SECTIONS: { status: PropertyStatus; title: string; icon: keyof typeof Ionicons.glyphMap; iconColor: string }[] = [
-  { status: 'Active', title: 'Active Listings', icon: 'home', iconColor: '#34C759' },
-  { status: 'Under Contract', title: 'Under Contract', icon: 'document-lock', iconColor: '#FF9500' },
-  { status: 'Buyer Shortlist', title: 'Buyer Shortlist', icon: 'heart', iconColor: '#007AFF' },
-  { status: 'Sold', title: 'Sold', icon: 'checkmark-circle', iconColor: '#AF52DE' },
+  { status: 'Active', title: 'Active Listings', icon: 'home', iconColor: '#34D399' },
+  { status: 'Under Contract', title: 'Under Contract', icon: 'document-lock', iconColor: '#FBBF24' },
+  { status: 'Buyer Shortlist', title: 'Buyer Shortlist', icon: 'heart', iconColor: '#60A5FA' },
+  { status: 'Sold', title: 'Sold', icon: 'checkmark-circle', iconColor: '#A78BFA' },
 ];
 
-export default function PropertiesScreen() {
-  const { colors, isDark } = useTheme();
-  const [activeFilter, setActiveFilter] = useState<FilterTab>('All');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(['5', '7']));
-  const [showHelp, setShowHelp] = useState<boolean>(false);
+function AnimatedFilterPill({ tab, isActive, colors, onPress }: { tab: FilterTab; isActive: boolean; colors: any; onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  return (
+    <Animated.View style={animStyle}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.93, { damping: 15, stiffness: 300 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
+        style={[styles.filterPill, { backgroundColor: isActive ? colors.primary : colors.cardGlass, borderColor: isActive ? colors.primary : colors.border }]}
+      >
+        <Text style={[styles.filterText, { color: isActive ? '#FFFFFF' : colors.textSecondary }]}>{tab}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
-  const filtered = activeFilter === 'All'
-    ? PROPERTIES
-    : activeFilter === 'My Listings'
-    ? PROPERTIES.filter(p => p.isMyListing)
-    : PROPERTIES.filter(p => p.status === activeFilter);
+function AnimatedPropertyQuickAction({ icon, label, primary, colors, isDark }: { icon: keyof typeof Ionicons.glyphMap; label: string; primary?: boolean; colors: any; isDark: boolean }) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  return (
+    <Animated.View style={animStyle}>
+      <Pressable
+        onPressIn={() => { scale.value = withSpring(0.92, { damping: 15, stiffness: 300 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
+        style={[styles.qAction, primary
+          ? { backgroundColor: colors.primary }
+          : { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderWidth: 1, borderColor: colors.border }
+        ]}
+      >
+        <Ionicons name={icon} size={16} color={primary ? '#FFFFFF' : colors.primary} />
+        <Text style={primary ? styles.qActionText : [styles.qActionTextAlt, { color: colors.primary }]}>{label}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
-  const activeCount = PROPERTIES.filter(p => p.status === 'Active').length;
-  const contractCount = PROPERTIES.filter(p => p.status === 'Under Contract').length;
-  const shortlistCount = PROPERTIES.filter(p => p.status === 'Buyer Shortlist').length;
-  const soldCount = PROPERTIES.filter(p => p.status === 'Sold').length;
+function AnimatedHeartButton({ isFav, onPress }: { isFav: boolean; onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  return (
+    <Animated.View style={[styles.heartBtn, animStyle]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.85, { damping: 15, stiffness: 300 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
+        style={{ width: 44, height: 44, alignItems: 'center' as const, justifyContent: 'center' as const }}
+      >
+        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#F87171' : '#FFFFFF'} />
+      </Pressable>
+    </Animated.View>
+  );
+}
 
-  const statusCounts: Record<PropertyStatus, number> = {
-    Active: activeCount,
-    'Under Contract': contractCount,
-    'Buyer Shortlist': shortlistCount,
-    Sold: soldCount,
-  };
-
-  const featuredProperties = PROPERTIES.filter(p => p.status === 'Active');
-
-  const toggleFavorite = (id: string) => {
-    setFavorites(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const getPropertiesForSection = (status: PropertyStatus): Property[] => {
-    if (activeFilter === 'All') return PROPERTIES.filter(p => p.status === status);
-    if (activeFilter === 'My Listings') return PROPERTIES.filter(p => p.isMyListing && p.status === status);
-    return activeFilter === status ? PROPERTIES.filter(p => p.status === status) : [];
-  };
-
-  const visibleSections = STATUS_SECTIONS.filter(section => {
-    const props = getPropertiesForSection(section.status);
-    if (activeFilter === 'All' || activeFilter === 'My Listings') return props.length > 0;
-    return activeFilter === section.status;
-  });
-
-  const renderPropertyCard = (prop: Property) => {
-    const expanded = expandedId === prop.id;
-    const isFav = favorites.has(prop.id);
-    return (
-      <GlassCard key={prop.id} onPress={() => setExpandedId(expanded ? null : prop.id)} style={styles.propCard}>
+function PropertyCard({ prop, expanded, onToggle, isFav, onToggleFav, index, colors, isDark }: { prop: Property; expanded: boolean; onToggle: () => void; isFav: boolean; onToggleFav: () => void; index: number; colors: any; isDark: boolean }) {
+  return (
+    <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
+      <GlassCard onPress={onToggle} style={styles.propCard}>
         <View style={styles.photoWrap}>
           <LinearGradient colors={prop.gradient as [string, string]} style={styles.photoGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             <Ionicons name="home" size={32} color="rgba(255,255,255,0.3)" />
           </LinearGradient>
-          <Pressable onPress={() => toggleFavorite(prop.id)} style={styles.heartBtn}>
-            <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#FF3B30' : '#FFFFFF'} />
-          </Pressable>
+          <AnimatedHeartButton isFav={isFav} onPress={onToggleFav} />
           <View style={[styles.statusPill, { backgroundColor: statusColors[prop.status] }]}>
             <Text style={styles.statusPillText}>{prop.status}</Text>
           </View>
@@ -170,102 +180,152 @@ export default function PropertiesScreen() {
                 <Text style={[styles.showingText, { color: colors.textSecondary }]}>{prop.showings} showings scheduled</Text>
               </View>
               <View style={styles.quickActions}>
-                <Pressable style={[styles.qAction, { backgroundColor: colors.primary }]}>
-                  <Ionicons name="call" size={16} color="#FFFFFF" />
-                  <Text style={styles.qActionText}>Contact</Text>
-                </Pressable>
-                <Pressable style={[styles.qAction, { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderWidth: 1, borderColor: colors.border }]}>
-                  <Ionicons name="share" size={16} color={colors.primary} />
-                  <Text style={[styles.qActionTextAlt, { color: colors.primary }]}>Share</Text>
-                </Pressable>
-                <Pressable style={[styles.qAction, { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderWidth: 1, borderColor: colors.border }]}>
-                  <Ionicons name="calendar" size={16} color={colors.primary} />
-                  <Text style={[styles.qActionTextAlt, { color: colors.primary }]}>Showing</Text>
-                </Pressable>
+                <AnimatedPropertyQuickAction icon="call" label="Contact" primary colors={colors} isDark={isDark} />
+                <AnimatedPropertyQuickAction icon="share" label="Share" colors={colors} isDark={isDark} />
+                <AnimatedPropertyQuickAction icon="calendar" label="Showing" colors={colors} isDark={isDark} />
               </View>
             </View>
           )}
         </View>
       </GlassCard>
-    );
+    </Animated.View>
+  );
+}
+
+export default function PropertiesScreen() {
+  const { colors, isDark } = useTheme();
+  const [activeFilter, setActiveFilter] = useState<FilterTab>('All');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set(['5', '7']));
+  const [showHelp, setShowHelp] = useState<boolean>(false);
+
+  const filtered = activeFilter === 'All'
+    ? PROPERTIES
+    : activeFilter === 'My Listings'
+    ? PROPERTIES.filter(p => p.isMyListing)
+    : PROPERTIES.filter(p => p.status === activeFilter);
+
+  const activeCount = PROPERTIES.filter(p => p.status === 'Active').length;
+  const contractCount = PROPERTIES.filter(p => p.status === 'Under Contract').length;
+  const shortlistCount = PROPERTIES.filter(p => p.status === 'Buyer Shortlist').length;
+  const soldCount = PROPERTIES.filter(p => p.status === 'Sold').length;
+
+  const featuredProperties = PROPERTIES.filter(p => p.status === 'Active');
+
+  const toggleFavorite = (id: string) => {
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
+
+  const getPropertiesForSection = (status: PropertyStatus): Property[] => {
+    if (activeFilter === 'All') return PROPERTIES.filter(p => p.status === status);
+    if (activeFilter === 'My Listings') return PROPERTIES.filter(p => p.isMyListing && p.status === status);
+    return activeFilter === status ? PROPERTIES.filter(p => p.status === status) : [];
+  };
+
+  const visibleSections = STATUS_SECTIONS.filter(section => {
+    const props = getPropertiesForSection(section.status);
+    if (activeFilter === 'All' || activeFilter === 'My Listings') return props.length > 0;
+    return activeFilter === section.status;
+  });
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Header title="Properties" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.bentoWrap}>
-          <BentoGrid columns={3} gap={10}>
-            {[
-              { label: 'Active Listings', value: activeCount, icon: 'home' as const, color: '#34C759' },
-              { label: 'Under Contract', value: contractCount, icon: 'document-lock' as const, color: '#FF9500' },
-              { label: 'Buyer Shortlist', value: shortlistCount, icon: 'heart' as const, color: '#007AFF' },
-            ].map(stat => (
-              <GlassCard key={stat.label} compact style={styles.statCard}>
-                <View style={styles.statInner}>
-                  <Ionicons name={stat.icon} size={20} color={stat.color} />
-                  <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
-                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
-                </View>
-              </GlassCard>
-            ))}
-          </BentoGrid>
-        </View>
+        <Animated.View entering={FadeInDown.duration(400).delay(0)}>
+          <View style={styles.bentoWrap}>
+            <BentoGrid columns={3} gap={10}>
+              {[
+                { label: 'Active Listings', value: activeCount, icon: 'home' as const, color: '#34D399' },
+                { label: 'Under Contract', value: contractCount, icon: 'document-lock' as const, color: '#FBBF24' },
+                { label: 'Buyer Shortlist', value: shortlistCount, icon: 'heart' as const, color: '#60A5FA' },
+              ].map(stat => (
+                <GlassCard key={stat.label} compact style={styles.statCard}>
+                  <View style={styles.statInner}>
+                    <Ionicons name={stat.icon} size={22} color={stat.color} />
+                    <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
+                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
+                  </View>
+                </GlassCard>
+              ))}
+            </BentoGrid>
+          </View>
+        </Animated.View>
 
-        <HorizontalCarousel title="Featured" itemWidth={220} style={styles.carouselWrap}>
-          {featuredProperties.map(prop => (
-            <Pressable key={prop.id} onPress={() => setExpandedId(expandedId === prop.id ? null : prop.id)} style={[styles.featuredCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
-              <View style={styles.featuredPhotoWrap}>
-                <LinearGradient colors={prop.gradient as [string, string]} style={styles.featuredPhotoGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                  <Ionicons name="home" size={24} color="rgba(255,255,255,0.3)" />
-                </LinearGradient>
-              </View>
-              <View style={styles.featuredBody}>
-                <Text style={[styles.featuredAddr, { color: colors.text }]} numberOfLines={1}>{prop.address}</Text>
-                <Text style={[styles.featuredPrice, { color: colors.primary }]}>{formatPrice(prop.price)}</Text>
-                <View style={styles.featuredDetails}>
-                  <Ionicons name="bed" size={12} color={colors.textSecondary} />
-                  <Text style={[styles.featuredDetailText, { color: colors.textSecondary }]}>{prop.beds}</Text>
-                  <Ionicons name="water" size={12} color={colors.textSecondary} />
-                  <Text style={[styles.featuredDetailText, { color: colors.textSecondary }]}>{prop.baths}</Text>
+        <Animated.View entering={FadeInDown.duration(400).delay(80)}>
+          <HorizontalCarousel title="Featured" itemWidth={220} style={styles.carouselWrap}>
+            {featuredProperties.map(prop => (
+              <Pressable key={prop.id} onPress={() => setExpandedId(expandedId === prop.id ? null : prop.id)} style={[styles.featuredCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
+                <View style={styles.featuredPhotoWrap}>
+                  <LinearGradient colors={prop.gradient as [string, string]} style={styles.featuredPhotoGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                    <Ionicons name="home" size={24} color="rgba(255,255,255,0.3)" />
+                  </LinearGradient>
                 </View>
-              </View>
-            </Pressable>
-          ))}
-        </HorizontalCarousel>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterContent}>
-          {FILTER_TABS.map(tab => {
-            const isActive = activeFilter === tab;
-            return (
-              <Pressable
-                key={tab}
-                onPress={() => setActiveFilter(tab)}
-                style={[styles.filterPill, { backgroundColor: isActive ? colors.primary : colors.cardGlass, borderColor: isActive ? colors.primary : colors.border }]}
-              >
-                <Text style={[styles.filterText, { color: isActive ? '#FFFFFF' : colors.textSecondary }]}>{tab}</Text>
+                <View style={styles.featuredBody}>
+                  <Text style={[styles.featuredAddr, { color: colors.text }]} numberOfLines={1}>{prop.address}</Text>
+                  <Text style={[styles.featuredPrice, { color: colors.primary }]}>{formatPrice(prop.price)}</Text>
+                  <View style={styles.featuredDetails}>
+                    <Ionicons name="bed" size={12} color={colors.textSecondary} />
+                    <Text style={[styles.featuredDetailText, { color: colors.textSecondary }]}>{prop.beds}</Text>
+                    <Ionicons name="water" size={12} color={colors.textSecondary} />
+                    <Text style={[styles.featuredDetailText, { color: colors.textSecondary }]}>{prop.baths}</Text>
+                  </View>
+                </View>
               </Pressable>
-            );
-          })}
-        </ScrollView>
+            ))}
+          </HorizontalCarousel>
+        </Animated.View>
 
-        <View style={styles.sectionsWrap}>
-          {visibleSections.map(section => {
-            const sectionProps = getPropertiesForSection(section.status);
-            return (
-              <AccordionSection
-                key={section.status}
-                title={section.title}
-                icon={section.icon}
-                iconColor={section.iconColor}
-                badge={sectionProps.length}
-                defaultOpen={sectionProps.length > 0}
-              >
-                {sectionProps.map(prop => renderPropertyCard(prop))}
-              </AccordionSection>
-            );
-          })}
-        </View>
+        <Animated.View entering={FadeInDown.duration(400).delay(160)}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterContent}>
+            {FILTER_TABS.map(tab => (
+              <AnimatedFilterPill
+                key={tab}
+                tab={tab}
+                isActive={activeFilter === tab}
+                colors={colors}
+                onPress={() => setActiveFilter(tab)}
+              />
+            ))}
+          </ScrollView>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.duration(400).delay(240)}>
+          <View style={styles.sectionsWrap}>
+            {visibleSections.map(section => {
+              const sectionProps = getPropertiesForSection(section.status);
+              return (
+                <AccordionSection
+                  key={section.status}
+                  title={section.title}
+                  icon={section.icon}
+                  iconColor={section.iconColor}
+                  badge={sectionProps.length}
+                  defaultOpen={sectionProps.length > 0}
+                >
+                  {sectionProps.map((prop, idx) => (
+                    <PropertyCard
+                      key={prop.id}
+                      prop={prop}
+                      expanded={expandedId === prop.id}
+                      onToggle={() => setExpandedId(expandedId === prop.id ? null : prop.id)}
+                      isFav={favorites.has(prop.id)}
+                      onToggleFav={() => toggleFavorite(prop.id)}
+                      index={idx}
+                      colors={colors}
+                      isDark={isDark}
+                    />
+                  ))}
+                </AccordionSection>
+              );
+            })}
+          </View>
+        </Animated.View>
 
         <Footer />
       </ScrollView>
@@ -286,51 +346,51 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 32 },
   bentoWrap: { paddingHorizontal: 16, marginTop: 16 },
-  statCard: { minHeight: 80 },
-  statInner: { alignItems: 'center' as const, gap: 4 },
-  statValue: { fontSize: 22, fontWeight: '700' as const },
-  statLabel: { fontSize: 11, fontWeight: '500' as const, textAlign: 'center' as const },
-  carouselWrap: { marginTop: 18 },
-  featuredCard: { width: 220, borderRadius: 14, borderWidth: 1, overflow: 'hidden' },
+  statCard: { minHeight: 84 },
+  statInner: { alignItems: 'center' as const, gap: 6 },
+  statValue: { fontSize: 24, fontWeight: '800' as const },
+  statLabel: { fontSize: 12, fontWeight: '600' as const, textAlign: 'center' as const },
+  carouselWrap: { marginTop: 20 },
+  featuredCard: { width: 220, borderRadius: 16, borderWidth: 1, overflow: 'hidden' },
   featuredPhotoWrap: { height: 110, overflow: 'hidden' },
   featuredPhotoGradient: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const },
-  featuredBody: { padding: 10, gap: 2 },
-  featuredAddr: { fontSize: 13, fontWeight: '600' as const },
+  featuredBody: { padding: 12, gap: 3 },
+  featuredAddr: { fontSize: 14, fontWeight: '600' as const },
   featuredPrice: { fontSize: 16, fontWeight: '700' as const },
-  featuredDetails: { flexDirection: 'row', alignItems: 'center' as const, gap: 4, marginTop: 2 },
-  featuredDetailText: { fontSize: 11, fontWeight: '500' as const },
-  filterRow: { marginTop: 16, maxHeight: 44 },
-  filterContent: { paddingHorizontal: 16, gap: 8 },
-  filterPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
+  featuredDetails: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, marginTop: 4 },
+  featuredDetailText: { fontSize: 12, fontWeight: '500' as const },
+  filterRow: { marginTop: 18, maxHeight: 48 },
+  filterContent: { paddingHorizontal: 16, gap: 10 },
+  filterPill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 22, borderWidth: 1, minHeight: 44 },
   filterText: { fontSize: 13, fontWeight: '600' as const },
-  sectionsWrap: { paddingHorizontal: 16, marginTop: 14 },
-  propCard: { marginTop: 10, minHeight: 0 },
-  photoWrap: { height: 140, borderRadius: 12, overflow: 'hidden', marginBottom: 10, position: 'relative' as const },
+  sectionsWrap: { paddingHorizontal: 16, marginTop: 16 },
+  propCard: { marginTop: 12, minHeight: 0 },
+  photoWrap: { height: 140, borderRadius: 14, overflow: 'hidden', marginBottom: 12, position: 'relative' as const },
   photoGradient: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const },
-  heartBtn: { position: 'absolute' as const, top: 10, right: 10, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.3)', alignItems: 'center' as const, justifyContent: 'center' as const },
-  statusPill: { position: 'absolute' as const, bottom: 10, left: 10, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  heartBtn: { position: 'absolute' as const, top: 6, right: 6, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.35)' },
+  statusPill: { position: 'absolute' as const, bottom: 10, left: 10, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10 },
   statusPillText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' as const },
   propBody: { gap: 6 },
   propHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' as const },
   propAddrWrap: { flex: 1, marginRight: 8 },
-  propAddr: { fontSize: 15, fontWeight: '600' as const },
-  propCity: { fontSize: 12, marginTop: 2 },
-  propPrice: { fontSize: 18, fontWeight: '700' as const },
-  propDetails: { flexDirection: 'row', alignItems: 'center' as const, gap: 12, marginTop: 4 },
+  propAddr: { fontSize: 16, fontWeight: '600' as const },
+  propCity: { fontSize: 13, marginTop: 2 },
+  propPrice: { fontSize: 20, fontWeight: '700' as const },
+  propDetails: { flexDirection: 'row', alignItems: 'center' as const, gap: 14, marginTop: 6 },
   detailChip: { flexDirection: 'row', alignItems: 'center' as const, gap: 4 },
-  detailText: { fontSize: 12, fontWeight: '500' as const },
-  domText: { fontSize: 11, marginLeft: 'auto' as any },
-  mlsText: { fontSize: 10, marginTop: 2 },
-  expandedSection: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, gap: 8 },
-  propDesc: { fontSize: 13, lineHeight: 19 },
-  expandedLabel: { fontSize: 10, fontWeight: '600' as const, textTransform: 'uppercase' as const, letterSpacing: 0.5 },
-  featureWrap: { flexDirection: 'row', flexWrap: 'wrap' as const, gap: 6 },
-  featureChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  featureText: { fontSize: 11, fontWeight: '600' as const },
-  showingRow: { flexDirection: 'row', alignItems: 'center' as const, gap: 6 },
-  showingText: { fontSize: 12 },
-  quickActions: { flexDirection: 'row', gap: 8, marginTop: 4 },
-  qAction: { flexDirection: 'row', alignItems: 'center' as const, gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
-  qActionText: { fontSize: 12, fontWeight: '600' as const, color: '#FFFFFF' },
-  qActionTextAlt: { fontSize: 12, fontWeight: '600' as const },
+  detailText: { fontSize: 13, fontWeight: '500' as const },
+  domText: { fontSize: 12, marginLeft: 'auto' as any },
+  mlsText: { fontSize: 11, marginTop: 2 },
+  expandedSection: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, gap: 10 },
+  propDesc: { fontSize: 14, lineHeight: 20 },
+  expandedLabel: { fontSize: 11, fontWeight: '600' as const, textTransform: 'uppercase' as const, letterSpacing: 0.6 },
+  featureWrap: { flexDirection: 'row', flexWrap: 'wrap' as const, gap: 8 },
+  featureChip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10 },
+  featureText: { fontSize: 12, fontWeight: '600' as const },
+  showingRow: { flexDirection: 'row', alignItems: 'center' as const, gap: 8 },
+  showingText: { fontSize: 13 },
+  quickActions: { flexDirection: 'row', gap: 10, marginTop: 6 },
+  qAction: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, minHeight: 44 },
+  qActionText: { fontSize: 13, fontWeight: '600' as const, color: '#FFFFFF' },
+  qActionTextAlt: { fontSize: 13, fontWeight: '600' as const },
 });

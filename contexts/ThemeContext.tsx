@@ -1,30 +1,45 @@
-import React, { createContext, useContext, useState, useMemo, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, ReactNode, useCallback } from 'react';
 import { useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors, { ThemeColors } from '@/constants/colors';
+
+type ThemeMode = 'light' | 'dark' | 'system';
 
 interface ThemeContextValue {
   colors: ThemeColors;
   isDark: boolean;
   toggleTheme: () => void;
-  mode: 'light' | 'dark' | 'system';
-  setMode: (mode: 'light' | 'dark' | 'system') => void;
+  mode: ThemeMode;
+  setMode: (mode: ThemeMode) => void;
 }
+
+const THEME_STORAGE_KEY = '@trusthome_theme_mode';
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemColorScheme = useColorScheme();
-  const [mode, setMode] = useState<'light' | 'dark' | 'system'>('system');
+  const [mode, setModeState] = useState<ThemeMode>('light');
+
+  useEffect(() => {
+    AsyncStorage.getItem(THEME_STORAGE_KEY).then(stored => {
+      if (stored === 'light' || stored === 'dark' || stored === 'system') {
+        setModeState(stored);
+      }
+    }).catch(() => {});
+  }, []);
+
+  const setMode = useCallback((newMode: ThemeMode) => {
+    setModeState(newMode);
+    AsyncStorage.setItem(THEME_STORAGE_KEY, newMode).catch(() => {});
+  }, []);
 
   const isDark = mode === 'system' ? systemColorScheme === 'dark' : mode === 'dark';
   const colors = isDark ? Colors.dark : Colors.light;
 
   const toggleTheme = useCallback(() => {
-    setMode(prev => {
-      if (prev === 'system') return isDark ? 'light' : 'dark';
-      return prev === 'dark' ? 'light' : 'dark';
-    });
-  }, [isDark]);
+    setMode(isDark ? 'light' : 'dark');
+  }, [isDark, setMode]);
 
   const value = useMemo(() => ({
     colors,
@@ -32,7 +47,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     toggleTheme,
     mode,
     setMode,
-  }), [colors, isDark, toggleTheme, mode]);
+  }), [colors, isDark, toggleTheme, mode, setMode]);
 
   return (
     <ThemeContext.Provider value={value}>

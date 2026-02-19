@@ -132,7 +132,7 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
 }
 
 export function Header({ title = 'TrustHome', showBack = false, showClose = false, onClose, rightAction, extraAction }: HeaderProps) {
-  const { colors } = useTheme();
+  const { colors, isDark, toggleTheme } = useTheme();
   const { toggleDrawer, demoMode, exitDemo, isAuthenticated } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -169,12 +169,19 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
 
           <View style={styles.right}>
             {rightAction || (
-              <>
+              <View style={styles.rightActions}>
                 {extraAction}
+                <Pressable onPress={toggleTheme} style={styles.iconButton} testID="header-theme-toggle">
+                  <Ionicons
+                    name={isDark ? 'sunny-outline' : 'moon-outline'}
+                    size={20}
+                    color="#FFFFFF"
+                  />
+                </Pressable>
                 <Pressable onPress={toggleDrawer} style={styles.iconButton} testID="header-menu">
                   <Ionicons name="menu" size={24} color="#FFFFFF" />
                 </Pressable>
-              </>
+              </View>
             )}
           </View>
         </View>
@@ -230,6 +237,11 @@ const styles = StyleSheet.create({
   },
   right: {
     alignItems: 'flex-end',
+  },
+  rightActions: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 2,
   },
   title: {
     fontSize: 18,

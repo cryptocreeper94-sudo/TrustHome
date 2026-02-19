@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Pressable, TextInput, ScrollView,
-  KeyboardAvoidingView, Platform, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -477,8 +477,12 @@ export default function TeamScreen() {
           </Pressable>
 
           <View style={styles.logoArea}>
-            <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-              <Ionicons name="people" size={36} color="#FFFFFF" />
+            <View style={[styles.logoCircle, { backgroundColor: colors.primary, overflow: 'hidden' }]}>
+              <Image
+                source={require('@/assets/images/cards/card-login-hero.jpg')}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
             </View>
             <Text style={[styles.logoTitle, { color: colors.text }]}>Team Access</Text>
             <Text style={[styles.logoSubtitle, { color: colors.textSecondary }]}>Agent & team member portal</Text>

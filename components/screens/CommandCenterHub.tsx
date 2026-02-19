@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, Platform, Linking, Dimensions,
+  View, Text, StyleSheet, ScrollView, Pressable, Platform, Linking, Dimensions, ImageBackground, ImageSourcePropType,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +30,7 @@ interface LaunchCard {
   badge?: string;
   badgeGradient?: [string, string];
   featured?: boolean;
+  image: ImageSourcePropType;
 }
 
 interface Category {
@@ -60,6 +61,7 @@ const ALL_CATEGORIES: Category[] = [
         badgeGradient: ['#10B981', '#059669'],
         featured: true,
         onAction: 'switch_dashboard',
+        image: require('@/assets/images/cards/card-agent-dashboard.jpg'),
       },
       {
         label: 'Lead Management',
@@ -68,6 +70,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'people-outline',
         gradient: ['#0E7490', '#0369A1'],
         glowColor: 'rgba(14, 116, 144, 0.3)',
+        image: require('@/assets/images/cards/card-lead-management.jpg'),
       },
       {
         label: 'Transaction Pipeline',
@@ -76,6 +79,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'swap-horizontal-outline',
         gradient: ['#115E59', '#134E4A'],
         glowColor: 'rgba(17, 94, 89, 0.3)',
+        image: require('@/assets/images/cards/card-transaction-pipeline.jpg'),
       },
       {
         label: 'Showing Manager',
@@ -84,6 +88,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'calendar-outline',
         gradient: ['#155E75', '#164E63'],
         glowColor: 'rgba(21, 94, 117, 0.3)',
+        image: require('@/assets/images/cards/card-showing-manager.jpg'),
       },
       {
         label: 'Property Manager',
@@ -92,6 +97,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'business-outline',
         gradient: ['#0D9488', '#0F766E'],
         glowColor: 'rgba(13, 148, 136, 0.3)',
+        image: require('@/assets/images/cards/card-property-manager.jpg'),
       },
     ],
   },
@@ -112,6 +118,7 @@ const ALL_CATEGORIES: Category[] = [
         badge: 'AI',
         badgeGradient: ['#8B5CF6', '#A855F7'],
         featured: true,
+        image: require('@/assets/images/cards/card-ai-marketing.jpg'),
       },
       {
         label: 'Blog Manager',
@@ -120,6 +127,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'newspaper-outline',
         gradient: ['#6D28D9', '#7E22CE'],
         glowColor: 'rgba(109, 40, 217, 0.3)',
+        image: require('@/assets/images/cards/card-blog-manager.jpg'),
       },
       {
         label: 'Media Studio',
@@ -130,6 +138,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(190, 24, 93, 0.3)',
         badge: 'New',
         badgeGradient: ['#F43F5E', '#E11D48'],
+        image: require('@/assets/images/cards/card-media-studio.jpg'),
       },
       {
         label: 'Branding Suite',
@@ -138,6 +147,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'color-palette-outline',
         gradient: ['#A21CAF', '#86198F'],
         glowColor: 'rgba(162, 28, 175, 0.3)',
+        image: require('@/assets/images/cards/card-branding-suite.jpg'),
       },
     ],
   },
@@ -156,6 +166,7 @@ const ALL_CATEGORIES: Category[] = [
         gradient: ['#2563EB', '#1D4ED8'],
         glowColor: 'rgba(37, 99, 235, 0.35)',
         featured: true,
+        image: require('@/assets/images/cards/card-messages.jpg'),
       },
       {
         label: 'Signal Chat',
@@ -166,6 +177,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(67, 56, 202, 0.3)',
         badge: 'Ecosystem',
         badgeGradient: ['#6366F1', '#4F46E5'],
+        image: require('@/assets/images/cards/card-signal-chat.jpg'),
       },
       {
         label: 'AI Assistant',
@@ -176,6 +188,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(30, 64, 175, 0.3)',
         badge: 'AI',
         badgeGradient: ['#8B5CF6', '#A855F7'],
+        image: require('@/assets/images/cards/card-ai-assistant.jpg'),
       },
       {
         label: 'Network & Referrals',
@@ -184,6 +197,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'globe-outline',
         gradient: ['#4F46E5', '#4338CA'],
         glowColor: 'rgba(79, 70, 229, 0.3)',
+        image: require('@/assets/images/cards/card-network-referrals.jpg'),
       },
     ],
   },
@@ -204,6 +218,7 @@ const ALL_CATEGORIES: Category[] = [
         badge: 'Earn',
         badgeGradient: ['#10B981', '#059669'],
         featured: true,
+        image: require('@/assets/images/cards/card-business-suite.jpg'),
       },
       {
         label: 'Analytics Dashboard',
@@ -214,6 +229,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(13, 148, 136, 0.3)',
         badge: 'Live',
         badgeGradient: ['#10B981', '#059669'],
+        image: require('@/assets/images/cards/card-analytics-dashboard.jpg'),
       },
       {
         label: 'Document Vault',
@@ -222,6 +238,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'lock-closed-outline',
         gradient: ['#047857', '#065F46'],
         glowColor: 'rgba(4, 120, 87, 0.3)',
+        image: require('@/assets/images/cards/card-document-vault.jpg'),
       },
     ],
   },
@@ -240,6 +257,7 @@ const ALL_CATEGORIES: Category[] = [
         gradient: ['#0E7490', '#0369A1'],
         glowColor: 'rgba(14, 116, 144, 0.35)',
         featured: true,
+        image: require('@/assets/images/cards/card-browse-properties.jpg'),
       },
       {
         label: 'Schedule Showings',
@@ -248,6 +266,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'calendar-outline',
         gradient: ['#155E75', '#164E63'],
         glowColor: 'rgba(21, 94, 117, 0.3)',
+        image: require('@/assets/images/cards/card-schedule-showings.jpg'),
       },
       {
         label: 'My Transaction',
@@ -256,6 +275,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'swap-horizontal-outline',
         gradient: ['#115E59', '#134E4A'],
         glowColor: 'rgba(17, 94, 89, 0.3)',
+        image: require('@/assets/images/cards/card-my-transaction.jpg'),
       },
     ],
   },
@@ -274,6 +294,7 @@ const ALL_CATEGORIES: Category[] = [
         gradient: ['#047857', '#065F46'],
         glowColor: 'rgba(4, 120, 87, 0.3)',
         featured: true,
+        image: require('@/assets/images/cards/card-document-vault.jpg'),
       },
       {
         label: 'Mortgage Tools',
@@ -282,6 +303,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'calculator-outline',
         gradient: ['#059669', '#047857'],
         glowColor: 'rgba(5, 150, 105, 0.3)',
+        image: require('@/assets/images/cards/card-mortgage-tools.jpg'),
       },
       {
         label: 'Neighborhood Intel',
@@ -290,6 +312,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'map-outline',
         gradient: ['#D97706', '#B45309'],
         glowColor: 'rgba(217, 119, 6, 0.3)',
+        image: require('@/assets/images/cards/card-neighborhood-intel.jpg'),
       },
     ],
   },
@@ -307,6 +330,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'cog-outline',
         gradient: ['#D97706', '#B45309'],
         glowColor: 'rgba(217, 119, 6, 0.3)',
+        image: require('@/assets/images/cards/card-settings.jpg'),
       },
       {
         label: 'MLS Integration',
@@ -317,6 +341,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(234, 88, 12, 0.3)',
         badge: 'Setup',
         badgeGradient: ['#F59E0B', '#D97706'],
+        image: require('@/assets/images/cards/card-mls-integration.jpg'),
       },
       {
         label: 'Help & Support',
@@ -325,6 +350,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'help-circle-outline',
         gradient: ['#B45309', '#92400E'],
         glowColor: 'rgba(180, 83, 9, 0.3)',
+        image: require('@/assets/images/cards/card-help-support.jpg'),
       },
     ],
   },
@@ -343,6 +369,7 @@ const ALL_CATEGORIES: Category[] = [
         gradient: ['#DC2626', '#B91C1C'],
         glowColor: 'rgba(220, 38, 38, 0.35)',
         featured: true,
+        image: require('@/assets/images/cards/card-developer-console.jpg'),
       },
       {
         label: 'Trust Layer',
@@ -353,6 +380,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(190, 18, 60, 0.3)',
         badge: 'Blockchain',
         badgeGradient: ['#EF4444', '#DC2626'],
+        image: require('@/assets/images/cards/card-trust-layer.jpg'),
       },
       {
         label: 'Trust Shield',
@@ -361,6 +389,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'shield-outline',
         gradient: ['#991B1B', '#7F1D1D'],
         glowColor: 'rgba(153, 27, 27, 0.3)',
+        image: require('@/assets/images/cards/card-trust-shield.jpg'),
       },
     ],
   },
@@ -380,6 +409,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(2, 132, 199, 0.3)',
         badge: 'CRM',
         badgeGradient: ['#38BDF8', '#0EA5E9'],
+        image: require('@/assets/images/cards/card-paintpros.jpg'),
       },
       {
         label: 'DarkWave Media',
@@ -388,6 +418,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'videocam-outline',
         gradient: ['#7C3AED', '#6D28D9'],
         glowColor: 'rgba(124, 58, 237, 0.3)',
+        image: require('@/assets/images/cards/card-darkwave-media.jpg'),
       },
       {
         label: 'Orbit Staffing',
@@ -398,6 +429,7 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(5, 150, 105, 0.3)',
         badge: 'Finance',
         badgeGradient: ['#10B981', '#059669'],
+        image: require('@/assets/images/cards/card-orbit-staffing.jpg'),
       },
       {
         label: 'Trust Layer Dashboard',
@@ -406,6 +438,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'layers-outline',
         gradient: ['#1A8A7E', '#0F766E'],
         glowColor: 'rgba(26, 138, 126, 0.3)',
+        image: require('@/assets/images/cards/card-trust-layer-dashboard.jpg'),
       },
     ],
   },
@@ -423,6 +456,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'cog-outline',
         gradient: ['#525252', '#404040'],
         glowColor: 'rgba(82, 82, 82, 0.3)',
+        image: require('@/assets/images/cards/card-client-settings.jpg'),
       },
       {
         label: 'Help & Support',
@@ -431,6 +465,7 @@ const ALL_CATEGORIES: Category[] = [
         icon: 'help-circle-outline',
         gradient: ['#D97706', '#B45309'],
         glowColor: 'rgba(217, 119, 6, 0.3)',
+        image: require('@/assets/images/cards/card-client-support.jpg'),
       },
     ],
   },
@@ -466,28 +501,16 @@ function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; o
             isFeatured && styles.cardFeatured,
           ]}
         >
-          <LinearGradient
-            colors={card.gradient as [string, string, ...string[]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          <ImageBackground
+            source={card.image}
             style={StyleSheet.absoluteFill}
+            imageStyle={{ borderRadius: 16 }}
+            resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.55)']}
+            colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.75)']}
             style={StyleSheet.absoluteFill}
           />
-
-          <View style={styles.cardPattern}>
-            {[0, 1, 2].map(i => (
-              <View key={i} style={[styles.patternCircle, {
-                width: 80 + i * 40,
-                height: 80 + i * 40,
-                right: -20 + i * 10,
-                top: -30 + i * 15,
-                opacity: 0.06 - i * 0.015,
-              }]} />
-            ))}
-          </View>
 
           {card.badge && (
             <View style={styles.badgeWrap}>

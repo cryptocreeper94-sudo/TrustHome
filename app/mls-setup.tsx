@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -275,7 +276,8 @@ export default function MlsSetupScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="MLS Integration" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
         {showSuccess && (
           <Animated.View entering={FadeIn.duration(300)} style={[styles.successBanner, { backgroundColor: '#34C75918' }]}>
@@ -821,6 +823,7 @@ export default function MlsSetupScreen() {
 
         <Footer />
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <InfoModal
         visible={showHelp}

@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   weekDayCell: { flex: 1, alignItems: 'center' as const, paddingVertical: 4 },
   weekDayText: { fontSize: 12, fontWeight: '600' as const },
   weekRow: { flexDirection: 'row' },
-  dayCell: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, paddingVertical: 8, borderRadius: 10, minHeight: 42 },
+  dayCell: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, paddingVertical: 8, borderRadius: 10, minHeight: 44 },
   dayText: { fontSize: 14, fontWeight: '500' as const },
   dotRow: { flexDirection: 'row', gap: 3, marginTop: 3 },
   dot: { width: 5, height: 5, borderRadius: 2.5 },

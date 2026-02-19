@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 32 },
   periodRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginTop: 16 },
-  periodPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
+  periodPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1, minHeight: 44, justifyContent: 'center' as const },
   periodText: { fontSize: 13, fontWeight: '600' as const },
   bentoWrap: { paddingHorizontal: 16, marginTop: 16 },
   statCard: { minHeight: 80 },

@@ -363,6 +363,6 @@ const styles = StyleSheet.create({
   msgText: { fontSize: 13, lineHeight: 18 },
   msgTime: { fontSize: 10, marginTop: 4, textAlign: 'right' as const },
   msgActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  replyBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 4, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, minHeight: 44 },
+  replyBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 4, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, minHeight: 44, justifyContent: 'center' as const },
   replyBtnText: { fontSize: 12, fontWeight: '600' as const },
 });

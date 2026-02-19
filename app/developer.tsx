@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, Platform,
-  ActivityIndicator, RefreshControl, TextInput,
+  ActivityIndicator, RefreshControl, TextInput, KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -595,6 +595,7 @@ export default function DeveloperScreen() {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Header title="Developer Console" showBack />
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
         <View style={styles.pinGateContainer}>
           <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.pinGateContent}>
             <View style={[styles.pinLockIcon, { backgroundColor: colors.primary + '14' }]}>
@@ -649,6 +650,7 @@ export default function DeveloperScreen() {
             )}
           </Animated.View>
         </View>
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -778,6 +780,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+    minHeight: 44,
   },
   tabActive: {},
   tabLabel: { fontSize: 13, fontWeight: '500' as const },

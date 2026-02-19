@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, StyleSheet, Pressable, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -603,7 +603,8 @@ export default function BlogScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Blog Management" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Animated.View entering={FadeInDown.duration(500).delay(100)}>
         <View style={styles.tabContainer}>
           {TABS.map((tab) => (
@@ -644,6 +645,7 @@ export default function BlogScreen() {
 
         <Footer />
       </ScrollView>
+      </KeyboardAvoidingView>
       <InfoModal
         visible={showHelp}
         onClose={() => setShowHelp(false)}
@@ -676,6 +678,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    minHeight: 44,
   },
   tabPillText: {
     fontSize: 14,

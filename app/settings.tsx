@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Switch, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Switch, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
@@ -182,7 +182,7 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Profile & Settings" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.section}>
           <Animated.View entering={FadeInDown.duration(500).delay(100)}>
             <GlassCard>
@@ -317,8 +317,9 @@ export default function SettingsScreen() {
         details={SCREEN_HELP.settings.details}
       />
       <Modal visible={showGreetingModal} transparent animationType="fade">
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, width: '100%', maxWidth: 360 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, justifyContent: 'center' }}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+            <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, width: '100%', maxWidth: 360 }}>
             <Text style={{ fontSize: 18, fontWeight: '700' as const, color: colors.text, marginBottom: 4 }}>Greeting Name</Text>
             <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 16 }}>Choose how you'd like to be greeted on the dashboard</Text>
             <TextInput
@@ -359,7 +360,8 @@ export default function SettingsScreen() {
               </Pressable>
             </View>
           </View>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

@@ -138,7 +138,7 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
   const router = useRouter();
   const [showTrustLayer, setShowTrustLayer] = useState(false);
 
-  const topPadding = Platform.OS === 'web' ? 4 : insets.top;
+  const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
   return (
     <View style={{ backgroundColor: colors.primary }}>

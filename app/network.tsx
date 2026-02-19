@@ -425,6 +425,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
+    minHeight: 44,
   },
   pillText: {
     fontSize: 13,

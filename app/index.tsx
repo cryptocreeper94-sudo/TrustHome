@@ -13,7 +13,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
 import { AgentDashboard } from '@/components/screens/AgentDashboard';
 import { ClientDashboard } from '@/components/screens/ClientDashboard';
-import { NavigationHub } from '@/components/screens/NavigationHub';
+import { CommandCenterHub } from '@/components/screens/CommandCenterHub';
 import { WelcomeGuide } from '@/components/ui/WelcomeGuide';
 import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
 
@@ -269,6 +269,10 @@ export default function HomeScreen() {
 
   const isAgent = currentRole === 'agent';
 
+  const switchToDashboard = useCallback(() => {
+    setView('dashboard');
+  }, []);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
@@ -286,7 +290,7 @@ export default function HomeScreen() {
         }
       />
       {view === 'hub' ? (
-        <NavigationHub />
+        <CommandCenterHub onSwitchToDashboard={switchToDashboard} />
       ) : (
         isAgent ? <AgentDashboard /> : <ClientDashboard />
       )}

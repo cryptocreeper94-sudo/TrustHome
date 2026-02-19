@@ -1,0 +1,56 @@
+Agent Handoff Request
+Context
+User is building ArborAI - a cross-platform tree/plant identification and removal planning app using React Native + Expo (mobile + web). This app will be part of the Trust Layer ecosystem and needs to follow established architectural patterns.
+
+Reference Application
+TrustHome (trusthome.replit.app) - An existing React Native + Expo app in the user's ecosystem that serves as the architectural reference.
+
+Information Needed
+Please provide the following from the TrustHome codebase:
+
+1. Project Structure
+Root folder organization
+Key directories (/src, /components, /screens, /services, etc.)
+Configuration files (app.json, package.json, relevant configs)
+2. Trust Layer SSO Integration
+Authentication flow implementation
+SSO connection code
+Token management
+User session handling
+Any shared auth utilities
+3. UI/Component Patterns
+Component library being used (NativeBase, React Native Paper, custom, etc.)
+Common UI components (buttons, inputs, cards, layouts)
+Design system/theme configuration
+Color schemes, typography, spacing patterns
+4. Navigation Setup
+Navigation library (React Navigation, Expo Router, etc.)
+Navigation structure (stack, tabs, drawer)
+Screen transition patterns
+5. API Communication
+How APIs are called (fetch, axios, custom service layer)
+Base API configuration
+Error handling patterns
+API endpoint structure for Trust Layer ecosystem
+6. Platform-Specific Code
+How web vs mobile differences are handled
+Platform detection utilities
+Responsive design patterns
+Camera/photo upload implementation (if exists)
+7. State Management
+State management solution (Context, Redux, Zustand, etc.)
+Global state patterns
+Data persistence (AsyncStorage, etc.)
+8. Dependencies
+Key packages from package.json
+Expo SDK version
+Major libraries in use
+Deliverable Format
+Please provide:
+
+Code snippets of key files (especially auth, navigation, API setup)
+File structure overview
+Any important conventions or patterns to follow
+Configuration examples
+Purpose
+This information will ensure ArborAI is built with consistent architecture, seamless Trust Layer integration, and matches the ecosystem's established patterns for easier maintenance and cross-app functionality.

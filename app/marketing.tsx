@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
@@ -123,6 +124,7 @@ export default function MarketingScreen() {
 
   const renderOverview = () => (
     <View style={styles.section}>
+      <Animated.View entering={FadeInDown.duration(400).delay(150)}>
       <GlassCard>
         <View style={styles.welcomeBanner}>
           <Ionicons name="megaphone" size={28} color={colors.primary} />
@@ -132,7 +134,9 @@ export default function MarketingScreen() {
           </View>
         </View>
       </GlassCard>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(250)}>
       <View style={{ marginTop: 14 }}>
         <BentoGrid columns={2} gap={10}>
           {[
@@ -149,7 +153,9 @@ export default function MarketingScreen() {
           ))}
         </BentoGrid>
       </View>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(350)}>
       <View style={{ marginTop: 14 }}>
         <AccordionSection title="Today's Suggested Post" icon="sparkles" iconColor="#FF9500" defaultOpen={true}>
           <View style={styles.suggestedPost}>
@@ -214,7 +220,9 @@ export default function MarketingScreen() {
           </View>
         </View>
       </AccordionSection>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(450)}>
       <AccordionSection title="Autopilot Status" icon="rocket" iconColor="#1A8A7E">
         <View style={styles.autopilotRow}>
           <View style={styles.autopilotItem}>
@@ -248,11 +256,13 @@ export default function MarketingScreen() {
           </View>
         </View>
       </AccordionSection>
+      </Animated.View>
     </View>
   );
 
   const renderContent = () => (
     <View style={styles.section}>
+      <Animated.View entering={FadeInDown.duration(400).delay(100)}>
       <HorizontalCarousel title="Recent Content" itemWidth={240}>
         {CONTENT_ITEMS.map(item => (
           <GlassCard key={item.id} compact style={{ width: 240, marginBottom: 0 }}>
@@ -273,7 +283,9 @@ export default function MarketingScreen() {
           </GlassCard>
         ))}
       </HorizontalCarousel>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(250)}>
       <View style={{ marginTop: 10 }}>
         <AccordionSection
           title="Published"
@@ -321,15 +333,19 @@ export default function MarketingScreen() {
           ))}
         </AccordionSection>
       </View>
+      </Animated.View>
     </View>
   );
 
   const renderSchedule = () => (
     <View style={styles.section}>
+      <Animated.View entering={FadeInDown.duration(400).delay(100)}>
       <GlassCard>
         <Text style={[styles.scheduleWeek, { color: colors.text }]}>Week of Feb 10 - Feb 16</Text>
       </GlassCard>
       <View style={{ height: 12 }} />
+      </Animated.View>
+      <Animated.View entering={FadeInDown.duration(400).delay(250)}>
       {SCHEDULE_DATA.map((day, i) => (
         <AccordionSection
           key={i}
@@ -356,19 +372,23 @@ export default function MarketingScreen() {
           )}
         </AccordionSection>
       ))}
+      </Animated.View>
     </View>
   );
 
   const renderAnalytics = () => (
     <View style={styles.section}>
+      <Animated.View entering={FadeInDown.duration(400).delay(100)}>
       <GlassCard>
         <View style={styles.analyticsPeriod}>
           <Ionicons name="calendar" size={18} color={colors.primary} />
           <Text style={[styles.analyticsPeriodText, { color: colors.text }]}>Last 30 Days</Text>
         </View>
       </GlassCard>
+      </Animated.View>
       <View style={{ height: 12 }} />
 
+      <Animated.View entering={FadeInDown.duration(400).delay(200)}>
       <AccordionSection title="Performance Overview" icon="bar-chart" iconColor={colors.primary} defaultOpen={true}>
         {ANALYTICS_DATA.map((item, i) => (
           <View key={i} style={styles.analyticsRow}>
@@ -382,7 +402,9 @@ export default function MarketingScreen() {
           </View>
         ))}
       </AccordionSection>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(300)}>
       <View style={styles.statsRow}>
         {[
           { label: 'Avg CTR', value: '3.2%', icon: 'finger-print' as const, change: '+0.4%' },
@@ -409,6 +431,7 @@ export default function MarketingScreen() {
           </View>
         ))}
       </AccordionSection>
+      </Animated.View>
     </View>
   );
 
@@ -423,10 +446,12 @@ export default function MarketingScreen() {
         ))}
       </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {activeTab === 'Overview' && renderOverview()}
-        {activeTab === 'Content' && renderContent()}
-        {activeTab === 'Schedule' && renderSchedule()}
-        {activeTab === 'Analytics' && renderAnalytics()}
+        <Animated.View entering={FadeInDown.duration(500).delay(100)}>
+          {activeTab === 'Overview' && renderOverview()}
+          {activeTab === 'Content' && renderContent()}
+          {activeTab === 'Schedule' && renderSchedule()}
+          {activeTab === 'Analytics' && renderAnalytics()}
+        </Animated.View>
         <Footer />
       </ScrollView>
       <InfoModal

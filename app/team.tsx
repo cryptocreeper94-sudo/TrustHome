@@ -15,7 +15,7 @@ type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_cod
 type VerifySource = 'login' | 'register';
 
 export default function TeamScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { enterDemo } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -460,7 +460,7 @@ export default function TeamScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: topInset, paddingBottom: bottomInset }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#020617' : colors.background, paddingTop: topInset, paddingBottom: bottomInset }]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -543,7 +543,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
                   onPress={() => goToStep('login')}
                   testID="team-signin-btn"
                 >
@@ -561,7 +561,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.requestAccessBtn, { borderColor: colors.primary }]}
+                  style={({ pressed }) => [styles.requestAccessBtn, { borderColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
                   onPress={() => goToStep('request_access')}
                   testID="request-access-btn"
                 >
@@ -570,7 +570,7 @@ export default function TeamScreen() {
                 </Pressable>
 
                 <Pressable
-                  style={[styles.demoBtn, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' }]}
+                  style={({ pressed }) => [styles.demoBtn, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30', opacity: pressed ? 0.85 : 1 }]}
                   onPress={handleEnterDemo}
                   testID="explore-demo-btn"
                 >
@@ -638,7 +638,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleLogin}
                   disabled={loading}
                   testID="team-login-btn"
@@ -752,7 +752,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleRegister}
                   disabled={loading}
                 >
@@ -791,7 +791,7 @@ export default function TeamScreen() {
                 {renderCodeInputs()}
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleVerify}
                   disabled={loading}
                 >
@@ -833,7 +833,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleForgotPassword}
                   disabled={loading}
                 >
@@ -890,7 +890,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleResetPassword}
                   disabled={loading}
                 >
@@ -948,7 +948,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleSetPassword}
                   disabled={loading}
                   testID="setup-password-btn"
@@ -1075,7 +1075,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleRequestAccess}
                   disabled={loading}
                   testID="req-submit-btn"
@@ -1170,7 +1170,7 @@ export default function TeamScreen() {
                 </View>
 
                 <Pressable
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : pressed ? 0.85 : 1 }]}
                   onPress={handleDemoVerify}
                   disabled={loading}
                   testID="demo-verify-btn"
@@ -1202,7 +1202,7 @@ export default function TeamScreen() {
                     Thank you for your interest in TrustHome. Our team will review your request and reach out to you shortly to get you set up.
                   </Text>
                   <Pressable
-                    style={[styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 8 }]}
+                    style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 8, opacity: pressed ? 0.85 : 1 }]}
                     onPress={() => router.back()}
                     testID="req-done-btn"
                   >
@@ -1251,6 +1251,7 @@ const styles = StyleSheet.create({
     gap: 4,
     alignSelf: 'flex-start',
     marginBottom: 12,
+    minHeight: 44,
   },
   backNavText: { fontSize: 14, fontWeight: '500' as const },
   logoArea: { alignItems: 'center', marginBottom: 28 },
@@ -1310,7 +1311,7 @@ const styles = StyleSheet.create({
   },
   inputIcon: { marginRight: 8 },
   input: { flex: 1, fontSize: 15, height: 48 },
-  eyeBtn: { padding: 6 },
+  eyeBtn: { padding: 10, minWidth: 44, minHeight: 44, alignItems: 'center' as const, justifyContent: 'center' as const },
   nameRow: { flexDirection: 'row', gap: 12 },
   halfInput: { flex: 1 },
   rememberRow: {
@@ -1354,7 +1355,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700' as const,
   },
-  linkBtn: { alignItems: 'center', paddingVertical: 12 },
+  linkBtn: { alignItems: 'center', paddingVertical: 12, minHeight: 44, justifyContent: 'center' },
   linkText: { fontSize: 14, fontWeight: '600' as const },
   dividerRow: {
     flexDirection: 'row',
@@ -1369,6 +1370,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     marginBottom: 16,
+    minHeight: 44,
   },
   backText: { fontSize: 14, fontWeight: '600' as const },
   verifyIconWrap: { alignItems: 'center', marginBottom: 16 },

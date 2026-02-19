@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, Switch, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -183,35 +184,37 @@ export default function SettingsScreen() {
       <Header title="Profile & Settings" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <GlassCard>
-            <View style={styles.profileSection}>
-              <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
-                <Text style={styles.profileAvatarText}>JL</Text>
-              </View>
-              <Text style={[styles.profileName, { color: colors.text }]}>Jennifer Lambert</Text>
-              <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>jennifer@lambertrealty.com</Text>
-              <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>(555) 123-4567</Text>
-              <View style={styles.profileMeta}>
-                <View style={styles.metaItem}>
-                  <Ionicons name="card-outline" size={14} color={colors.textSecondary} />
-                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>License #RE-2024-84721</Text>
+          <Animated.View entering={FadeInDown.duration(500).delay(100)}>
+            <GlassCard>
+              <View style={styles.profileSection}>
+                <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.profileAvatarText}>JL</Text>
                 </View>
-                <View style={styles.metaItem}>
-                  <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
-                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>Lambert Realty Group</Text>
+                <Text style={[styles.profileName, { color: colors.text }]}>Jennifer Lambert</Text>
+                <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>jennifer@lambertrealty.com</Text>
+                <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>(555) 123-4567</Text>
+                <View style={styles.profileMeta}>
+                  <View style={styles.metaItem}>
+                    <Ionicons name="card-outline" size={14} color={colors.textSecondary} />
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>License #RE-2024-84721</Text>
+                  </View>
+                  <View style={styles.metaItem}>
+                    <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>Lambert Realty Group</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          </GlassCard>
+            </GlassCard>
+          </Animated.View>
 
-          <View style={{ marginTop: 14 }}>
+          <Animated.View entering={FadeInDown.duration(500).delay(200)} style={{ marginTop: 14 }}>
             <TrustShieldBadge score={97.4} verified showLink />
-          </View>
+          </Animated.View>
 
           <View style={styles.accordionGroup}>
             {SECTIONS.map((section, si) => (
+              <Animated.View key={si} entering={FadeInDown.duration(400).delay(300 + si * 80)}>
               <AccordionSection
-                key={si}
                 title={section.title}
                 icon={section.icon}
                 iconColor={section.iconColor}
@@ -219,9 +222,11 @@ export default function SettingsScreen() {
               >
                 {section.items.map((item, ii) => renderSettingsRow(item, ii))}
               </AccordionSection>
+              </Animated.View>
             ))}
 
             {isJenniferUser && (
+              <Animated.View entering={FadeInDown.duration(400).delay(800)}>
               <AccordionSection
                 title="Partner Dashboard"
                 icon="shield-checkmark"
@@ -262,8 +267,10 @@ export default function SettingsScreen() {
                   <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
                 </Pressable>
               </AccordionSection>
+              </Animated.View>
             )}
 
+            <Animated.View entering={FadeInDown.duration(400).delay(900)}>
             <AccordionSection
               title="Help"
               icon="help-circle"
@@ -290,12 +297,15 @@ export default function SettingsScreen() {
                 <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
               </Pressable>
             </AccordionSection>
+            </Animated.View>
           </View>
 
+          <Animated.View entering={FadeInDown.duration(400).delay(1000)}>
           <Pressable style={[styles.signOutBtn, { borderColor: colors.error }]}>
             <Ionicons name="log-out-outline" size={20} color={colors.error} />
             <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
           </Pressable>
+          </Animated.View>
         </View>
         <Footer />
       </ScrollView>
@@ -416,6 +426,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center' as const,
     paddingVertical: 12,
+    minHeight: 44,
   },
   settingsIcon: {
     width: 32,

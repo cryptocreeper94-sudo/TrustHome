@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
@@ -185,6 +186,7 @@ export default function MessagesScreen() {
       <Header title="Messages" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
+        <Animated.View entering={FadeInDown.duration(400).delay(100)}>
         <BentoGrid columns={3} gap={10}>
           <GlassCard compact style={styles.statCard}>
             <View style={styles.statInner}>
@@ -208,7 +210,9 @@ export default function MessagesScreen() {
             </View>
           </GlassCard>
         </BentoGrid>
+        </Animated.View>
 
+        <Animated.View entering={FadeInDown.duration(400).delay(180)}>
         <View style={styles.actionRow}>
           <GlassCard style={styles.actionCard} compact onPress={() => {}}>
             <View style={styles.actionInner}>
@@ -223,6 +227,7 @@ export default function MessagesScreen() {
             </View>
           </GlassCard>
         </View>
+        </Animated.View>
 
         {totalUnread > 0 && (
           <View style={styles.unreadBanner}>
@@ -258,6 +263,7 @@ export default function MessagesScreen() {
           </HorizontalCarousel>
         )}
 
+        <Animated.View entering={FadeInDown.duration(400).delay(260)}>
         <AccordionSection
           title="Active Conversations"
           icon="chatbubbles"
@@ -276,7 +282,9 @@ export default function MessagesScreen() {
             />
           ))}
         </AccordionSection>
+        </Animated.View>
 
+        <Animated.View entering={FadeInDown.duration(400).delay(340)}>
         <AccordionSection
           title="All Messages"
           icon="mail"
@@ -295,6 +303,7 @@ export default function MessagesScreen() {
             />
           ))}
         </AccordionSection>
+        </Animated.View>
 
         <Footer />
       </ScrollView>
@@ -354,6 +363,6 @@ const styles = StyleSheet.create({
   msgText: { fontSize: 13, lineHeight: 18 },
   msgTime: { fontSize: 10, marginTop: 4, textAlign: 'right' as const },
   msgActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  replyBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 4, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16 },
+  replyBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 4, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, minHeight: 44 },
   replyBtnText: { fontSize: 12, fontWeight: '600' as const },
 });

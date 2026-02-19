@@ -229,7 +229,7 @@ function ProjectCarouselCard({ project, onDownload, isDownloading, colors, isDar
                   </LinearGradient>
                 </Pressable>
               ) : project.status === 'processing' ? (
-                <View style={[s.progressBarWrap, { backgroundColor: isDark ? '#333' : '#E5E7EB' }]}>
+                <View style={[s.progressBarWrap, { backgroundColor: colors.divider }]}>
                   <Animated.View style={[s.progressBar, { width: '65%', backgroundColor: '#F59E0B' }]} />
                 </View>
               ) : (
@@ -533,7 +533,7 @@ export default function MediaStudioScreen() {
               return (
                 <Pressable
                   key={project.id}
-                  style={[s.accordionRow, idx > 0 && { borderTopWidth: 1, borderTopColor: isDark ? '#222' : '#eee' }]}
+                  style={[s.accordionRow, idx > 0 && { borderTopWidth: 1, borderTopColor: colors.divider }]}
                   onPress={() => handleDownload(project)}
                 >
                   <View style={s.accordionThumb}>
@@ -572,7 +572,7 @@ export default function MediaStudioScreen() {
               return (
                 <View
                   key={project.id}
-                  style={[s.accordionRow, idx > 0 && { borderTopWidth: 1, borderTopColor: isDark ? '#222' : '#eee' }]}
+                  style={[s.accordionRow, idx > 0 && { borderTopWidth: 1, borderTopColor: colors.divider }]}
                 >
                   <View style={s.accordionThumb}>
                     {img && <Image source={img} style={s.accordionThumbImg} resizeMode="cover" />}

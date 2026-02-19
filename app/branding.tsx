@@ -81,8 +81,8 @@ export default function BrandingScreen() {
       <Header title="Branding & Profile" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Animated.View entering={FadeInDown.duration(400).delay(100)}>
             <View style={styles.accordionGroup}>
+              <Animated.View entering={FadeInDown.duration(400).delay(100)}>
               <AccordionSection
                 title="Agent Profile"
                 icon="person"
@@ -117,7 +117,9 @@ export default function BrandingScreen() {
                   <Text style={styles.actionBtnText}>Edit Profile</Text>
                 </Pressable>
               </AccordionSection>
+              </Animated.View>
 
+              <Animated.View entering={FadeInDown.duration(400).delay(200)}>
               <AccordionSection
                 title="Brand Colors"
                 icon="color-palette"
@@ -151,7 +153,9 @@ export default function BrandingScreen() {
                   ))}
                 </View>
               </AccordionSection>
+              </Animated.View>
 
+              <Animated.View entering={FadeInDown.duration(400).delay(300)}>
               <AccordionSection
                 title="Logo & Assets"
                 icon="image"
@@ -176,7 +180,9 @@ export default function BrandingScreen() {
                   <Text style={styles.actionBtnText}>Upload Logo</Text>
                 </Pressable>
               </AccordionSection>
+              </Animated.View>
 
+              <Animated.View entering={FadeInDown.duration(400).delay(400)}>
               <AccordionSection
                 title="Agent Landing Page"
                 icon="globe"
@@ -210,7 +216,9 @@ export default function BrandingScreen() {
                   </Pressable>
                 </View>
               </AccordionSection>
+              </Animated.View>
 
+              <Animated.View entering={FadeInDown.duration(400).delay(500)}>
               <AccordionSection
                 title="QR Code"
                 icon="qr-code"
@@ -234,7 +242,9 @@ export default function BrandingScreen() {
                   <Text style={styles.actionBtnText}>Generate QR Code</Text>
                 </Pressable>
               </AccordionSection>
+              </Animated.View>
 
+              <Animated.View entering={FadeInDown.duration(400).delay(600)}>
               <AccordionSection
                 title="White-Label Settings"
                 icon="briefcase"
@@ -262,8 +272,8 @@ export default function BrandingScreen() {
                   </View>
                 ))}
               </AccordionSection>
+              </Animated.View>
             </View>
-          </Animated.View>
         </View>
         <Footer />
       </ScrollView>

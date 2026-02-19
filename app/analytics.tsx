@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator, Platform } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -148,7 +149,7 @@ export default function AnalyticsScreen() {
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Header title="Analytics" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.periodRow}>
+        <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.periodRow}>
           {(['This Month', 'Quarter', 'Year'] as Period[]).map(p => {
             const isActive = period === p;
             return (
@@ -161,7 +162,7 @@ export default function AnalyticsScreen() {
               </Pressable>
             );
           })}
-        </View>
+        </Animated.View>
 
         {apiDashboard && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
@@ -176,7 +177,7 @@ export default function AnalyticsScreen() {
           </View>
         )}
 
-        <View style={styles.bentoWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(180)} style={styles.bentoWrap}>
           <BentoGrid columns={2} gap={10}>
             {[
               { label: 'Closings', value: data.closings.toString(), icon: 'checkmark-circle' as const, color: '#34C759' },
@@ -193,9 +194,9 @@ export default function AnalyticsScreen() {
               </GlassCard>
             ))}
           </BentoGrid>
-        </View>
+        </Animated.View>
 
-        <View style={styles.accordionWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(260)} style={styles.accordionWrap}>
           <AccordionSection title="Revenue Trend" icon="trending-up" iconColor="#1A8A7E" defaultOpen={true}>
             <View style={styles.chartContainer}>
               {data.revenueByMonth.map((m, i) => {
@@ -212,9 +213,9 @@ export default function AnalyticsScreen() {
               })}
             </View>
           </AccordionSection>
-        </View>
+        </Animated.View>
 
-        <View style={styles.accordionWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(340)} style={styles.accordionWrap}>
           <AccordionSection title="Conversion Funnel" icon="funnel" iconColor="#007AFF" defaultOpen={true}>
             {[
               { label: 'Leads', value: data.funnel.leads, pct: null },
@@ -239,9 +240,9 @@ export default function AnalyticsScreen() {
               </View>
             ))}
           </AccordionSection>
-        </View>
+        </Animated.View>
 
-        <View style={styles.accordionWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(420)} style={styles.accordionWrap}>
           <AccordionSection title="Top Sources" icon="pie-chart" iconColor="#FF9500">
             {data.sources.map(source => (
               <View key={source.name} style={styles.sourceRow}>
@@ -253,9 +254,9 @@ export default function AnalyticsScreen() {
               </View>
             ))}
           </AccordionSection>
-        </View>
+        </Animated.View>
 
-        <View style={styles.carouselWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(500)} style={styles.carouselWrap}>
           <HorizontalCarousel title="Recent Closings" itemWidth={200}>
             {data.recentClosings.map((closing, i) => (
               <GlassCard key={i} compact style={styles.closingCard}>
@@ -268,9 +269,9 @@ export default function AnalyticsScreen() {
               </GlassCard>
             ))}
           </HorizontalCarousel>
-        </View>
+        </Animated.View>
 
-        <View style={styles.accordionWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(580)} style={styles.accordionWrap}>
           <AccordionSection title="vs Last Period" icon="analytics" iconColor="#AF52DE">
             <View style={styles.compGrid}>
               {[
@@ -297,7 +298,7 @@ export default function AnalyticsScreen() {
               })}
             </View>
           </AccordionSection>
-        </View>
+        </Animated.View>
 
         <Footer />
       </ScrollView>

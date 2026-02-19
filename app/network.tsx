@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator, Linking, Platform } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -216,6 +217,7 @@ export default function NetworkScreen() {
       )}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
+          <Animated.View entering={FadeInDown.duration(400).delay(100)}>
           <BentoGrid columns={3} gap={10}>
             {[
               { label: 'Connected Vendors', value: '24', icon: 'people' as const },
@@ -229,7 +231,9 @@ export default function NetworkScreen() {
               </GlassCard>
             ))}
           </BentoGrid>
+          </Animated.View>
 
+          <Animated.View entering={FadeInDown.duration(400).delay(180)}>
           <HorizontalCarousel title="Top Trust Scores" itemWidth={180} style={{ marginTop: 16 }}>
             {topVendors.map(vendor => (
               <GlassCard key={vendor.id} compact style={styles.carouselCard}>
@@ -246,7 +250,9 @@ export default function NetworkScreen() {
               </GlassCard>
             ))}
           </HorizontalCarousel>
+          </Animated.View>
 
+          <Animated.View entering={FadeInDown.duration(400).delay(260)}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillScroll} contentContainerStyle={styles.pillRow}>
             {CATEGORIES.map(cat => (
               <Pressable
@@ -264,6 +270,7 @@ export default function NetworkScreen() {
               </Pressable>
             ))}
           </ScrollView>
+          </Animated.View>
 
           {subcontractorsQuery.isLoading && (
             <View style={{ alignItems: 'center', paddingVertical: 8 }}>
@@ -271,6 +278,7 @@ export default function NetworkScreen() {
             </View>
           )}
 
+          <Animated.View entering={FadeInDown.duration(400).delay(340)}>
           {visibleCategories.map((category, catIdx) => {
             const vendors = vendorsByCategory[category] || [];
             if (vendors.length === 0) return null;
@@ -296,7 +304,9 @@ export default function NetworkScreen() {
               </AccordionSection>
             );
           })}
+          </Animated.View>
 
+          <Animated.View entering={FadeInDown.duration(400).delay(420)}>
           <AccordionSection
             title="Referral Partners"
             icon="swap-horizontal"
@@ -328,6 +338,7 @@ export default function NetworkScreen() {
               </GlassCard>
             ))}
           </AccordionSection>
+          </Animated.View>
         </View>
         <Footer />
       </ScrollView>
@@ -527,6 +538,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     gap: 5,
+    minHeight: 44,
   },
   expandedBtnText: {
     color: '#FFF',

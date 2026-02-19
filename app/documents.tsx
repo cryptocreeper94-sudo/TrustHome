@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
@@ -83,7 +84,7 @@ export default function DocumentsScreen() {
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Header title="Documents" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.bentoWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.bentoWrap}>
           <BentoGrid columns={3} gap={10}>
             {[
               { label: 'Total Docs', value: totalDocs, icon: 'documents' as const, color: colors.primary },
@@ -99,9 +100,9 @@ export default function DocumentsScreen() {
               </GlassCard>
             ))}
           </BentoGrid>
-        </View>
+        </Animated.View>
 
-        <View style={styles.carouselWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(180)} style={styles.carouselWrap}>
           <HorizontalCarousel title="Verified on Chain" itemWidth={200}>
             {verifiedDocs.map(doc => (
               <GlassCard key={doc.id} compact style={styles.verifiedCard}>
@@ -115,8 +116,9 @@ export default function DocumentsScreen() {
               </GlassCard>
             ))}
           </HorizontalCarousel>
-        </View>
+        </Animated.View>
 
+        <Animated.View entering={FadeInDown.duration(400).delay(260)}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterContent}>
           {FILTER_TABS.map(tab => {
             const isActive = activeFilter === tab;
@@ -131,7 +133,9 @@ export default function DocumentsScreen() {
             );
           })}
         </ScrollView>
+        </Animated.View>
 
+        <Animated.View entering={FadeInDown.duration(400).delay(340)}>
         <View style={styles.actionsRow}>
           <Pressable style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
             <Ionicons name="cloud-upload" size={18} color="#FFFFFF" />
@@ -142,8 +146,9 @@ export default function DocumentsScreen() {
             <Text style={[styles.actionBtnText, { color: colors.primary }]}>Request Signature</Text>
           </Pressable>
         </View>
+        </Animated.View>
 
-        <View style={styles.accordionWrap}>
+        <Animated.View entering={FadeInDown.duration(400).delay(420)} style={styles.accordionWrap}>
           {transactionKeys.map((txn, idx) => (
             <AccordionSection
               key={txn}
@@ -202,7 +207,7 @@ export default function DocumentsScreen() {
               })}
             </AccordionSection>
           ))}
-        </View>
+        </Animated.View>
 
         <Footer />
       </ScrollView>
@@ -238,7 +243,7 @@ const styles = StyleSheet.create({
   filterPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   filterText: { fontSize: 13, fontWeight: '600' as const },
   actionsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginTop: 16 },
-  actionBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
+  actionBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, minHeight: 44 },
   actionBtnText: { fontSize: 13, fontWeight: '600' as const, color: '#FFFFFF' },
   accordionWrap: { paddingHorizontal: 16, marginTop: 16 },
   docCard: { marginTop: 8, minHeight: 70 },

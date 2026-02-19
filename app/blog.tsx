@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -217,9 +218,9 @@ export default function BlogScreen() {
   };
 
   const statusBadgeColor = (s: string) => {
-    if (s === 'published') return '#1A8A7E';
-    if (s === 'draft') return '#F59E0B';
-    return '#9CA3AF';
+    if (s === 'published') return colors.success;
+    if (s === 'draft') return colors.warning;
+    return colors.textTertiary;
   };
 
   const renderPicker = (
@@ -271,7 +272,7 @@ export default function BlogScreen() {
           <Pressable
             testID={`publish-post-${post.id}`}
             onPress={() => publishMutation.mutate(post.id)}
-            style={[styles.actionButton, { backgroundColor: '#1A8A7E' }]}
+            style={[styles.actionButton, { backgroundColor: colors.success }]}
           >
             <Ionicons name="checkmark-circle-outline" size={16} color="#FFF" />
             <Text style={styles.actionButtonText}>Publish</Text>
@@ -343,8 +344,8 @@ export default function BlogScreen() {
               {publishedPosts.map((post) => (
                 <GlassCard key={post.id} compact style={styles.carouselCard} onPress={() => openEditForm(post)}>
                   <Text style={[styles.carouselTitle, { color: colors.text }]} numberOfLines={2}>{post.title}</Text>
-                  <View style={[styles.carouselBadge, { backgroundColor: '#1A8A7E20' }]}>
-                    <Text style={[styles.carouselBadgeText, { color: '#1A8A7E' }]}>{post.category}</Text>
+                  <View style={[styles.carouselBadge, { backgroundColor: colors.success + '20' }]}>
+                    <Text style={[styles.carouselBadgeText, { color: colors.success }]}>{post.category}</Text>
                   </View>
                   <Text style={[styles.carouselDate, { color: colors.textSecondary }]}>
                     {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}
@@ -573,7 +574,7 @@ export default function BlogScreen() {
         <AccordionSection title="Generated Result" icon="document" defaultOpen={true}>
           <View style={styles.generatedHeader}>
             <Ionicons name="checkmark-circle" size={20} color="#1A8A7E" />
-            <Text style={[styles.generatedLabel, { color: '#1A8A7E' }]}>Generated Successfully</Text>
+            <Text style={[styles.generatedLabel, { color: colors.success }]}>Generated Successfully</Text>
           </View>
           <Text style={[styles.generatedTitle, { color: colors.text }]}>{generatedPost.title}</Text>
           {generatedPost.excerpt ? (
@@ -588,7 +589,7 @@ export default function BlogScreen() {
             <Pressable
               testID="ai-publish-button"
               onPress={() => publishGenerated(generatedPost)}
-              style={[styles.formButton, styles.submitButton, { backgroundColor: '#1A8A7E' }]}
+              style={[styles.formButton, styles.submitButton, { backgroundColor: colors.success }]}
             >
               <Ionicons name="cloud-upload-outline" size={18} color="#FFF" />
               <Text style={styles.submitButtonText}>Publish</Text>
@@ -611,6 +612,7 @@ export default function BlogScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Blog Management" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Animated.View entering={FadeInDown.duration(500).delay(100)}>
         <View style={styles.tabContainer}>
           {TABS.map((tab) => (
             <Pressable
@@ -640,10 +642,13 @@ export default function BlogScreen() {
             </Pressable>
           ))}
         </View>
+        </Animated.View>
 
+        <Animated.View entering={FadeInDown.duration(400).delay(200)}>
         {activeTab === 'Posts' && renderPostsTab()}
         {activeTab === 'Create' && renderCreateTab()}
         {activeTab === 'AI Generate' && renderAiTab()}
+        </Animated.View>
 
         <Footer />
       </ScrollView>

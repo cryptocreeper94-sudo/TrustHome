@@ -80,7 +80,7 @@ export function Footer() {
             <View key={i} style={styles.column}>
               <Text style={[styles.colTitle, { color: colors.text }]}>{col.title}</Text>
               {col.links.map((link, j) => (
-                <Pressable key={j} onPress={() => handleLinkPress(link)} hitSlop={4}>
+                <Pressable key={j} onPress={() => handleLinkPress(link)} hitSlop={4} style={({ pressed }) => [styles.colLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
                   <Text style={[styles.colLink, { color: colors.textSecondary }]}>{link.label}</Text>
                 </Pressable>
               ))}
@@ -91,23 +91,23 @@ export function Footer() {
 
       <View style={styles.bottomBar}>
         <View style={styles.bottomRow}>
-          <Pressable onPress={() => Linking.openURL('https://darkwavestudios.io')}>
+          <Pressable onPress={() => Linking.openURL('https://darkwavestudios.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.bottomText, styles.bottomLink, { color: colors.textSecondary }]}>darkwavestudios.io</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
           <Text style={[styles.bottomText, { color: colors.textTertiary }]}>{'\u00A9'} 2026</Text>
           <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Pressable onPress={() => Linking.openURL('https://trustshield.tech')}>
+          <Pressable onPress={() => Linking.openURL('https://trustshield.tech')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.bottomText, { color: colors.textSecondary }]}>
               Powered by <Text style={styles.bottomLink}>trustshield.tech</Text>
             </Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Pressable onPress={() => Linking.openURL('https://dwtl.io')}>
+          <Pressable onPress={() => Linking.openURL('https://dwtl.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.bottomText, styles.bottomLink, { color: colors.textSecondary }]}>dwtl.io</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Pressable onPress={() => router.push('/team' as any)} testID="footer-team-link">
+          <Pressable onPress={() => router.push('/team' as any)} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]} testID="footer-team-link">
             <Text style={[styles.bottomText, styles.bottomLink, { color: colors.primary }]}>Team</Text>
           </Pressable>
         </View>
@@ -144,9 +144,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 10,
   },
+  colLinkPressable: {
+    minHeight: 44,
+    justifyContent: 'center' as const,
+  },
   colLink: {
     fontSize: 13,
-    lineHeight: 24,
   },
   bottomBar: {
     paddingHorizontal: 16,
@@ -158,6 +161,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexWrap: 'wrap',
     gap: 6,
+  },
+  bottomLinkPressable: {
+    minHeight: 44,
+    justifyContent: 'center' as const,
   },
   bottomText: {
     fontSize: 11,

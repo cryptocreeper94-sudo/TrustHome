@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Image, ImageBackground, Platform, Linking } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
@@ -165,13 +166,13 @@ export function AgentDashboard() {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
     >
-      <View style={styles.greetingRow}>
+      <Animated.View entering={FadeInDown.duration(400).delay(0)} style={styles.greetingRow}>
         <View>
           <Text style={[styles.greeting, { color: colors.textSecondary }]}>{new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}</Text>
           <Text style={[styles.name, { color: colors.text }]}>{greetingName || (user ? `${user.firstName} ${user.lastName}` : MOCK_AGENT.name)}</Text>
         </View>
         <TrustShieldBadge score={MOCK_AGENT.trustScore} compact showLink />
-      </View>
+      </Animated.View>
 
       {(liveLeadCount !== null || liveAnalytics || trustLayerQuery.data?.configured) && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, marginBottom: 4, flexWrap: 'wrap' }}>
@@ -191,7 +192,7 @@ export function AgentDashboard() {
       )}
 
       {MOCK_URGENT.length > 0 ? (
-        <View style={[styles.urgentBar, { backgroundColor: isDark ? 'rgba(255,59,48,0.1)' : 'rgba(255,59,48,0.06)' }]}>
+        <Animated.View entering={FadeInDown.duration(400).delay(100)} style={[styles.urgentBar, { backgroundColor: isDark ? 'rgba(255,59,48,0.1)' : 'rgba(255,59,48,0.06)' }]}>
           <View style={styles.urgentHeader}>
             <Ionicons name="warning" size={16} color={colors.warning} />
             <Text style={[styles.urgentTitle, { color: colors.text }]}>Action Required</Text>
@@ -203,13 +204,14 @@ export function AgentDashboard() {
               <Text style={[styles.urgentText, { color: colors.textSecondary }]} numberOfLines={1}>{item.text}</Text>
             </View>
           ))}
-        </View>
+        </Animated.View>
       ) : null}
 
       {isJenniferUser && (
         <PartnerQuickAccess colors={colors} isDark={isDark} onPress={replayPartnerDashboard} />
       )}
 
+      <Animated.View entering={FadeInDown.duration(400).delay(200)}>
       <HorizontalCarousel
         title="At a Glance"
         itemWidth={160}
@@ -237,7 +239,9 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(300)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Today's Schedule</Text>
         <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>{MOCK_TODAY_SCHEDULE.length} events</Text>
@@ -266,7 +270,9 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </View>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(400)}>
       <HorizontalCarousel title="Active Deals" onSeeAll={() => {}} itemWidth={260}>
         {MOCK_ACTIVE_DEALS.map((deal, i) => (
           <Pressable key={i}>
@@ -291,7 +297,9 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(500)}>
       <HorizontalCarousel title="Hot Leads" onSeeAll={() => {}} itemWidth={180}>
         {MOCK_HOT_LEADS.map((lead, i) => (
           <Pressable key={i}>
@@ -307,7 +315,9 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(600)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Connected Verticals</Text>
         <InfoButton onPress={() => showInfo(
@@ -337,7 +347,9 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(700)}>
       <Pressable
         onPress={toggleSafetyMode}
         style={[
@@ -373,7 +385,9 @@ export function AgentDashboard() {
           <View style={[styles.safetyToggleKnob, { transform: [{ translateX: safetyModeActive ? 18 : 2 }] }]} />
         </View>
       </Pressable>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(800)}>
       <View style={styles.quickActions}>
         {[
           { label: 'Add Client', icon: 'person-add-outline' as const, key: 'add' },
@@ -406,6 +420,7 @@ export function AgentDashboard() {
           );
         })}
       </View>
+      </Animated.View>
 
       <Footer />
 
@@ -677,6 +692,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
+    minHeight: 44,
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,

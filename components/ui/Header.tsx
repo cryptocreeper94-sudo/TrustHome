@@ -66,7 +66,7 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
                   {isConnected ? 'Connected & Verified' : 'Not Configured'}
                 </Text>
               </View>
-              <View style={[modalStyles.statusDot, { backgroundColor: isConnected ? '#34C759' : colors.warning }]} />
+              <View style={[modalStyles.statusDot, { backgroundColor: isConnected ? colors.success : colors.warning }]} />
             </View>
 
             <Text style={[modalStyles.sectionDesc, { color: colors.textSecondary }]}>
@@ -88,9 +88,9 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
                 onPress={() => Linking.openURL('https://dwtl.io')}
                 style={[modalStyles.membershipCta, { backgroundColor: colors.primary }]}
               >
-                <MaterialCommunityIcons name="login" size={18} color="#FFFFFF" />
-                <Text style={modalStyles.membershipCtaText}>Log in at dwtl.io</Text>
-                <Ionicons name="open-outline" size={14} color="rgba(255,255,255,0.7)" />
+                <MaterialCommunityIcons name="login" size={18} color={colors.textInverse} />
+                <Text style={[modalStyles.membershipCtaText, { color: colors.textInverse }]}>Log in at dwtl.io</Text>
+                <Ionicons name="open-outline" size={14} color={colors.textInverse} />
               </Pressable>
               <Text style={[modalStyles.membershipHint, { color: colors.textTertiary }]}>
                 Use the same credentials you use for TrustHome to access your Trust Layer dashboard, set up your membership card, and manage your verified professional profile.
@@ -146,40 +146,40 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
         <View style={styles.content}>
           <View style={styles.left}>
             {showBack ? (
-              <Pressable onPress={() => router.back()} style={styles.iconButton} testID="header-back">
-                <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
+              <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
+                <Ionicons name="chevron-back" size={22} color={colors.textInverse} />
               </Pressable>
             ) : showClose ? (
-              <Pressable onPress={onClose} style={styles.iconButton} testID="header-close">
-                <Ionicons name="close" size={22} color="#FFFFFF" />
+              <Pressable onPress={onClose} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-close">
+                <Ionicons name="close" size={22} color={colors.textInverse} />
               </Pressable>
             ) : null}
             {isAuthenticated && (
               <Pressable
                 onPress={() => setShowTrustLayer(true)}
-                style={styles.trustStamp}
+                style={({ pressed }) => [styles.trustStamp, { opacity: pressed ? 0.7 : 1 }]}
                 hitSlop={6}
                 testID="header-trust-stamp"
               >
                 <MaterialCommunityIcons name="shield-check" size={20} color="rgba(255,255,255,0.9)" />
               </Pressable>
             )}
-            <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            <Text style={[styles.title, { color: colors.textInverse }]} numberOfLines={1}>{title}</Text>
           </View>
 
           <View style={styles.right}>
             {rightAction || (
               <View style={styles.rightActions}>
                 {extraAction}
-                <Pressable onPress={toggleTheme} style={styles.iconButton} testID="header-theme-toggle">
+                <Pressable onPress={toggleTheme} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-theme-toggle">
                   <Ionicons
                     name={isDark ? 'sunny-outline' : 'moon-outline'}
                     size={20}
-                    color="#FFFFFF"
+                    color={colors.textInverse}
                   />
                 </Pressable>
-                <Pressable onPress={toggleDrawer} style={styles.iconButton} testID="header-menu">
-                  <Ionicons name="menu" size={24} color="#FFFFFF" />
+                <Pressable onPress={toggleDrawer} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-menu">
+                  <Ionicons name="menu" size={24} color={colors.textInverse} />
                 </Pressable>
               </View>
             )}
@@ -197,14 +197,14 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
           </View>
           <View style={styles.demoActions}>
             <Pressable
-              style={styles.demoRequestBtn}
+              style={({ pressed }) => [styles.demoRequestBtn, { opacity: pressed ? 0.7 : 1 }]}
               onPress={() => { router.replace('/team'); setTimeout(exitDemo, 150); }}
               testID="demo-request-access"
             >
               <Text style={styles.demoRequestText}>Request Access</Text>
             </Pressable>
             <Pressable
-              style={styles.demoExitBtn}
+              style={({ pressed }) => [styles.demoExitBtn, { opacity: pressed ? 0.7 : 1 }]}
               onPress={() => { router.replace('/team'); setTimeout(exitDemo, 150); }}
               testID="demo-exit"
             >
@@ -246,15 +246,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
     letterSpacing: 0.3,
   },
   iconButton: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
+    borderRadius: 22,
   },
   demoBanner: {
     flexDirection: 'row' as const,
@@ -294,17 +293,17 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   demoExitBtn: {
-    width: 28,
-    height: 28,
+    width: 44,
+    height: 44,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
   trustStamp: {
-    width: 30,
-    height: 30,
+    width: 44,
+    height: 44,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    borderRadius: 15,
+    borderRadius: 22,
     backgroundColor: 'rgba(255,255,255,0.12)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
@@ -345,8 +344,8 @@ const modalStyles = StyleSheet.create({
     flex: 1,
   },
   closeBtn: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
@@ -452,7 +451,6 @@ const modalStyles = StyleSheet.create({
   membershipCtaText: {
     fontSize: 15,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
   },
   membershipHint: {
     fontSize: 12,

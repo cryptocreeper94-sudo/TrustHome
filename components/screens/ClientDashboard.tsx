@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Image, Platform, Linking } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -113,7 +114,7 @@ export function ClientDashboard() {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
     >
-      <View style={styles.greetingRow}>
+      <Animated.View entering={FadeInDown.duration(400).delay(0)} style={styles.greetingRow}>
         <View>
           <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back</Text>
           <Text style={[styles.name, { color: colors.text }]}>{MOCK_CLIENT.name}</Text>
@@ -127,8 +128,9 @@ export function ClientDashboard() {
             <Text style={[styles.agentName, { color: colors.text }]}>{MOCK_CLIENT.agentName}</Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(100)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Transaction Progress</Text>
         <InfoButton onPress={() => showInfo(
@@ -156,7 +158,9 @@ export function ClientDashboard() {
           ))}
         </View>
       </GlassCard>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(200)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Upcoming Showings</Text>
         <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>{MOCK_SHOWINGS.length} scheduled</Text>
@@ -179,7 +183,9 @@ export function ClientDashboard() {
           </GlassCard>
         </Pressable>
       ))}
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(300)}>
       <HorizontalCarousel title="Your Shortlist" onSeeAll={() => {}} style={styles.shortlistSection} itemWidth={240}>
         {MOCK_SHORTLIST.map((prop, i) => (
           <Pressable key={i}>
@@ -218,7 +224,9 @@ export function ClientDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(400)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Documents</Text>
         <InfoButton onPress={() => showInfo(
@@ -248,7 +256,9 @@ export function ClientDashboard() {
           </Pressable>
         ))}
       </View>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(500)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Connected Parties</Text>
         <InfoButton onPress={() => showInfo(
@@ -278,7 +288,9 @@ export function ClientDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(600)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Tools</Text>
       </View>
@@ -300,7 +312,9 @@ export function ClientDashboard() {
           </View>
         </GlassCard>
       </Pressable>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(400).delay(700)}>
       <View style={styles.quickActions}>
         {[
           { label: 'Message Agent', icon: 'chatbubble-outline' as const, key: 'message' },
@@ -326,6 +340,7 @@ export function ClientDashboard() {
           );
         })}
       </View>
+      </Animated.View>
 
       <Footer />
 
@@ -513,6 +528,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
+    minHeight: 44,
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,

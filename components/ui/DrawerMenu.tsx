@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, Platform, Modal, Linking
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, SlideInRight, SlideOutRight } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 
@@ -14,6 +14,26 @@ interface MenuItem {
   onPress?: () => void;
   agentOnly?: boolean;
   dividerAfter?: boolean;
+}
+
+function AnimatedMenuItem({ item, index, onPress, colors }: { item: MenuItem; index: number; onPress: (item: MenuItem) => void; colors: any }) {
+  return (
+    <Animated.View entering={FadeInDown.delay(index * 40).duration(250).springify().damping(18)}>
+      <Pressable
+        onPress={() => onPress(item)}
+        style={({ pressed }) => [
+          styles.menuItem,
+          pressed && { backgroundColor: colors.backgroundTertiary, opacity: 0.8 },
+        ]}
+      >
+        <Ionicons name={item.icon} size={22} color={colors.textSecondary} />
+        <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
+      </Pressable>
+      {item.dividerAfter ? (
+        <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+      ) : null}
+    </Animated.View>
+  );
 }
 
 export function DrawerMenu() {
@@ -97,7 +117,7 @@ export function DrawerMenu() {
               {isAuthenticated && user ? (
                 <>
                   <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.avatarText}>
+                    <Text style={[styles.avatarText, { color: colors.textInverse }]}>
                       {(user.firstName?.[0] || '').toUpperCase()}{(user.lastName?.[0] || '').toUpperCase()}
                     </Text>
                   </View>
@@ -117,36 +137,25 @@ export function DrawerMenu() {
                 </View>
               )}
             </View>
-            <Pressable onPress={closeDrawer} style={styles.closeBtn}>
+            <Pressable onPress={closeDrawer} style={({ pressed }) => [styles.closeBtn, { opacity: pressed ? 0.7 : 1 }]}>
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
           </View>
 
           <ScrollView style={styles.menuScroll} showsVerticalScrollIndicator={false}>
-            {menuItems.map((item) => {
-              if (item.agentOnly && !isAgent) return null;
-              return (
-                <React.Fragment key={item.label}>
-                  <Pressable
-                    onPress={() => handleItemPress(item)}
-                    style={({ pressed }) => [
-                      styles.menuItem,
-                      pressed && { backgroundColor: colors.backgroundTertiary },
-                    ]}
-                  >
-                    <Ionicons name={item.icon} size={22} color={colors.textSecondary} />
-                    <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
-                  </Pressable>
-                  {item.dividerAfter ? (
-                    <View style={[styles.divider, { backgroundColor: colors.divider }]} />
-                  ) : null}
-                </React.Fragment>
-              );
-            })}
+            {menuItems.filter(item => !item.agentOnly || isAgent).map((item, index) => (
+              <AnimatedMenuItem
+                key={item.label}
+                item={item}
+                index={index}
+                onPress={handleItemPress}
+                colors={colors}
+              />
+            ))}
           </ScrollView>
 
           <View style={[styles.drawerFooter, { borderTopColor: colors.divider }]}>
-            <Pressable onPress={toggleTheme} style={styles.themeToggle}>
+            <Pressable onPress={toggleTheme} style={({ pressed }) => [styles.themeToggle, { opacity: pressed ? 0.7 : 1 }]}>
               <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textSecondary} />
               <Text style={[styles.themeText, { color: colors.textSecondary }]}>{isDark ? 'Light Mode' : 'Dark Mode'}</Text>
             </Pressable>
@@ -219,7 +228,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700' as const,
   },
@@ -233,9 +241,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   closeBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -246,7 +254,8 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 13,
+    minHeight: 44,
+    paddingVertical: 11,
     paddingHorizontal: 16,
     borderRadius: 12,
     gap: 14,
@@ -268,8 +277,10 @@ const styles = StyleSheet.create({
   themeToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 13,
+    minHeight: 44,
+    paddingVertical: 11,
     paddingHorizontal: 16,
+    borderRadius: 12,
     gap: 14,
   },
   themeText: {

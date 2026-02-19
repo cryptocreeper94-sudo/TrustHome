@@ -11,6 +11,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
+import { DevConsoleSkeleton, ListSkeleton } from '@/components/ui/SkeletonLoader';
 import { getQueryFn, apiRequest, queryClient } from '@/lib/query-client';
 
 
@@ -183,7 +184,7 @@ export default function DeveloperScreen() {
 
   const renderOverview = () => {
     const data = overviewQuery.data;
-    if (overviewQuery.isLoading) return <ActivityIndicator color={colors.primary} style={styles.loader} />;
+    if (overviewQuery.isLoading) return <DevConsoleSkeleton />;
     if (!data) return <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Unable to load overview</Text>;
 
     return (
@@ -240,7 +241,7 @@ export default function DeveloperScreen() {
 
   const renderHealth = () => {
     const data = healthQuery.data;
-    if (healthQuery.isLoading) return <ActivityIndicator color={colors.primary} style={styles.loader} />;
+    if (healthQuery.isLoading) return <DevConsoleSkeleton />;
     if (!data) return <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Unable to load health data</Text>;
 
     const onlineCount = data.services.filter(s => s.status === 'online').length;
@@ -315,7 +316,7 @@ export default function DeveloperScreen() {
 
   const renderConnections = () => {
     const data = connectionsQuery.data;
-    if (connectionsQuery.isLoading) return <ActivityIndicator color={colors.primary} style={styles.loader} />;
+    if (connectionsQuery.isLoading) return <ListSkeleton count={3} />;
     if (!data) return <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Unable to load connections</Text>;
 
     const configured = data.connections.filter(c => c.configured).length;
@@ -389,7 +390,7 @@ export default function DeveloperScreen() {
 
   const renderRequests = () => {
     const data = requestsQuery.data;
-    if (requestsQuery.isLoading) return <ActivityIndicator color={colors.primary} style={styles.loader} />;
+    if (requestsQuery.isLoading) return <ListSkeleton count={4} />;
     if (!data || data.length === 0) {
       return (
         <View style={styles.sectionContent}>
@@ -585,7 +586,7 @@ export default function DeveloperScreen() {
   if (authLoading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <DevConsoleSkeleton />
       </View>
     );
   }

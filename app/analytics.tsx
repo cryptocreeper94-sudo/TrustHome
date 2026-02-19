@@ -12,6 +12,7 @@ import { SCREEN_HELP } from '@/constants/helpContent';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
+import { AnalyticsSkeleton } from '@/components/ui/SkeletonLoader';
 
 type Period = 'This Month' | 'Quarter' | 'Year';
 
@@ -172,9 +173,9 @@ export default function AnalyticsScreen() {
         )}
 
         {dashboardQuery.isLoading && (
-          <View style={{ alignItems: 'center', paddingVertical: 8 }}>
-            <ActivityIndicator size="small" color={colors.primary} />
-          </View>
+          <Animated.View entering={FadeInDown.duration(400).delay(100)} style={{ paddingHorizontal: 16, marginTop: 16 }}>
+            <AnalyticsSkeleton />
+          </Animated.View>
         )}
 
         <Animated.View entering={FadeInDown.duration(400).delay(180)} style={styles.bentoWrap}>

@@ -13,6 +13,7 @@ import { SCREEN_HELP } from '@/constants/helpContent';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
+import { NetworkSkeleton } from '@/components/ui/SkeletonLoader';
 
 const CATEGORIES = ['All', 'Inspectors', 'Lenders', 'Title', 'Appraisers', 'Contractors'] as const;
 type Category = typeof CATEGORIES[number];
@@ -273,9 +274,9 @@ export default function NetworkScreen() {
           </Animated.View>
 
           {subcontractorsQuery.isLoading && (
-            <View style={{ alignItems: 'center', paddingVertical: 8 }}>
-              <ActivityIndicator size="small" color={colors.primary} />
-            </View>
+            <Animated.View entering={FadeInDown.duration(400).delay(100)} style={{ marginTop: 16 }}>
+              <NetworkSkeleton />
+            </Animated.View>
           )}
 
           <Animated.View entering={FadeInDown.duration(400).delay(340)}>

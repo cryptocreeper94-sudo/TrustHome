@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, Platform,
-  ActivityIndicator, Linking,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -16,6 +16,7 @@ import { ClientDashboard } from '@/components/screens/ClientDashboard';
 import { CommandCenterHub } from '@/components/screens/CommandCenterHub';
 import { WelcomeGuide } from '@/components/ui/WelcomeGuide';
 import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
+import { DashboardSkeleton } from '@/components/ui/SkeletonLoader';
 
 type HomeView = 'hub' | 'dashboard';
 
@@ -344,7 +345,7 @@ export default function HomeScreen() {
   if (isLoading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <DashboardSkeleton />
       </View>
     );
   }

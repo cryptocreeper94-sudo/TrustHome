@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
+import { BlogSkeleton } from '@/components/ui/SkeletonLoader';
 
 const TABS = ['Posts', 'Create', 'AI Generate'] as const;
 type Tab = typeof TABS[number];
@@ -301,10 +302,7 @@ export default function BlogScreen() {
   const renderPostsTab = () => (
     <View style={styles.section}>
       {postsLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading posts...</Text>
-        </View>
+        <BlogSkeleton />
       ) : !posts || posts.length === 0 ? (
         <GlassCard>
           <View style={styles.emptyState}>
@@ -561,13 +559,7 @@ export default function BlogScreen() {
       </AccordionSection>
 
       {generateMutation.isPending && (
-        <GlassCard style={styles.generatingCard}>
-          <View style={styles.generatingContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.generatingText, { color: colors.text }]}>Generating your blog post...</Text>
-            <Text style={[styles.generatingSubtext, { color: colors.textSecondary }]}>This may take a moment</Text>
-          </View>
-        </GlassCard>
+        <BlogSkeleton />
       )}
 
       {generatedPost && !generateMutation.isPending && (

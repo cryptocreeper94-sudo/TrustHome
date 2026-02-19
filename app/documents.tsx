@@ -118,8 +118,8 @@ export default function DocumentsScreen() {
           </HorizontalCarousel>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(400).delay(260)}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterContent}>
+        <Animated.View entering={FadeInDown.duration(400).delay(260)} style={styles.filterRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContent}>
           {FILTER_TABS.map(tab => {
             const isActive = activeFilter === tab;
             return (
@@ -135,8 +135,7 @@ export default function DocumentsScreen() {
         </ScrollView>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(400).delay(340)}>
-        <View style={styles.actionsRow}>
+        <Animated.View entering={FadeInDown.duration(400).delay(340)} style={styles.actionsRow}>
           <Pressable style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
             <Ionicons name="cloud-upload" size={18} color="#FFFFFF" />
             <Text style={styles.actionBtnText}>Upload</Text>
@@ -145,7 +144,6 @@ export default function DocumentsScreen() {
             <Ionicons name="pencil" size={18} color={colors.primary} />
             <Text style={[styles.actionBtnText, { color: colors.primary }]}>Request Signature</Text>
           </Pressable>
-        </View>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(420)} style={styles.accordionWrap}>

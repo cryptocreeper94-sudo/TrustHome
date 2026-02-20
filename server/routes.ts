@@ -20,6 +20,15 @@ import {
   tlCheckoutCertification,
   tlIsConfigured,
 } from "./trustlayer-client";
+import {
+  mediaStudioStatus,
+  mediaStudioListProjects,
+  mediaStudioGetProject,
+  mediaStudioGetProjectStatus,
+  mediaStudioRequestWalkthrough,
+  mediaStudioCancelProject,
+  mediaStudioIsConfigured,
+} from "./media-studio-client";
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
@@ -972,34 +981,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ─── DarkWave Media Studio ──────────────────────────────────────────
+  // ─── DarkWave Media Studio (TrustVault) ──────────────────────────────
 
-  app.get("/api/media-studio/status", (_req: Request, res: Response) => {
-    res.json({
-      configured: !!(process.env.DW_MEDIA_API_KEY && process.env.DW_MEDIA_API_SECRET),
-      baseUrl: "https://media.darkwavestudios.io/api/ecosystem",
-      service: "DarkWave Media Studio",
-      capabilities: [
-        "video_walkthrough",
-        "video_editing",
-        "audio_editing",
-        "media_combining",
-        "branded_intros",
-        "voiceover",
-        "multi_angle_stitch",
-        "thumbnail_generation",
-      ],
-      tenantSpace: "trusthome",
-    });
-  });
-
-  app.get("/api/media-studio/projects", async (req: Request, res: Response) => {
+  app.get("/api/media-studio/status", async (_req: Request, res: Response) => {
     try {
+      const result = await mediaStudioStatus();
       res.json({
-        projects: [],
-        message: "Media Studio tenant space ready. Connect API keys to sync projects.",
+        ...result,
+        service: "DarkWave Media Studio (TrustVault)",
+        configured: mediaStudioIsConfigured(),
+        baseUrl: process.env.TRUSTVAULT_BASE_URL || "https://trustvault.replit.app",
         tenantSpace: "trusthome",
       });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/media-studio/projects", async (_req: Request, res: Response) => {
+    try {
+      const result = await mediaStudioListProjects();
+      res.json({ ...result, tenantSpace: "trusthome" });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/media-studio/projects/:projectId", async (req: Request, res: Response) => {
+    try {
+      const result = await mediaStudioGetProject(req.params.projectId);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/media-studio/projects/:projectId/status", async (req: Request, res: Response) => {
+    try {
+      const result = await mediaStudioGetProjectStatus(req.params.projectId);
+      res.json(result);
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
@@ -1007,57 +1027,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/media-studio/walkthrough-request", async (req: Request, res: Response) => {
     try {
-      const { propertyId, propertyAddress, requestType, notes } = req.body;
+      const { propertyId, propertyAddress, requestType, notes, agentId } = req.body;
       if (!propertyAddress) {
         return res.status(400).json({ error: "Property address is required" });
       }
-      res.json({
-        requestId: `ms-${Date.now()}`,
-        status: "queued",
+      const result = await mediaStudioRequestWalkthrough({
         propertyAddress,
-        requestType: requestType || "video_walkthrough",
-        estimatedTurnaround: "24 hours",
-        message: "Video walkthrough request submitted to DarkWave Media Studio.",
-        tenantSpace: "trusthome",
+        propertyId,
+        requestType: requestType || "Video Walkthrough",
+        notes,
+        agentId,
       });
+      res.status(201).json({ ...result, tenantSpace: "trusthome" });
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
-  app.get("/api/media-studio/projects/:projectId/download", async (req: Request, res: Response) => {
+  app.post("/api/media-studio/projects/:projectId/cancel", async (req: Request, res: Response) => {
     try {
-      const { projectId } = req.params;
-      const format = (req.query.format as string) || "mp4";
-      res.json({
-        projectId,
-        downloadUrl: `https://media.darkwavestudios.io/api/ecosystem/projects/${projectId}/export?format=${format}&tenant=trusthome`,
-        format,
-        expiresIn: "1 hour",
-        message: "Download link generated. Link expires in 1 hour.",
-        tenantSpace: "trusthome",
-      });
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/media-studio/upload", async (req: Request, res: Response) => {
-    try {
-      const { title, description, mediaType } = req.body;
-      if (!title) {
-        return res.status(400).json({ error: "Title is required" });
-      }
-      res.json({
-        projectId: `msp-${Date.now()}`,
-        status: "uploading",
-        title,
-        description: description || "",
-        mediaType: mediaType || "video",
-        uploadUrl: `https://media.darkwavestudios.io/api/ecosystem/upload?tenant=trusthome`,
-        message: "Upload initiated to DarkWave Media Studio.",
-        tenantSpace: "trusthome",
-      });
+      const result = await mediaStudioCancelProject(req.params.projectId);
+      res.json(result);
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
@@ -1352,10 +1342,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {
           id: "media_studio",
-          name: "DarkWave Media Studio",
-          description: "Video walkthroughs, audio/video editing, media production API",
-          baseUrl: "https://media.darkwavestudios.io/api/ecosystem",
-          configured: !!(process.env.DW_MEDIA_API_KEY && process.env.DW_MEDIA_API_SECRET),
+          name: "TrustVault / DW Media Studio",
+          description: "Video walkthroughs, photo editing, virtual staging, media production API",
+          baseUrl: process.env.TRUSTVAULT_BASE_URL || "https://trustvault.replit.app",
+          configured: mediaStudioIsConfigured(),
           keyMasked: process.env.DW_MEDIA_API_KEY ? `${process.env.DW_MEDIA_API_KEY.slice(0, 6)}...${process.env.DW_MEDIA_API_KEY.slice(-4)}` : null,
           icon: "videocam-outline",
         },

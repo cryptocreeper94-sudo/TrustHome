@@ -5,7 +5,7 @@ import connectPg from 'connect-pg-simple';
 import { registerRoutes } from "./routes";
 import { registerVoiceAiRoutes } from "./voice-ai-routes";
 import { registerOrbitRoutes } from "./orbit-routes";
-import { registerArborAiRoutes } from "./arborai-routes";
+import { registerVerdaraRoutes } from "./verdara-routes";
 import { pool, db } from './db';
 import { blogPosts } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -452,7 +452,7 @@ function setupErrorHandler(app: express.Application) {
 
   registerVoiceAiRoutes(app);
   registerOrbitRoutes(app);
-  registerArborAiRoutes(app);
+  registerVerdaraRoutes(app);
 
   setupErrorHandler(app);
 

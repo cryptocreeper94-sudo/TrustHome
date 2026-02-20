@@ -56,6 +56,15 @@ TrustHome is a real estate platform designed to be a central hub for all parties
   - Royalty split: 51% Jennifer / 49% Jason — enforced by ORBIT Financial Hub
   - App ID: dw_app_trusthome
 
+- Verdara Integration — cross-ecosystem connection for AI-powered tree/plant services
+  - Client: server/verdara-client.ts (HMAC-SHA256 signed requests)
+  - Routes: server/verdara-routes.ts (/api/verdara/status, identify, removal-plan, assess, species/:id)
+  - Ecosystem routes: /api/ecosystem/status, /api/ecosystem/widget-config, /api/ecosystem/incoming (signature-verified)
+  - Env (pending from Verdara): VERDARA_API_KEY, VERDARA_API_SECRET, VERDARA_BASE_URL
+  - Auth pattern: DW ${apiKey}:${timestamp}:${signature} with HMAC-SHA256
+  - Ecosystem Widget: https://dwsc.io/api/ecosystem/widget.js, data from GET https://dwsc.io/api/ecosystem/widget-data
+  - Status: Client and routes ready, awaiting Verdara credentials to activate
+
 - MLS Integration Setup — per-agent self-service MLS credential configuration
   - Screen: app/mls-setup.tsx (ultra-premium UI with Bento grid, carousels, accordions, glassmorphism)
   - Database: mls_configurations table (per-agent MLS credentials, provider, status, sync settings)

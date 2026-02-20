@@ -1,26 +1,26 @@
 import type { Express, Request, Response } from "express";
 import * as crypto from "crypto";
 import {
-  arboraiIsConfigured,
-  arboraiStatus,
-  arboraiIdentify,
-  arboraiRemovalPlan,
-  arboraiAssess,
-  arboraiGetSpecies,
-} from "./arborai-client";
+  verdaraIsConfigured,
+  verdaraStatus,
+  verdaraIdentify,
+  verdaraRemovalPlan,
+  verdaraAssess,
+  verdaraGetSpecies,
+} from "./verdara-client";
 import { getDarkWaveHeaders } from "./ecosystem-client";
 
-export function registerArborAiRoutes(app: Express) {
+export function registerVerdaraRoutes(app: Express) {
 
-  app.get("/api/arborai/status", async (_req: Request, res: Response) => {
+  app.get("/api/verdara/status", async (_req: Request, res: Response) => {
     try {
-      if (!arboraiIsConfigured()) {
+      if (!verdaraIsConfigured()) {
         return res.json({
           connected: false,
-          message: "ArborAI integration pending — awaiting API credentials",
+          message: "Verdara integration pending — awaiting API credentials",
         });
       }
-      const result = await arboraiStatus();
+      const result = await verdaraStatus();
       return res.json({
         connected: !result.error,
         ...result,
@@ -33,16 +33,16 @@ export function registerArborAiRoutes(app: Express) {
     }
   });
 
-  app.post("/api/arborai/identify", async (req: Request, res: Response) => {
+  app.post("/api/verdara/identify", async (req: Request, res: Response) => {
     try {
-      if (!arboraiIsConfigured()) {
-        return res.status(503).json({ error: "ArborAI integration not configured" });
+      if (!verdaraIsConfigured()) {
+        return res.status(503).json({ error: "Verdara integration not configured" });
       }
       const { imageData, location } = req.body;
       if (!imageData) {
         return res.status(400).json({ error: "imageData is required" });
       }
-      const result = await arboraiIdentify(imageData, location);
+      const result = await verdaraIdentify(imageData, location);
       return res.json(result);
     } catch (error) {
       return res.status(500).json({
@@ -51,16 +51,16 @@ export function registerArborAiRoutes(app: Express) {
     }
   });
 
-  app.post("/api/arborai/removal-plan", async (req: Request, res: Response) => {
+  app.post("/api/verdara/removal-plan", async (req: Request, res: Response) => {
     try {
-      if (!arboraiIsConfigured()) {
-        return res.status(503).json({ error: "ArborAI integration not configured" });
+      if (!verdaraIsConfigured()) {
+        return res.status(503).json({ error: "Verdara integration not configured" });
       }
       const { propertyAddress, treeIds } = req.body;
       if (!propertyAddress || !treeIds) {
         return res.status(400).json({ error: "propertyAddress and treeIds are required" });
       }
-      const result = await arboraiRemovalPlan(propertyAddress, treeIds);
+      const result = await verdaraRemovalPlan(propertyAddress, treeIds);
       return res.json(result);
     } catch (error) {
       return res.status(500).json({
@@ -69,16 +69,16 @@ export function registerArborAiRoutes(app: Express) {
     }
   });
 
-  app.post("/api/arborai/assess", async (req: Request, res: Response) => {
+  app.post("/api/verdara/assess", async (req: Request, res: Response) => {
     try {
-      if (!arboraiIsConfigured()) {
-        return res.status(503).json({ error: "ArborAI integration not configured" });
+      if (!verdaraIsConfigured()) {
+        return res.status(503).json({ error: "Verdara integration not configured" });
       }
       const { propertyAddress, agentId } = req.body;
       if (!propertyAddress) {
         return res.status(400).json({ error: "propertyAddress is required" });
       }
-      const result = await arboraiAssess(propertyAddress, agentId || "demo");
+      const result = await verdaraAssess(propertyAddress, agentId || "demo");
       return res.json(result);
     } catch (error) {
       return res.status(500).json({
@@ -87,13 +87,13 @@ export function registerArborAiRoutes(app: Express) {
     }
   });
 
-  app.get("/api/arborai/species/:id", async (req: Request, res: Response) => {
+  app.get("/api/verdara/species/:id", async (req: Request, res: Response) => {
     try {
-      if (!arboraiIsConfigured()) {
-        return res.status(503).json({ error: "ArborAI integration not configured" });
+      if (!verdaraIsConfigured()) {
+        return res.status(503).json({ error: "Verdara integration not configured" });
       }
       const speciesId = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
-      const result = await arboraiGetSpecies(speciesId);
+      const result = await verdaraGetSpecies(speciesId);
       return res.json(result);
     } catch (error) {
       return res.status(500).json({
@@ -148,10 +148,10 @@ export function registerArborAiRoutes(app: Express) {
 
       const knownApps: Record<string, { secret: string; name: string }> = {};
 
-      if (process.env.ARBORAI_API_KEY && process.env.ARBORAI_API_SECRET) {
-        knownApps[process.env.ARBORAI_API_KEY] = {
-          secret: process.env.ARBORAI_API_SECRET,
-          name: "ArborAI",
+      if (process.env.VERDARA_API_KEY && process.env.VERDARA_API_SECRET) {
+        knownApps[process.env.VERDARA_API_KEY] = {
+          secret: process.env.VERDARA_API_SECRET,
+          name: "Verdara",
         };
       }
 
@@ -196,9 +196,9 @@ export function registerArborAiRoutes(app: Express) {
         configured: !!(process.env.ORBIT_ECOSYSTEM_API_KEY && process.env.ORBIT_ECOSYSTEM_API_SECRET),
         url: "https://paintpros.io",
       },
-      arborAI: {
-        configured: arboraiIsConfigured(),
-        url: process.env.ARBORAI_BASE_URL || null,
+      verdara: {
+        configured: verdaraIsConfigured(),
+        url: process.env.VERDARA_BASE_URL || null,
       },
       widget: {
         url: "https://dwsc.io/api/ecosystem/widget.js",

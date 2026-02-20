@@ -155,6 +155,13 @@ export function registerVerdaraRoutes(app: Express) {
         };
       }
 
+      if (process.env.DARKWAVE_API_KEY && process.env.DARKWAVE_API_SECRET) {
+        knownApps[process.env.DARKWAVE_API_KEY] = {
+          secret: process.env.DARKWAVE_API_SECRET,
+          name: "TrustVault Media Studio",
+        };
+      }
+
       const app = knownApps[incomingKey];
       if (!app) {
         return res.status(401).json({ error: "Unknown API key" });
@@ -199,6 +206,11 @@ export function registerVerdaraRoutes(app: Express) {
       verdara: {
         configured: verdaraIsConfigured(),
         url: process.env.VERDARA_BASE_URL || null,
+      },
+      trustVault: {
+        configured: !!(process.env.DW_MEDIA_API_KEY && process.env.DW_MEDIA_API_SECRET),
+        url: process.env.TRUSTVAULT_BASE_URL || "https://trustvault.replit.app",
+        capabilities: ["media_vault", "video_walkthrough", "photo_editing", "virtual_staging"],
       },
       widget: {
         url: "https://dwsc.io/api/ecosystem/widget.js",

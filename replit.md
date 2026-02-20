@@ -75,6 +75,18 @@ TrustHome is a real estate platform designed to be a central hub for all parties
   - Added to: landing-page.html, blog-index.html, blog-page.html, invite-jennifer.html
   - Theme: data-theme="dark" (matches app dark mode default on server-rendered pages)
 
+- TrustVault / DW Media Studio Integration — CONNECTED (HMAC-SHA256 authenticated)
+  - Client: server/media-studio-client.ts (HMAC-SHA256 signed requests, same pattern as Verdara)
+  - Routes: server/routes.ts (/api/media-studio/status, projects, projects/:id, projects/:id/status, walkthrough-request, projects/:id/cancel)
+  - Base URL: https://trustvault.replit.app/api/ecosystem
+  - Env: TRUSTVAULT_BASE_URL, DW_MEDIA_API_KEY, DW_MEDIA_API_SECRET
+  - Auth: DW ${apiKey}:${timestamp}:${signature} with HMAC-SHA256, X-App-Name: trusthome
+  - Tenant ID: trusthome (sent as query param on GET, body field on POST)
+  - Webhook inbound: POST /api/ecosystem/incoming (verified via DARKWAVE_API_KEY/SECRET, X-App-Name: mediastudio)
+  - Capabilities: media_vault, video_walkthrough, photo_editing, virtual_staging
+  - Upload/Editor embed: Available via Studio API (JWT auth, not yet connected — requires Trust Layer SSO JWT)
+  - App ID: dw_app_trustvault
+
 - MLS Integration Setup — per-agent self-service MLS credential configuration
   - Screen: app/mls-setup.tsx (ultra-premium UI with Bento grid, carousels, accordions, glassmorphism)
   - Database: mls_configurations table (per-agent MLS credentials, provider, status, sync settings)

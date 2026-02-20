@@ -65,6 +65,16 @@ TrustHome is a real estate platform designed to be a central hub for all parties
   - Ecosystem Widget: https://dwsc.io/api/ecosystem/widget.js, data from GET https://dwsc.io/api/ecosystem/widget-data
   - Status: Client and routes ready, awaiting Verdara credentials to activate
 
+- DarkWave Shared Components System — ecosystem-wide UI components loaded via script tag
+  - Loader: https://dwsc.io/api/ecosystem/shared/loader.js
+  - Components: footer, announcement-bar, trust-badge (use "all" for everything)
+  - Auto-placement: footer → bottom, announcement-bar → top, trust-badge → bottom-right
+  - Custom placement: add `<div id="dw-shared-footer"></div>` etc.
+  - Direct render: GET https://dwsc.io/api/ecosystem/shared/render/{component}?theme=dark
+  - Bundle: GET https://dwsc.io/api/ecosystem/shared/bundle?components=footer,trust-badge&theme=dark
+  - Added to: landing-page.html, blog-index.html, blog-page.html, invite-jennifer.html
+  - Theme: data-theme="dark" (matches app dark mode default on server-rendered pages)
+
 - MLS Integration Setup — per-agent self-service MLS credential configuration
   - Screen: app/mls-setup.tsx (ultra-premium UI with Bento grid, carousels, accordions, glassmorphism)
   - Database: mls_configurations table (per-agent MLS credentials, provider, status, sync settings)

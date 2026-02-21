@@ -11,6 +11,16 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
+import { VideoHero } from '@/components/ui/VideoHero';
+
+const HERO_VIDEOS = [
+  { src: require('@/assets/videos/hero-properties.mp4'), label: 'Properties & Listings', fallbackImage: require('@/assets/images/cards/card-property-manager.jpg') },
+  { src: require('@/assets/videos/hero-interior.mp4'), label: 'Home Interiors', fallbackImage: require('@/assets/images/cards/card-browse-properties.jpg') },
+  { src: require('@/assets/videos/hero-marketing.mp4'), label: 'Marketing & AI', fallbackImage: require('@/assets/images/cards/card-ai-marketing.jpg') },
+  { src: require('@/assets/videos/hero-transactions.mp4'), label: 'Transactions & Deals', fallbackImage: require('@/assets/images/cards/card-transaction-pipeline.jpg') },
+  { src: require('@/assets/videos/hero-landscape.mp4'), label: 'Tree & Landscape', fallbackImage: require('@/assets/images/cards/card-tree-services.png') },
+  { src: require('@/assets/videos/hero-business.mp4'), label: 'Business & Analytics', fallbackImage: require('@/assets/images/cards/card-analytics-dashboard.jpg') },
+];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = Math.min(260, SCREEN_WIDTH * 0.72);
@@ -626,16 +636,14 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <Animated.View entering={FadeInDown.duration(500)} style={styles.greeting}>
-        <Text style={[styles.greetingText, { color: isDark ? 'rgba(255,255,255,0.5)' : colors.textSecondary }]}>
-          {getTimeGreeting()}, {displayName}
-        </Text>
-        <Text style={[styles.greetingHeadline, { color: isDark ? '#FFFFFF' : colors.text }]}>
-          Command Center
-        </Text>
-        <Text style={[styles.greetingSub, { color: isDark ? 'rgba(255,255,255,0.35)' : colors.textTertiary }]}>
-          {filteredCategories.length} categories · {totalTools} tools
-        </Text>
+      <Animated.View entering={FadeInDown.duration(500)} style={styles.videoHeroWrap}>
+        <VideoHero videos={HERO_VIDEOS} height={280}>
+          <View style={styles.videoHeroContent}>
+            <Text style={styles.videoHeroGreeting}>{getTimeGreeting()}, {displayName}</Text>
+            <Text style={styles.videoHeroHeadline}>Command Center</Text>
+            <Text style={styles.videoHeroSub}>{filteredCategories.length} categories · {totalTools} tools</Text>
+          </View>
+        </VideoHero>
       </Animated.View>
 
       {filteredCategories.map((category, catIndex) => (
@@ -744,23 +752,31 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 8,
   },
-  greeting: {
+  videoHeroWrap: {
     paddingHorizontal: 16,
     marginBottom: 24,
   },
-  greetingText: {
+  videoHeroContent: {
+    justifyContent: 'flex-end',
+    flex: 1,
+    paddingBottom: 30,
+  },
+  videoHeroGreeting: {
     fontSize: 14,
     fontWeight: '500' as const,
+    color: 'rgba(255,255,255,0.7)',
     marginBottom: 2,
   },
-  greetingHeadline: {
-    fontSize: 28,
+  videoHeroHeadline: {
+    fontSize: 30,
     fontWeight: '800' as const,
+    color: '#FFFFFF',
     letterSpacing: -0.8,
   },
-  greetingSub: {
+  videoHeroSub: {
     fontSize: 13,
     fontWeight: '500' as const,
+    color: 'rgba(255,255,255,0.5)',
     marginTop: 4,
   },
   categorySection: {

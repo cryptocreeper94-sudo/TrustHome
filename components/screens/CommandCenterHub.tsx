@@ -141,6 +141,17 @@ const ALL_CATEGORIES: Category[] = [
         image: require('@/assets/images/cards/card-media-studio.jpg'),
       },
       {
+        label: 'Tree Services',
+        description: 'AI tree assessment & removal estimates',
+        route: '/tree-services',
+        icon: 'leaf-outline',
+        gradient: ['#16A34A', '#15803D'],
+        glowColor: 'rgba(22, 163, 74, 0.3)',
+        badge: 'Ecosystem',
+        badgeGradient: ['#34C759', '#22A047'],
+        image: require('@/assets/images/cards/card-tree-services.png'),
+      },
+      {
         label: 'Branding Suite',
         description: 'Colors, logos & white-label settings',
         route: '/branding',

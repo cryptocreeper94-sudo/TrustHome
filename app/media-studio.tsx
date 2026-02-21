@@ -70,15 +70,44 @@ interface MediaProject {
   createdAt: string;
   duration?: string;
   format?: string;
+  outputUrl?: string;
+  thumbnailUrl?: string;
 }
 
-const SAMPLE_PROJECTS: MediaProject[] = [
-  { id: 'msp-001', title: 'Oak Street Listing Walkthrough', type: 'video_walkthrough', status: 'completed', createdAt: 'Feb 10, 2026', duration: '3:45', format: 'mp4' },
-  { id: 'msp-002', title: 'Spring Campaign Promo', type: 'branded_intro', status: 'completed', createdAt: 'Feb 8, 2026', duration: '0:30', format: 'mp4' },
-  { id: 'msp-003', title: 'Market Update Voiceover', type: 'voiceover', status: 'completed', createdAt: 'Feb 6, 2026', duration: '2:15', format: 'mp3' },
-  { id: 'msp-004', title: 'Oakwood Open House Highlights', type: 'video_editing', status: 'processing', createdAt: 'Feb 11, 2026', duration: '5:00' },
-  { id: 'msp-005', title: 'New Listing - Elm Ave', type: 'video_walkthrough', status: 'queued', createdAt: 'Feb 12, 2026' },
-];
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch { return ''; }
+}
+
+function formatDuration(seconds: number | null | undefined): string | undefined {
+  if (!seconds) return undefined;
+  const min = Math.floor(seconds / 60);
+  const sec = seconds % 60;
+  return `${min}:${sec.toString().padStart(2, '0')}`;
+}
+
+function mapVaultProject(p: any): MediaProject {
+  const statusMap: Record<string, MediaProject['status']> = {
+    queued: 'queued',
+    in_progress: 'processing',
+    complete: 'completed',
+    cancelled: 'draft',
+  };
+  return {
+    id: String(p.id),
+    title: p.title || p.propertyAddress || 'Untitled Project',
+    type: p.requestType?.toLowerCase().replace(/\s+/g, '_') || 'video_walkthrough',
+    status: statusMap[p.status] || 'queued',
+    createdAt: formatDate(p.createdAt),
+    duration: formatDuration(p.duration),
+    format: p.outputUrl?.split('.').pop() || 'mp4',
+    outputUrl: p.outputUrl || undefined,
+    thumbnailUrl: p.thumbnailUrl || undefined,
+  };
+}
 
 const TOOLS = [
   { id: 'walkthrough', icon: 'videocam' as const, label: 'Video Walkthrough', desc: 'Professional property walkthrough video', gradient: ['#1A8A7E', '#0F6B62'] as [string, string] },
@@ -89,12 +118,6 @@ const TOOLS = [
   { id: 'thumbnail', icon: 'image' as const, label: 'Thumbnail Gen', desc: 'Auto-generate listing thumbnails', gradient: ['#834D9B', '#D04ED6'] as [string, string] },
 ];
 
-const STATS = [
-  { icon: 'film' as const, label: 'Total Projects', value: '5', color: '#1A8A7E' },
-  { icon: 'checkmark-circle' as const, label: 'Completed', value: '3', color: '#34C759' },
-  { icon: 'hourglass' as const, label: 'In Progress', value: '2', color: '#F59E0B' },
-  { icon: 'cloud-download' as const, label: 'Downloads', value: '12', color: '#6366F1' },
-];
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -369,21 +392,36 @@ export default function MediaStudioScreen() {
     queryKey: ['/api/media-studio/status'],
   });
 
+  const projectsQuery = useQuery<any>({
+    queryKey: ['/api/media-studio/projects'],
+    refetchInterval: 30000,
+  });
+
   const isConnected = statusQuery.data?.configured === true;
   const capabilities = statusQuery.data?.capabilities || [];
+
+  const vaultProjects: MediaProject[] = (projectsQuery.data?.projects || []).map(mapVaultProject);
+  const hasVaultProjects = vaultProjects.length > 0;
 
   const handleDownload = useCallback(async (project: MediaProject) => {
     setDownloadingId(project.id);
     try {
-      const url = new URL(`/api/media-studio/projects/${project.id}/download`, getApiUrl());
-      url.searchParams.set('format', project.format || 'mp4');
-      const resp = await fetch(url.toString());
-      const data = await resp.json();
-      if (data.downloadUrl) {
+      if (project.outputUrl) {
         if (Platform.OS === 'web') {
-          window.open(data.downloadUrl, '_blank');
+          window.open(project.outputUrl, '_blank');
         } else {
-          await Linking.openURL(data.downloadUrl);
+          await Linking.openURL(project.outputUrl);
+        }
+      } else {
+        const resp: any = await apiRequest('GET', `/api/media-studio/projects/${project.id}`);
+        if (resp.outputUrl) {
+          if (Platform.OS === 'web') {
+            window.open(resp.outputUrl, '_blank');
+          } else {
+            await Linking.openURL(resp.outputUrl);
+          }
+        } else {
+          Alert.alert('Not Ready', 'This project is still being processed. Check back soon.');
         }
       }
     } catch (err) {
@@ -445,11 +483,12 @@ export default function MediaStudioScreen() {
   }, []);
 
   const handleOpenStudio = useCallback(() => {
-    Linking.openURL('https://media.darkwavestudios.io');
+    Linking.openURL('https://trustvault.replit.app');
   }, []);
 
-  const completedProjects = SAMPLE_PROJECTS.filter(p => p.status === 'completed');
-  const activeProjects = SAMPLE_PROJECTS.filter(p => p.status !== 'completed');
+  const allProjects = vaultProjects;
+  const completedProjects = allProjects.filter(p => p.status === 'completed');
+  const activeProjects = allProjects.filter(p => p.status !== 'completed');
 
   return (
     <View style={[s.container, { backgroundColor: colors.background }]}>
@@ -496,26 +535,41 @@ export default function MediaStudioScreen() {
 
         <Animated.View entering={FadeInDown.delay(150).springify()} style={s.statsSection}>
           <BentoGrid columns={2} gap={8}>
-            {STATS.map((stat) => (
-              <StatCard key={stat.label} icon={stat.icon} label={stat.label} value={stat.value} color={stat.color} colors={colors} />
-            ))}
+            <StatCard icon="film" label="Total Projects" value={String(allProjects.length)} color="#1A8A7E" colors={colors} />
+            <StatCard icon="checkmark-circle" label="Completed" value={String(completedProjects.length)} color="#34C759" colors={colors} />
+            <StatCard icon="hourglass" label="In Progress" value={String(activeProjects.length)} color="#F59E0B" colors={colors} />
+            <StatCard icon="cloud-download" label="Downloads" value={String(completedProjects.length)} color="#6366F1" colors={colors} />
           </BentoGrid>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <HorizontalCarousel title="Recent Projects" onSeeAll={handleOpenStudio}>
-            {SAMPLE_PROJECTS.map((project, idx) => (
-              <ProjectCarouselCard
-                key={project.id}
-                project={project}
-                onDownload={() => handleDownload(project)}
-                isDownloading={downloadingId === project.id}
-                colors={colors}
-                isDark={isDark}
-                index={idx}
-              />
-            ))}
-          </HorizontalCarousel>
+          {allProjects.length > 0 ? (
+            <HorizontalCarousel title="Recent Projects" onSeeAll={handleOpenStudio}>
+              {allProjects.map((project, idx) => (
+                <ProjectCarouselCard
+                  key={project.id}
+                  project={project}
+                  onDownload={() => handleDownload(project)}
+                  isDownloading={downloadingId === project.id}
+                  colors={colors}
+                  isDark={isDark}
+                  index={idx}
+                />
+              ))}
+            </HorizontalCarousel>
+          ) : (
+            <View style={s.emptyProjects}>
+              <GlassCard>
+                <View style={s.emptyContent}>
+                  <Ionicons name="film-outline" size={36} color={colors.textSecondary} />
+                  <Text style={[s.emptyTitle, { color: colors.text }]}>No Projects Yet</Text>
+                  <Text style={[s.emptyDesc, { color: colors.textSecondary }]}>
+                    Request a video walkthrough, photo edit, or virtual staging below to get started.
+                  </Text>
+                </View>
+              </GlassCard>
+            </View>
+          )}
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(250).springify()}>
@@ -528,8 +582,10 @@ export default function MediaStudioScreen() {
             badgeColor="#34C759"
             style={{ marginHorizontal: 16, marginTop: 8 }}
           >
-            {completedProjects.map((project, idx) => {
-              const img = PROJECT_IMAGES[project.id];
+            {completedProjects.length === 0 ? (
+              <Text style={[s.accordionMeta, { color: colors.textSecondary, paddingVertical: 12, textAlign: 'center' }]}>No completed projects yet</Text>
+            ) : completedProjects.map((project, idx) => {
+              const localImg = PROJECT_IMAGES[project.id];
               return (
                 <Pressable
                   key={project.id}
@@ -537,7 +593,15 @@ export default function MediaStudioScreen() {
                   onPress={() => handleDownload(project)}
                 >
                   <View style={s.accordionThumb}>
-                    {img && <Image source={img} style={s.accordionThumbImg} resizeMode="cover" />}
+                    {project.thumbnailUrl ? (
+                      <Image source={{ uri: project.thumbnailUrl }} style={s.accordionThumbImg} resizeMode="cover" />
+                    ) : localImg ? (
+                      <Image source={localImg} style={s.accordionThumbImg} resizeMode="cover" />
+                    ) : (
+                      <View style={[s.accordionThumbImg, { backgroundColor: '#1A8A7E20', alignItems: 'center', justifyContent: 'center' }]}>
+                        <Ionicons name="film-outline" size={20} color="#1A8A7E" />
+                      </View>
+                    )}
                   </View>
                   <View style={s.accordionInfo}>
                     <Text style={[s.accordionTitle, { color: colors.text }]} numberOfLines={1}>{project.title}</Text>
@@ -567,15 +631,25 @@ export default function MediaStudioScreen() {
             badgeColor="#F59E0B"
             style={{ marginHorizontal: 16 }}
           >
-            {activeProjects.map((project, idx) => {
-              const img = PROJECT_IMAGES[project.id];
+            {activeProjects.length === 0 ? (
+              <Text style={[s.accordionMeta, { color: colors.textSecondary, paddingVertical: 12, textAlign: 'center' }]}>No active projects</Text>
+            ) : activeProjects.map((project, idx) => {
+              const localImg = PROJECT_IMAGES[project.id];
               return (
                 <View
                   key={project.id}
                   style={[s.accordionRow, idx > 0 && { borderTopWidth: 1, borderTopColor: colors.divider }]}
                 >
                   <View style={s.accordionThumb}>
-                    {img && <Image source={img} style={s.accordionThumbImg} resizeMode="cover" />}
+                    {project.thumbnailUrl ? (
+                      <Image source={{ uri: project.thumbnailUrl }} style={s.accordionThumbImg} resizeMode="cover" />
+                    ) : localImg ? (
+                      <Image source={localImg} style={s.accordionThumbImg} resizeMode="cover" />
+                    ) : (
+                      <View style={[s.accordionThumbImg, { backgroundColor: '#F59E0B20', alignItems: 'center', justifyContent: 'center' }]}>
+                        <Ionicons name="hourglass-outline" size={20} color="#F59E0B" />
+                      </View>
+                    )}
                   </View>
                   <View style={s.accordionInfo}>
                     <Text style={[s.accordionTitle, { color: colors.text }]} numberOfLines={1}>{project.title}</Text>
@@ -696,7 +770,7 @@ export default function MediaStudioScreen() {
           >
             <MaterialCommunityIcons name="movie-open-star-outline" size={18} color="#1A8A7E" />
             <Text style={[s.poweredByText, { color: colors.textSecondary }]}>
-              Powered by DarkWave Media Studio  media.darkwavestudios.io
+              Powered by TrustVault / DarkWave Media Studio
             </Text>
           </LinearGradient>
         </View>
@@ -843,6 +917,11 @@ const s = StyleSheet.create({
   capGrid: { flexDirection: 'row', flexWrap: 'wrap' as const, gap: 6, paddingTop: 4 },
   capPill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 },
   capText: { fontSize: 11, fontWeight: '600' as const, textTransform: 'capitalize' as const },
+
+  emptyProjects: { marginHorizontal: 16, marginTop: 12 },
+  emptyContent: { alignItems: 'center' as const, paddingVertical: 20, gap: 8 },
+  emptyTitle: { fontSize: 16, fontWeight: '700' as const },
+  emptyDesc: { fontSize: 13, textAlign: 'center' as const, lineHeight: 19, paddingHorizontal: 12 },
 
   poweredByWrap: { marginHorizontal: 16, marginTop: 16 },
   poweredBy: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 14, borderRadius: 14 },

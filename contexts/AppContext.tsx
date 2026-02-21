@@ -169,7 +169,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCurrentRole('client_buyer');
   }, []);
 
-  const isBrowsing = browseMode && !isAuthenticated && !demoMode;
+  const isBrowsing = browseMode && !realUser && !demoMode;
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);

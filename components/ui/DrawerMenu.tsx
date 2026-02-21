@@ -42,9 +42,12 @@ export function DrawerMenu() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const isAgent = isAgentAuthenticated;
+  const isAgent = isAgentAuthenticated && !isBrowsing;
 
-  const menuItems: MenuItem[] = [
+  const menuItems: MenuItem[] = isBrowsing ? [
+    { icon: 'home-outline', label: 'Command Center', route: '/' },
+    { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
+  ] : [
     { icon: 'home-outline', label: 'Dashboard', route: '/' },
     { icon: 'swap-horizontal-outline', label: 'Transactions', route: '/transactions' },
     { icon: 'business-outline', label: 'Properties', route: '/properties' },

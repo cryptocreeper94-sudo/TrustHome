@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, Platform, Linking, Dimensions, ImageBackground, ImageSourcePropType,
+  View, Text, StyleSheet, ScrollView, Pressable, Platform, Linking, Dimensions, ImageBackground, ImageSourcePropType, Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -579,22 +579,68 @@ interface CommandCenterHubProps {
   onSwitchToDashboard?: () => void;
 }
 
+function SubscribeModal({ visible, onClose, featureName, onGetStarted }: { visible: boolean; onClose: () => void; featureName: string; onGetStarted: () => void }) {
+  const { colors, isDark } = useTheme();
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={browseStyles.overlay} onPress={onClose}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={[browseStyles.card, { backgroundColor: isDark ? '#111827' : '#FFFFFF' }]}>
+          <View style={browseStyles.iconWrap}>
+            <LinearGradient colors={['#1A8A7E', '#0F766E']} style={browseStyles.iconGradient}>
+              <Ionicons name="lock-open-outline" size={28} color="#FFFFFF" />
+            </LinearGradient>
+          </View>
+          <Text style={[browseStyles.title, { color: colors.text }]}>Unlock {featureName}</Text>
+          <Text style={[browseStyles.sub, { color: colors.textSecondary }]}>
+            Sign up as an agent to access {featureName} and all TrustHome business tools. Free to explore, subscribe to unlock.
+          </Text>
+          <Pressable style={browseStyles.primaryBtn} onPress={onGetStarted}>
+            <LinearGradient colors={['#1A8A7E', '#0F766E']} style={browseStyles.primaryBtnGradient}>
+              <Text style={browseStyles.primaryBtnText}>Get Started</Text>
+              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+            </LinearGradient>
+          </Pressable>
+          <Pressable onPress={onClose} style={browseStyles.secondaryBtn}>
+            <Text style={[browseStyles.secondaryBtnText, { color: colors.textSecondary }]}>Keep Exploring</Text>
+          </Pressable>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const browseStyles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  card: { width: '100%', maxWidth: 380, borderRadius: 20, padding: 28, alignItems: 'center', ...(Platform.OS === 'web' ? { boxShadow: '0 24px 64px rgba(0,0,0,0.4)' } as any : {}) },
+  iconWrap: { marginBottom: 16 },
+  iconGradient: { width: 64, height: 64, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3, marginBottom: 8, textAlign: 'center' },
+  sub: { fontSize: 14, lineHeight: 20, textAlign: 'center', marginBottom: 20 },
+  primaryBtn: { width: '100%', borderRadius: 14, overflow: 'hidden', marginBottom: 10 },
+  primaryBtnGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14 },
+  primaryBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  secondaryBtn: { paddingVertical: 10 },
+  secondaryBtnText: { fontSize: 14, fontWeight: '600' },
+});
+
 export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps) {
   const { colors, isDark } = useTheme();
-  const { currentRole, greetingName, user, openAiAssistant, openSignalChat } = useApp();
+  const { currentRole, greetingName, user, openAiAssistant, openSignalChat, isBrowsing } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [subscribeModal, setSubscribeModal] = useState<{ visible: boolean; feature: string }>({ visible: false, feature: '' });
 
   const isAgent = currentRole === 'agent';
   const isClient = !isAgent;
-  const displayName = greetingName || user?.firstName || 'there';
+  const displayName = isBrowsing ? 'Explorer' : (greetingName || user?.firstName || 'there');
 
   const roleKey = useMemo(() => {
+    if (isBrowsing) return 'agent';
     if (user?.role === 'developer') return 'developer';
     if (user?.role === 'partner') return 'partner';
     if (isAgent) return 'agent';
     return 'client';
-  }, [user?.role, isAgent]);
+  }, [user?.role, isAgent, isBrowsing]);
 
   const filteredCategories = useMemo(() => {
     return ALL_CATEGORIES.filter(cat => {
@@ -605,6 +651,14 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
   }, [roleKey]);
 
   const handleCardPress = useCallback((card: LaunchCard) => {
+    if (isBrowsing) {
+      if (card.externalUrl) {
+        Linking.openURL(card.externalUrl);
+        return;
+      }
+      setSubscribeModal({ visible: true, feature: card.label });
+      return;
+    }
     if (card.onAction === 'ai_assistant') {
       openAiAssistant();
     } else if (card.onAction === 'signal_chat') {
@@ -616,7 +670,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
     } else if (card.route) {
       router.push(card.route as any);
     }
-  }, [router, openAiAssistant, openSignalChat, onSwitchToDashboard]);
+  }, [router, openAiAssistant, openSignalChat, onSwitchToDashboard, isBrowsing]);
 
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
@@ -628,6 +682,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
   const totalTools = filteredCategories.reduce((sum, c) => sum + c.cards.length, 0);
 
   return (
+    <>
     <ScrollView
       style={[styles.container, { backgroundColor: isDark ? '#070B16' : colors.background }]}
       contentContainerStyle={[
@@ -742,6 +797,17 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
         </View>
       </View>
     </ScrollView>
+
+    <SubscribeModal
+      visible={subscribeModal.visible}
+      featureName={subscribeModal.feature}
+      onClose={() => setSubscribeModal({ visible: false, feature: '' })}
+      onGetStarted={() => {
+        setSubscribeModal({ visible: false, feature: '' });
+        router.push('/team');
+      }}
+    />
+    </>
   );
 }
 

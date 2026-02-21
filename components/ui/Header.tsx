@@ -154,7 +154,7 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
                 <Ionicons name="close" size={22} color={colors.textInverse} />
               </Pressable>
             ) : null}
-            {isAuthenticated && (
+            {isAuthenticated && !isBrowsing && (
               <Pressable
                 onPress={() => setShowTrustLayer(true)}
                 style={({ pressed }) => [styles.trustStamp, { opacity: pressed ? 0.7 : 1 }]}

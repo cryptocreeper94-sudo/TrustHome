@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, Image, ImageSourcePropType } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeIn, FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, useAnimatedStyle, useSharedValue, withTiming, runOnJS } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface HeroVideo {
@@ -167,15 +167,21 @@ function NativeVideoHero({ videos, children, height = 320, showDots = true }: Vi
   const [currentIndex, setCurrentIndex] = useState(0);
   const opacity = useSharedValue(1);
 
+  const advanceSlide = useCallback(() => {
+    setCurrentIndex(prev => (prev + 1) % videos.length);
+  }, [videos.length]);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      opacity.value = withTiming(0, { duration: 500 }, () => {
-        setCurrentIndex(prev => (prev + 1) % videos.length);
-        opacity.value = withTiming(1, { duration: 500 });
+      opacity.value = withTiming(0, { duration: 500 }, (finished) => {
+        if (finished) {
+          runOnJS(advanceSlide)();
+          opacity.value = withTiming(1, { duration: 500 });
+        }
       });
     }, 6000);
     return () => clearInterval(interval);
-  }, [videos.length, opacity]);
+  }, [videos.length, opacity, advanceSlide]);
 
   const animStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

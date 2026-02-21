@@ -53,6 +53,7 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
 
 function FeatureTile({ item, index }: { item: typeof FEATURE_CATEGORIES[0]['items'][0]; index: number }) {
   const { isDark } = useTheme();
+  const router = useRouter();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -74,10 +75,7 @@ function FeatureTile({ item, index }: { item: typeof FEATURE_CATEGORIES[0]['item
             borderColor: 'rgba(255,255,255,0.08)',
           },
         ]}
-        onPress={() => {
-          const router = useRouter();
-          router.push('/auth');
-        }}
+        onPress={() => router.push('/auth')}
       >
         <View style={[styles.catTileIcon, { backgroundColor: item.color + '20' }]}>
           <Ionicons name={item.icon} size={20} color={item.color} />

@@ -687,7 +687,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       style={[styles.container, { backgroundColor: isDark ? '#070B16' : colors.background }]}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 30 },
+        { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + (isBrowsing ? 80 : 30) },
       ]}
       showsVerticalScrollIndicator={false}
     >

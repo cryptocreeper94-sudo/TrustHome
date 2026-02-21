@@ -375,9 +375,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingVertical: 10,
     borderRadius: 10,
     backgroundColor: 'rgba(255,255,255,0.15)',
+    minHeight: 36,
   },
   barBtnSecondaryText: {
     color: '#FFFFFF',
@@ -389,9 +390,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 10,
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
+    minHeight: 36,
   },
   barBtnPrimaryText: {
     color: '#1A8A7E',

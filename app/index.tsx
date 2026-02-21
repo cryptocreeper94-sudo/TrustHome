@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, Platform,
   Linking,
@@ -17,6 +17,7 @@ import { CommandCenterHub } from '@/components/screens/CommandCenterHub';
 import { WelcomeGuide } from '@/components/ui/WelcomeGuide';
 import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoader';
+import { BrowseCTABar } from '@/components/ui/BrowseCTABar';
 
 type HomeView = 'hub' | 'dashboard';
 
@@ -334,13 +335,21 @@ function UserCommandCenter() {
 
 export default function HomeScreen() {
   const { colors } = useTheme();
-  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding } = useApp();
+  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding, isBrowsing, browseMode, enterBrowse, demoMode } = useApp();
   const router = useRouter();
   const [view, setView] = useState<HomeView>('hub');
 
   const toggleView = useCallback(() => {
     setView(v => v === 'hub' ? 'dashboard' : 'hub');
   }, []);
+
+  const reallyAuthenticated = isAuthenticated && !isBrowsing;
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !browseMode && !demoMode) {
+      enterBrowse();
+    }
+  }, [isLoading, isAuthenticated, browseMode, demoMode, enterBrowse]);
 
   if (isLoading) {
     return (
@@ -350,43 +359,43 @@ export default function HomeScreen() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <UserCommandCenter />;
-  }
-
   const isAgent = currentRole === 'agent';
 
   const switchToDashboard = useCallback(() => {
+    if (isBrowsing) return;
     setView('dashboard');
-  }, []);
+  }, [isBrowsing]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
         extraAction={
-          <Pressable
-            onPress={toggleView}
-            style={styles.viewToggle}
-          >
-            <Ionicons
-              name={view === 'hub' ? 'speedometer-outline' : 'grid-outline'}
-              size={18}
-              color="rgba(255,255,255,0.8)"
-            />
-          </Pressable>
+          !isBrowsing ? (
+            <Pressable
+              onPress={toggleView}
+              style={styles.viewToggle}
+            >
+              <Ionicons
+                name={view === 'hub' ? 'speedometer-outline' : 'grid-outline'}
+                size={18}
+                color="rgba(255,255,255,0.8)"
+              />
+            </Pressable>
+          ) : undefined
         }
       />
-      {view === 'hub' ? (
+      {view === 'hub' || isBrowsing ? (
         <CommandCenterHub onSwitchToDashboard={switchToDashboard} />
       ) : (
         isAgent ? <AgentDashboard /> : <ClientDashboard />
       )}
+      <BrowseCTABar />
       <WelcomeGuide
-        visible={showWelcomeGuide}
+        visible={showWelcomeGuide && reallyAuthenticated}
         onComplete={() => setShowWelcomeGuide(false)}
       />
       <PartnerOnboardingModal
-        visible={showPartnerOnboarding && !showWelcomeGuide}
+        visible={showPartnerOnboarding && !showWelcomeGuide && reallyAuthenticated}
         onComplete={() => setShowPartnerOnboarding(false)}
       />
     </View>

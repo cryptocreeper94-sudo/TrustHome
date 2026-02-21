@@ -133,7 +133,7 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
 
 export function Header({ title = 'TrustHome', showBack = false, showClose = false, onClose, rightAction, extraAction }: HeaderProps) {
   const { colors, isDark, toggleTheme } = useTheme();
-  const { toggleDrawer, demoMode, exitDemo, isAuthenticated } = useApp();
+  const { toggleDrawer, demoMode, exitDemo, isAuthenticated, isBrowsing } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [showTrustLayer, setShowTrustLayer] = useState(false);
@@ -189,7 +189,7 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
 
       <TrustLayerModal visible={showTrustLayer} onClose={() => setShowTrustLayer(false)} />
 
-      {demoMode && (
+      {demoMode && !isBrowsing && (
         <View style={styles.demoBanner}>
           <View style={styles.demoLeft}>
             <Ionicons name="eye-outline" size={16} color="#FFFFFF" />

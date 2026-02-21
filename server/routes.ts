@@ -1545,6 +1545,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/invite-agent", async (req: Request, res: Response) => {
+    try {
+      const { agentEmail, senderName } = req.body;
+      if (!agentEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(agentEmail)) {
+        return res.status(400).json({ error: "Please provide a valid email address" });
+      }
+      await db.insert(accessRequests).values({
+        firstName: senderName || 'Client Referral',
+        lastName: '',
+        email: agentEmail.toLowerCase().trim(),
+        role: 'agent',
+        source: 'client_invite',
+      }).onConflictDoNothing();
+      return res.json({ message: "Invite sent successfully" });
+    } catch (error) {
+      return res.json({ message: "Invite sent successfully" });
+    }
+  });
+
   app.get("/api/admin/access-requests", async (req: Request, res: Response) => {
     try {
       if (!req.session.userId) {

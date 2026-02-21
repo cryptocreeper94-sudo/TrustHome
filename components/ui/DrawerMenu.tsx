@@ -38,7 +38,7 @@ function AnimatedMenuItem({ item, index, onPress, colors }: { item: MenuItem; in
 
 export function DrawerMenu() {
   const { colors, isDark, toggleTheme } = useTheme();
-  const { drawerOpen, closeDrawer, currentRole, isAuthenticated, isAgentAuthenticated, signOut, user, demoMode, exitDemo, replayWelcomeGuide } = useApp();
+  const { drawerOpen, closeDrawer, currentRole, isAuthenticated, isAgentAuthenticated, signOut, user, demoMode, exitDemo, replayWelcomeGuide, isBrowsing, exitBrowse } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -126,8 +126,8 @@ export function DrawerMenu() {
                     <Text style={[styles.drawerTitle, { color: colors.text }]} numberOfLines={1}>
                       {user.firstName} {user.lastName}
                     </Text>
-                    <Text style={[styles.roleLabel, { color: demoMode ? colors.primary : colors.textSecondary }]}>
-                      {demoMode ? 'Demo Explorer' : isAgent ? 'Agent Dashboard' : 'Client Portal'}
+                    <Text style={[styles.roleLabel, { color: (demoMode || isBrowsing) ? colors.primary : colors.textSecondary }]}>
+                      {isBrowsing ? 'Exploring' : demoMode ? 'Demo Explorer' : isAgent ? 'Agent Dashboard' : 'Client Portal'}
                     </Text>
                   </View>
                 </>
@@ -160,7 +160,16 @@ export function DrawerMenu() {
               <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textSecondary} />
               <Text style={[styles.themeText, { color: colors.textSecondary }]}>{isDark ? 'Light Mode' : 'Dark Mode'}</Text>
             </Pressable>
-            {demoMode ? (
+            {isBrowsing ? (
+              <Pressable
+                onPress={() => { closeDrawer(); router.push('/team'); }}
+                style={styles.menuItem}
+                testID="drawer-get-started"
+              >
+                <Ionicons name="log-in-outline" size={22} color={colors.primary} />
+                <Text style={[styles.menuLabel, { color: colors.primary }]}>Sign In / Get Started</Text>
+              </Pressable>
+            ) : demoMode ? (
               <>
                 <Pressable
                   onPress={() => { closeDrawer(); router.replace('/team'); setTimeout(exitDemo, 150); }}

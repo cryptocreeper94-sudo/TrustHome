@@ -24,6 +24,10 @@ interface AppContextValue {
   demoMode: boolean;
   enterDemo: () => void;
   exitDemo: () => void;
+  browseMode: boolean;
+  enterBrowse: () => void;
+  exitBrowse: () => void;
+  isBrowsing: boolean;
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -59,6 +63,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [currentRole, setCurrentRole] = useState<UserRole>('client_buyer');
   const [demoMode, setDemoMode] = useState(false);
+  const [browseMode, setBrowseMode] = useState(false);
 
   const realUser = data?.user ?? null;
 
@@ -70,7 +75,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     role: 'agent',
   };
 
-  const user = demoMode ? DEMO_USER : realUser;
+  const BROWSE_USER: AuthUser = {
+    id: 'browse-user',
+    email: 'guest@trusthome.io',
+    firstName: 'Guest',
+    lastName: '',
+    role: 'agent',
+  };
+
+  const user = demoMode ? DEMO_USER : browseMode ? BROWSE_USER : realUser;
   const isAuthenticated = !!user;
   const isAgentAuthenticated = isAuthenticated && user?.role === 'agent';
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -136,6 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const enterDemo = useCallback(() => {
     setDemoMode(true);
+    setBrowseMode(false);
     setCurrentRole('agent');
   }, []);
 
@@ -143,6 +157,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDemoMode(false);
     setCurrentRole('client_buyer');
   }, []);
+
+  const enterBrowse = useCallback(() => {
+    setBrowseMode(true);
+    setDemoMode(false);
+    setCurrentRole('agent');
+  }, []);
+
+  const exitBrowse = useCallback(() => {
+    setBrowseMode(false);
+    setCurrentRole('client_buyer');
+  }, []);
+
+  const isBrowsing = browseMode && !isAuthenticated && !demoMode;
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
@@ -199,6 +226,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     demoMode,
     enterDemo,
     exitDemo,
+    browseMode,
+    enterBrowse,
+    exitBrowse,
+    isBrowsing,
     drawerOpen,
     openDrawer,
     closeDrawer,
@@ -220,7 +251,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     replayPartnerDashboard,
     greetingName,
     setGreetingName,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard, greetingName, setGreetingName]);
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, browseMode, enterBrowse, exitBrowse, isBrowsing, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard, greetingName, setGreetingName]);
 
   return (
     <AppContext.Provider value={value}>

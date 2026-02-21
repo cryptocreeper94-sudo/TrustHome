@@ -1,0 +1,135 @@
+
+Video Clip Presentation Setup (Chronicles Pattern)
+How it works: Multiple short video clips play as a full-screen background in the hero section, auto-rotating with smooth crossfade transitions when each clip ends. Users can click indicator dots to jump between clips and toggle sound on/off.
+
+Step 1: Generate the videos
+Use the generate_video_tool to create your video clips. Save them to client/src/assets/generated_videos/. Example:
+
+output_path: "client/src/assets/generated_videos/your_video_name.mp4"
+aspect_ratio: "16:9"
+duration_seconds: 6 or 8
+Step 2: Import the videos
+
+import video1 from "@assets/generated_videos/your_first_video.mp4";
+import video2 from "@assets/generated_videos/your_second_video.mp4";
+const HERO_VIDEOS = [
+  { src: video1, label: "Scene One" },
+  { src: video2, label: "Scene Two" },
+];
+Step 3: State & Refs
+
+const [videoMuted, setVideoMuted] = useState(true);
+const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+const [nextVideoIndex, setNextVideoIndex] = useState(1);
+const [isVideoTransitioning, setIsVideoTransitioning] = useState(false);
+const currentVideoRef = useRef<HTMLVideoElement>(null);
+const nextVideoRef = useRef<HTMLVideoElement>(null);
+Step 4: Audio fade helper
+
+const fadeAudio = (video: HTMLVideoElement, fadeIn: boolean, duration = 500) => {
+  const steps = 20;
+  const stepTime = duration / steps;
+  const startVolume = fadeIn ? 0 : 1;
+  const endVolume = fadeIn ? 1 : 0;
+  const volumeStep = (endVolume - startVolume) / steps;
+  video.volume = startVolume;
+  let step = 0;
+  const interval = setInterval(() => {
+    step++;
+    video.volume = Math.max(0, Math.min(1, startVolume + (volumeStep * step)));
+    if (step >= steps) { clearInterval(interval); video.volume = endVolume; }
+  }, stepTime);
+};
+Step 5: Auto-rotation effects
+
+// When current video ends, crossfade to next
+useEffect(() => {
+  const handleVideoEnd = () => {
+    const currentVideo = currentVideoRef.current;
+    if (currentVideo && !videoMuted) fadeAudio(currentVideo, false, 500);
+    setIsVideoTransitioning(true);
+    setTimeout(() => {
+      setCurrentVideoIndex(nextVideoIndex);
+      setNextVideoIndex((nextVideoIndex + 1) % HERO_VIDEOS.length);
+      setIsVideoTransitioning(false);
+    }, 400);
+  };
+  const video = currentVideoRef.current;
+  if (video) {
+    video.addEventListener('ended', handleVideoEnd);
+    return () => video.removeEventListener('ended', handleVideoEnd);
+  }
+}, [nextVideoIndex, videoMuted]);
+// Preload next video
+useEffect(() => {
+  if (nextVideoRef.current) nextVideoRef.current.load();
+}, [nextVideoIndex]);
+// Auto-play current video
+useEffect(() => {
+  if (currentVideoRef.current && !isVideoTransitioning) {
+    const video = currentVideoRef.current;
+    video.volume = 0;
+    video.play().catch(() => {});
+    if (!videoMuted) fadeAudio(video, true, 500);
+  }
+}, [currentVideoIndex, isVideoTransitioning, videoMuted]);
+Step 6: The JSX (two stacked videos for crossfade)
+
+<section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+  <div className="absolute inset-0 bg-black">
+    {/* Current video */}
+    <video ref={currentVideoRef} key={`current-${currentVideoIndex}`}
+      autoPlay muted={videoMuted} playsInline
+      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isVideoTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+      <source src={HERO_VIDEOS[currentVideoIndex].src} type="video/mp4" />
+    </video>
+    {/* Next video (preloaded, hidden until transition) */}
+    <video ref={nextVideoRef} key={`next-${nextVideoIndex}`}
+      muted={videoMuted} playsInline preload="auto"
+      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isVideoTransitioning ? 'opacity-100' : 'opacity-0'}`}>
+      <source src={HERO_VIDEOS[nextVideoIndex].src} type="video/mp4" />
+    </video>
+    {/* Gradient overlays for readability */}
+    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
+  </div>
+  {/* Video indicator dots */}
+  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-3 py-2">
+    {HERO_VIDEOS.map((video, idx) => (
+      <button key={idx} onClick={() => {
+        if (idx !== currentVideoIndex) {
+          setNextVideoIndex(idx);
+          setIsVideoTransitioning(true);
+          setTimeout(() => {
+            setCurrentVideoIndex(idx);
+            setNextVideoIndex((idx + 1) % HERO_VIDEOS.length);
+            setIsVideoTransitioning(false);
+          }, 700);
+        }
+      }}
+      className={`transition-all ${currentVideoIndex === idx
+        ? 'w-8 h-2 bg-white rounded-full'
+        : 'w-2 h-2 bg-white/40 hover:bg-white/60 rounded-full'}`}
+      title={video.label} />
+    ))}
+  </div>
+  {/* Mute/unmute button */}
+  <button onClick={() => setVideoMuted(!videoMuted)}
+    className="absolute top-20 right-4 z-20 w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white">
+    {videoMuted ? <VolumeX /> : <Volume2 />}
+  </button>
+  {/* Your page content goes here, on top of the video */}
+  <div className="relative z-10 container mx-auto px-4 text-center">
+    ...
+  </div>
+</section>
+Key points:
+
+Videos must start muted (browsers block autoplay with sound)
+Use playsInline for mobile/Android compatibility
+Two <video> elements stacked for smooth crossfade (opacity toggle)
+Videos are imported via Vite's @assets alias, not from public/
+The mute button lets users opt into sound with audio fade-in/fade-out
+
+Scroll to latest
+
+Make, test, iterate…

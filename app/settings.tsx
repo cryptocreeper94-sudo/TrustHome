@@ -33,7 +33,7 @@ interface SettingsSection {
 
 export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
-  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard, greetingName, setGreetingName } = useApp();
+  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard, openBrokerPitchDeck, greetingName, setGreetingName } = useApp();
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [showGreetingModal, setShowGreetingModal] = useState(false);
   const [greetingInput, setGreetingInput] = useState('');
@@ -238,32 +238,28 @@ export default function SettingsScreen() {
                   style={styles.settingsRow}
                 >
                   <View style={[styles.settingsIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
-                    <Ionicons name="stats-chart" size={18} color="#D4AF37" />
+                    <Ionicons name="document-text" size={18} color="#D4AF37" />
                   </View>
-                  <Text style={[styles.settingsLabel, { color: colors.text }]}>View Partner Dashboard</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.settingsLabel, { color: colors.text }]}>Partner Pack</Text>
+                    <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 1 }}>Your ownership guide, payouts, Stripe setup</Text>
+                  </View>
                   <View style={styles.statusRow}>
                     <Text style={[styles.statusValue, { color: '#D4AF37' }]}>51% Owner</Text>
                     <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
                   </View>
                 </Pressable>
                 <Pressable
-                  onPress={replayPartnerDashboard}
+                  onPress={openBrokerPitchDeck}
                   style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
                 >
-                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
-                    <Ionicons name="trending-up" size={18} color="#D4AF37" />
+                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(26,138,126,0.12)' }]}>
+                    <Ionicons name="easel" size={18} color="#1A8A7E" />
                   </View>
-                  <Text style={[styles.settingsLabel, { color: colors.text }]}>Revenue Projections</Text>
-                  <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-                </Pressable>
-                <Pressable
-                  onPress={replayPartnerDashboard}
-                  style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
-                >
-                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(212,175,55,0.12)' }]}>
-                    <Ionicons name="layers" size={18} color="#D4AF37" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.settingsLabel, { color: colors.text }]}>Broker Pitch Deck</Text>
+                    <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 1 }}>Features, pricing, white-label, competitive edge</Text>
                   </View>
-                  <Text style={[styles.settingsLabel, { color: colors.text }]}>White-Label & Franchise Info</Text>
                   <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
                 </Pressable>
               </AccordionSection>

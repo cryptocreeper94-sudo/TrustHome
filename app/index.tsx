@@ -16,6 +16,7 @@ import { ClientDashboard } from '@/components/screens/ClientDashboard';
 import { CommandCenterHub } from '@/components/screens/CommandCenterHub';
 import { WelcomeGuide } from '@/components/ui/WelcomeGuide';
 import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
+import { BrokerPitchDeck } from '@/components/ui/BrokerPitchDeck';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoader';
 import { BrowseCTABar } from '@/components/ui/BrowseCTABar';
 
@@ -333,7 +334,7 @@ function UserCommandCenter() {
 
 export default function HomeScreen() {
   const { colors } = useTheme();
-  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding, isBrowsing, browseMode, enterBrowse, demoMode } = useApp();
+  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding, showBrokerPitchDeck, setShowBrokerPitchDeck, isBrowsing, browseMode, enterBrowse, demoMode } = useApp();
   const router = useRouter();
   const [view, setView] = useState<HomeView>('hub');
 
@@ -395,6 +396,10 @@ export default function HomeScreen() {
       <PartnerOnboardingModal
         visible={showPartnerOnboarding && !showWelcomeGuide && reallyAuthenticated}
         onComplete={() => setShowPartnerOnboarding(false)}
+      />
+      <BrokerPitchDeck
+        visible={showBrokerPitchDeck && !showPartnerOnboarding && !showWelcomeGuide && reallyAuthenticated}
+        onComplete={() => setShowBrokerPitchDeck(false)}
       />
     </View>
   );

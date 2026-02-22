@@ -603,7 +603,7 @@ export default function CommandCenterScreen() {
             <Ionicons name="log-out-outline" size={18} color="rgba(255,255,255,0.6)" />
           </Pressable>
         </View>
-        <Text style={styles.headerGreeting}>Welcome back, {userName}</Text>
+        <Text style={styles.headerGreeting}>{(() => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; })()}, {userName}</Text>
       </Animated.View>
 
       <ScrollView

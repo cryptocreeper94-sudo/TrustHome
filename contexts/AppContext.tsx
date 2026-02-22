@@ -47,9 +47,12 @@ interface AppContextValue {
   setShowPartnerOnboarding: (show: boolean) => void;
   showBrokerPitchDeck: boolean;
   setShowBrokerPitchDeck: (show: boolean) => void;
+  showLicensingPack: boolean;
+  setShowLicensingPack: (show: boolean) => void;
   isJenniferUser: boolean;
   replayPartnerDashboard: () => void;
   openBrokerPitchDeck: () => void;
+  openLicensingPack: () => void;
   greetingName: string;
   setGreetingName: (name: string) => void;
 }
@@ -96,6 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [guideChecked, setGuideChecked] = useState(false);
   const [showPartnerOnboarding, setShowPartnerOnboarding] = useState(false);
   const [showBrokerPitchDeck, setShowBrokerPitchDeck] = useState(false);
+  const [showLicensingPack, setShowLicensingPack] = useState(false);
   const [partnerChecked, setPartnerChecked] = useState(false);
   const [greetingName, setGreetingNameState] = useState<string>('');
 
@@ -216,6 +220,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setShowBrokerPitchDeck(true);
   }, []);
 
+  const openLicensingPack = useCallback(() => {
+    setShowLicensingPack(true);
+  }, []);
+
   const setGreetingName = useCallback((name: string) => {
     setGreetingNameState(name);
     if (user) {
@@ -257,12 +265,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setShowPartnerOnboarding: handleSetShowPartnerOnboarding,
     showBrokerPitchDeck,
     setShowBrokerPitchDeck,
+    showLicensingPack,
+    setShowLicensingPack,
     isJenniferUser,
     replayPartnerDashboard,
     openBrokerPitchDeck,
+    openLicensingPack,
     greetingName,
     setGreetingName,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, browseMode, enterBrowse, exitBrowse, isBrowsing, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, showBrokerPitchDeck, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard, openBrokerPitchDeck, greetingName, setGreetingName]);
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, browseMode, enterBrowse, exitBrowse, isBrowsing, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, showBrokerPitchDeck, showLicensingPack, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack, greetingName, setGreetingName]);
 
   return (
     <AppContext.Provider value={value}>

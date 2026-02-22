@@ -33,7 +33,7 @@ interface SettingsSection {
 
 export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
-  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard, openBrokerPitchDeck, greetingName, setGreetingName } = useApp();
+  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack, greetingName, setGreetingName } = useApp();
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [showGreetingModal, setShowGreetingModal] = useState(false);
   const [greetingInput, setGreetingInput] = useState('');
@@ -259,6 +259,19 @@ export default function SettingsScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.settingsLabel, { color: colors.text }]}>Broker Pitch Deck</Text>
                     <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 1 }}>Features, pricing, white-label, competitive edge</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+                </Pressable>
+                <Pressable
+                  onPress={openLicensingPack}
+                  style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
+                >
+                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(74,144,217,0.12)' }]}>
+                    <Ionicons name="briefcase" size={18} color="#4A90D9" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.settingsLabel, { color: colors.text }]}>Enterprise Licensing</Text>
+                    <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 1 }}>Volume pricing, onboarding, support tiers for 100+ agents</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
                 </Pressable>

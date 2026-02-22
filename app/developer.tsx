@@ -56,7 +56,7 @@ interface OverviewData {
   securitySuite: string;
 }
 
-type TabId = 'overview' | 'health' | 'connections' | 'requests';
+type TabId = 'overview' | 'health' | 'connections' | 'requests' | 'partner';
 
 interface AccessRequestItem {
   id: string;
@@ -76,7 +76,7 @@ interface AccessRequestItem {
 
 export default function DeveloperScreen() {
   const { colors } = useTheme();
-  const { isAuthenticated, isLoading: authLoading } = useApp();
+  const { isAuthenticated, isLoading: authLoading, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>('overview');
@@ -180,6 +180,7 @@ export default function DeveloperScreen() {
     { id: 'health', label: 'Health', icon: 'pulse-outline' },
     { id: 'connections', label: 'APIs', icon: 'link-outline' },
     { id: 'requests', label: 'Requests', icon: 'people-outline' },
+    { id: 'partner', label: 'Partner', icon: 'diamond-outline' },
   ];
 
   const renderOverview = () => {
@@ -655,6 +656,110 @@ export default function DeveloperScreen() {
     );
   }
 
+  const renderPartner = () => {
+    const tools = [
+      {
+        title: 'Partner Pack',
+        desc: 'Your ownership guide — role, payouts, Stripe setup, Trust Layer account, WOSB certification',
+        icon: 'document-text' as const,
+        accent: '#D4AF37',
+        badge: '51% Owner',
+        onPress: replayPartnerDashboard,
+      },
+      {
+        title: 'Broker Pitch Deck',
+        desc: 'Sales presentation — platform features, pricing, white-label, ecosystem, competitive advantages',
+        icon: 'easel' as const,
+        accent: '#1A8A7E',
+        badge: '9 Slides',
+        onPress: openBrokerPitchDeck,
+      },
+      {
+        title: 'Enterprise Licensing',
+        desc: 'Volume pricing, onboarding timeline, support tiers, ROI calculator, contract terms for 100+ agents',
+        icon: 'briefcase' as const,
+        accent: '#4A90D9',
+        badge: '8 Slides',
+        onPress: openLicensingPack,
+      },
+    ];
+
+    return (
+      <View style={styles.sectionContent}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <View style={[styles.overviewHero, { backgroundColor: '#D4AF37' }]}>
+            <View style={styles.heroTopRow}>
+              <View style={styles.heroIcon}>
+                <Ionicons name="diamond" size={28} color="rgba(255,255,255,0.9)" />
+              </View>
+              <View style={[styles.envBadge, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
+                <Text style={styles.envBadgeText}>PARTNER TOOLS</Text>
+              </View>
+            </View>
+            <Text style={styles.heroTitle}>Jennifer Lambert</Text>
+            <Text style={styles.heroVersion}>Managing Partner · 51% Owner</Text>
+            <View style={styles.heroStats}>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>3</Text>
+                <Text style={styles.heroStatLabel}>Decks</Text>
+              </View>
+              <View style={[styles.heroStatDivider, { backgroundColor: 'rgba(255,255,255,0.2)' }]} />
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>51%</Text>
+                <Text style={styles.heroStatLabel}>Ownership</Text>
+              </View>
+              <View style={[styles.heroStatDivider, { backgroundColor: 'rgba(255,255,255,0.2)' }]} />
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>WOSB</Text>
+                <Text style={styles.heroStatLabel}>Eligible</Text>
+              </View>
+            </View>
+          </View>
+        </Animated.View>
+
+        {tools.map((tool, i) => (
+          <Animated.View
+            key={tool.title}
+            entering={FadeInDown.delay(200 + i * 80).duration(350)}
+          >
+            <Pressable
+              onPress={tool.onPress}
+              style={[styles.serviceCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}
+            >
+              <View style={styles.serviceTop}>
+                <View style={styles.serviceLeft}>
+                  <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: tool.accent + '15', alignItems: 'center', justifyContent: 'center' }}>
+                    <Ionicons name={tool.icon} size={20} color={tool.accent} />
+                  </View>
+                  <View style={styles.serviceInfo}>
+                    <Text style={[styles.serviceName, { color: colors.text }]}>{tool.title}</Text>
+                    <Text style={[styles.serviceEndpoint, { color: colors.textTertiary }]} numberOfLines={2}>{tool.desc}</Text>
+                  </View>
+                </View>
+                <View style={styles.serviceRight}>
+                  <View style={[styles.statusPill, { backgroundColor: tool.accent + '18' }]}>
+                    <Text style={[styles.statusPillText, { color: tool.accent }]}>{tool.badge}</Text>
+                  </View>
+                </View>
+              </View>
+            </Pressable>
+          </Animated.View>
+        ))}
+
+        <Animated.View entering={FadeInDown.delay(500).duration(350)}>
+          <View style={[styles.serviceCard, { backgroundColor: colors.primary + '08', borderColor: colors.primary + '20' }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 4 }}>
+              <Ionicons name="information-circle" size={18} color={colors.primary} style={{ marginTop: 1 }} />
+              <Text style={{ fontSize: 12, lineHeight: 18, color: colors.textSecondary, flex: 1 }}>
+                These tools are also available from Settings {'>'} Partner Dashboard when logged in as Jennifer Lambert (PIN 7777).
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+      </View>
+    );
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Developer Console" showBack />
@@ -697,6 +802,7 @@ export default function DeveloperScreen() {
         {activeTab === 'health' && renderHealth()}
         {activeTab === 'connections' && renderConnections()}
         {activeTab === 'requests' && renderRequests()}
+        {activeTab === 'partner' && renderPartner()}
       </ScrollView>
     </View>
   );

@@ -17,6 +17,7 @@ import { CommandCenterHub } from '@/components/screens/CommandCenterHub';
 import { WelcomeGuide } from '@/components/ui/WelcomeGuide';
 import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
 import { BrokerPitchDeck } from '@/components/ui/BrokerPitchDeck';
+import { LicensingPack } from '@/components/ui/LicensingPack';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoader';
 import { BrowseCTABar } from '@/components/ui/BrowseCTABar';
 
@@ -334,7 +335,7 @@ function UserCommandCenter() {
 
 export default function HomeScreen() {
   const { colors } = useTheme();
-  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding, showBrokerPitchDeck, setShowBrokerPitchDeck, isBrowsing, browseMode, enterBrowse, demoMode } = useApp();
+  const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding, showBrokerPitchDeck, setShowBrokerPitchDeck, showLicensingPack, setShowLicensingPack, isBrowsing, browseMode, enterBrowse, demoMode } = useApp();
   const router = useRouter();
   const [view, setView] = useState<HomeView>('hub');
 
@@ -400,6 +401,10 @@ export default function HomeScreen() {
       <BrokerPitchDeck
         visible={showBrokerPitchDeck && !showPartnerOnboarding && !showWelcomeGuide && reallyAuthenticated}
         onComplete={() => setShowBrokerPitchDeck(false)}
+      />
+      <LicensingPack
+        visible={showLicensingPack && !showBrokerPitchDeck && !showPartnerOnboarding && !showWelcomeGuide && reallyAuthenticated}
+        onComplete={() => setShowLicensingPack(false)}
       />
     </View>
   );

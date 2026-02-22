@@ -266,6 +266,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/auth/ecosystem-login", async (req: Request, res: Response) => {
+    try {
+      const { identifier, credential } = req.body;
+      if (!identifier || !credential || typeof identifier !== "string" || typeof credential !== "string") {
+        return res.status(400).json({ error: "Trust Layer ID or email and credential are required" });
+      }
+      const trimmedId = identifier.trim();
+      const trimmedCred = credential.trim();
+      if (!trimmedId || !trimmedCred) {
+        return res.status(400).json({ error: "Trust Layer ID or email and credential are required" });
+      }
+
+      let user;
+      if (trimmedId.startsWith("tl-")) {
+        user = await storage.getUserByTrustLayerId(trimmedId);
+      }
+      if (!user) {
+        user = await storage.getUserByEmail(trimmedId.toLowerCase());
+      }
+      if (!user) {
+        return res.status(401).json({ error: "No ecosystem account found. Check your Trust Layer ID or email." });
+      }
+
+      if (!user.trustLayerId) {
+        return res.status(401).json({ error: "This account is not linked to the Trust Layer ecosystem. Please sign in with your email and password instead." });
+      }
+
+      let authenticated = false;
+      if (user.ecosystemPinHash && trimmedCred.length <= 8 && /^\d+$/.test(trimmedCred)) {
+        authenticated = await bcrypt.compare(trimmedCred, user.ecosystemPinHash);
+      }
+      if (!authenticated) {
+        authenticated = await bcrypt.compare(trimmedCred, user.password);
+      }
+      if (!authenticated) {
+        return res.status(401).json({ error: "Invalid credential. Please check your password or ecosystem PIN." });
+      }
+
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+      req.session.userEmail = user.email;
+      req.session.userName = user.firstName + ' ' + user.lastName;
+
+      console.log(`[Ecosystem Login] ${user.email} authenticated via Trust Layer (${user.trustLayerId})`);
+
+      return res.json({
+        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+      });
+    } catch (error) {
+      console.error("Ecosystem login error:", error);
+      return res.status(500).json({ error: "Login failed. Please try again." });
+    }
+  });
+
   app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
     try {
       const { email } = req.body;

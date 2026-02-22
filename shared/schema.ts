@@ -19,6 +19,9 @@ export const users = pgTable("users", {
   brokerage: text("brokerage"),
   licenseNumber: text("license_number"),
   mustResetPassword: text("must_reset_password").notNull().default('false'),
+  trustLayerId: text("trust_layer_id"),
+  ecosystemPinHash: text("ecosystem_pin_hash"),
+  ecosystemApp: text("ecosystem_app"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

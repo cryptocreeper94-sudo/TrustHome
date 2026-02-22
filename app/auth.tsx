@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { apiRequest, queryClient } from '@/lib/query-client';
 
-type AuthStep = 'login' | 'register' | 'verify' | 'forgot' | 'reset_code';
+type AuthStep = 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'ecosystem';
 type VerifySource = 'login' | 'register';
 
 export default function AuthScreen() {
@@ -39,6 +39,10 @@ export default function AuthScreen() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const [ecoIdentifier, setEcoIdentifier] = useState('');
+  const [ecoCredential, setEcoCredential] = useState('');
+  const [showEcoCredential, setShowEcoCredential] = useState(false);
 
   const clearError = useCallback(() => {
     setError('');
@@ -199,6 +203,27 @@ export default function AuthScreen() {
       setConfirmPassword('');
       setVerifyCode(['', '', '', '', '', '']);
       setTimeout(() => goToStep('login'), 2000);
+    } catch (err) {
+      setError(await parseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEcosystemLogin = async () => {
+    if (!ecoIdentifier.trim() || !ecoCredential.trim()) {
+      setError('Please enter your Trust Layer ID or email and your credential');
+      return;
+    }
+    setLoading(true);
+    clearError();
+    try {
+      await apiRequest('POST', '/api/auth/ecosystem-login', {
+        identifier: ecoIdentifier.trim(),
+        credential: ecoCredential.trim(),
+      });
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      router.replace('/');
     } catch (err) {
       setError(await parseError(err));
     } finally {
@@ -396,6 +421,89 @@ export default function AuthScreen() {
                   <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>Create Account</Text>
                 </Pressable>
 
+                <Pressable
+                  onPress={() => { clearError(); setStep('ecosystem'); setShowEcoCredential(false); }}
+                  style={[styles.ecosystemBtn, { borderColor: 'rgba(26,138,126,0.3)' }]}
+                  testID="go-ecosystem"
+                >
+                  <Ionicons name="shield-checkmark" size={18} color="#1A8A7E" />
+                  <Text style={[styles.ecosystemBtnText, { color: '#1A8A7E' }]}>Sign in with Trust Layer</Text>
+                </Pressable>
+
+              </>
+            )}
+
+            {step === 'ecosystem' && (
+              <>
+                <Pressable onPress={() => goToStep('login')} style={styles.backRow}>
+                  <Ionicons name="arrow-back" size={20} color={colors.primary} />
+                  <Text style={[styles.backText, { color: colors.primary }]}>Back to Sign In</Text>
+                </Pressable>
+
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Trust Layer Login</Text>
+                <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>Sign in with your ecosystem account</Text>
+
+                <View style={[styles.ecoInfoBox, { backgroundColor: 'rgba(26,138,126,0.06)', borderColor: 'rgba(26,138,126,0.15)' }]}>
+                  <Ionicons name="information-circle-outline" size={16} color="#1A8A7E" />
+                  <Text style={[styles.ecoInfoText, { color: colors.textSecondary }]}>
+                    Use your Trust Layer ID or email from any DarkWave ecosystem app (Happy Eats, TrustHome, Signal, TrustVault, Verdara)
+                  </Text>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Trust Layer ID or Email</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="finger-print-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={ecoIdentifier}
+                      onChangeText={setEcoIdentifier}
+                      placeholder="tl-xxxx-xxxx or you@example.com"
+                      placeholderTextColor={colors.textTertiary}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      testID="eco-identifier"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Password or Ecosystem PIN</Text>
+                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <Ionicons name="key-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      value={ecoCredential}
+                      onChangeText={setEcoCredential}
+                      placeholder="Password or PIN"
+                      placeholderTextColor={colors.textTertiary}
+                      secureTextEntry={!showEcoCredential}
+                      testID="eco-credential"
+                    />
+                    <Pressable onPress={() => setShowEcoCredential(!showEcoCredential)} style={styles.eyeBtn}>
+                      <Ionicons name={showEcoCredential ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textTertiary} />
+                    </Pressable>
+                  </View>
+                  <Text style={[styles.ecoHintText, { color: colors.textTertiary }]}>
+                    Use your full password or ecosystem PIN if whitelisted
+                  </Text>
+                </View>
+
+                <Pressable
+                  onPress={handleEcosystemLogin}
+                  disabled={loading}
+                  style={[styles.primaryBtn, { backgroundColor: '#1A8A7E', opacity: loading ? 0.7 : 1 }]}
+                  testID="eco-submit"
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <>
+                      <Ionicons name="shield-checkmark" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <Text style={styles.primaryBtnText}>Sign In with Trust Layer</Text>
+                    </>
+                  )}
+                </Pressable>
               </>
             )}
 
@@ -999,5 +1107,38 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
+  },
+  ecosystemBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 13,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  ecosystemBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  ecoInfoBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  ecoInfoText: {
+    fontSize: 12,
+    lineHeight: 17,
+    flex: 1,
+  },
+  ecoHintText: {
+    fontSize: 11,
+    marginTop: 4,
   },
 });

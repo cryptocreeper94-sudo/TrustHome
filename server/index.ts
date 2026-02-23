@@ -458,6 +458,19 @@ function setupErrorHandler(app: express.Application) {
   registerOrbitRoutes(app);
   registerVerdaraRoutes(app);
 
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith("/api") || req.path.startsWith("/ws") || req.path.startsWith("/webhooks")) {
+      return next();
+    }
+    if (req.accepts("html")) {
+      const webIndex = path.resolve(process.cwd(), "static-build", "index.html");
+      if (fs.existsSync(webIndex)) {
+        return res.sendFile(webIndex);
+      }
+    }
+    next();
+  });
+
   setupErrorHandler(app);
 
   const port = parseInt(process.env.PORT || "5000", 10);

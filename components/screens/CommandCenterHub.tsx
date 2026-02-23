@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, Platform, Linking, Dimensions, ImageBackground, ImageSourcePropType, Modal,
+  View, Text, StyleSheet, ScrollView, Pressable, Platform, Linking, Dimensions, ImageBackground, ImageSourcePropType, Modal, NativeSyntheticEvent, NativeScrollEvent,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,10 +23,8 @@ const HERO_VIDEOS = [
 ];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = Math.min(260, SCREEN_WIDTH * 0.72);
-const FEATURED_CARD_WIDTH = Math.min(300, SCREEN_WIDTH * 0.82);
-const CARD_HEIGHT = 170;
-const FEATURED_CARD_HEIGHT = 200;
+const CARD_WIDTH = Math.min(280, SCREEN_WIDTH * 0.75);
+const CARD_HEIGHT = 180;
 
 interface LaunchCard {
   label: string;
@@ -494,9 +492,6 @@ const ALL_CATEGORIES: Category[] = [
 
 function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; onPress: () => void }) {
   const scale = useSharedValue(1);
-  const isFeatured = card.featured;
-  const w = isFeatured ? FEATURED_CARD_WIDTH : CARD_WIDTH;
-  const h = isFeatured ? FEATURED_CARD_HEIGHT : CARD_HEIGHT;
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -512,14 +507,13 @@ function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; o
         <Animated.View
           style={[
             styles.card,
-            { width: w, height: h },
+            { width: CARD_WIDTH, height: CARD_HEIGHT },
             animStyle,
             ...Platform.select({
               ios: [{ shadowColor: card.glowColor, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.5, shadowRadius: 16 }],
               android: [{ elevation: 8 }],
               web: [{ boxShadow: `0px 6px 20px ${card.glowColor}` } as any],
             }) as any[],
-            isFeatured && styles.cardFeatured,
           ]}
         >
           <ImageBackground
@@ -559,7 +553,7 @@ function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; o
             )}
           </View>
 
-          {isFeatured && (
+          {card.featured && (
             <View style={styles.featuredStripe}>
               <LinearGradient
                 colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0)']}
@@ -572,6 +566,100 @@ function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; o
         </Animated.View>
       </Pressable>
     </Animated.View>
+  );
+}
+
+const SNAP_INTERVAL = CARD_WIDTH + 12;
+
+function CarouselWithNav({ cards, onCardPress, isDark, colors }: {
+  cards: LaunchCard[];
+  onCardPress: (card: LaunchCard) => void;
+  isDark: boolean;
+  colors: any;
+}) {
+  const scrollRef = useRef<ScrollView>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const totalCards = cards.length;
+
+  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const x = e.nativeEvent.contentOffset.x;
+    const idx = Math.round(x / SNAP_INTERVAL);
+    setActiveIndex(Math.max(0, Math.min(idx, totalCards - 1)));
+  }, [totalCards]);
+
+  const scrollTo = useCallback((direction: 'prev' | 'next') => {
+    const newIdx = direction === 'next'
+      ? Math.min(activeIndex + 1, totalCards - 1)
+      : Math.max(activeIndex - 1, 0);
+    scrollRef.current?.scrollTo({ x: newIdx * SNAP_INTERVAL, animated: true });
+    setActiveIndex(newIdx);
+  }, [activeIndex, totalCards]);
+
+  return (
+    <View>
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.carouselContent}
+        decelerationRate="fast"
+        snapToInterval={SNAP_INTERVAL}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
+        {cards.map((card, cardIndex) => (
+          <CardItem
+            key={card.label}
+            card={card}
+            index={cardIndex}
+            onPress={() => onCardPress(card)}
+          />
+        ))}
+      </ScrollView>
+
+      {totalCards > 1 && (
+        <View style={styles.navRow}>
+          <Pressable
+            onPress={() => scrollTo('prev')}
+            style={[styles.navArrow, {
+              backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+              opacity: activeIndex === 0 ? 0.3 : 1,
+            }]}
+            disabled={activeIndex === 0}
+          >
+            <Ionicons name="chevron-back" size={16} color={isDark ? '#FFFFFF' : colors.text} />
+          </Pressable>
+
+          <View style={styles.dotsRow}>
+            {cards.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.dot,
+                  {
+                    backgroundColor: i === activeIndex ? '#22D3EE' : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'),
+                    width: i === activeIndex ? 18 : 6,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+
+          <Pressable
+            onPress={() => scrollTo('next')}
+            style={[styles.navArrow, {
+              backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+              opacity: activeIndex >= totalCards - 1 ? 0.3 : 1,
+            }]}
+            disabled={activeIndex >= totalCards - 1}
+          >
+            <Ionicons name="chevron-forward" size={16} color={isDark ? '#FFFFFF' : colors.text} />
+          </Pressable>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -726,22 +814,12 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
             </View>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.carouselContent}
-            decelerationRate="fast"
-            snapToInterval={CARD_WIDTH + 12}
-          >
-            {category.cards.map((card, cardIndex) => (
-              <CardItem
-                key={card.label}
-                card={card}
-                index={cardIndex}
-                onPress={() => handleCardPress(card)}
-              />
-            ))}
-          </ScrollView>
+          <CarouselWithNav
+            cards={category.cards}
+            onCardPress={handleCardPress}
+            isDark={isDark}
+            colors={colors}
+          />
         </Animated.View>
       ))}
 
@@ -1021,5 +1099,30 @@ const styles = StyleSheet.create({
   },
   footerDot: {
     fontSize: 11,
+  },
+  navRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 12,
+    paddingHorizontal: 16,
+  },
+  navArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  dot: {
+    height: 6,
+    borderRadius: 3,
   },
 });

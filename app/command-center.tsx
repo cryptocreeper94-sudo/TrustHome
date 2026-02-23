@@ -504,8 +504,8 @@ export default function CommandCenterScreen() {
           style={StyleSheet.absoluteFill}
         />}
 
-        <Pressable onPress={() => router.back()} style={styles.authBackBtn}>
-          <Ionicons name="arrow-back" size={22} color={isDark ? 'rgba(255,255,255,0.6)' : colors.textSecondary} />
+        <Pressable onPress={() => router.replace('/')} style={styles.authBackBtn}>
+          <Ionicons name="home" size={20} color={isDark ? 'rgba(255,255,255,0.6)' : colors.textSecondary} />
         </Pressable>
 
         <Animated.View entering={FadeInDown.duration(600).springify()} style={styles.authContent}>
@@ -581,8 +581,8 @@ export default function CommandCenterScreen() {
           style={StyleSheet.absoluteFill}
         />
         <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} style={styles.headerBackBtn}>
-            <Ionicons name="arrow-back" size={20} color="rgba(255,255,255,0.7)" />
+          <Pressable onPress={() => router.replace('/')} style={styles.headerBackBtn}>
+            <Ionicons name="home" size={18} color="rgba(255,255,255,0.7)" />
           </Pressable>
 
           <View style={styles.headerCenter}>

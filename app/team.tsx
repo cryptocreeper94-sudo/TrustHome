@@ -471,9 +471,9 @@ export default function TeamScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Pressable style={styles.backNav} onPress={() => router.back()} hitSlop={8}>
-            <Ionicons name="chevron-back" size={20} color={colors.textSecondary} />
-            <Text style={[styles.backNavText, { color: colors.textSecondary }]}>Back</Text>
+          <Pressable style={styles.backNav} onPress={() => router.replace('/')} hitSlop={8}>
+            <Ionicons name="home" size={18} color={colors.textSecondary} />
+            <Text style={[styles.backNavText, { color: colors.textSecondary }]}>Home</Text>
           </Pressable>
 
           <View style={styles.logoArea}>
@@ -1207,7 +1207,7 @@ export default function TeamScreen() {
                   </Text>
                   <Pressable
                     style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 8, opacity: pressed ? 0.85 : 1 }]}
-                    onPress={() => router.back()}
+                    onPress={() => router.replace('/')}
                     testID="req-done-btn"
                   >
                     <Text style={styles.primaryBtnText}>Done</Text>

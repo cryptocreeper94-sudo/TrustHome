@@ -140,14 +140,16 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
 
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
+  const goHome = () => router.replace('/');
+
   return (
     <View style={{ backgroundColor: colors.primary }}>
       <View style={[styles.container, { paddingTop: topPadding }]}>
         <View style={styles.content}>
           <View style={styles.left}>
             {showBack ? (
-              <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
-                <Ionicons name="chevron-back" size={22} color={colors.textInverse} />
+              <Pressable onPress={goHome} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
+                <Ionicons name="home" size={20} color={colors.textInverse} />
               </Pressable>
             ) : showClose ? (
               <Pressable onPress={onClose} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-close">

@@ -45,10 +45,10 @@ export function DrawerMenu() {
   const isAgent = isAgentAuthenticated && !isBrowsing;
 
   const menuItems: MenuItem[] = isBrowsing ? [
-    { icon: 'home-outline', label: 'Command Center', route: '/' },
+    { icon: 'home', label: 'Home', route: '/' },
     { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
   ] : [
-    { icon: 'home-outline', label: 'Dashboard', route: '/' },
+    { icon: 'home', label: 'Home', route: '/' },
     { icon: 'swap-horizontal-outline', label: 'Transactions', route: '/transactions' },
     { icon: 'business-outline', label: 'Properties', route: '/properties' },
     { icon: 'calendar-outline', label: 'Showings', route: '/showings' },

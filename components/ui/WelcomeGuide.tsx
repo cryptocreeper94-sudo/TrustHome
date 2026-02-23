@@ -540,6 +540,17 @@ export function WelcomeGuide({ visible, onComplete }: WelcomeGuideProps) {
           </View>
         </View>
 
+        <Pressable
+          onPress={onComplete}
+          hitSlop={16}
+          style={[styles.closeBtn, { top: Platform.OS === 'web' ? 67 + 10 : insets.top + 10 }]}
+        >
+          <View style={styles.closeBtnCircle}>
+            <Ionicons name="close" size={18} color="#FFFFFF" />
+          </View>
+          <Text style={styles.closeBtnLabel}>Skip</Text>
+        </Pressable>
+
         <LinearGradient
           colors={['transparent', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.85)'] as [string, string, ...string[]]}
           style={[styles.controlsGradient, {
@@ -548,19 +559,19 @@ export function WelcomeGuide({ visible, onComplete }: WelcomeGuideProps) {
           pointerEvents="box-none"
         >
           <View style={styles.controls}>
-            <Pressable
-              onPress={isFirstSlide ? onComplete : goToPrev}
-              style={styles.controlBtn}
-              hitSlop={12}
-            >
-              {isFirstSlide ? (
-                <Text style={styles.skipText}>Skip</Text>
-              ) : (
+            {!isFirstSlide ? (
+              <Pressable
+                onPress={goToPrev}
+                style={styles.controlBtn}
+                hitSlop={12}
+              >
                 <View style={styles.navCircle}>
                   <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
                 </View>
-              )}
-            </Pressable>
+              </Pressable>
+            ) : (
+              <View style={styles.controlBtn} />
+            )}
 
             <View style={styles.centerNav}>
               <Text style={styles.pageIndicator}>
@@ -703,28 +714,28 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     ...Platform.select({
       ios: {
-        textShadowColor: 'rgba(0,0,0,0.3)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 4,
+        textShadowColor: 'rgba(0,0,0,0.6)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 8,
       },
       web: {
-        textShadow: '0px 1px 4px rgba(0,0,0,0.3)',
+        textShadow: '0px 2px 8px rgba(0,0,0,0.6)',
       } as any,
       default: {
-        textShadowColor: 'rgba(0,0,0,0.3)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 4,
+        textShadowColor: 'rgba(0,0,0,0.6)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 8,
       },
     }),
   },
   subtitleCard: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   slideSubtitle: {
     fontSize: 13,
@@ -733,12 +744,12 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   bulletCard: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     borderRadius: 14,
     padding: 14,
     gap: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   bulletRow: {
     flexDirection: 'row',
@@ -892,5 +903,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700' as const,
     color: '#FFFFFF',
+  },
+  closeBtn: {
+    position: 'absolute',
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    zIndex: 20,
+  },
+  closeBtnCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtnLabel: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: 'rgba(255,255,255,0.8)',
   },
 });

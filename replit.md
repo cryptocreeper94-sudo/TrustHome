@@ -56,11 +56,14 @@ TrustHome is a real estate platform designed to be a central hub for all parties
     - Registration: POST https://orbitstaffing.io/api/admin/ecosystem/register-app
     - SSO Login: POST https://orbitstaffing.io/api/auth/ecosystem-login
     - SSO Register: POST https://orbitstaffing.io/api/chat/auth/register
-  - TrustHome proxy routes: /api/orbit/register-app, /api/orbit/sso/login, /api/orbit/sso/register
+  - TrustHome proxy routes: /api/orbit/register-app, /api/orbit/sso/login, /api/orbit/sso/register, /api/orbit/pricing, /api/orbit/pricing/push
   - Auto-registration: Server registers dw_app_trusthome on startup (3s delay)
+  - Auto-pricing sync: Pushes all pricing tiers to Orbit Staffing on startup
+  - Pricing tiers synced: Agent $49/$99, Brokerage $299/$599, White-Label $1,499/$2,999 (Founders/Standard)
+  - Founders Program: First 100 agents lock in founder pricing permanently
   - Ecosystem apps connected: THE VOID, Happy Eats, TL Driver Connect, TrustHome, Trust Vault
-  - Env: ORBIT_HUB_URL, ORBIT_ECOSYSTEM_API_KEY, ORBIT_ECOSYSTEM_API_SECRET, ORBIT_FINANCIAL_HUB_SECRET
-  - Royalty split: 51% Jennifer / 49% Jason — enforced by ORBIT Financial Hub
+  - Env: ORBIT_HUB_URL, ORBIT_STAFFING_API_KEY, ORBIT_STAFFING_API_SECRET, ORBIT_ECOSYSTEM_API_KEY, ORBIT_ECOSYSTEM_API_SECRET, ORBIT_FINANCIAL_HUB_SECRET
+  - Royalty split: 51% Jennifer Lambert / 49% Jason Andrews — enforced by ORBIT Financial Hub
   - App ID: dw_app_trusthome
 
 - Verdara Integration — cross-ecosystem connection for AI-powered tree/plant services

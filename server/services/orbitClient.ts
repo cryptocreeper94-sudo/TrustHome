@@ -79,8 +79,8 @@ export class OrbitEcosystemClient {
 
   constructor(appName: string) {
     this.hubUrl = process.env.ORBIT_HUB_URL || "https://orbitstaffing.io";
-    this.apiKey = process.env.ORBIT_ECOSYSTEM_API_KEY || "";
-    this.apiSecret = process.env.ORBIT_ECOSYSTEM_API_SECRET || "";
+    this.apiKey = process.env.ORBIT_STAFFING_API_KEY || process.env.ORBIT_ECOSYSTEM_API_KEY || "";
+    this.apiSecret = process.env.ORBIT_STAFFING_API_SECRET || process.env.ORBIT_ECOSYSTEM_API_SECRET || "";
     this.appName = appName;
   }
 

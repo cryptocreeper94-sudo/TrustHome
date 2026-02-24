@@ -40,7 +40,7 @@ async function autoRegisterWithOrbit() {
         ownershipSplit: {
           partner1: "Jennifer Lambert",
           partner1Pct: 51,
-          partner2: "Jason",
+          partner2: "Jason Andrews",
           partner2Pct: 49,
         },
       }),
@@ -60,6 +60,137 @@ async function autoRegisterWithOrbit() {
     }
   } catch (err: any) {
     console.log("[ORBIT] Auto-registration failed (non-blocking):", err.message);
+  }
+}
+
+const TRUSTHOME_PRICING = {
+  appId: "dw_app_trusthome",
+  appName: "TrustHome",
+  ownership: {
+    partner1: { name: "Jennifer Lambert", percentage: 51, role: "Managing Member" },
+    partner2: { name: "Jason Andrews", percentage: 49, role: "Technical Lead & Platform Architect" },
+    entity: "DarkWave Studios LLC",
+    womanOwned: true,
+  },
+  foundersProgram: {
+    milestone: 100,
+    description: "First 100 agent subscribers lock in founder pricing permanently",
+    tiers: [
+      {
+        id: "founder_agent",
+        name: "Agent",
+        type: "subscription",
+        billing: "monthly",
+        founderPrice: 49,
+        standardPrice: 99,
+        currency: "USD",
+        description: "Individual agent subscription — CRM, transaction management, marketing hub, AI assistant, document vault",
+        features: [
+          "Full CRM & lead management",
+          "Transaction pipeline & timeline",
+          "AI-powered marketing hub",
+          "Document vault with blockchain verification",
+          "Voice AI assistant",
+          "Client portal",
+          "Showing management",
+          "Signal Chat messaging",
+        ],
+      },
+      {
+        id: "founder_brokerage",
+        name: "Brokerage",
+        type: "subscription",
+        billing: "monthly",
+        founderPrice: 299,
+        standardPrice: 599,
+        currency: "USD",
+        description: "Brokerage-level subscription — everything in Agent plus team management, analytics, and brokerage branding",
+        features: [
+          "Everything in Agent tier",
+          "Team management & permissions",
+          "Brokerage-wide analytics",
+          "Custom branding",
+          "Multi-agent CRM",
+          "Performance dashboards",
+          "Bulk marketing tools",
+        ],
+      },
+      {
+        id: "founder_whitelabel",
+        name: "White-Label",
+        type: "subscription",
+        billing: "monthly",
+        founderPrice: 1499,
+        standardPrice: 2999,
+        currency: "USD",
+        description: "Full white-label platform — your brand, your domain, zero development costs",
+        features: [
+          "Everything in Brokerage tier",
+          "Complete white-label rebrand",
+          "Custom domain support",
+          "Dedicated support",
+          "API access",
+          "Custom integrations",
+          "Franchise scaling tools",
+          "Priority feature requests",
+        ],
+      },
+    ],
+  },
+  revenueProjections: [
+    { phase: "Founders Phase (Months 1-6)", agents: 25, brokerages: 2, whiteLabels: 0 },
+    { phase: "Milestone Hit (Months 7-12)", agents: 100, brokerages: 8, whiteLabels: 2 },
+    { phase: "Standard Pricing (Year 2)", agents: 500, brokerages: 30, whiteLabels: 10 },
+    { phase: "Franchise Scale (Year 3+)", agents: 2000, brokerages: 100, whiteLabels: 50 },
+  ],
+  royaltySplit: {
+    partner1Pct: 51,
+    partner2Pct: 49,
+    enforcedBy: "ORBIT Financial Hub",
+  },
+};
+
+async function pushPricingToOrbit() {
+  const hubUrl = process.env.ORBIT_HUB_URL || "https://orbitstaffing.io";
+  const apiKey = process.env.ORBIT_STAFFING_API_KEY || "";
+  const apiSecret = process.env.ORBIT_STAFFING_API_SECRET || "";
+
+  if (!apiKey || !apiSecret) {
+    console.log("[ORBIT] Pricing sync skipped — ORBIT_STAFFING_API_KEY/SECRET not configured");
+    return;
+  }
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "X-App-Name": "TrustHome",
+      "X-API-Key": apiKey,
+      "X-API-Secret": apiSecret,
+    };
+
+    const res = await fetch(`${hubUrl}/api/ecosystem/logs`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        action: "pricing_sync",
+        resource: "pricing",
+        details: TRUSTHOME_PRICING,
+      }),
+    });
+
+    const contentType = res.headers.get("content-type") || "";
+    if (res.ok && contentType.includes("application/json")) {
+      const body = await res.json();
+      console.log("[ORBIT] Pricing synced to Orbit Staffing:", body.id || "done");
+      console.log("[ORBIT] Tiers: Agent $49/$99, Brokerage $299/$599, White-Label $1,499/$2,999");
+      console.log("[ORBIT] Ownership: 51% Jennifer Lambert / 49% Jason Andrews — enforced by Financial Hub");
+    } else if (res.status === 401) {
+      console.log("[ORBIT] Pricing sync skipped — API credentials required");
+    } else {
+      console.log("[ORBIT] Pricing sync response:", res.status);
+    }
+  } catch (err: any) {
+    console.log("[ORBIT] Pricing sync failed (non-blocking):", err.message);
   }
 }
 
@@ -185,7 +316,7 @@ export function registerOrbitRoutes(app: Express) {
         ownershipSplit: {
           partner1: "Jennifer Lambert",
           partner1Pct: 51,
-          partner2: "Jason",
+          partner2: "Jason Andrews",
           partner2Pct: 49,
         },
       });
@@ -244,6 +375,19 @@ export function registerOrbitRoutes(app: Express) {
     }
   });
 
+  app.get("/api/orbit/pricing", (_req: Request, res: Response) => {
+    res.json(TRUSTHOME_PRICING);
+  });
+
+  app.post("/api/orbit/pricing/push", async (_req: Request, res: Response) => {
+    try {
+      await pushPricingToOrbit();
+      res.json({ pushed: true, tiers: TRUSTHOME_PRICING.foundersProgram.tiers.length, hubUrl: orbitTrustHome.baseUrl });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.post("/webhooks/orbit", (req: Request, res: Response) => {
     const signature = req.headers["x-orbit-signature"] as string;
     const secret = process.env.ORBIT_FINANCIAL_HUB_SECRET || "";
@@ -283,7 +427,10 @@ export function registerOrbitRoutes(app: Express) {
     res.json({ received: true });
   });
 
-  console.log("[ORBIT] Routes registered: /api/orbit/*, /api/orbit/sso/*, /webhooks/orbit");
+  console.log("[ORBIT] Routes registered: /api/orbit/*, /api/orbit/sso/*, /api/orbit/pricing, /webhooks/orbit");
 
-  setTimeout(() => autoRegisterWithOrbit(), 3000);
+  setTimeout(async () => {
+    await autoRegisterWithOrbit();
+    await pushPricingToOrbit();
+  }, 3000);
 }

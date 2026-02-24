@@ -49,9 +49,9 @@ interface CertificationData {
 }
 
 interface EcosystemRegistration {
-  appId: string;
   appName: string;
-  appUrl: string;
+  appSlug: string;
+  appUrl?: string;
   webhookUrl?: string;
   capabilities?: string[];
   ownershipSplit?: { partner1: string; partner1Pct: number; partner2: string; partner2Pct: number };
@@ -60,15 +60,15 @@ interface EcosystemRegistration {
 interface EcosystemSSOLogin {
   identifier: string;
   credential: string;
-  sourceApp: string;
+  sourceApp?: string;
 }
 
 interface EcosystemSSORegister {
+  username: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  sourceApp: string;
-  trustLayerId?: string;
+  password: string;
+  displayName: string;
+  sourceApp?: string;
 }
 
 export class OrbitEcosystemClient {
@@ -85,12 +85,17 @@ export class OrbitEcosystemClient {
   }
 
   private get headers() {
-    return {
+    const h: Record<string, string> = {
       "Content-Type": "application/json",
-      "X-API-Key": this.apiKey,
-      "X-API-Secret": this.apiSecret,
       "X-App-Name": this.appName,
     };
+    if (this.apiKey) {
+      h["X-API-Key"] = this.apiKey;
+    }
+    if (this.apiSecret) {
+      h["X-API-Secret"] = this.apiSecret;
+    }
+    return h;
   }
 
   private async request(method: string, path: string, body?: any) {
@@ -101,8 +106,16 @@ export class OrbitEcosystemClient {
       body: body ? JSON.stringify(body) : undefined,
     });
     if (!res.ok) {
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        throw new Error(`ORBIT API ${method} ${path} failed: ${res.status} ${res.statusText}`);
+      }
       const err = await res.json().catch(() => ({ error: res.statusText }));
       throw new Error(`ORBIT API ${method} ${path} failed: ${JSON.stringify(err)}`);
+    }
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return { status: res.status, ok: true };
     }
     return res.json();
   }

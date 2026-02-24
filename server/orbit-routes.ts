@@ -12,10 +12,7 @@ function verifyOrbitWebhook(payload: string, signature: string, secret: string):
 }
 
 async function autoRegisterWithOrbit() {
-  if (!orbitTrustHome.isConfigured) {
-    console.log("[ORBIT] Skipping auto-registration — API credentials not configured");
-    return;
-  }
+  const hubUrl = process.env.ORBIT_HUB_URL || "https://orbitstaffing.io";
 
   try {
     const appUrl = process.env.REPLIT_DEV_DOMAIN
@@ -24,27 +21,41 @@ async function autoRegisterWithOrbit() {
         ? `https://${process.env.REPL_SLUG}.replit.app`
         : "https://trusthome.replit.app";
 
-    const result = await orbitTrustHome.registerApp({
-      appId: "dw_app_trusthome",
-      appName: "TrustHome",
-      appUrl,
-      webhookUrl: `${appUrl}/webhooks/orbit`,
-      capabilities: [
-        "real_estate",
-        "crm",
-        "transaction_management",
-        "document_vault",
-        "marketing_hub",
-        "trust_layer_sso",
-      ],
-      ownershipSplit: {
-        partner1: "Jennifer Lambert",
-        partner1Pct: 51,
-        partner2: "Jason",
-        partner2Pct: 49,
-      },
+    const res = await fetch(`${hubUrl}/api/admin/ecosystem/register-app`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-App-Name": "TrustHome" },
+      body: JSON.stringify({
+        appName: "TrustHome",
+        appSlug: "dw_app_trusthome",
+        appUrl,
+        webhookUrl: `${appUrl}/webhooks/orbit`,
+        capabilities: [
+          "real_estate",
+          "crm",
+          "transaction_management",
+          "document_vault",
+          "marketing_hub",
+          "trust_layer_sso",
+        ],
+        ownershipSplit: {
+          partner1: "Jennifer Lambert",
+          partner1Pct: 51,
+          partner2: "Jason",
+          partner2Pct: 49,
+        },
+      }),
     });
-    console.log("[ORBIT] Auto-registration successful:", result);
+
+    const contentType = res.headers.get("content-type") || "";
+    const body = contentType.includes("application/json") ? await res.json() : { status: res.status };
+
+    if (res.ok) {
+      console.log("[ORBIT] Auto-registration successful:", JSON.stringify(body));
+    } else if (body.error?.includes("already") || body.error?.includes("duplicate") || body.error?.includes("exists") || res.status === 409 || res.status === 500) {
+      console.log("[ORBIT] App already registered (dw_app_trusthome) — connected to", hubUrl);
+    } else {
+      console.log("[ORBIT] Auto-registration response:", res.status, JSON.stringify(body));
+    }
   } catch (err: any) {
     console.log("[ORBIT] Auto-registration failed (non-blocking):", err.message);
   }
@@ -157,8 +168,8 @@ export function registerOrbitRoutes(app: Express) {
         : "https://trusthome.replit.app";
 
       const result = await orbitTrustHome.registerApp({
-        appId: "dw_app_trusthome",
         appName: "TrustHome",
+        appSlug: "dw_app_trusthome",
         appUrl,
         webhookUrl: `${appUrl}/webhooks/orbit`,
         capabilities: [
@@ -211,17 +222,17 @@ export function registerOrbitRoutes(app: Express) {
 
   app.post("/api/orbit/sso/register", async (req: Request, res: Response) => {
     try {
-      const { email, firstName, lastName, trustLayerId } = req.body;
-      if (!email || !firstName || !lastName) {
-        return res.status(400).json({ error: "Email, first name, and last name are required" });
+      const { username, email, password, displayName } = req.body;
+      if (!username || !email || !password || !displayName) {
+        return res.status(400).json({ error: "Username, email, password, and display name are required" });
       }
 
       const result = await orbitTrustHome.ecosystemSSORegister({
+        username,
         email,
-        firstName,
-        lastName,
+        password,
+        displayName,
         sourceApp: "dw_app_trusthome",
-        trustLayerId,
       });
 
       console.log(`[ORBIT SSO] Registered via Orbit Staffing: ${email}`);

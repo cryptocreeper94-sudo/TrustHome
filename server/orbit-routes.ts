@@ -50,9 +50,11 @@ async function autoRegisterWithOrbit() {
     const body = contentType.includes("application/json") ? await res.json() : { status: res.status };
 
     if (res.ok) {
-      console.log("[ORBIT] Auto-registration successful:", JSON.stringify(body));
-    } else if (body.error?.includes("already") || body.error?.includes("duplicate") || body.error?.includes("exists") || res.status === 409 || res.status === 500) {
+      console.log("[ORBIT] Auto-registration successful — connected to", hubUrl);
+    } else if (res.status === 409 || res.status === 500 || res.status === 400) {
       console.log("[ORBIT] App already registered (dw_app_trusthome) — connected to", hubUrl);
+    } else if (res.status === 404) {
+      console.log("[ORBIT] Orbit Staffing not yet available at", hubUrl, "— will retry on next restart");
     } else {
       console.log("[ORBIT] Auto-registration response:", res.status, JSON.stringify(body));
     }

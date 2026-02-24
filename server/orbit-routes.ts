@@ -11,13 +11,68 @@ function verifyOrbitWebhook(payload: string, signature: string, secret: string):
   }
 }
 
+async function autoRegisterWithOrbit() {
+  if (!orbitTrustHome.isConfigured) {
+    console.log("[ORBIT] Skipping auto-registration — API credentials not configured");
+    return;
+  }
+
+  try {
+    const appUrl = process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : process.env.REPL_SLUG
+        ? `https://${process.env.REPL_SLUG}.replit.app`
+        : "https://trusthome.replit.app";
+
+    const result = await orbitTrustHome.registerApp({
+      appId: "dw_app_trusthome",
+      appName: "TrustHome",
+      appUrl,
+      webhookUrl: `${appUrl}/webhooks/orbit`,
+      capabilities: [
+        "real_estate",
+        "crm",
+        "transaction_management",
+        "document_vault",
+        "marketing_hub",
+        "trust_layer_sso",
+      ],
+      ownershipSplit: {
+        partner1: "Jennifer Lambert",
+        partner1Pct: 51,
+        partner2: "Jason",
+        partner2Pct: 49,
+      },
+    });
+    console.log("[ORBIT] Auto-registration successful:", result);
+  } catch (err: any) {
+    console.log("[ORBIT] Auto-registration failed (non-blocking):", err.message);
+  }
+}
+
 export function registerOrbitRoutes(app: Express) {
   app.get("/api/orbit/status", async (_req: Request, res: Response) => {
     try {
       const status = await orbitTrustHome.checkConnection();
-      res.json({ connected: true, ...status });
+      res.json({
+        connected: true,
+        hubUrl: orbitTrustHome.baseUrl,
+        configured: orbitTrustHome.isConfigured,
+        appId: "dw_app_trusthome",
+        endpoints: {
+          registration: "/api/admin/ecosystem/register-app",
+          ssoLogin: "/api/auth/ecosystem-login",
+          ssoRegister: "/api/chat/auth/register",
+        },
+        ...status,
+      });
     } catch (err: any) {
-      res.json({ connected: false, error: err.message });
+      res.json({
+        connected: false,
+        hubUrl: orbitTrustHome.baseUrl,
+        configured: orbitTrustHome.isConfigured,
+        error: err.message,
+      });
     }
   });
 
@@ -95,6 +150,87 @@ export function registerOrbitRoutes(app: Express) {
     }
   });
 
+  app.post("/api/orbit/register-app", async (_req: Request, res: Response) => {
+    try {
+      const appUrl = process.env.REPLIT_DEV_DOMAIN
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : "https://trusthome.replit.app";
+
+      const result = await orbitTrustHome.registerApp({
+        appId: "dw_app_trusthome",
+        appName: "TrustHome",
+        appUrl,
+        webhookUrl: `${appUrl}/webhooks/orbit`,
+        capabilities: [
+          "real_estate",
+          "crm",
+          "transaction_management",
+          "document_vault",
+          "marketing_hub",
+          "trust_layer_sso",
+        ],
+        ownershipSplit: {
+          partner1: "Jennifer Lambert",
+          partner1Pct: 51,
+          partner2: "Jason",
+          partner2Pct: 49,
+        },
+      });
+      res.json({ registered: true, ...result });
+    } catch (err: any) {
+      res.status(500).json({ registered: false, error: err.message });
+    }
+  });
+
+  app.post("/api/orbit/sso/login", async (req: Request, res: Response) => {
+    try {
+      const { identifier, credential } = req.body;
+      if (!identifier || !credential) {
+        return res.status(400).json({ error: "Identifier and credential are required" });
+      }
+
+      const result = await orbitTrustHome.ecosystemSSOLogin({
+        identifier,
+        credential,
+        sourceApp: "dw_app_trusthome",
+      });
+
+      if (result.user) {
+        req.session.userId = result.user.id;
+        req.session.userRole = result.user.role;
+        req.session.userEmail = result.user.email;
+        req.session.userName = `${result.user.firstName} ${result.user.lastName}`;
+        console.log(`[ORBIT SSO] Login via Orbit Staffing: ${result.user.email}`);
+      }
+
+      res.json(result);
+    } catch (err: any) {
+      res.status(401).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/orbit/sso/register", async (req: Request, res: Response) => {
+    try {
+      const { email, firstName, lastName, trustLayerId } = req.body;
+      if (!email || !firstName || !lastName) {
+        return res.status(400).json({ error: "Email, first name, and last name are required" });
+      }
+
+      const result = await orbitTrustHome.ecosystemSSORegister({
+        email,
+        firstName,
+        lastName,
+        sourceApp: "dw_app_trusthome",
+        trustLayerId,
+      });
+
+      console.log(`[ORBIT SSO] Registered via Orbit Staffing: ${email}`);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.post("/webhooks/orbit", (req: Request, res: Response) => {
     const signature = req.headers["x-orbit-signature"] as string;
     const secret = process.env.ORBIT_FINANCIAL_HUB_SECRET || "";
@@ -134,5 +270,7 @@ export function registerOrbitRoutes(app: Express) {
     res.json({ received: true });
   });
 
-  console.log("[ORBIT] Routes registered: /api/orbit/*, /webhooks/orbit");
+  console.log("[ORBIT] Routes registered: /api/orbit/*, /api/orbit/sso/*, /webhooks/orbit");
+
+  setTimeout(() => autoRegisterWithOrbit(), 3000);
 }

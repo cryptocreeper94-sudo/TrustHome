@@ -49,9 +49,16 @@ TrustHome is a real estate platform designed to be a central hub for all parties
 - Founders Program pricing: $49/agent, $299/brokerage, $1499/white-label for first 100 agents; then $99/$599/$2999 standard
 - Light/dark theme with premium glassmorphism design
 - PWA capabilities
-- Orbit Staffing integration — client wired up, routes registered, webhook handler ready (pending ORBIT server republish)
+- Orbit Staffing integration — CONNECTED (live endpoints at https://orbitstaffing.io)
   - Client: server/services/orbitClient.ts (OrbitEcosystemClient class)
-  - Routes: server/orbit-routes.ts (/api/orbit/status, sync endpoints, /webhooks/orbit)
+  - Routes: server/orbit-routes.ts (/api/orbit/status, sync endpoints, SSO endpoints, /webhooks/orbit)
+  - Trust Layer SSO endpoints (live):
+    - Registration: POST https://orbitstaffing.io/api/admin/ecosystem/register-app
+    - SSO Login: POST https://orbitstaffing.io/api/auth/ecosystem-login
+    - SSO Register: POST https://orbitstaffing.io/api/chat/auth/register
+  - TrustHome proxy routes: /api/orbit/register-app, /api/orbit/sso/login, /api/orbit/sso/register
+  - Auto-registration: Server registers dw_app_trusthome on startup (3s delay)
+  - Ecosystem apps connected: THE VOID, Happy Eats, TL Driver Connect, TrustHome, Trust Vault
   - Env: ORBIT_HUB_URL, ORBIT_ECOSYSTEM_API_KEY, ORBIT_ECOSYSTEM_API_SECRET, ORBIT_FINANCIAL_HUB_SECRET
   - Royalty split: 51% Jennifer / 49% Jason — enforced by ORBIT Financial Hub
   - App ID: dw_app_trusthome

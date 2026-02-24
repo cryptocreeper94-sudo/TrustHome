@@ -48,6 +48,29 @@ interface CertificationData {
   expirationDate?: string;
 }
 
+interface EcosystemRegistration {
+  appId: string;
+  appName: string;
+  appUrl: string;
+  webhookUrl?: string;
+  capabilities?: string[];
+  ownershipSplit?: { partner1: string; partner1Pct: number; partner2: string; partner2Pct: number };
+}
+
+interface EcosystemSSOLogin {
+  identifier: string;
+  credential: string;
+  sourceApp: string;
+}
+
+interface EcosystemSSORegister {
+  email: string;
+  firstName: string;
+  lastName: string;
+  sourceApp: string;
+  trustLayerId?: string;
+}
+
 export class OrbitEcosystemClient {
   private hubUrl: string;
   private apiKey: string;
@@ -55,7 +78,7 @@ export class OrbitEcosystemClient {
   private appName: string;
 
   constructor(appName: string) {
-    this.hubUrl = process.env.ORBIT_HUB_URL || "https://orbitstaffing.replit.app";
+    this.hubUrl = process.env.ORBIT_HUB_URL || "https://orbitstaffing.io";
     this.apiKey = process.env.ORBIT_ECOSYSTEM_API_KEY || "";
     this.apiSecret = process.env.ORBIT_ECOSYSTEM_API_SECRET || "";
     this.appName = appName;
@@ -144,6 +167,26 @@ export class OrbitEcosystemClient {
   async pushLog(log: { action: string; details?: any }) {
     return this.request("POST", "/api/ecosystem/logs", log);
   }
+
+  async registerApp(registration: EcosystemRegistration) {
+    return this.request("POST", "/api/admin/ecosystem/register-app", registration);
+  }
+
+  async ecosystemSSOLogin(login: EcosystemSSOLogin) {
+    return this.request("POST", "/api/auth/ecosystem-login", login);
+  }
+
+  async ecosystemSSORegister(registration: EcosystemSSORegister) {
+    return this.request("POST", "/api/chat/auth/register", registration);
+  }
+
+  get isConfigured(): boolean {
+    return !!(this.apiKey && this.apiSecret);
+  }
+
+  get baseUrl(): string {
+    return this.hubUrl;
+  }
 }
 
-export const orbitTrustHome = new OrbitEcosystemClient("Trust Home");
+export const orbitTrustHome = new OrbitEcosystemClient("TrustHome");

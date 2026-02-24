@@ -1350,6 +1350,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           icon: "globe-outline",
         },
         {
+          id: "orbit_staffing",
+          name: "Orbit Staffing",
+          description: "Ecosystem registration, Trust Layer SSO login, SSO register",
+          baseUrl: "https://orbitstaffing.io",
+          configured: !!(process.env.ORBIT_ECOSYSTEM_API_KEY && process.env.ORBIT_ECOSYSTEM_API_SECRET),
+          keyMasked: process.env.ORBIT_ECOSYSTEM_API_KEY ? `${process.env.ORBIT_ECOSYSTEM_API_KEY.slice(0, 6)}...${process.env.ORBIT_ECOSYSTEM_API_KEY.slice(-4)}` : null,
+          icon: "people-outline",
+          endpoints: {
+            registration: "POST /api/admin/ecosystem/register-app",
+            ssoLogin: "POST /api/auth/ecosystem-login",
+            ssoRegister: "POST /api/chat/auth/register",
+          },
+        },
+        {
           id: "darkwave",
           name: "DarkWave Studios Core",
           description: "Ecosystem authentication, cross-app authorization",

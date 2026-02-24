@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Switch, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Switch, Modal, TextInput, KeyboardAvoidingView, Platform, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
@@ -274,6 +274,22 @@ export default function SettingsScreen() {
                     <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 1 }}>Volume pricing, onboarding, support tiers for 100+ agents</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+                </Pressable>
+                <Pressable
+                  onPress={() => Linking.openURL('https://orbitstaffing.io')}
+                  style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
+                >
+                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
+                    <Ionicons name="wallet" size={18} color="#8B5CF6" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.settingsLabel, { color: colors.text }]}>Orbit Staffing</Text>
+                    <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 1 }}>Financials, payroll, royalty splits, bookkeeping</Text>
+                  </View>
+                  <View style={styles.statusRow}>
+                    <Text style={[styles.statusValue, { color: '#8B5CF6' }]}>51/49</Text>
+                    <Ionicons name="open-outline" size={14} color={colors.textTertiary} />
+                  </View>
                 </Pressable>
               </AccordionSection>
               </Animated.View>

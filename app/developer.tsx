@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, Platform,
-  ActivityIndicator, RefreshControl, TextInput, KeyboardAvoidingView,
+  ActivityIndicator, RefreshControl, TextInput, KeyboardAvoidingView, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -682,6 +682,14 @@ export default function DeveloperScreen() {
         badge: '8 Slides',
         onPress: openLicensingPack,
       },
+      {
+        title: 'Orbit Staffing',
+        desc: 'Financials, payroll, royalty splits (51/49), bookkeeping — DarkWave Studios LLC',
+        icon: 'wallet' as const,
+        accent: '#8B5CF6',
+        badge: 'External',
+        onPress: () => Linking.openURL('https://orbitstaffing.io'),
+      },
     ];
 
     return (
@@ -700,8 +708,8 @@ export default function DeveloperScreen() {
             <Text style={styles.heroVersion}>Managing Partner · 51% Owner</Text>
             <View style={styles.heroStats}>
               <View style={styles.heroStat}>
-                <Text style={styles.heroStatValue}>3</Text>
-                <Text style={styles.heroStatLabel}>Decks</Text>
+                <Text style={styles.heroStatValue}>4</Text>
+                <Text style={styles.heroStatLabel}>Tools</Text>
               </View>
               <View style={[styles.heroStatDivider, { backgroundColor: 'rgba(255,255,255,0.2)' }]} />
               <View style={styles.heroStat}>

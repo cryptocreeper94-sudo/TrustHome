@@ -107,6 +107,10 @@ export function Footer() {
             <Text style={[styles.bottomText, styles.bottomLink, { color: colors.textSecondary }]}>dwtl.io</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
+          <Pressable onPress={() => router.push('/ecosystem' as any)} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
+            <Text style={[styles.bottomText, styles.bottomLink, { color: '#22d3ee' }]}>Trust Layer</Text>
+          </Pressable>
+          <Text style={[styles.bottomDot, { color: colors.textTertiary }]}>{'\u00B7'}</Text>
           <Pressable onPress={() => router.push('/team' as any)} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]} testID="footer-team-link">
             <Text style={[styles.bottomText, styles.bottomLink, { color: colors.primary }]}>Team</Text>
           </Pressable>

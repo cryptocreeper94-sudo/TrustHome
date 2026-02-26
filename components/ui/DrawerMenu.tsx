@@ -46,6 +46,7 @@ export function DrawerMenu() {
 
   const menuItems: MenuItem[] = isBrowsing ? [
     { icon: 'home', label: 'Home', route: '/' },
+    { icon: 'shield-checkmark-outline', label: 'Trust Layer', route: '/ecosystem' },
     { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
   ] : [
     { icon: 'home', label: 'Home', route: '/' },
@@ -68,6 +69,7 @@ export function DrawerMenu() {
     { icon: 'grid-outline', label: 'Command Center', route: '/command-center', agentOnly: true },
     { icon: 'code-slash-outline', label: 'Developer Console', route: '/developer', agentOnly: true },
     { icon: 'map-outline', label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); }, agentOnly: true },
+    { icon: 'shield-checkmark-outline', label: 'Trust Layer', route: '/ecosystem' },
     { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
   ];
 

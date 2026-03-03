@@ -41,6 +41,8 @@ function RootLayoutNav() {
         <Stack.Screen name="tree-services" />
         <Stack.Screen name="support" />
         <Stack.Screen name="ecosystem" />
+        <Stack.Screen name="hallmark" />
+        <Stack.Screen name="affiliate" />
         <Stack.Screen name="command-center" />
       </Stack>
       <DrawerMenu />

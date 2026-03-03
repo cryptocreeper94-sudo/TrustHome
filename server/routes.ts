@@ -32,6 +32,7 @@ import {
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
+import { createTrustStamp } from "./hallmark";
 import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, expenses, mileageEntries, mlsConfigurations } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, desc } from "drizzle-orm";

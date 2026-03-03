@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes";
 import { registerVoiceAiRoutes } from "./voice-ai-routes";
 import { registerOrbitRoutes } from "./orbit-routes";
 import { registerVerdaraRoutes } from "./verdara-routes";
+import { registerHallmarkRoutes } from "./hallmark";
 import { pool, db } from './db';
 import { blogPosts } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -457,6 +458,7 @@ function setupErrorHandler(app: express.Application) {
   registerVoiceAiRoutes(app);
   registerOrbitRoutes(app);
   registerVerdaraRoutes(app);
+  registerHallmarkRoutes(app);
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api") || req.path.startsWith("/ws") || req.path.startsWith("/webhooks")) {

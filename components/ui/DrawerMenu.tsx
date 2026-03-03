@@ -70,6 +70,7 @@ export function DrawerMenu() {
     { icon: 'code-slash-outline', label: 'Developer Console', route: '/developer', agentOnly: true },
     { icon: 'map-outline', label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); }, agentOnly: true },
     { icon: 'shield-checkmark-outline', label: 'Trust Layer', route: '/ecosystem' },
+    { icon: 'gift-outline', label: 'Share & Earn', route: '/affiliate' },
     { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
   ];
 

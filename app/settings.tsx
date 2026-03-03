@@ -325,7 +325,32 @@ export default function SettingsScreen() {
             </Animated.View>
           </View>
 
+          <Animated.View entering={FadeInDown.duration(400).delay(950)}>
+          <Pressable
+            onPress={() => router.push('/affiliate' as any)}
+            style={({ pressed }) => [styles.affiliateBanner, { backgroundColor: isDark ? 'rgba(34,211,238,0.06)' : 'rgba(34,211,238,0.04)', borderColor: 'rgba(34,211,238,0.15)', opacity: pressed ? 0.8 : 1 }]}
+          >
+            <Ionicons name="gift-outline" size={20} color="#22d3ee" />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600' as const, color: colors.text }}>Share & Earn</Text>
+              <Text style={{ fontSize: 11, color: colors.textTertiary }}>Earn up to 20% commission on referrals</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          </Pressable>
+          </Animated.View>
+
           <Animated.View entering={FadeInDown.duration(400).delay(1000)}>
+          <Pressable
+            onPress={() => router.push('/hallmark' as any)}
+            style={({ pressed }) => [styles.genesisBadge, { backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : 'rgba(139,92,246,0.04)', borderColor: 'rgba(139,92,246,0.15)', opacity: pressed ? 0.8 : 1 }]}
+          >
+            <Ionicons name="shield-checkmark" size={18} color="#a78bfa" />
+            <Text style={{ fontSize: 12, fontWeight: '600' as const, color: '#a78bfa' }}>Genesis Hallmark</Text>
+            <Text style={{ fontSize: 12, fontWeight: '700' as const, color: '#22d3ee', letterSpacing: 0.5 }}>TR-00000001</Text>
+          </Pressable>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.duration(400).delay(1050)}>
           <Pressable style={[styles.signOutBtn, { borderColor: colors.error }]}>
             <Ionicons name="log-out-outline" size={20} color={colors.error} />
             <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
@@ -477,6 +502,26 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500' as const,
   },
+  affiliateBanner: {
+    flexDirection: 'row',
+    alignItems: 'center' as const,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 14,
+    gap: 12,
+    marginTop: 16,
+  },
+  genesisBadge: {
+    flexDirection: 'row',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    gap: 8,
+    marginTop: 12,
+  },
   signOutBtn: {
     flexDirection: 'row',
     alignItems: 'center' as const,
@@ -484,7 +529,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1.5,
-    marginTop: 32,
+    marginTop: 24,
     gap: 8,
   },
   signOutText: {

@@ -112,7 +112,7 @@ export default function EcosystemScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Ecosystem" />
+      <Header title="Ecosystem" showBack />
 
       <ScrollView
         style={styles.scroll}

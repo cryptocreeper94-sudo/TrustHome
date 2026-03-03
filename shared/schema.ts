@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   trustLayerId: text("trust_layer_id"),
   ecosystemPinHash: text("ecosystem_pin_hash"),
   ecosystemApp: text("ecosystem_app"),
+  uniqueHash: text("unique_hash"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -233,5 +234,70 @@ export const insertMlsConfigSchema = createInsertSchema(mlsConfigurations).pick(
 
 export type InsertMlsConfig = z.infer<typeof insertMlsConfigSchema>;
 export type MlsConfiguration = typeof mlsConfigurations.$inferSelect;
+
+export const hallmarks = pgTable("hallmarks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  thId: text("th_id").notNull().unique(),
+  userId: varchar("user_id"),
+  appId: text("app_id").notNull(),
+  appName: text("app_name").notNull(),
+  productName: text("product_name").notNull(),
+  releaseType: text("release_type").notNull(),
+  metadata: text("metadata").notNull().default('{}'),
+  dataHash: text("data_hash").notNull(),
+  txHash: text("tx_hash"),
+  blockHeight: text("block_height"),
+  qrCodeSvg: text("qr_code_svg"),
+  verificationUrl: text("verification_url"),
+  hallmarkId: integer("hallmark_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Hallmark = typeof hallmarks.$inferSelect;
+
+export const trustStamps = pgTable("trust_stamps", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"),
+  category: text("category").notNull(),
+  data: text("stamp_data").notNull().default('{}'),
+  dataHash: text("data_hash").notNull(),
+  txHash: text("tx_hash"),
+  blockHeight: text("block_height"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type TrustStamp = typeof trustStamps.$inferSelect;
+
+export const hallmarkCounter = pgTable("hallmark_counter", {
+  id: text("id").primaryKey(),
+  currentSequence: text("current_sequence").notNull().default('0'),
+});
+
+export const affiliateReferrals = pgTable("affiliate_referrals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id").notNull(),
+  referredUserId: varchar("referred_user_id"),
+  referralHash: text("referral_hash").notNull(),
+  platform: text("platform").notNull().default('trusthome'),
+  status: text("status").notNull().default('pending'),
+  convertedAt: timestamp("converted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AffiliateReferral = typeof affiliateReferrals.$inferSelect;
+
+export const affiliateCommissions = pgTable("affiliate_commissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id").notNull(),
+  referralId: varchar("referral_id"),
+  amount: text("amount").notNull(),
+  currency: text("currency").notNull().default('SIG'),
+  tier: text("tier").notNull().default('base'),
+  status: text("status").notNull().default('pending'),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AffiliateCommission = typeof affiliateCommissions.$inferSelect;
 
 export * from "./models/chat";

@@ -772,7 +772,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
   return (
     <>
     <ScrollView
-      style={[styles.container, { backgroundColor: isDark ? '#070B16' : colors.background }]}
+      style={[styles.container, { backgroundColor: isDark ? '#020617' : colors.background }]}
       contentContainerStyle={[
         styles.scrollContent,
         { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + (isBrowsing ? 80 : 30) },

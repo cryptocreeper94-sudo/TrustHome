@@ -15,7 +15,7 @@ TrustHome's architecture is API-first, integrating with existing ecosystem tools
 
 **UI/UX Decisions:**
 - **Design Philosophy:** Mobile-native, premium, intuitive, clean, and calming with minimal UI chrome.
-- **Color Scheme:** Light/dark mode with TrustHome teal (#1A8A7E), using clean whites/soft grays for light mode and deep charcoals/near-blacks for dark mode.
+- **Color Scheme:** Light/dark mode with TrustHome teal (#1A8A7E). Dark mode uses ultra-deep slate-950 (#020617) background with slate-900 (#0f172a) surfaces and cyan-tinted shadows. Light mode uses clean whites/soft grays. Glassmorphism: rgba(12,18,36,0.65) dark / rgba(255,255,255,0.72) light.
 - **Grid System:** True Bento grid (3-column layout) with grouped cards and horizontal carousels.
 - **Card & Surface Design:** Glassmorphism with photorealistic images or rich gradients/textured backgrounds for depth, utilizing low-profile, compact cards.
 - **Visual Effects & Interactions:** Includes 3D effects, hover effects, accordion/dropdowns, pill-shaped buttons, subtle micro-animations, skeleton loading, and haptic feedback.

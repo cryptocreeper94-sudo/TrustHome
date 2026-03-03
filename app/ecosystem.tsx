@@ -73,10 +73,10 @@ function AppCard({ app, colors, isDark, isCompact }: { app: typeof ECOSYSTEM_APP
       style={({ pressed }) => [
         styles.appCard,
         {
-          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+          backgroundColor: isDark ? 'rgba(12,18,36,0.65)' : 'rgba(255,255,255,0.72)',
           borderColor: isSelf
             ? 'rgba(26,138,126,0.3)'
-            : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+            : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
           opacity: pressed ? 0.7 : 1,
           padding: isCompact ? 10 : 12,
         },
@@ -185,8 +185,8 @@ export default function EcosystemScreen() {
 
         <Animated.View entering={FadeInDown.duration(400).delay(160)}>
           <View style={[styles.widgetCard, {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-            borderColor: 'rgba(6,182,212,0.15)',
+            backgroundColor: isDark ? 'rgba(12,18,36,0.65)' : 'rgba(255,255,255,0.72)',
+            borderColor: isDark ? 'rgba(6,182,212,0.15)' : 'rgba(0,0,0,0.06)',
             padding: isCompact ? 12 : 16,
           }]}>
             <View style={[styles.widgetHeader, { borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
@@ -220,8 +220,8 @@ export default function EcosystemScreen() {
                 style={[
                   styles.featureCard,
                   {
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
-                    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                    backgroundColor: isDark ? 'rgba(12,18,36,0.65)' : 'rgba(255,255,255,0.72)',
+                    borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
                     flex: isWide ? 1 : undefined,
                     padding: isCompact ? 14 : 16,
                   },

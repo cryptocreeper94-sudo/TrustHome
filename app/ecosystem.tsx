@@ -168,7 +168,7 @@ export default function EcosystemScreen() {
 
             <View style={styles.statRow}>
               <View style={[styles.statPill, { backgroundColor: isDark ? 'rgba(34,211,238,0.1)' : 'rgba(34,211,238,0.08)' }]}>
-                <Text style={[styles.statValue, { color: '#22d3ee' }]}>{ECOSYSTEM_APPS.length}</Text>
+                <Text style={[styles.statValue, { color: '#22d3ee' }]}>33</Text>
                 <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Apps</Text>
               </View>
               <View style={[styles.statPill, { backgroundColor: isDark ? 'rgba(167,139,250,0.1)' : 'rgba(167,139,250,0.08)' }]}>

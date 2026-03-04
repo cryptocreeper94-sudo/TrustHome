@@ -168,7 +168,7 @@ export default function AffiliateScreen() {
               {((data?.commissionRate || 0.1) * 100).toFixed(1)}% Commission
             </Text>
             <Text style={[styles.heroSub, { color: colors.textTertiary }]}>
-              Earn SIG across all 32 Trust Layer apps with one link
+              Earn SIG across all 33 Trust Layer apps with one link
             </Text>
           </View>
         </Animated.View>

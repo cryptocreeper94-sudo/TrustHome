@@ -35,14 +35,9 @@ function setupCors(app: express.Application) {
   app.use((req, res, next) => {
     const origins = new Set<string>();
 
-    if (process.env.REPLIT_DEV_DOMAIN) {
-      origins.add(`https://${process.env.REPLIT_DEV_DOMAIN}`);
-    }
-
-    if (process.env.REPLIT_DOMAINS) {
-      process.env.REPLIT_DOMAINS.split(",").forEach((d) => {
-        origins.add(`https://${d.trim()}`);
-      });
+    // Add the configured site base URL (Render, custom domain, etc.)
+    if (process.env.SITE_BASE_URL) {
+      origins.add(process.env.SITE_BASE_URL.replace(/\/$/, ''));
     }
 
     const origin = req.header("origin");
@@ -369,7 +364,7 @@ function configureExpoAndLanding(app: express.Application) {
       }
 
       let tags: string[] = [];
-      try { tags = JSON.parse(post.tags); } catch {}
+      try { tags = JSON.parse(post.tags); } catch { }
 
       const tagMeta = tags.map(t => `<meta property="article:tag" content="${t}" />`).join('\n    ');
       const tagsHtml = tags.map(t => `<span class="tag">${t}</span>`).join('\n');

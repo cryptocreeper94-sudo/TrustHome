@@ -1,48 +1,19 @@
 import WebSocket from 'ws';
 
-let cachedApiKey: string | null = null;
-
-async function getCredentials(): Promise<string> {
-  if (cachedApiKey) return cachedApiKey;
-
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY
-    ? 'repl ' + process.env.REPL_IDENTITY
-    : process.env.WEB_REPL_RENEWAL
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL
-    : null;
-
-  if (!xReplitToken) {
-    throw new Error('ElevenLabs: X_REPLIT_TOKEN not found');
+function getApiKey(): string {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  if (!apiKey) {
+    throw new Error('ELEVENLABS_API_KEY not set');
   }
-
-  const res = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=elevenlabs',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
-    }
-  );
-
-  const data = await res.json();
-  const settings = data.items?.[0];
-
-  if (!settings || !settings.settings?.api_key) {
-    throw new Error('ElevenLabs not connected - please set up the ElevenLabs connector');
-  }
-
-  cachedApiKey = settings.settings.api_key;
-  return cachedApiKey!;
+  return apiKey;
 }
 
 export async function getElevenLabsApiKey(): Promise<string> {
-  return await getCredentials();
+  return getApiKey();
 }
 
 export async function transcribeAudio(audioBuffer: Buffer, filename: string): Promise<string> {
-  const apiKey = await getCredentials();
+  const apiKey = getApiKey();
   console.log('[ElevenLabs] Starting transcription...');
 
   const formData = new FormData();
@@ -66,7 +37,7 @@ export async function transcribeAudio(audioBuffer: Buffer, filename: string): Pr
 }
 
 export async function textToSpeechRest(text: string, voiceId: string): Promise<Buffer> {
-  const apiKey = await getCredentials();
+  const apiKey = getApiKey();
   console.log('[ElevenLabs] TTS REST request for', text.length, 'chars');
 
   const response = await fetch(
@@ -105,7 +76,7 @@ export function createStreamingTTS(
 ): Promise<{ send: (text: string) => void; flush: () => void; close: () => Promise<void> }> {
   return new Promise(async (resolve, reject) => {
     try {
-      const apiKey = await getCredentials();
+      const apiKey = getApiKey();
       console.log('[ElevenLabs] Opening TTS WebSocket...');
 
       const uri = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=eleven_flash_v2_5&output_format=pcm_16000`;

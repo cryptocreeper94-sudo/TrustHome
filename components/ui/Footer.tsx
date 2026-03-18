@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Linking, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -21,6 +21,18 @@ export function Footer() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 500;
+  const dwscClickRef = useRef({ count: 0, timer: null as ReturnType<typeof setTimeout> | null });
+  const handleDWSCClick = () => {
+    dwscClickRef.current.count++;
+    if (dwscClickRef.current.count === 3) {
+      dwscClickRef.current.count = 0;
+      if (dwscClickRef.current.timer) clearTimeout(dwscClickRef.current.timer);
+      Linking.openURL('https://dwsc.io/#portal');
+    } else {
+      if (dwscClickRef.current.timer) clearTimeout(dwscClickRef.current.timer);
+      dwscClickRef.current.timer = setTimeout(() => { dwscClickRef.current.count = 0; }, 800);
+    }
+  };
 
   const FOOTER_COLUMNS: FooterColumn[] = [
     {
@@ -144,6 +156,10 @@ export function Footer() {
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
           <Pressable onPress={() => router.push('/team' as any)} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]} testID="footer-team-link">
             <Text style={[styles.bottomText, styles.bottomLink, { color: '#1A8A7E' }]}>Team</Text>
+          </Pressable>
+          <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
+          <Pressable onPress={handleDWSCClick} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]} testID="footer-dwsc-link">
+            <Text style={[styles.bottomText, { color: isDark ? 'rgba(255,255,255,0.25)' : colors.textTertiary }]}>◈</Text>
           </Pressable>
         </View>
       </View>

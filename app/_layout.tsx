@@ -14,10 +14,14 @@ import { AiAssistant } from "@/components/ui/AiAssistant";
 import { SignalChat } from "@/components/ui/SignalChat";
 
 SplashScreen.preventAutoHideAsync();
+import { PresaleBanner } from "@/components/ui/PresaleBanner";
+import { EcosystemAccountHub } from "@/components/ui/EcosystemAccountHub";
 
 function RootLayoutNav() {
   return (
     <>
+      <PresaleBanner />
+      <EcosystemAccountHub />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="auth" />

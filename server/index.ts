@@ -13,6 +13,7 @@ import { eq, desc } from 'drizzle-orm';
 import * as fs from "fs";
 import * as path from "path";
 import { registerTrustLayerSSO } from './trustLayerSSO';
+import { registerAffiliateRoutes } from "./affiliate";
 
 const app = express();
 const log = console.log;
@@ -452,6 +453,7 @@ function setupErrorHandler(app: express.Application) {
   const server = await registerRoutes(app);
   // Trust Layer SSO consumer endpoints
   registerTrustLayerSSO(app);
+registerAffiliateRoutes(app);
 
   registerVoiceAiRoutes(app);
   registerOrbitRoutes(app);

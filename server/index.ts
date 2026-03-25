@@ -12,6 +12,7 @@ import { blogPosts } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
 import * as fs from "fs";
 import * as path from "path";
+import { registerTrustLayerSSO } from './trustLayerSSO';
 
 const app = express();
 const log = console.log;
@@ -449,6 +450,8 @@ function setupErrorHandler(app: express.Application) {
   configureExpoAndLanding(app);
 
   const server = await registerRoutes(app);
+  // Trust Layer SSO consumer endpoints
+  registerTrustLayerSSO(app);
 
   registerVoiceAiRoutes(app);
   registerOrbitRoutes(app);
@@ -482,3 +485,4 @@ function setupErrorHandler(app: express.Application) {
     },
   );
 })();
+

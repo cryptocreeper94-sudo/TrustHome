@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eq(verificationCodes.email, email),
           eq(verificationCodes.code, code),
           eq(verificationCodes.type, 'email_verification'),
-          eq(verificationCodes.used, 'false'),
+          eq(verificationCodes.used, false),
         )
       );
 
@@ -121,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid or expired verification code" });
       }
 
-      await db.update(verificationCodes).set({ used: 'true' }).where(eq(verificationCodes.id, verification.id));
+      await db.update(verificationCodes).set({ used: true }).where(eq(verificationCodes.id, verification.id));
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
@@ -232,7 +232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eq(verificationCodes.email, email),
           eq(verificationCodes.code, code),
           eq(verificationCodes.type, 'email_verification'),
-          eq(verificationCodes.used, 'false'),
+          eq(verificationCodes.used, false),
         )
       );
 
@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid or expired verification code" });
       }
 
-      await db.update(verificationCodes).set({ used: 'true' }).where(eq(verificationCodes.id, verification.id));
+      await db.update(verificationCodes).set({ used: true }).where(eq(verificationCodes.id, verification.id));
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
@@ -373,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eq(verificationCodes.email, email),
           eq(verificationCodes.code, code),
           eq(verificationCodes.type, 'password_reset'),
-          eq(verificationCodes.used, 'false'),
+          eq(verificationCodes.used, false),
         )
       );
 
@@ -381,7 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid or expired reset code" });
       }
 
-      await db.update(verificationCodes).set({ used: 'true' }).where(eq(verificationCodes.id, verification.id));
+      await db.update(verificationCodes).set({ used: true }).where(eq(verificationCodes.id, verification.id));
 
       const hashedPassword = await bcrypt.hash(newPassword, 12);
       await db.update(users).set({ password: hashedPassword }).where(eq(users.email, email));
@@ -447,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           licenseNumber: null,
         });
         if (account.mustReset) {
-          await db.update(users).set({ mustResetPassword: 'true' }).where(eq(users.id, user.id));
+          await db.update(users).set({ mustResetPassword: true }).where(eq(users.id, user.id));
         }
       }
 
@@ -459,7 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       return res.json({
         user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
-        mustResetPassword: user.mustResetPassword === 'true',
+        mustResetPassword: user.mustResetPassword,
       });
     } catch (error) {
       console.error("Dev PIN error:", error);
@@ -484,7 +484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const hashedPassword = await bcrypt.hash(password, 12);
-      await db.update(users).set({ password: hashedPassword, mustResetPassword: 'false' }).where(eq(users.id, req.session.userId));
+      await db.update(users).set({ password: hashedPassword, mustResetPassword: false }).where(eq(users.id, req.session.userId));
 
       return res.json({ message: "Password set successfully" });
     } catch (error) {
@@ -506,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       return res.json({
         user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
-        mustResetPassword: user.mustResetPassword === 'true',
+        mustResetPassword: user.mustResetPassword,
       });
     } catch (error) {
       console.error("Auth me error:", error);
@@ -1580,7 +1580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tags: JSON.stringify(generated.tags || []),
         metaTitle: generated.metaTitle,
         metaDescription: generated.metaDescription,
-        aiGenerated: 'true',
+        aiGenerated: true,
         status: 'draft',
         authorName: 'TrustHome AI',
       }).returning();
@@ -1921,7 +1921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           loginUrl: req.body.loginUrl || null,
           mediaUrl: req.body.mediaUrl || null,
           status: req.body.status || 'pending',
-          syncEnabled: req.body.syncEnabled || 'false',
+          syncEnabled: req.body.syncEnabled ?? false,
           notes: req.body.notes || null,
         }).returning();
         return res.json(config);

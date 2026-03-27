@@ -15,11 +15,9 @@ async function autoRegisterWithOrbit() {
   const hubUrl = process.env.ORBIT_HUB_URL || "https://orbitstaffing.io";
 
   try {
-    const appUrl = process.env.REPLIT_DEV_DOMAIN
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : process.env.REPL_SLUG
-        ? `https://${process.env.REPL_SLUG}.replit.app`
-        : "https://trusthome.replit.app";
+    const appUrl = process.env.SITE_BASE_URL
+      || process.env.REPLIT_DEV_DOMAIN && `https://${process.env.REPLIT_DEV_DOMAIN}`
+      || "https://trusthome.tlid.io";
 
     const res = await fetch(`${hubUrl}/api/admin/ecosystem/register-app`, {
       method: "POST",
@@ -296,9 +294,9 @@ export function registerOrbitRoutes(app: Express) {
 
   app.post("/api/orbit/register-app", async (_req: Request, res: Response) => {
     try {
-      const appUrl = process.env.REPLIT_DEV_DOMAIN
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-        : "https://trusthome.replit.app";
+      const appUrl = process.env.SITE_BASE_URL
+        || process.env.REPLIT_DEV_DOMAIN && `https://${process.env.REPLIT_DEV_DOMAIN}`
+        || "https://trusthome.tlid.io";
 
       const result = await orbitTrustHome.registerApp({
         appName: "TrustHome",

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, real, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, real, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -18,7 +18,7 @@ export const users = pgTable("users", {
   phone: text("phone"),
   brokerage: text("brokerage"),
   licenseNumber: text("license_number"),
-  mustResetPassword: text("must_reset_password").notNull().default('false'),
+  mustResetPassword: boolean("must_reset_password").notNull().default(false),
   trustLayerId: text("trust_layer_id"),
   ecosystemPinHash: text("ecosystem_pin_hash"),
   ecosystemApp: text("ecosystem_app"),
@@ -32,7 +32,7 @@ export const verificationCodes = pgTable("verification_codes", {
   code: text("code").notNull(),
   type: text("type").notNull().default('email_verification'),
   expiresAt: timestamp("expires_at").notNull(),
-  used: text("used").notNull().default('false'),
+  used: boolean("used").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -77,7 +77,7 @@ export const blogPosts = pgTable("blog_posts", {
   authorId: varchar("author_id"),
   authorName: text("author_name").notNull().default('TrustHome'),
   status: text("status").notNull().default('draft'),
-  aiGenerated: text("ai_generated").notNull().default('false'),
+  aiGenerated: boolean("ai_generated").notNull().default(false),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
   publishedAt: timestamp("published_at"),
@@ -213,7 +213,7 @@ export const mlsConfigurations = pgTable("mls_configurations", {
   mediaUrl: text("media_url"),
   status: text("status").notNull().default('pending'),
   lastSyncAt: timestamp("last_sync_at"),
-  syncEnabled: text("sync_enabled").notNull().default('false'),
+  syncEnabled: boolean("sync_enabled").notNull().default(false),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

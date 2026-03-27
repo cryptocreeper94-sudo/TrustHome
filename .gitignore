@@ -40,3 +40,9 @@ yarn-error.*
 
 .env
 server_dist/
+
+# Replit artifacts
+.cache/
+.local/
+.upm/
+

@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { ensureCompatibleFormat, speechToText, textToSpeech } from "./replit_integrations/audio/client";
 
 const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY || "not-configured",
+  ...(process.env.AI_INTEGRATIONS_OPENAI_BASE_URL && { baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL }),
 });
 
 const SYSTEM_PROMPT = "You are TrustHome AI, a knowledgeable real estate assistant for Jennifer Lambert's team at Lambert Realty Group. You help with transaction management, lead analysis, market insights, scheduling, mortgage calculations, contract questions, and client communication. You speak in a warm, professional tone. Keep responses concise but thorough — aim for 2-3 paragraphs max. You are powered by the TrustHome platform by DarkWave Studios.";

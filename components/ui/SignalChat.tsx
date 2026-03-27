@@ -105,20 +105,24 @@ export function SignalChat() {
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Guest';
   const userId = user?.id || 'guest';
 
+  const connectingRef = useRef(false);
+
   const connectSocket = useCallback(() => {
-    if (wsRef.current || connecting) return;
+    if (wsRef.current || connectingRef.current) return;
+    connectingRef.current = true;
     setConnecting(true);
     try {
       const baseUrl = getApiUrl();
       const pollingUrl = `${baseUrl}/ws/?EIO=4&transport=polling`;
       fetch(pollingUrl)
-        .then(() => { setConnected(true); setConnecting(false); })
-        .catch(() => { setConnected(false); setConnecting(false); });
+        .then(() => { setConnected(true); setConnecting(false); connectingRef.current = false; })
+        .catch(() => { setConnected(false); setConnecting(false); connectingRef.current = false; });
     } catch {
       setConnected(false);
       setConnecting(false);
+      connectingRef.current = false;
     }
-  }, [connecting]);
+  }, []);
 
   useEffect(() => {
     if (signalChatOpen && !connected && !connecting) {

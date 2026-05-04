@@ -112,13 +112,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         and(
           eq(verificationCodes.email, email),
           eq(verificationCodes.code, code),
-          eq(verificationCodes.type, 'email_verification'),
-          eq(verificationCodes.used, false),
+          eq(verificationCodes.type, 'email_verification')
         )
       );
 
       if (!verification || new Date(verification.expiresAt) < new Date()) {
         return res.status(400).json({ error: "Invalid or expired verification code" });
+      }
+
+      if (verification.used === true || String(verification.used) === 'true' || verification.used === 1 || String(verification.used) === '1') {
+        return res.status(400).json({ error: "Verification code has already been used" });
       }
 
       await db.update(verificationCodes).set({ used: true }).where(eq(verificationCodes.id, verification.id));
@@ -231,13 +234,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         and(
           eq(verificationCodes.email, email),
           eq(verificationCodes.code, code),
-          eq(verificationCodes.type, 'email_verification'),
-          eq(verificationCodes.used, false),
+          eq(verificationCodes.type, 'email_verification')
         )
       );
 
       if (!verification || new Date(verification.expiresAt) < new Date()) {
         return res.status(400).json({ error: "Invalid or expired verification code" });
+      }
+
+      if (verification.used === true || String(verification.used) === 'true' || verification.used === 1 || String(verification.used) === '1') {
+        return res.status(400).json({ error: "Verification code has already been used" });
       }
 
       await db.update(verificationCodes).set({ used: true }).where(eq(verificationCodes.id, verification.id));
@@ -372,13 +378,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         and(
           eq(verificationCodes.email, email),
           eq(verificationCodes.code, code),
-          eq(verificationCodes.type, 'password_reset'),
-          eq(verificationCodes.used, false),
+          eq(verificationCodes.type, 'password_reset')
         )
       );
 
       if (!verification || new Date(verification.expiresAt) < new Date()) {
         return res.status(400).json({ error: "Invalid or expired reset code" });
+      }
+
+      if (verification.used === true || String(verification.used) === 'true' || verification.used === 1 || String(verification.used) === '1') {
+        return res.status(400).json({ error: "Reset code has already been used" });
       }
 
       await db.update(verificationCodes).set({ used: true }).where(eq(verificationCodes.id, verification.id));

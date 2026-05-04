@@ -15,9 +15,13 @@ async function autoRegisterWithOrbit() {
   const hubUrl = process.env.ORBIT_HUB_URL || "https://orbitstaffing.io";
 
   try {
-    const appUrl = process.env.SITE_BASE_URL
-      || process.env.REPLIT_DEV_DOMAIN && `https://${process.env.REPLIT_DEV_DOMAIN}`
+    let appUrl = process.env.SITE_BASE_URL
+      || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null)
       || "https://trusthome.tlid.io";
+
+    if (appUrl && !appUrl.startsWith("http")) {
+      appUrl = `https://${appUrl}`;
+    }
 
     const res = await fetch(`${hubUrl}/api/admin/ecosystem/register-app`, {
       method: "POST",
@@ -294,9 +298,14 @@ export function registerOrbitRoutes(app: Express) {
 
   app.post("/api/orbit/register-app", async (_req: Request, res: Response) => {
     try {
-      const appUrl = process.env.SITE_BASE_URL
-        || process.env.REPLIT_DEV_DOMAIN && `https://${process.env.REPLIT_DEV_DOMAIN}`
+      let appUrl = process.env.SITE_BASE_URL
+        || (_req && _req.get("host") ? `${_req.protocol}://${_req.get("host")}` : null)
+        || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null)
         || "https://trusthome.tlid.io";
+
+      if (appUrl && !appUrl.startsWith("http")) {
+        appUrl = `https://${appUrl}`;
+      }
 
       const result = await orbitTrustHome.registerApp({
         appName: "TrustHome",

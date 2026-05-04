@@ -153,7 +153,7 @@ export default function TeamScreen() {
         const data = await res.json();
         await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
         setPinUserName(data.user?.firstName || 'Team Member');
-        if (data.mustResetPassword) {
+        if (data.mustResetPassword === true || String(data.mustResetPassword) === 'true' || data.mustResetPassword === 1 || String(data.mustResetPassword) === '1') {
           goToStep('set_password');
         } else {
           router.replace('/');

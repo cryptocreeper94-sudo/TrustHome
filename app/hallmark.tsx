@@ -157,8 +157,8 @@ export default function HallmarkDetailScreen() {
           <View style={styles.heroSection}>
             <LinearGradient
               colors={isDark
-                ? ['rgba(6,182,212,0.12)', 'rgba(139,92,246,0.08)', 'transparent']
-                : ['rgba(6,182,212,0.06)', 'rgba(139,92,246,0.04)', 'transparent']
+                ? ['rgba(6,182,212,0.12)', 'rgba(14,165,233,0.08)', 'transparent']
+                : ['rgba(6,182,212,0.06)', 'rgba(14,165,233,0.04)', 'transparent']
               }
               style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
               start={{ x: 0, y: 0 }}
@@ -168,7 +168,7 @@ export default function HallmarkDetailScreen() {
               <Animated.View style={[styles.shieldGlow, glowStyle]} />
               <View style={styles.shieldWrap}>
                 <LinearGradient
-                  colors={['rgba(6,182,212,0.3)', 'rgba(139,92,246,0.3)']}
+                  colors={['rgba(6,182,212,0.3)', 'rgba(14,165,233,0.3)']}
                   style={[StyleSheet.absoluteFill, { borderRadius: 24 }]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -209,8 +209,8 @@ export default function HallmarkDetailScreen() {
             <Animated.View entering={FadeInDown.duration(400).delay(240)}>
               <View style={[styles.section, { backgroundColor: sectionBg, borderColor: sectionBorder }, sectionShadow as any]}>
                 <View style={[styles.sectionHeader, { borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
-                  <Ionicons name="cube-outline" size={16} color="#a78bfa" />
-                  <Text style={[styles.sectionTitle, { color: '#a78bfa' }]}>BLOCKCHAIN RECORD</Text>
+                  <Ionicons name="cube-outline" size={16} color="#38bdf8" />
+                  <Text style={[styles.sectionTitle, { color: '#38bdf8' }]}>BLOCKCHAIN RECORD</Text>
                 </View>
                 <DetailRow label="Data Hash" value={hallmark.dataHash} colors={colors} mono />
                 <DetailRow label="Tx Hash" value={hallmark.txHash} colors={colors} mono />
@@ -256,10 +256,10 @@ export default function HallmarkDetailScreen() {
                   <AnimatedVerifyButton
                     onPress={() => Linking.openURL('https://trusthub.tlid.io/api/hallmark/TH-00000001/verify')}
                     icon="link-outline"
-                    iconColor="#a78bfa"
+                    iconColor="#38bdf8"
                     label="View Hub Genesis (TH-00000001)"
-                    labelColor="#a78bfa"
-                    bgColor={isDark ? 'rgba(167,139,250,0.1)' : 'rgba(167,139,250,0.08)'}
+                    labelColor="#38bdf8"
+                    bgColor={isDark ? 'rgba(56,189,248,0.1)' : 'rgba(56,189,248,0.08)'}
                     style={{ marginTop: 8 }}
                   />
                 )}

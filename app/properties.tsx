@@ -51,7 +51,7 @@ const statusColors: Record<PropertyStatus, string> = {
   Active: '#34D399',
   'Under Contract': '#FBBF24',
   'Buyer Shortlist': '#60A5FA',
-  Sold: '#A78BFA',
+  Sold: '#38bdf8',
 };
 
 function formatPrice(price: number): string {
@@ -63,7 +63,7 @@ const STATUS_SECTIONS: { status: PropertyStatus; title: string; icon: keyof type
   { status: 'Active', title: 'Active Listings', icon: 'home', iconColor: '#34D399' },
   { status: 'Under Contract', title: 'Under Contract', icon: 'document-lock', iconColor: '#FBBF24' },
   { status: 'Buyer Shortlist', title: 'Buyer Shortlist', icon: 'heart', iconColor: '#60A5FA' },
-  { status: 'Sold', title: 'Sold', icon: 'checkmark-circle', iconColor: '#A78BFA' },
+  { status: 'Sold', title: 'Sold', icon: 'checkmark-circle', iconColor: '#38bdf8' },
 ];
 
 function AnimatedFilterPill({ tab, isActive, colors, onPress }: { tab: FilterTab; isActive: boolean; colors: any; onPress: () => void }) {

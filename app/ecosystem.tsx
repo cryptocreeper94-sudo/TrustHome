@@ -10,7 +10,7 @@ import { Header } from '@/components/ui/Header';
 
 const ECOSYSTEM_APPS = [
   { name: 'TrustHome', slug: 'trusthome', url: 'https://trusthome.replit.app', desc: 'White-label real estate platform', category: 'Real Estate', icon: 'home', color: '#1A8A7E' },
-  { name: 'Trust Vault', slug: 'trust-vault', url: 'https://trustvault.tlid.io', desc: 'Multi-chain wallet & multi-sig', category: 'Finance', icon: 'wallet', color: '#8B5CF6' },
+  { name: 'Trust Vault', slug: 'trust-vault', url: 'https://trustvault.tlid.io', desc: 'Multi-chain wallet & multi-sig', category: 'Finance', icon: 'wallet', color: '#0ea5e9' },
   { name: 'TL Driver Connect', slug: 'driver-connect', url: 'https://driverconnect.tlid.io', desc: 'Blockchain-verified drivers', category: 'Transport', icon: 'car', color: '#3B82F6' },
   { name: 'THE VOID', slug: 'the-void', url: 'https://thevoid.tlid.io', desc: 'Premium membership identity', category: 'Entertainment', icon: 'planet', color: '#EC4899' },
   { name: 'Happy Eats', slug: 'happy-eats', url: 'https://happyeats.app', desc: 'Trust-verified food & dining', category: 'Dining', icon: 'restaurant', color: '#F59E0B' },
@@ -21,7 +21,7 @@ const ECOSYSTEM_APPS = [
 
 const FEATURES = [
   { icon: 'finger-print' as const, title: 'Single Sign-On', desc: 'One set of credentials across all DarkWave apps. No redirects — synced behind the scenes.', color: '#22d3ee' },
-  { icon: 'flash' as const, title: 'Blockchain Verified', desc: 'Identity and credentials anchored on-chain. Tamper-proof verification for all assets.', color: '#a78bfa' },
+  { icon: 'flash' as const, title: 'Blockchain Verified', desc: 'Identity and credentials anchored on-chain. Tamper-proof verification for all assets.', color: '#38bdf8' },
   { icon: 'code-slash' as const, title: 'Open API', desc: 'Connected apps share data securely via JWT-authenticated endpoints.', color: '#34d399' },
 ];
 
@@ -132,8 +132,8 @@ export default function EcosystemScreen() {
           <View style={[styles.heroSection, { padding: isCompact ? 16 : 20 }]}>
             <LinearGradient
               colors={isDark
-                ? ['rgba(6,182,212,0.08)', 'rgba(139,92,246,0.06)', 'transparent']
-                : ['rgba(6,182,212,0.05)', 'rgba(139,92,246,0.03)', 'transparent']
+                ? ['rgba(6,182,212,0.08)', 'rgba(14,165,233,0.06)', 'transparent']
+                : ['rgba(6,182,212,0.05)', 'rgba(14,165,233,0.03)', 'transparent']
               }
               style={StyleSheet.absoluteFill}
               start={{ x: 0, y: 0 }}
@@ -143,7 +143,7 @@ export default function EcosystemScreen() {
             <View style={[styles.heroHeader, { gap: isCompact ? 10 : 14 }]}>
               <View style={[styles.heroIconBadge, { width: isCompact ? 44 : 52, height: isCompact ? 44 : 52, borderRadius: isCompact ? 12 : 14 }]}>
                 <LinearGradient
-                  colors={['rgba(6,182,212,0.25)', 'rgba(139,92,246,0.25)']}
+                  colors={['rgba(6,182,212,0.25)', 'rgba(14,165,233,0.25)']}
                   style={[StyleSheet.absoluteFill, { borderRadius: isCompact ? 12 : 14 }]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -171,8 +171,8 @@ export default function EcosystemScreen() {
                 <Text style={[styles.statValue, { color: '#22d3ee' }]}>33</Text>
                 <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Apps</Text>
               </View>
-              <View style={[styles.statPill, { backgroundColor: isDark ? 'rgba(167,139,250,0.1)' : 'rgba(167,139,250,0.08)' }]}>
-                <Text style={[styles.statValue, { color: '#a78bfa' }]}>SSO</Text>
+              <View style={[styles.statPill, { backgroundColor: isDark ? 'rgba(56,189,248,0.1)' : 'rgba(56,189,248,0.08)' }]}>
+                <Text style={[styles.statValue, { color: '#38bdf8' }]}>SSO</Text>
                 <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Enabled</Text>
               </View>
               <View style={[styles.statPill, { backgroundColor: isDark ? 'rgba(52,211,153,0.1)' : 'rgba(52,211,153,0.08)' }]}>

@@ -61,7 +61,7 @@ const STAGES = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won'] as const;
 const STAGE_COLORS: Record<string, string> = {
   'New': '#60A5FA',
   'Contacted': '#FBBF24',
-  'Qualified': '#A78BFA',
+  'Qualified': '#38bdf8',
   'Proposal': '#F87171',
   'Won': '#34D399',
 };
@@ -193,7 +193,7 @@ function AnimatedLeadCard({ lead, isExpanded, onToggle, index }: { lead: Lead; i
             <View style={styles.actionRow}>
               <AnimatedActionButton icon="call" color="#34D399" />
               <AnimatedActionButton icon="mail" color="#60A5FA" />
-              <AnimatedActionButton icon="chatbubble" color="#A78BFA" />
+              <AnimatedActionButton icon="chatbubble" color="#38bdf8" />
               <AnimatedActionButton icon="calendar" color="#FBBF24" />
             </View>
           </View>
@@ -257,10 +257,10 @@ export default function LeadsScreen() {
   const computedSources = (() => {
     const sourceColors: Record<string, string> = {
       'Referral': '#1A8A7E', 'Zillow': '#60A5FA', 'Realtor.com': '#FBBF24',
-      'Open House': '#34D399', 'Website': '#A78BFA', 'Facebook': '#3B5998',
-      'Instagram': '#E1306C', 'popup_modal': '#A78BFA', 'other': '#94A3B8',
+      'Open House': '#34D399', 'Website': '#38bdf8', 'Facebook': '#3B5998',
+      'Instagram': '#E1306C', 'popup_modal': '#38bdf8', 'other': '#94A3B8',
     };
-    const defaultColors = ['#1A8A7E', '#60A5FA', '#FBBF24', '#34D399', '#A78BFA', '#3B5998', '#E1306C'];
+    const defaultColors = ['#1A8A7E', '#60A5FA', '#FBBF24', '#34D399', '#38bdf8', '#3B5998', '#E1306C'];
     const counts: Record<string, number> = {};
     LEADS.forEach(l => {
       const src = l.source || 'Other';

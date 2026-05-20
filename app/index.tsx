@@ -48,7 +48,7 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
       { icon: 'lock-closed-outline', label: 'Document Vault', color: '#047857' },
       { icon: 'calculator-outline', label: 'Mortgage Tools', color: '#0369A1' },
       { icon: 'chatbubbles-outline', label: 'Direct Messaging', color: '#1E40AF' },
-      { icon: 'sparkles-outline', label: 'AI Assistant', color: '#7C3AED' },
+      { icon: 'sparkles-outline', label: 'AI Assistant', color: '#0369a1' },
     ],
   },
 ];
@@ -266,8 +266,8 @@ function UserCommandCenter() {
               </View>
             </View>
             <View style={styles.trustBannerRow}>
-              <View style={[styles.trustBadge, { backgroundColor: 'rgba(124,58,237,0.2)' }]}>
-                <Ionicons name="sparkles" size={18} color="#7C3AED" />
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(3,105,161,0.2)' }]}>
+                <Ionicons name="sparkles" size={18} color="#0369a1" />
               </View>
               <View style={styles.trustBannerText}>
                 <Text style={styles.trustBannerTitle}>AI-Powered Platform</Text>

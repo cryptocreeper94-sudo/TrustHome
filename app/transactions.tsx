@@ -26,7 +26,7 @@ const URGENT_STAGES = new Set(['under_contract', 'inspection', 'offer']);
 const PIPELINE_STAGES = [
   { key: 'pre_approval', label: 'Pre-Approval', color: '#FBBF24', count: 2 },
   { key: 'home_search', label: 'Home Search', color: '#60A5FA', count: 3 },
-  { key: 'offer', label: 'Offer', color: '#A78BFA', count: 1 },
+  { key: 'offer', label: 'Offer', color: '#38bdf8', count: 1 },
   { key: 'under_contract', label: 'Under Contract', color: '#1A8A7E', count: 2 },
   { key: 'inspection', label: 'Inspection', color: '#F87171', count: 1 },
   { key: 'closing', label: 'Closing', color: '#34D399', count: 1 },

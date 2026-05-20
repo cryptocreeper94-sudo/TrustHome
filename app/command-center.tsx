@@ -96,7 +96,7 @@ const categories: Category[] = [
   {
     title: 'Marketing & Content',
     icon: 'megaphone-outline',
-    gradient: ['#7C3AED', '#DB2777'],
+    gradient: ['#0369a1', '#DB2777'],
     description: 'AI-powered marketing suite. Generate social posts, manage your blog, produce property media, and customize your brand — all from one place.',
     cards: [
       {
@@ -104,10 +104,10 @@ const categories: Category[] = [
         description: 'Generate posts, captions & campaigns',
         route: '/marketing',
         icon: 'rocket-outline',
-        gradient: ['#7C3AED', '#9333EA'],
-        glowColor: 'rgba(124, 58, 237, 0.35)',
+        gradient: ['#0369a1', '#0284c7'],
+        glowColor: 'rgba(3,105,161, 0.35)',
         badge: 'AI',
-        badgeGradient: ['#8B5CF6', '#A855F7'],
+        badgeGradient: ['#0ea5e9', '#38bdf8'],
         featured: true,
       },
       {
@@ -133,7 +133,7 @@ const categories: Category[] = [
         description: 'Colors, logos & white-label settings',
         route: '/branding',
         icon: 'color-palette-outline',
-        gradient: ['#A21CAF', '#86198F'],
+        gradient: ['#0e7490', '#155e75'],
         glowColor: 'rgba(162, 28, 175, 0.3)',
       },
     ],
@@ -171,7 +171,7 @@ const categories: Category[] = [
         gradient: ['#1E40AF', '#1E3A8A'],
         glowColor: 'rgba(30, 64, 175, 0.3)',
         badge: 'AI',
-        badgeGradient: ['#8B5CF6', '#A855F7'],
+        badgeGradient: ['#0ea5e9', '#38bdf8'],
       },
       {
         label: 'Network & Referrals',
@@ -310,8 +310,8 @@ const categories: Category[] = [
         description: 'Professional video & photo production',
         externalUrl: 'https://darkwavestudios.io',
         icon: 'videocam-outline',
-        gradient: ['#7C3AED', '#6D28D9'],
-        glowColor: 'rgba(124, 58, 237, 0.3)',
+        gradient: ['#0369a1', '#6D28D9'],
+        glowColor: 'rgba(3,105,161, 0.3)',
       },
       {
         label: 'Orbit Staffing',

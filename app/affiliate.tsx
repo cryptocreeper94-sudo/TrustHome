@@ -19,7 +19,7 @@ const TIER_COLORS: Record<string, string> = {
   base: '#9CA3AF',
   silver: '#C0C0C0',
   gold: '#F59E0B',
-  platinum: '#A78BFA',
+  platinum: '#38bdf8',
   diamond: '#22D3EE',
 };
 
@@ -27,7 +27,7 @@ const TIER_THRESHOLDS = [
   { name: 'Base', min: 0, rate: '10%', color: '#9CA3AF' },
   { name: 'Silver', min: 5, rate: '12.5%', color: '#C0C0C0' },
   { name: 'Gold', min: 15, rate: '15%', color: '#F59E0B' },
-  { name: 'Platinum', min: 30, rate: '17.5%', color: '#A78BFA' },
+  { name: 'Platinum', min: 30, rate: '17.5%', color: '#38bdf8' },
   { name: 'Diamond', min: 50, rate: '20%', color: '#22D3EE' },
 ];
 
@@ -180,7 +180,7 @@ export default function AffiliateScreen() {
           </View>
           <View style={styles.statsRow}>
             <StatCard label="Pending" value={`${stats.pendingEarnings || '0.00'} SIG`} color="#f59e0b" isDark={isDark} />
-            <StatCard label="Paid" value={`${stats.paidEarnings || '0.00'} SIG`} color="#a78bfa" isDark={isDark} />
+            <StatCard label="Paid" value={`${stats.paidEarnings || '0.00'} SIG`} color="#38bdf8" isDark={isDark} />
           </View>
         </Animated.View>
 
@@ -201,9 +201,9 @@ export default function AffiliateScreen() {
                 <Ionicons name="copy-outline" size={16} color="#22d3ee" />
                 <Text style={{ color: '#22d3ee', fontSize: 13, fontWeight: '600' as const }}>Copy</Text>
               </AnimatedButton>
-              <AnimatedButton onPress={handleShare} style={[styles.linkBtn, { backgroundColor: '#a78bfa20' }]}>
-                <Ionicons name="share-outline" size={16} color="#a78bfa" />
-                <Text style={{ color: '#a78bfa', fontSize: 13, fontWeight: '600' as const }}>Share</Text>
+              <AnimatedButton onPress={handleShare} style={[styles.linkBtn, { backgroundColor: '#38bdf820' }]}>
+                <Ionicons name="share-outline" size={16} color="#38bdf8" />
+                <Text style={{ color: '#38bdf8', fontSize: 13, fontWeight: '600' as const }}>Share</Text>
               </AnimatedButton>
             </View>
           </View>

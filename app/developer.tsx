@@ -686,7 +686,7 @@ export default function DeveloperScreen() {
         title: 'Orbit Staffing',
         desc: 'Financials, payroll, royalty splits (51/49), bookkeeping — DarkWave Studios LLC',
         icon: 'wallet' as const,
-        accent: '#8B5CF6',
+        accent: '#0ea5e9',
         badge: 'External',
         onPress: () => Linking.openURL('https://orbitstaffing.io'),
       },

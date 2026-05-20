@@ -279,15 +279,15 @@ export default function SettingsScreen() {
                   onPress={() => Linking.openURL('https://orbitstaffing.io')}
                   style={[styles.settingsRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}
                 >
-                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
-                    <Ionicons name="wallet" size={18} color="#8B5CF6" />
+                  <View style={[styles.settingsIcon, { backgroundColor: 'rgba(14,165,233,0.12)' }]}>
+                    <Ionicons name="wallet" size={18} color="#0ea5e9" />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.settingsLabel, { color: colors.text }]}>Orbit Staffing</Text>
                     <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 1 }}>Financials, payroll, royalty splits, bookkeeping</Text>
                   </View>
                   <View style={styles.statusRow}>
-                    <Text style={[styles.statusValue, { color: '#8B5CF6' }]}>51/49</Text>
+                    <Text style={[styles.statusValue, { color: '#0ea5e9' }]}>51/49</Text>
                     <Ionicons name="open-outline" size={14} color={colors.textTertiary} />
                   </View>
                 </Pressable>
@@ -342,10 +342,10 @@ export default function SettingsScreen() {
           <Animated.View entering={FadeInDown.duration(400).delay(1000)}>
           <Pressable
             onPress={() => router.push('/hallmark' as any)}
-            style={({ pressed }) => [styles.genesisBadge, { backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : 'rgba(139,92,246,0.04)', borderColor: 'rgba(139,92,246,0.15)', opacity: pressed ? 0.8 : 1 }]}
+            style={({ pressed }) => [styles.genesisBadge, { backgroundColor: isDark ? 'rgba(14,165,233,0.06)' : 'rgba(14,165,233,0.04)', borderColor: 'rgba(14,165,233,0.15)', opacity: pressed ? 0.8 : 1 }]}
           >
-            <Ionicons name="shield-checkmark" size={18} color="#a78bfa" />
-            <Text style={{ fontSize: 12, fontWeight: '600' as const, color: '#a78bfa' }}>Genesis Hallmark</Text>
+            <Ionicons name="shield-checkmark" size={18} color="#38bdf8" />
+            <Text style={{ fontSize: 12, fontWeight: '600' as const, color: '#38bdf8' }}>Genesis Hallmark</Text>
             <Text style={{ fontSize: 12, fontWeight: '700' as const, color: '#22d3ee', letterSpacing: 0.5 }}>TR-00000001</Text>
           </Pressable>
           </Animated.View>

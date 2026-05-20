@@ -112,7 +112,7 @@ function mapVaultProject(p: any): MediaProject {
 const TOOLS = [
   { id: 'walkthrough', icon: 'videocam' as const, label: 'Video Walkthrough', desc: 'Professional property walkthrough video', gradient: ['#1A8A7E', '#0F6B62'] as [string, string] },
   { id: 'editing', icon: 'cut' as const, label: 'Video Editing', desc: 'Edit and polish your property videos', gradient: ['#F2994A', '#F2C94C'] as [string, string] },
-  { id: 'audio', icon: 'mic' as const, label: 'Audio / Voiceover', desc: 'Professional narration for tours', gradient: ['#6366F1', '#818CF8'] as [string, string] },
+  { id: 'audio', icon: 'mic' as const, label: 'Audio / Voiceover', desc: 'Professional narration for tours', gradient: ['#6366F1', '#22d3ee'] as [string, string] },
   { id: 'branding', icon: 'sparkles' as const, label: 'Branded Intros', desc: 'Custom animated intro/outros', gradient: ['#E44D26', '#F16529'] as [string, string] },
   { id: 'stitch', icon: 'layers' as const, label: 'Multi-Angle Stitch', desc: 'Combine multiple camera angles', gradient: ['#4B6CB7', '#182848'] as [string, string] },
   { id: 'thumbnail', icon: 'image' as const, label: 'Thumbnail Gen', desc: 'Auto-generate listing thumbnails', gradient: ['#834D9B', '#D04ED6'] as [string, string] },
@@ -686,7 +686,7 @@ export default function MediaStudioScreen() {
               title="Voiceover Narration"
               desc="Add professional voiceover to property tours. AI-generated or custom script."
               image={REQUEST_IMAGES.voiceover}
-              gradient={['#6366F1', '#818CF8']}
+              gradient={['#6366F1', '#22d3ee']}
               icon="mic-outline"
               onPress={handleRequestVoiceover}
               colors={colors}

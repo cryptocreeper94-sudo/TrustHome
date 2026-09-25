@@ -19,7 +19,6 @@ import { PartnerOnboardingModal } from '@/components/ui/PartnerOnboardingModal';
 import { BrokerPitchDeck } from '@/components/ui/BrokerPitchDeck';
 import { LicensingPack } from '@/components/ui/LicensingPack';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoader';
-import { BrowseCTABar } from '@/components/ui/BrowseCTABar';
 
 type HomeView = 'hub' | 'dashboard';
 
@@ -313,20 +312,6 @@ function UserCommandCenter() {
             </View>
             <Text style={styles.copyrightText}>2026 DarkWave Studios LLC</Text>
           </View>
-
-          <View style={styles.ecosystemLinks}>
-            <Pressable onPress={() => Linking.openURL('https://dwtl.io')}>
-              <Text style={styles.ecoLink}>dwtl.io</Text>
-            </Pressable>
-            <View style={[styles.adminDot]} />
-            <Pressable onPress={() => Linking.openURL('https://trustshield.tech')}>
-              <Text style={styles.ecoLink}>trustshield.tech</Text>
-            </Pressable>
-            <View style={[styles.adminDot]} />
-            <Pressable onPress={() => Linking.openURL('https://darkwavestudios.io')}>
-              <Text style={styles.ecoLink}>darkwavestudios.io</Text>
-            </Pressable>
-          </View>
         </Animated.View>
       </ScrollView>
     </View>
@@ -389,7 +374,7 @@ export default function HomeScreen() {
       ) : (
         isAgent ? <AgentDashboard /> : <ClientDashboard />
       )}
-      <BrowseCTABar />
+
       <WelcomeGuide
         visible={showWelcomeGuide && reallyAuthenticated}
         onComplete={() => setShowWelcomeGuide(false)}

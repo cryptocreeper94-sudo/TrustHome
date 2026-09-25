@@ -10,18 +10,12 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { DrawerMenu } from "@/components/ui/DrawerMenu";
-import { AiAssistant } from "@/components/ui/AiAssistant";
-import { SignalChat } from "@/components/ui/SignalChat";
 
 SplashScreen.preventAutoHideAsync();
-import { PresaleBanner } from "@/components/ui/PresaleBanner";
-import { EcosystemAccountHub } from "@/components/ui/EcosystemAccountHub";
 
 function RootLayoutNav() {
   return (
     <>
-      <PresaleBanner />
-      <EcosystemAccountHub />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="auth" />
@@ -44,14 +38,11 @@ function RootLayoutNav() {
         <Stack.Screen name="mls-setup" />
         <Stack.Screen name="tree-services" />
         <Stack.Screen name="support" />
-        <Stack.Screen name="ecosystem" />
         <Stack.Screen name="hallmark" />
         <Stack.Screen name="affiliate" />
         <Stack.Screen name="command-center" />
       </Stack>
       <DrawerMenu />
-      <SignalChat />
-      <AiAssistant />
     </>
   );
 }

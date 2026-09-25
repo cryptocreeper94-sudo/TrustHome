@@ -353,23 +353,6 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header
-        transparent
-        extraAction={
-          !isBrowsing ? (
-            <Pressable
-              onPress={toggleView}
-              style={styles.viewToggle}
-            >
-              <Ionicons
-                name={view === 'hub' ? 'speedometer-outline' : 'grid-outline'}
-                size={18}
-                color="rgba(255,255,255,0.8)"
-              />
-            </Pressable>
-          ) : undefined
-        }
-      />
       {view === 'hub' || isBrowsing ? (
         <CommandCenterHub onSwitchToDashboard={switchToDashboard} />
       ) : (

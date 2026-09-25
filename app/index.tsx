@@ -354,6 +354,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
+        transparent
         extraAction={
           !isBrowsing ? (
             <Pressable

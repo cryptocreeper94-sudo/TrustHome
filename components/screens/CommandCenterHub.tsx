@@ -870,10 +870,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 8,
+    paddingTop: 0,
   },
   videoHeroWrap: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     marginBottom: 24,
   },
   videoHeroContent: {

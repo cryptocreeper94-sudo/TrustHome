@@ -159,7 +159,6 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     overflow: 'hidden',
-    borderRadius: 16,
     position: 'relative',
   },
   image: {

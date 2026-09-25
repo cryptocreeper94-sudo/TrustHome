@@ -131,7 +131,7 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
   );
 }
 
-export function Header({ title = 'TrustHome', showBack = false, showClose = false, onClose, rightAction, extraAction }: HeaderProps) {
+export function Header({ title = 'TrustHome', showBack = false, showClose = false, onClose, rightAction, extraAction, transparent = false }: { title?: string; showBack?: boolean; showClose?: boolean; onClose?: () => void; rightAction?: React.ReactNode; extraAction?: React.ReactNode; transparent?: boolean }) {
   const { colors, isDark, toggleTheme } = useTheme();
   const { toggleDrawer, demoMode, exitDemo, isAuthenticated, isBrowsing } = useApp();
   const insets = useSafeAreaInsets();
@@ -143,7 +143,7 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
   const goHome = () => router.replace('/');
 
   return (
-    <View style={{ backgroundColor: colors.primary }}>
+    <View style={[{ backgroundColor: transparent ? 'transparent' : colors.primary }, transparent && { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }]}>
       <View style={[styles.container, { paddingTop: topPadding }]}>
         <View style={styles.content}>
           <View style={styles.left}>

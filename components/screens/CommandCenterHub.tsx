@@ -80,7 +80,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
   const cardWidth = Math.min(SCREEN_WIDTH > 900 ? (SCREEN_WIDTH - 80) / 3 : SCREEN_WIDTH > 600 ? (SCREEN_WIDTH - 60) / 2 : SCREEN_WIDTH - 40, 400);
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
     {/* Floating menu button */}
     <Pressable
       style={({ pressed }) => [styles.floatingMenuBtn, pressed && { opacity: 0.8 }]}
@@ -308,7 +308,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
         </View>
       </View>
     </ScrollView>
-    </>
+    </View>
   );
 }
 

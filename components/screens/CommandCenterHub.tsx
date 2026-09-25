@@ -11,15 +11,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
-import { VideoHero } from '@/components/ui/VideoHero';
+import { KenBurnsHero } from '@/components/ui/VideoHero';
 
-const HERO_VIDEOS = [
-  { src: require('@/assets/videos/hero-properties.mp4'), label: 'Properties & Listings', fallbackImage: require('@/assets/images/cards/card-property-manager.jpg') },
-  { src: require('@/assets/videos/hero-interior.mp4'), label: 'Home Interiors', fallbackImage: require('@/assets/images/cards/card-browse-properties.jpg') },
-  { src: require('@/assets/videos/hero-marketing.mp4'), label: 'Marketing & AI', fallbackImage: require('@/assets/images/cards/card-ai-marketing.jpg') },
-  { src: require('@/assets/videos/hero-transactions.mp4'), label: 'Transactions & Deals', fallbackImage: require('@/assets/images/cards/card-transaction-pipeline.jpg') },
-  { src: require('@/assets/videos/hero-landscape.mp4'), label: 'Tree & Landscape', fallbackImage: require('@/assets/images/cards/card-tree-services.png') },
-  { src: require('@/assets/videos/hero-business.mp4'), label: 'Business & Analytics', fallbackImage: require('@/assets/images/cards/card-analytics-dashboard.jpg') },
+const HERO_SLIDES = [
+  { image: require('@/assets/images/hero-1.jpg'), label: 'Craftsman Homes' },
+  { image: require('@/assets/images/hero-2.jpg'), label: 'Classic Brick Ranch' },
+  { image: require('@/assets/images/hero-3.jpg'), label: 'Tennessee Neighborhoods' },
+  { image: require('@/assets/images/hero-4.jpg'), label: 'Home Showings' },
 ];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -174,7 +172,7 @@ const ALL_CATEGORIES: Category[] = [
     title: 'Communication',
     icon: 'chatbubbles-outline',
     gradient: ['#2563EB', '#4F46E5'],
-    description: 'Messaging, cross-ecosystem chat, AI assistant, and your professional network.',
+    description: 'Client messaging, team collaboration, and professional networking.',
     roles: ['agent', 'partner', 'developer', 'client'],
     cards: [
       {
@@ -186,28 +184,6 @@ const ALL_CATEGORIES: Category[] = [
         glowColor: 'rgba(37, 99, 235, 0.35)',
         featured: true,
         image: require('@/assets/images/cards/card-messages.jpg'),
-      },
-      {
-        label: 'Signal Chat',
-        description: 'Cross-ecosystem messaging via PaintPros',
-        onAction: 'signal_chat',
-        icon: 'radio-outline',
-        gradient: ['#4338CA', '#3730A3'],
-        glowColor: 'rgba(67, 56, 202, 0.3)',
-        badge: 'Ecosystem',
-        badgeGradient: ['#6366F1', '#4F46E5'],
-        image: require('@/assets/images/cards/card-signal-chat.jpg'),
-      },
-      {
-        label: 'AI Assistant',
-        description: 'Voice-capable AI for agents & clients',
-        onAction: 'ai_assistant',
-        icon: 'sparkles-outline',
-        gradient: ['#1E40AF', '#1E3A8A'],
-        glowColor: 'rgba(30, 64, 175, 0.3)',
-        badge: 'AI',
-        badgeGradient: ['#8B5CF6', '#A855F7'],
-        image: require('@/assets/images/cards/card-ai-assistant.jpg'),
       },
       {
         label: 'Network & Referrals',
@@ -780,13 +756,13 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       showsVerticalScrollIndicator={false}
     >
       <Animated.View entering={FadeInDown.duration(500)} style={styles.videoHeroWrap}>
-        <VideoHero videos={HERO_VIDEOS} height={280}>
+        <KenBurnsHero slides={HERO_SLIDES} height={320}>
           <View style={styles.videoHeroContent}>
             <Text style={styles.videoHeroGreeting}>{getTimeGreeting()}, {displayName}</Text>
             <Text style={styles.videoHeroHeadline}>Command Center</Text>
             <Text style={styles.videoHeroSub}>{filteredCategories.length} categories · {totalTools} tools</Text>
           </View>
-        </VideoHero>
+        </KenBurnsHero>
       </Animated.View>
 
       {filteredCategories.map((category, catIndex) => (

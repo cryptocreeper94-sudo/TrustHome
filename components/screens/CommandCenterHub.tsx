@@ -1,14 +1,13 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, Platform, Linking, Dimensions, ImageBackground, ImageSourcePropType, Modal, NativeSyntheticEvent, NativeScrollEvent,
+  View, Text, StyleSheet, ScrollView, Pressable, Platform,
+  Dimensions, Linking, Image,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, {
-  FadeInDown, FadeInUp, useAnimatedStyle, useSharedValue, withSpring,
-} from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { KenBurnsHero } from '@/components/ui/VideoHero';
@@ -20,869 +19,301 @@ const HERO_SLIDES = [
   { image: require('@/assets/images/hero-4.jpg'), label: 'Home Showings' },
 ];
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = Math.min(280, SCREEN_WIDTH * 0.75);
-const CARD_HEIGHT = 180;
-
-interface LaunchCard {
-  label: string;
-  description: string;
-  route?: string;
-  externalUrl?: string;
-  onAction?: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  gradient: [string, string];
-  glowColor: string;
-  badge?: string;
-  badgeGradient?: [string, string];
-  featured?: boolean;
-  image: ImageSourcePropType;
-}
-
-interface Category {
-  title: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  gradient: [string, string];
-  description: string;
-  cards: LaunchCard[];
-  roles?: string[];
-}
-
-const ALL_CATEGORIES: Category[] = [
+const FEATURES = [
   {
-    title: 'Operations Hub',
-    icon: 'grid-outline',
-    gradient: ['#1A8A7E', '#0EA5E9'],
-    description: 'Core business tools — leads, transactions, showings, and property management.',
-    roles: ['agent', 'partner', 'developer'],
-    cards: [
-      {
-        label: 'Agent Dashboard',
-        description: 'Real-time business overview & KPIs',
-        route: '/',
-        icon: 'speedometer-outline',
-        gradient: ['#0F766E', '#0891B2'],
-        glowColor: 'rgba(26, 138, 126, 0.35)',
-        badge: 'Live',
-        badgeGradient: ['#10B981', '#059669'],
-        featured: true,
-        onAction: 'switch_dashboard',
-        image: require('@/assets/images/cards/card-agent-dashboard.jpg'),
-      },
-      {
-        label: 'Lead Management',
-        description: 'Track, score & nurture prospects',
-        route: '/leads',
-        icon: 'people-outline',
-        gradient: ['#0E7490', '#0369A1'],
-        glowColor: 'rgba(14, 116, 144, 0.3)',
-        image: require('@/assets/images/cards/card-lead-management.jpg'),
-      },
-      {
-        label: 'Transaction Pipeline',
-        description: 'Manage deals from offer to close',
-        route: '/transactions',
-        icon: 'swap-horizontal-outline',
-        gradient: ['#115E59', '#134E4A'],
-        glowColor: 'rgba(17, 94, 89, 0.3)',
-        image: require('@/assets/images/cards/card-transaction-pipeline.jpg'),
-      },
-      {
-        label: 'Showing Manager',
-        description: 'Schedule & track property showings',
-        route: '/showings',
-        icon: 'calendar-outline',
-        gradient: ['#155E75', '#164E63'],
-        glowColor: 'rgba(21, 94, 117, 0.3)',
-        image: require('@/assets/images/cards/card-showing-manager.jpg'),
-      },
-      {
-        label: 'Property Manager',
-        description: 'Listings, shortlists & comparisons',
-        route: '/properties',
-        icon: 'business-outline',
-        gradient: ['#0D9488', '#0F766E'],
-        glowColor: 'rgba(13, 148, 136, 0.3)',
-        image: require('@/assets/images/cards/card-property-manager.jpg'),
-      },
-    ],
+    title: 'Leads & CRM',
+    subtitle: 'Never lose a lead again',
+    description: 'Track every client from first contact to closing day. Smart lead scoring, automated follow-ups, and a pipeline view that keeps you on top of every deal.',
+    image: require('@/assets/images/feature-crm.jpg'),
+    icon: 'people-outline' as const,
+    route: '/leads',
+    gradient: ['#0EA5E9', '#0284C7'] as [string, string],
   },
   {
-    title: 'Marketing & Content',
-    icon: 'megaphone-outline',
-    gradient: ['#7C3AED', '#DB2777'],
-    description: 'AI-powered marketing, blog, media production, and brand customization.',
-    roles: ['agent', 'partner', 'developer'],
-    cards: [
-      {
-        label: 'AI Marketing Hub',
-        description: 'Generate posts, captions & campaigns',
-        route: '/marketing',
-        icon: 'rocket-outline',
-        gradient: ['#7C3AED', '#9333EA'],
-        glowColor: 'rgba(124, 58, 237, 0.35)',
-        badge: 'AI',
-        badgeGradient: ['#8B5CF6', '#A855F7'],
-        featured: true,
-        image: require('@/assets/images/cards/card-ai-marketing.jpg'),
-      },
-      {
-        label: 'Blog Manager',
-        description: 'Create & publish AI-generated articles',
-        route: '/blog',
-        icon: 'newspaper-outline',
-        gradient: ['#6D28D9', '#7E22CE'],
-        glowColor: 'rgba(109, 40, 217, 0.3)',
-        image: require('@/assets/images/cards/card-blog-manager.jpg'),
-      },
-      {
-        label: 'Media Studio',
-        description: 'Video walkthroughs & property media',
-        route: '/media-studio',
-        icon: 'film-outline',
-        gradient: ['#BE185D', '#9D174D'],
-        glowColor: 'rgba(190, 24, 93, 0.3)',
-        badge: 'New',
-        badgeGradient: ['#F43F5E', '#E11D48'],
-        image: require('@/assets/images/cards/card-media-studio.jpg'),
-      },
-      {
-        label: 'Tree Services',
-        description: 'AI tree assessment & removal estimates',
-        route: '/tree-services',
-        icon: 'leaf-outline',
-        gradient: ['#16A34A', '#15803D'],
-        glowColor: 'rgba(22, 163, 74, 0.3)',
-        badge: 'Ecosystem',
-        badgeGradient: ['#34C759', '#22A047'],
-        image: require('@/assets/images/cards/card-tree-services.png'),
-      },
-      {
-        label: 'Branding Suite',
-        description: 'Colors, logos & white-label settings',
-        route: '/branding',
-        icon: 'color-palette-outline',
-        gradient: ['#A21CAF', '#86198F'],
-        glowColor: 'rgba(162, 28, 175, 0.3)',
-        image: require('@/assets/images/cards/card-branding-suite.jpg'),
-      },
-    ],
+    title: 'Marketing Suite',
+    subtitle: 'Stand out in every market',
+    description: 'AI-powered listing descriptions, social media templates, branded flyers, and a blog manager that positions you as the local expert.',
+    image: require('@/assets/images/feature-marketing.jpg'),
+    icon: 'megaphone-outline' as const,
+    route: '/marketing',
+    gradient: ['#8B5CF6', '#7C3AED'] as [string, string],
   },
   {
-    title: 'Communication',
-    icon: 'chatbubbles-outline',
-    gradient: ['#2563EB', '#4F46E5'],
-    description: 'Client messaging, team collaboration, and professional networking.',
-    roles: ['agent', 'partner', 'developer', 'client'],
-    cards: [
-      {
-        label: 'Messages',
-        description: 'Direct client & team messaging',
-        route: '/messages',
-        icon: 'chatbubble-ellipses-outline',
-        gradient: ['#2563EB', '#1D4ED8'],
-        glowColor: 'rgba(37, 99, 235, 0.35)',
-        featured: true,
-        image: require('@/assets/images/cards/card-messages.jpg'),
-      },
-      {
-        label: 'Network & Referrals',
-        description: 'Build your professional referral network',
-        route: '/network',
-        icon: 'globe-outline',
-        gradient: ['#4F46E5', '#4338CA'],
-        glowColor: 'rgba(79, 70, 229, 0.3)',
-        image: require('@/assets/images/cards/card-network-referrals.jpg'),
-      },
-    ],
-  },
-  {
-    title: 'Business & Finance',
-    icon: 'briefcase-outline',
-    gradient: ['#059669', '#0D9488'],
-    description: 'Expenses, mileage tracking, analytics, and document management.',
-    roles: ['agent', 'partner', 'developer'],
-    cards: [
-      {
-        label: 'Business Suite',
-        description: 'Expenses, mileage & financial tools',
-        route: '/business',
-        icon: 'calculator-outline',
-        gradient: ['#059669', '#047857'],
-        glowColor: 'rgba(5, 150, 105, 0.35)',
-        badge: 'Earn',
-        badgeGradient: ['#10B981', '#059669'],
-        featured: true,
-        image: require('@/assets/images/cards/card-business-suite.jpg'),
-      },
-      {
-        label: 'Analytics Dashboard',
-        description: 'Performance metrics & market insights',
-        route: '/analytics',
-        icon: 'bar-chart-outline',
-        gradient: ['#0D9488', '#0F766E'],
-        glowColor: 'rgba(13, 148, 136, 0.3)',
-        badge: 'Live',
-        badgeGradient: ['#10B981', '#059669'],
-        image: require('@/assets/images/cards/card-analytics-dashboard.jpg'),
-      },
-      {
-        label: 'Document Vault',
-        description: 'Encrypted contract & file management',
-        route: '/documents',
-        icon: 'lock-closed-outline',
-        gradient: ['#047857', '#065F46'],
-        glowColor: 'rgba(4, 120, 87, 0.3)',
-        image: require('@/assets/images/cards/card-document-vault.jpg'),
-      },
-    ],
-  },
-  {
-    title: 'Your Home Journey',
-    icon: 'home-outline',
-    gradient: ['#0D9488', '#1A8A7E'],
-    description: 'Browse properties, schedule showings, and track your transaction.',
-    roles: ['client'],
-    cards: [
-      {
-        label: 'Browse Properties',
-        description: 'Search listings & build your shortlist',
-        route: '/properties',
-        icon: 'business-outline',
-        gradient: ['#0E7490', '#0369A1'],
-        glowColor: 'rgba(14, 116, 144, 0.35)',
-        featured: true,
-        image: require('@/assets/images/cards/card-browse-properties.jpg'),
-      },
-      {
-        label: 'Schedule Showings',
-        description: 'Book & manage property tours',
-        route: '/showings',
-        icon: 'calendar-outline',
-        gradient: ['#155E75', '#164E63'],
-        glowColor: 'rgba(21, 94, 117, 0.3)',
-        image: require('@/assets/images/cards/card-schedule-showings.jpg'),
-      },
-      {
-        label: 'My Transaction',
-        description: 'Track your deal from offer to close',
-        route: '/transactions',
-        icon: 'swap-horizontal-outline',
-        gradient: ['#115E59', '#134E4A'],
-        glowColor: 'rgba(17, 94, 89, 0.3)',
-        image: require('@/assets/images/cards/card-my-transaction.jpg'),
-      },
-    ],
-  },
-  {
-    title: 'Tools & Resources',
-    icon: 'construct-outline',
-    gradient: ['#0369A1', '#047857'],
-    description: 'Mortgage calculators, document vault, and neighborhood intelligence.',
-    roles: ['client'],
-    cards: [
-      {
-        label: 'Document Vault',
-        description: 'Contracts & files, securely stored',
-        route: '/documents',
-        icon: 'lock-closed-outline',
-        gradient: ['#047857', '#065F46'],
-        glowColor: 'rgba(4, 120, 87, 0.3)',
-        featured: true,
-        image: require('@/assets/images/cards/card-document-vault.jpg'),
-      },
-      {
-        label: 'Mortgage Tools',
-        description: 'Calculators, rates & pre-approval',
-        route: '/',
-        icon: 'calculator-outline',
-        gradient: ['#059669', '#047857'],
-        glowColor: 'rgba(5, 150, 105, 0.3)',
-        image: require('@/assets/images/cards/card-mortgage-tools.jpg'),
-      },
-      {
-        label: 'Neighborhood Intel',
-        description: 'Schools, safety & local data',
-        route: '/',
-        icon: 'map-outline',
-        gradient: ['#D97706', '#B45309'],
-        glowColor: 'rgba(217, 119, 6, 0.3)',
-        image: require('@/assets/images/cards/card-neighborhood-intel.jpg'),
-      },
-    ],
-  },
-  {
-    title: 'Platform Management',
-    icon: 'settings-outline',
-    gradient: ['#D97706', '#EA580C'],
-    description: 'MLS connections, account settings, integrations, and support.',
-    roles: ['agent', 'partner', 'developer'],
-    cards: [
-      {
-        label: 'Settings',
-        description: 'Account, security & preferences',
-        route: '/settings',
-        icon: 'cog-outline',
-        gradient: ['#D97706', '#B45309'],
-        glowColor: 'rgba(217, 119, 6, 0.3)',
-        image: require('@/assets/images/cards/card-settings.jpg'),
-      },
-      {
-        label: 'MLS Integration',
-        description: 'Connect your MLS data feed',
-        route: '/mls-setup',
-        icon: 'link-outline',
-        gradient: ['#EA580C', '#C2410C'],
-        glowColor: 'rgba(234, 88, 12, 0.3)',
-        badge: 'Setup',
-        badgeGradient: ['#F59E0B', '#D97706'],
-        image: require('@/assets/images/cards/card-mls-integration.jpg'),
-      },
-      {
-        label: 'Help & Support',
-        description: 'FAQs, contact & feature requests',
-        route: '/support',
-        icon: 'help-circle-outline',
-        gradient: ['#B45309', '#92400E'],
-        glowColor: 'rgba(180, 83, 9, 0.3)',
-        image: require('@/assets/images/cards/card-help-support.jpg'),
-      },
-    ],
-  },
-  {
-    title: 'Developer & Security',
-    icon: 'code-slash-outline',
-    gradient: ['#DC2626', '#BE123C'],
-    description: 'API access, blockchain verification, and Trust Shield security.',
-    roles: ['developer', 'partner'],
-    cards: [
-      {
-        label: 'Developer Console',
-        description: 'API keys, access requests & system health',
-        route: '/developer',
-        icon: 'terminal-outline',
-        gradient: ['#DC2626', '#B91C1C'],
-        glowColor: 'rgba(220, 38, 38, 0.35)',
-        featured: true,
-        image: require('@/assets/images/cards/card-developer-console.jpg'),
-      },
-      {
-        label: 'Trust Layer',
-        description: 'Blockchain verification & trust scores',
-        externalUrl: 'https://dwtl.io',
-        icon: 'shield-checkmark-outline',
-        gradient: ['#BE123C', '#9F1239'],
-        glowColor: 'rgba(190, 18, 60, 0.3)',
-        badge: 'Blockchain',
-        badgeGradient: ['#EF4444', '#DC2626'],
-        image: require('@/assets/images/cards/card-trust-layer.jpg'),
-      },
-      {
-        label: 'Trust Shield',
-        description: 'Ecosystem security monitoring',
-        externalUrl: 'https://trustshield.tech',
-        icon: 'shield-outline',
-        gradient: ['#991B1B', '#7F1D1D'],
-        glowColor: 'rgba(153, 27, 27, 0.3)',
-        image: require('@/assets/images/cards/card-trust-shield.jpg'),
-      },
-    ],
-  },
-  {
-    title: 'Ecosystem',
-    icon: 'planet-outline',
-    gradient: ['#0284C7', '#0369A1'],
-    description: 'Connected DarkWave services — CRM, media, staffing, and blockchain.',
-    roles: ['agent', 'partner', 'developer'],
-    cards: [
-      {
-        label: 'PaintPros.io',
-        description: 'CRM, Marketing Suite & SSO hub',
-        externalUrl: 'https://paintpros.io',
-        icon: 'color-wand-outline',
-        gradient: ['#0284C7', '#0369A1'],
-        glowColor: 'rgba(2, 132, 199, 0.3)',
-        badge: 'CRM',
-        badgeGradient: ['#38BDF8', '#0EA5E9'],
-        image: require('@/assets/images/cards/card-paintpros.jpg'),
-      },
-      {
-        label: 'DarkWave Media',
-        description: 'Professional video & photo production',
-        externalUrl: 'https://darkwavestudios.io',
-        icon: 'videocam-outline',
-        gradient: ['#7C3AED', '#6D28D9'],
-        glowColor: 'rgba(124, 58, 237, 0.3)',
-        image: require('@/assets/images/cards/card-darkwave-media.jpg'),
-      },
-      {
-        label: 'Orbit Staffing',
-        description: 'Bookkeeping, HR & payroll management',
-        externalUrl: 'https://orbitstaffing.io',
-        icon: 'earth-outline',
-        gradient: ['#059669', '#047857'],
-        glowColor: 'rgba(5, 150, 105, 0.3)',
-        badge: 'Finance',
-        badgeGradient: ['#10B981', '#059669'],
-        image: require('@/assets/images/cards/card-orbit-staffing.jpg'),
-      },
-      {
-        label: 'Trust Layer Dashboard',
-        description: 'Blockchain explorer & membership card',
-        externalUrl: 'https://dwtl.io',
-        icon: 'layers-outline',
-        gradient: ['#1A8A7E', '#0F766E'],
-        glowColor: 'rgba(26, 138, 126, 0.3)',
-        image: require('@/assets/images/cards/card-trust-layer-dashboard.jpg'),
-      },
-    ],
-  },
-  {
-    title: 'Account',
-    icon: 'person-outline',
-    gradient: ['#525252', '#404040'],
-    description: 'Your preferences, help, and support.',
-    roles: ['client'],
-    cards: [
-      {
-        label: 'Settings',
-        description: 'Account & preferences',
-        route: '/settings',
-        icon: 'cog-outline',
-        gradient: ['#525252', '#404040'],
-        glowColor: 'rgba(82, 82, 82, 0.3)',
-        image: require('@/assets/images/cards/card-client-settings.jpg'),
-      },
-      {
-        label: 'Help & Support',
-        description: 'FAQs & contact',
-        route: '/support',
-        icon: 'help-circle-outline',
-        gradient: ['#D97706', '#B45309'],
-        glowColor: 'rgba(217, 119, 6, 0.3)',
-        image: require('@/assets/images/cards/card-client-support.jpg'),
-      },
-    ],
+    title: 'Analytics & Insights',
+    subtitle: 'Data-driven decisions',
+    description: 'Real-time performance dashboards, market trend analysis, and transaction metrics that help you understand what\'s working and where to focus.',
+    image: require('@/assets/images/feature-analytics.jpg'),
+    icon: 'bar-chart-outline' as const,
+    route: '/analytics',
+    gradient: ['#10B981', '#059669'] as [string, string],
   },
 ];
 
-function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; onPress: () => void }) {
-  const scale = useSharedValue(1);
+const STATS = [
+  { value: '15+', label: 'Agent Tools' },
+  { value: '24/7', label: 'Always Available' },
+  { value: '100%', label: 'White-Label Ready' },
+  { value: '0', label: 'Paper Needed' },
+];
 
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+const TOOLS_QUICK = [
+  { icon: 'swap-horizontal-outline' as const, label: 'Transactions', route: '/transactions', color: '#0EA5E9' },
+  { icon: 'business-outline' as const, label: 'Properties', route: '/properties', color: '#8B5CF6' },
+  { icon: 'document-text-outline' as const, label: 'Documents', route: '/documents', color: '#10B981' },
+  { icon: 'chatbubbles-outline' as const, label: 'Messages', route: '/messages', color: '#F59E0B' },
+  { icon: 'film-outline' as const, label: 'Media Studio', route: '/media-studio', color: '#EC4899' },
+  { icon: 'briefcase-outline' as const, label: 'Business Suite', route: '/business', color: '#6366F1' },
+];
 
-  return (
-    <Animated.View entering={FadeInDown.delay(index * 60).duration(400).springify()}>
-      <Pressable
-        onPressIn={() => { scale.value = withSpring(0.96, { damping: 15, stiffness: 300 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
-        onPress={onPress}
-      >
-        <Animated.View
-          style={[
-            styles.card,
-            { width: CARD_WIDTH, height: CARD_HEIGHT },
-            animStyle,
-            ...Platform.select({
-              ios: [{ shadowColor: card.glowColor, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.5, shadowRadius: 16 }],
-              android: [{ elevation: 8 }],
-              web: [{ boxShadow: `0px 6px 20px ${card.glowColor}` } as any],
-            }) as any[],
-          ]}
-        >
-          <ImageBackground
-            source={card.image}
-            style={StyleSheet.absoluteFill}
-            imageStyle={{ borderRadius: 16 }}
-            resizeMode="cover"
-          />
-          <LinearGradient
-            colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.75)']}
-            style={StyleSheet.absoluteFill}
-          />
-
-          {card.badge && (
-            <View style={styles.badgeWrap}>
-              <LinearGradient
-                colors={(card.badgeGradient || ['#F59E0B', '#D97706']) as [string, string, ...string[]]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.badgeGradient}
-              >
-                <Text style={styles.badgeText}>{card.badge}</Text>
-              </LinearGradient>
-            </View>
-          )}
-
-          <View style={styles.cardContent}>
-            <View style={[styles.iconContainer, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-              <Ionicons name={card.icon} size={22} color="#FFFFFF" />
-            </View>
-            <View style={styles.cardTextWrap}>
-              <Text style={styles.cardLabel} numberOfLines={1}>{card.label}</Text>
-              <Text style={styles.cardDescription} numberOfLines={2}>{card.description}</Text>
-            </View>
-            {card.externalUrl && (
-              <Ionicons name="open-outline" size={14} color="rgba(255,255,255,0.5)" style={styles.externalIcon} />
-            )}
-          </View>
-
-          {card.featured && (
-            <View style={styles.featuredStripe}>
-              <LinearGradient
-                colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
-            </View>
-          )}
-        </Animated.View>
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-const SNAP_INTERVAL = CARD_WIDTH + 12;
-
-function CarouselWithNav({ cards, onCardPress, isDark, colors }: {
-  cards: LaunchCard[];
-  onCardPress: (card: LaunchCard) => void;
-  isDark: boolean;
-  colors: any;
-}) {
-  const scrollRef = useRef<ScrollView>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const totalCards = cards.length;
-
-  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const x = e.nativeEvent.contentOffset.x;
-    const idx = Math.round(x / SNAP_INTERVAL);
-    setActiveIndex(Math.max(0, Math.min(idx, totalCards - 1)));
-  }, [totalCards]);
-
-  const scrollTo = useCallback((direction: 'prev' | 'next') => {
-    const newIdx = direction === 'next'
-      ? Math.min(activeIndex + 1, totalCards - 1)
-      : Math.max(activeIndex - 1, 0);
-    scrollRef.current?.scrollTo({ x: newIdx * SNAP_INTERVAL, animated: true });
-    setActiveIndex(newIdx);
-  }, [activeIndex, totalCards]);
-
-  return (
-    <View>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.carouselContent}
-        decelerationRate="fast"
-        snapToInterval={SNAP_INTERVAL}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        {cards.map((card, cardIndex) => (
-          <CardItem
-            key={card.label}
-            card={card}
-            index={cardIndex}
-            onPress={() => onCardPress(card)}
-          />
-        ))}
-      </ScrollView>
-
-      {totalCards > 1 && (
-        <View style={styles.navRow}>
-          <Pressable
-            onPress={() => scrollTo('prev')}
-            style={[styles.navArrow, {
-              backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-              opacity: activeIndex === 0 ? 0.3 : 1,
-            }]}
-            disabled={activeIndex === 0}
-          >
-            <Ionicons name="chevron-back" size={16} color={isDark ? '#FFFFFF' : colors.text} />
-          </Pressable>
-
-          <View style={styles.dotsRow}>
-            {cards.map((_, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.dot,
-                  {
-                    backgroundColor: i === activeIndex ? '#22D3EE' : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'),
-                    width: i === activeIndex ? 18 : 6,
-                  },
-                ]}
-              />
-            ))}
-          </View>
-
-          <Pressable
-            onPress={() => scrollTo('next')}
-            style={[styles.navArrow, {
-              backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-              opacity: activeIndex >= totalCards - 1 ? 0.3 : 1,
-            }]}
-            disabled={activeIndex >= totalCards - 1}
-          >
-            <Ionicons name="chevron-forward" size={16} color={isDark ? '#FFFFFF' : colors.text} />
-          </Pressable>
-        </View>
-      )}
-    </View>
-  );
-}
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface CommandCenterHubProps {
   onSwitchToDashboard?: () => void;
 }
 
-function SubscribeModal({ visible, onClose, featureName, onGetStarted }: { visible: boolean; onClose: () => void; featureName: string; onGetStarted: () => void }) {
-  const { colors, isDark } = useTheme();
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={browseStyles.overlay} onPress={onClose}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={[browseStyles.card, { backgroundColor: isDark ? '#111827' : '#FFFFFF' }]}>
-          <View style={browseStyles.iconWrap}>
-            <LinearGradient colors={['#1A8A7E', '#0F766E']} style={browseStyles.iconGradient}>
-              <Ionicons name="lock-open-outline" size={28} color="#FFFFFF" />
-            </LinearGradient>
-          </View>
-          <Text style={[browseStyles.title, { color: colors.text }]}>Unlock {featureName}</Text>
-          <Text style={[browseStyles.sub, { color: colors.textSecondary }]}>
-            Sign up as an agent to access {featureName} and all TrustHome business tools. Free to explore, subscribe to unlock.
-          </Text>
-          <Pressable style={browseStyles.primaryBtn} onPress={onGetStarted}>
-            <LinearGradient colors={['#1A8A7E', '#0F766E']} style={browseStyles.primaryBtnGradient}>
-              <Text style={browseStyles.primaryBtnText}>Get Started</Text>
-              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
-            </LinearGradient>
-          </Pressable>
-          <Pressable onPress={onClose} style={browseStyles.secondaryBtn}>
-            <Text style={[browseStyles.secondaryBtnText, { color: colors.textSecondary }]}>Keep Exploring</Text>
-          </Pressable>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
-const browseStyles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  card: { width: '100%', maxWidth: 380, borderRadius: 20, padding: 28, alignItems: 'center', ...(Platform.OS === 'web' ? { boxShadow: '0 24px 64px rgba(0,0,0,0.4)' } as any : {}) },
-  iconWrap: { marginBottom: 16 },
-  iconGradient: { width: 64, height: 64, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3, marginBottom: 8, textAlign: 'center' },
-  sub: { fontSize: 14, lineHeight: 20, textAlign: 'center', marginBottom: 20 },
-  primaryBtn: { width: '100%', borderRadius: 14, overflow: 'hidden', marginBottom: 10 },
-  primaryBtnGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14 },
-  primaryBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
-  secondaryBtn: { paddingVertical: 10 },
-  secondaryBtnText: { fontSize: 14, fontWeight: '600' },
-});
-
 export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps) {
   const { colors, isDark } = useTheme();
-  const { currentRole, greetingName, user, openAiAssistant, openSignalChat, isBrowsing } = useApp();
+  const { toggleDrawer, isBrowsing } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [subscribeModal, setSubscribeModal] = useState<{ visible: boolean; feature: string }>({ visible: false, feature: '' });
 
-  const isAgent = currentRole === 'agent';
-  const isClient = !isAgent;
-  const displayName = isBrowsing ? 'Explorer' : (greetingName || user?.firstName || 'there');
-
-  const roleKey = useMemo(() => {
-    if (isBrowsing) return 'agent';
-    if (user?.role === 'developer') return 'developer';
-    if (user?.role === 'partner') return 'partner';
-    if (isAgent) return 'agent';
-    return 'client';
-  }, [user?.role, isAgent, isBrowsing]);
-
-  const filteredCategories = useMemo(() => {
-    return ALL_CATEGORIES.filter(cat => {
-      if (!cat.roles) return true;
-      if (roleKey === 'developer' || roleKey === 'partner') return true;
-      return cat.roles.includes(roleKey);
-    });
-  }, [roleKey]);
-
-  const handleCardPress = useCallback((card: LaunchCard) => {
-    if (isBrowsing) {
-      if (card.externalUrl) {
-        Linking.openURL(card.externalUrl);
-        return;
-      }
-      setSubscribeModal({ visible: true, feature: card.label });
-      return;
-    }
-    if (card.onAction === 'ai_assistant') {
-      openAiAssistant();
-    } else if (card.onAction === 'signal_chat') {
-      openSignalChat();
-    } else if (card.onAction === 'switch_dashboard' && onSwitchToDashboard) {
-      onSwitchToDashboard();
-    } else if (card.externalUrl) {
-      Linking.openURL(card.externalUrl);
-    } else if (card.route) {
-      router.push(card.route as any);
-    }
-  }, [router, openAiAssistant, openSignalChat, onSwitchToDashboard, isBrowsing]);
-
-  const getTimeGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
-  const totalTools = filteredCategories.reduce((sum, c) => sum + c.cards.length, 0);
+  const cardWidth = Math.min(SCREEN_WIDTH > 900 ? (SCREEN_WIDTH - 80) / 3 : SCREEN_WIDTH > 600 ? (SCREEN_WIDTH - 60) / 2 : SCREEN_WIDTH - 40, 400);
 
   return (
-    <>
     <ScrollView
-      style={[styles.container, { backgroundColor: isDark ? '#020617' : colors.background }]}
+      style={[styles.container, { backgroundColor: isDark ? '#020617' : '#FAFAFA' }]}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + (isBrowsing ? 80 : 30) },
+        { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 40 },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <Animated.View entering={FadeInDown.duration(500)} style={styles.videoHeroWrap}>
-        <KenBurnsHero slides={HERO_SLIDES} height={480}>
-          <View style={styles.videoHeroContent}>
-            <Text style={styles.videoHeroHeadline}>TrustHome</Text>
-            <Text style={styles.videoHeroSub}>Your complete real estate agent platform</Text>
+      {/* ─── HERO ─── */}
+      <View style={styles.heroWrap}>
+        <KenBurnsHero slides={HERO_SLIDES} height={520}>
+          <View style={styles.heroContent}>
+            <Text style={styles.heroTitle}>TrustHome</Text>
+            <Text style={styles.heroSubtitle}>Your complete real estate agent platform</Text>
+            <View style={styles.heroBtnRow}>
+              <Pressable
+                style={({ pressed }) => [styles.heroPrimaryBtn, pressed && { opacity: 0.85 }]}
+                onPress={() => router.push('/team')}
+              >
+                <LinearGradient
+                  colors={['#1A8A7E', '#0F766E']}
+                  style={styles.heroBtnGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Text style={styles.heroBtnText}>Get Started</Text>
+                  <Ionicons name="arrow-forward" size={16} color="#FFF" />
+                </LinearGradient>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.heroSecondaryBtn, pressed && { opacity: 0.85 }]}
+                onPress={toggleDrawer}
+              >
+                <Ionicons name="grid-outline" size={16} color="#FFF" />
+                <Text style={styles.heroSecondaryBtnText}>Explore Tools</Text>
+              </Pressable>
+            </View>
           </View>
         </KenBurnsHero>
+      </View>
+
+      {/* ─── INTRO SECTION ─── */}
+      <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.section}>
+        <View style={styles.sectionInner}>
+          <Text style={[styles.sectionEyebrow, { color: '#1A8A7E' }]}>BUILT FOR AGENTS</Text>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
+            Everything you need.{'\n'}Nothing you don't.
+          </Text>
+          <Text style={[styles.sectionBody, { color: isDark ? '#94A3B8' : '#64748B' }]}>
+            TrustHome brings your entire real estate business into one platform — leads, transactions, 
+            marketing, documents, and analytics. Stop juggling ten different apps and start closing more deals.
+          </Text>
+        </View>
       </Animated.View>
 
-      {filteredCategories.map((category, catIndex) => (
+      {/* ─── FEATURES ─── */}
+      {FEATURES.map((feature, index) => (
         <Animated.View
-          key={category.title}
-          entering={FadeInDown.delay(150 + catIndex * 70).duration(500).springify()}
-          style={styles.categorySection}
+          key={feature.title}
+          entering={FadeInDown.delay(300 + index * 150).duration(600)}
+          style={[
+            styles.featureSection,
+            index % 2 === 1 && styles.featureSectionAlt,
+            { backgroundColor: index % 2 === 1 ? (isDark ? '#0F172A' : '#F1F5F9') : 'transparent' },
+          ]}
         >
-          <View style={styles.categoryHeader}>
-            <View style={styles.categoryIconWrap}>
+          <View style={[styles.featureInner, index % 2 === 1 && styles.featureInnerReversed]}>
+            <Pressable
+              style={styles.featureImageWrap}
+              onPress={() => router.push(feature.route as any)}
+            >
+              <Image
+                source={feature.image}
+                style={styles.featureImage}
+                resizeMode="cover"
+              />
               <LinearGradient
-                colors={category.gradient as [string, string, ...string[]]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.categoryIconGradient}
-              >
-                <Ionicons name={category.icon} size={18} color="#FFFFFF" />
-              </LinearGradient>
-            </View>
-            <View style={styles.categoryTextWrap}>
-              <Text style={[styles.categoryTitle, { color: isDark ? '#FFFFFF' : colors.text }]}>{category.title}</Text>
-              <Text style={[styles.categoryDescription, { color: isDark ? 'rgba(255,255,255,0.4)' : colors.textSecondary }]}>
-                {category.description}
+                colors={['transparent', 'rgba(0,0,0,0.3)']}
+                style={styles.featureImageOverlay}
+              />
+            </Pressable>
+            <View style={styles.featureText}>
+              <View style={styles.featureIconRow}>
+                <LinearGradient
+                  colors={feature.gradient}
+                  style={styles.featureIconBg}
+                >
+                  <Ionicons name={feature.icon} size={20} color="#FFF" />
+                </LinearGradient>
+              </View>
+              <Text style={[styles.featureTitle, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
+                {feature.title}
               </Text>
+              <Text style={[styles.featureSubtitle, { color: feature.gradient[0] }]}>
+                {feature.subtitle}
+              </Text>
+              <Text style={[styles.featureDescription, { color: isDark ? '#94A3B8' : '#475569' }]}>
+                {feature.description}
+              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.featureBtn, pressed && { opacity: 0.8 }]}
+                onPress={() => router.push(feature.route as any)}
+              >
+                <Text style={[styles.featureBtnText, { color: feature.gradient[0] }]}>
+                  Learn More
+                </Text>
+                <Ionicons name="arrow-forward" size={14} color={feature.gradient[0]} />
+              </Pressable>
             </View>
           </View>
-
-          <CarouselWithNav
-            cards={category.cards}
-            onCardPress={handleCardPress}
-            isDark={isDark}
-            colors={colors}
-          />
         </Animated.View>
       ))}
 
-      <Animated.View entering={FadeInDown.delay(600).duration(400)} style={styles.trustFooter}>
+      {/* ─── STATS BAR ─── */}
+      <Animated.View entering={FadeInDown.delay(700).duration(600)}>
         <LinearGradient
-          colors={isDark
-            ? ['rgba(26,138,126,0.08)', 'rgba(26,138,126,0.02)']
-            : ['rgba(26,138,126,0.06)', 'rgba(26,138,126,0.02)']
-          }
-          style={styles.trustFooterGradient}
+          colors={isDark ? ['#0F766E', '#065F46'] : ['#1A8A7E', '#0D9488']}
+          style={styles.statsBar}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
         >
-          <Ionicons name="shield-checkmark" size={16} color="#1A8A7E" />
-          <View style={styles.trustFooterTextWrap}>
-            <Text style={[styles.trustFooterTitle, { color: isDark ? '#FFFFFF' : colors.text }]}>
-              Secured by Trust Shield
-            </Text>
-            <Text style={[styles.trustFooterSub, { color: isDark ? 'rgba(255,255,255,0.5)' : colors.textSecondary }]}>
-              Blockchain-verified by DarkWave Trust Layer
-            </Text>
-          </View>
+          {STATS.map((stat, i) => (
+            <View key={stat.label} style={styles.statItem}>
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </View>
+          ))}
+        </LinearGradient>
+      </Animated.View>
+
+      {/* ─── QUICK ACCESS TOOLS ─── */}
+      <Animated.View entering={FadeInDown.delay(800).duration(600)} style={styles.section}>
+        <View style={styles.sectionInner}>
+          <Text style={[styles.sectionEyebrow, { color: '#1A8A7E' }]}>QUICK ACCESS</Text>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
+            Your toolkit
+          </Text>
+          <Text style={[styles.sectionBody, { color: isDark ? '#94A3B8' : '#64748B', marginBottom: 24 }]}>
+            Jump straight into any tool. Everything else is in the menu.
+          </Text>
+        </View>
+        <View style={styles.toolsGrid}>
+          {TOOLS_QUICK.map((tool) => (
+            <Pressable
+              key={tool.label}
+              style={({ pressed }) => [
+                styles.toolCard,
+                {
+                  backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+                  borderColor: isDark ? '#334155' : '#E2E8F0',
+                  ...(pressed ? { transform: [{ scale: 0.97 }] } : {}),
+                },
+              ]}
+              onPress={() => router.push(tool.route as any)}
+            >
+              <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '15' }]}>
+                <Ionicons name={tool.icon} size={22} color={tool.color} />
+              </View>
+              <Text style={[styles.toolLabel, { color: isDark ? '#E2E8F0' : '#1E293B' }]}>
+                {tool.label}
+              </Text>
+              <Ionicons name="chevron-forward" size={14} color={isDark ? '#475569' : '#94A3B8'} />
+            </Pressable>
+          ))}
+        </View>
+      </Animated.View>
+
+      {/* ─── CTA SECTION ─── */}
+      <Animated.View entering={FadeInDown.delay(900).duration(600)} style={styles.ctaSection}>
+        <LinearGradient
+          colors={isDark ? ['#0F172A', '#1E293B'] : ['#F8FAFC', '#F1F5F9']}
+          style={styles.ctaInner}
+        >
+          <Ionicons name="shield-checkmark" size={40} color="#1A8A7E" />
+          <Text style={[styles.ctaTitle, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
+            Ready to streamline your business?
+          </Text>
+          <Text style={[styles.ctaBody, { color: isDark ? '#94A3B8' : '#64748B' }]}>
+            Join agents who've simplified their workflow with TrustHome. 
+            Everything from lead capture to closing — in one place.
+          </Text>
           <Pressable
-            onPress={() => Linking.openURL('https://dwtl.io')}
-            style={[styles.trustFooterBtn, { backgroundColor: '#1A8A7E' + (isDark ? '20' : '15') }]}
+            style={({ pressed }) => [styles.ctaBtn, pressed && { opacity: 0.85 }]}
+            onPress={() => router.push('/team')}
           >
-            <Ionicons name="open-outline" size={14} color="#1A8A7E" />
+            <LinearGradient
+              colors={['#1A8A7E', '#0F766E']}
+              style={styles.ctaBtnGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.ctaBtnText}>Get Started Free</Text>
+              <Ionicons name="arrow-forward" size={16} color="#FFF" />
+            </LinearGradient>
           </Pressable>
         </LinearGradient>
       </Animated.View>
 
-      <View style={styles.footerSection}>
-        <View style={styles.footerDivider} />
-        <View style={styles.footerRow}>
-          <Ionicons name="shield-checkmark" size={14} color="rgba(255,255,255,0.2)" />
-          <Text style={[styles.footerText, { color: isDark ? 'rgba(255,255,255,0.25)' : colors.textTertiary }]}>
-            TrustHome Command Center
-          </Text>
-        </View>
-        <Text style={[styles.footerCopyright, { color: isDark ? 'rgba(255,255,255,0.15)' : colors.textTertiary }]}>
-          2026 DarkWave Studios LLC
+      {/* ─── FOOTER ─── */}
+      <View style={[styles.footer, { borderTopColor: isDark ? '#1E293B' : '#E2E8F0' }]}>
+        <Text style={[styles.footerBrand, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
+          TrustHome
+        </Text>
+        <Text style={[styles.footerCopyright, { color: isDark ? '#475569' : '#94A3B8' }]}>
+          © {new Date().getFullYear()} DarkWave Studios
         </Text>
         <View style={styles.footerLinks}>
           <Pressable onPress={() => Linking.openURL('https://darkwavestudios.io')}>
-            <Text style={[styles.footerLink, { color: isDark ? 'rgba(255,255,255,0.3)' : colors.textTertiary }]}>DarkWave Studios</Text>
+            <Text style={[styles.footerLink, { color: isDark ? '#64748B' : '#94A3B8' }]}>DarkWave Studios</Text>
           </Pressable>
-          <Text style={[styles.footerDot, { color: isDark ? 'rgba(255,255,255,0.15)' : colors.textTertiary }]}>  ·  </Text>
+          <Text style={[styles.footerDot, { color: isDark ? '#334155' : '#CBD5E1' }]}> · </Text>
           <Pressable onPress={() => Linking.openURL('https://dwtl.io')}>
-            <Text style={[styles.footerLink, { color: isDark ? 'rgba(255,255,255,0.3)' : colors.textTertiary }]}>Trust Layer</Text>
-          </Pressable>
-          <Text style={[styles.footerDot, { color: isDark ? 'rgba(255,255,255,0.15)' : colors.textTertiary }]}>  ·  </Text>
-          <Pressable onPress={() => Linking.openURL('https://trustshield.tech')}>
-            <Text style={[styles.footerLink, { color: isDark ? 'rgba(255,255,255,0.3)' : colors.textTertiary }]}>Trust Shield</Text>
+            <Text style={[styles.footerLink, { color: isDark ? '#64748B' : '#94A3B8' }]}>Trust Layer</Text>
           </Pressable>
         </View>
       </View>
     </ScrollView>
-
-    <SubscribeModal
-      visible={subscribeModal.visible}
-      featureName={subscribeModal.feature}
-      onClose={() => setSubscribeModal({ visible: false, feature: '' })}
-      onGetStarted={() => {
-        setSubscribeModal({ visible: false, feature: '' });
-        router.push('/team');
-      }}
-    />
-    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingTop: 0,
-  },
-  videoHeroWrap: {
-    paddingHorizontal: 0,
-    marginBottom: 24,
-  },
-  videoHeroContent: {
+  container: { flex: 1 },
+  scrollContent: { paddingTop: 0 },
+
+  // Hero
+  heroWrap: { marginBottom: 0 },
+  heroContent: {
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
   },
-  videoHeroHeadline: {
+  heroTitle: {
     fontSize: 56,
-    fontWeight: '800' as const,
+    fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: -1.5,
     textAlign: 'center',
@@ -890,9 +321,9 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 3 },
     textShadowRadius: 16,
   },
-  videoHeroSub: {
+  heroSubtitle: {
     fontSize: 20,
-    fontWeight: '500' as const,
+    fontWeight: '500',
     color: 'rgba(255,255,255,0.85)',
     marginTop: 10,
     textAlign: 'center',
@@ -901,206 +332,256 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 12,
   },
-  categorySection: {
-    marginBottom: 28,
-  },
-  categoryHeader: {
+  heroBtnRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 14,
     gap: 12,
+    marginTop: 28,
   },
-  categoryIconWrap: {},
-  categoryIconGradient: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
+  heroPrimaryBtn: { borderRadius: 12, overflow: 'hidden' },
+  heroBtnGradient: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
   },
-  categoryTextWrap: {
-    flex: 1,
+  heroBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
-  categoryTitle: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    letterSpacing: -0.3,
-    marginBottom: 3,
+  heroSecondaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
-  categoryDescription: {
+  heroSecondaryBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+
+  // Sections
+  section: {
+    paddingVertical: 48,
+    paddingHorizontal: 20,
+  },
+  sectionInner: {
+    maxWidth: 680,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  sectionEyebrow: {
     fontSize: 12,
-    lineHeight: 17,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  carouselContent: {
-    paddingHorizontal: 16,
-    gap: 12,
-    paddingBottom: 4,
+  sectionHeading: {
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    textAlign: 'center',
+    lineHeight: 40,
+    marginBottom: 14,
   },
-  card: {
-    borderRadius: 18,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+  sectionBody: {
+    fontSize: 16,
+    lineHeight: 26,
+    textAlign: 'center',
   },
-  cardFeatured: {
-    borderColor: 'rgba(255,255,255,0.15)',
+
+  // Features
+  featureSection: {
+    paddingVertical: 48,
+    paddingHorizontal: 20,
   },
-  cardPattern: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
+  featureSectionAlt: {},
+  featureInner: {
+    maxWidth: 1000,
+    alignSelf: 'center',
+    width: '100%',
+    ...(Platform.OS === 'web' ? { flexDirection: 'row' } as any : {}),
+    gap: 32,
+    alignItems: 'center',
   },
-  patternCircle: {
-    position: 'absolute',
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,1)',
+  featureInnerReversed: {
+    ...(Platform.OS === 'web' ? { flexDirection: 'row-reverse' } as any : {}),
   },
-  badgeWrap: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 5,
-  },
-  badgeGradient: {
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '800' as const,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase' as const,
-  },
-  cardContent: {
+  featureImageWrap: {
     flex: 1,
-    justifyContent: 'flex-end',
-    padding: 14,
+    borderRadius: 16,
+    overflow: 'hidden',
+    minHeight: 240,
+    ...(Platform.OS === 'web' ? { maxWidth: '50%' } as any : {}),
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
+  featureImage: {
+    width: '100%',
+    height: 280,
+    borderRadius: 16,
+  },
+  featureImageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 16,
+  },
+  featureText: {
+    flex: 1,
+    ...(Platform.OS === 'web' ? { maxWidth: '50%' } as any : {}),
+  },
+  featureIconRow: { marginBottom: 12 },
+  featureIconBg: {
+    width: 44,
+    height: 44,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
   },
-  cardTextWrap: {
-    gap: 2,
+  featureTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginBottom: 4,
   },
-  cardLabel: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: '#FFFFFF',
-    letterSpacing: -0.2,
+  featureSubtitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 12,
   },
-  cardDescription: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.6)',
-    lineHeight: 16,
+  featureDescription: {
+    fontSize: 15,
+    lineHeight: 24,
+    marginBottom: 16,
   },
-  externalIcon: {
-    position: 'absolute',
-    bottom: 14,
-    right: 14,
-  },
-  featuredStripe: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-  },
-  trustFooter: {
-    marginTop: 4,
-    marginHorizontal: 16,
-    marginBottom: 20,
-  },
-  trustFooterGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 14,
-    gap: 10,
-  },
-  trustFooterTextWrap: {
-    flex: 1,
-  },
-  trustFooterTitle: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-  },
-  trustFooterSub: {
-    fontSize: 11,
-    fontWeight: '400' as const,
-  },
-  trustFooterBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  footerSection: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    gap: 8,
-  },
-  footerDivider: {
-    width: 60,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    marginBottom: 8,
-  },
-  footerRow: {
+  featureBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  footerText: {
-    fontSize: 13,
-    fontWeight: '600' as const,
+  featureBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
-  footerCopyright: {
-    fontSize: 11,
-  },
-  footerLinks: {
+
+  // Stats
+  statsBar: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 36,
+    paddingHorizontal: 20,
+  },
+  statItem: {
     alignItems: 'center',
-    gap: 4,
   },
-  footerLink: {
-    fontSize: 11,
-    fontWeight: '500' as const,
+  statValue: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
   },
-  footerDot: {
-    fontSize: 11,
+  statLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 4,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
-  navRow: {
+
+  // Tools Grid
+  toolsGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexWrap: 'wrap',
     gap: 12,
-    marginTop: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
   },
-  navArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  toolCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 14,
     borderWidth: 1,
+    width: SCREEN_WIDTH > 600 ? '30%' : '47%',
+    minWidth: 150,
+    ...(Platform.OS === 'web' ? { boxShadow: '0 1px 3px rgba(0,0,0,0.08)' } as any : {}),
+  },
+  toolIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotsRow: {
+  toolLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // CTA
+  ctaSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+  },
+  ctaInner: {
+    borderRadius: 20,
+    padding: 40,
+    alignItems: 'center',
+  },
+  ctaTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 10,
+  },
+  ctaBody: {
+    fontSize: 15,
+    lineHeight: 24,
+    textAlign: 'center',
+    maxWidth: 480,
+    marginBottom: 24,
+  },
+  ctaBtn: { borderRadius: 12, overflow: 'hidden' },
+  ctaBtnGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
   },
-  dot: {
-    height: 6,
-    borderRadius: 3,
+  ctaBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
+
+  // Footer
+  footer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    marginTop: 8,
+  },
+  footerBrand: {
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    marginBottom: 6,
+  },
+  footerCopyright: { fontSize: 12, marginBottom: 8 },
+  footerLinks: { flexDirection: 'row', alignItems: 'center' },
+  footerLink: { fontSize: 12, fontWeight: '500' },
+  footerDot: { fontSize: 12 },
 });

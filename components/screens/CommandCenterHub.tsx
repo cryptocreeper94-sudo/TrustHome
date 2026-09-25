@@ -80,6 +80,17 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
   const cardWidth = Math.min(SCREEN_WIDTH > 900 ? (SCREEN_WIDTH - 80) / 3 : SCREEN_WIDTH > 600 ? (SCREEN_WIDTH - 60) / 2 : SCREEN_WIDTH - 40, 400);
 
   return (
+    <>
+    {/* Floating menu button */}
+    <Pressable
+      style={({ pressed }) => [styles.floatingMenuBtn, pressed && { opacity: 0.8 }]}
+      onPress={toggleDrawer}
+    >
+      <View style={styles.floatingMenuInner}>
+        <Ionicons name="menu" size={22} color="#FFF" />
+      </View>
+    </Pressable>
+
     <ScrollView
       style={[styles.container, { backgroundColor: isDark ? '#020617' : '#FAFAFA' }]}
       contentContainerStyle={[
@@ -297,11 +308,27 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
         </View>
       </View>
     </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  floatingMenuBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'web' ? 20 : 50,
+    right: 20,
+    zIndex: 100,
+  },
+  floatingMenuInner: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(12px)' } as any : {}),
+  },
   scrollContent: { paddingTop: 0 },
 
   // Hero

@@ -149,41 +149,22 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
           <View style={styles.left}>
             {showBack ? (
               <Pressable onPress={goHome} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
-                <Ionicons name="home" size={20} color={colors.textInverse} />
+                <Ionicons name="arrow-back" size={22} color={colors.textInverse} />
               </Pressable>
             ) : showClose ? (
               <Pressable onPress={onClose} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-close">
                 <Ionicons name="close" size={22} color={colors.textInverse} />
               </Pressable>
-            ) : null}
-            {isAuthenticated && !isBrowsing && (
-              <Pressable
-                onPress={() => setShowTrustLayer(true)}
-                style={({ pressed }) => [styles.trustStamp, { opacity: pressed ? 0.7 : 1 }]}
-                hitSlop={6}
-                testID="header-trust-stamp"
-              >
-                <MaterialCommunityIcons name="shield-check" size={20} color="rgba(255,255,255,0.9)" />
-              </Pressable>
-            )}
-            <Text style={[styles.title, { color: colors.textInverse }]} numberOfLines={1}>{title}</Text>
+            ) : <View style={styles.iconButton} />}
           </View>
+
+          <Text style={[styles.title, { color: colors.textInverse }]} numberOfLines={1}>{title}</Text>
 
           <View style={styles.right}>
             {rightAction || (
-              <View style={styles.rightActions}>
-                {extraAction}
-                <Pressable onPress={toggleTheme} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-theme-toggle">
-                  <Ionicons
-                    name={isDark ? 'sunny-outline' : 'moon-outline'}
-                    size={20}
-                    color={colors.textInverse}
-                  />
-                </Pressable>
-                <Pressable onPress={toggleDrawer} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-menu">
-                  <Ionicons name="menu" size={24} color={colors.textInverse} />
-                </Pressable>
-              </View>
+              <Pressable onPress={toggleDrawer} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-menu">
+                <Ionicons name="menu" size={24} color={colors.textInverse} />
+              </Pressable>
             )}
           </View>
         </View>
@@ -228,27 +209,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 44,
-    paddingHorizontal: 12,
+    height: 52,
+    paddingHorizontal: 8,
   },
   left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 4,
+    width: 48,
+    alignItems: 'flex-start',
   },
   right: {
+    width: 48,
     alignItems: 'flex-end',
   },
-  rightActions: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 2,
-  },
   title: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    letterSpacing: 0.3,
+    fontSize: 22,
+    fontWeight: '800' as const,
+    letterSpacing: -0.3,
+    textAlign: 'center',
+    flex: 1,
   },
   iconButton: {
     width: 44,

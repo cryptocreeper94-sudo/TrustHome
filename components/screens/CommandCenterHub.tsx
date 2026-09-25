@@ -756,11 +756,10 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       showsVerticalScrollIndicator={false}
     >
       <Animated.View entering={FadeInDown.duration(500)} style={styles.videoHeroWrap}>
-        <KenBurnsHero slides={HERO_SLIDES} height={320}>
+        <KenBurnsHero slides={HERO_SLIDES} height={480}>
           <View style={styles.videoHeroContent}>
-            <Text style={styles.videoHeroGreeting}>{getTimeGreeting()}, {displayName}</Text>
-            <Text style={styles.videoHeroHeadline}>Command Center</Text>
-            <Text style={styles.videoHeroSub}>{filteredCategories.length} categories · {totalTools} tools</Text>
+            <Text style={styles.videoHeroHeadline}>TrustHome</Text>
+            <Text style={styles.videoHeroSub}>Your complete real estate agent platform</Text>
           </View>
         </KenBurnsHero>
       </Animated.View>
@@ -877,27 +876,29 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   videoHeroContent: {
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
     flex: 1,
-    paddingBottom: 30,
-  },
-  videoHeroGreeting: {
-    fontSize: 14,
-    fontWeight: '500' as const,
-    color: 'rgba(255,255,255,0.7)',
-    marginBottom: 2,
   },
   videoHeroHeadline: {
-    fontSize: 30,
+    fontSize: 42,
     fontWeight: '800' as const,
     color: '#FFFFFF',
-    letterSpacing: -0.8,
+    letterSpacing: -1,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   videoHeroSub: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '500' as const,
-    color: 'rgba(255,255,255,0.5)',
-    marginTop: 4,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 8,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   categorySection: {
     marginBottom: 28,

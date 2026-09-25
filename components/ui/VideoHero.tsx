@@ -134,16 +134,6 @@ export function KenBurnsHero({ slides, children, height = 320, interval = SLIDE_
       {/* Content overlay */}
       <View style={styles.content}>
         {children}
-        
-        {/* Dot indicators */}
-        <View style={styles.dots}>
-          {slides.map((_, idx) => (
-            <View key={idx} style={dotStyle(idx)} />
-          ))}
-        </View>
-
-        {/* Slide label */}
-        <Text style={styles.slideLabel}>{slides[currentIndex]?.label}</Text>
       </View>
     </View>
   );
@@ -173,22 +163,8 @@ const styles = StyleSheet.create({
   },
   content: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    padding: 20,
-    paddingBottom: 16,
-  },
-  dots: {
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    marginBottom: 6,
-  },
-  slideLabel: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'right',
-    letterSpacing: 0.3,
+    alignItems: 'center',
+    padding: 20,
   },
 });

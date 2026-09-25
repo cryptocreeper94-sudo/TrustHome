@@ -1,13 +1,13 @@
 # TrustHome — Dockerfile for Coolify
-# Express server + Expo static web build + PostgreSQL
+# Express server + pre-built Expo static web bundle + PostgreSQL
 
 FROM node:20-slim
 
 WORKDIR /app
 
-# Install system deps needed by Expo/Metro build
+# Install system deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ git curl \
+    python3 make g++ curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files and patches for layer caching
@@ -15,16 +15,12 @@ COPY package.json package-lock.json ./
 COPY patches/ ./patches/
 
 # Install dependencies (skip postinstall to avoid patch-package PATH issue)
-# Then run patch-package manually via npx
 RUN npm ci --legacy-peer-deps --ignore-scripts && npx patch-package || true
 
-# Copy the rest of the source
+# Copy the rest of the source (static-build is pre-built and committed)
 COPY . .
 
-# Build the Expo static web bundle
-RUN npm run expo:static:build
-
-# Build the Express server
+# Build the Express server only (static web bundle is pre-built)
 RUN npm run server:build
 
 # Expose port

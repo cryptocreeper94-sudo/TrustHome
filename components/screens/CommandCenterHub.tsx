@@ -87,7 +87,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       onPress={toggleDrawer}
     >
       <View style={styles.floatingMenuInner}>
-        <Ionicons name="menu" size={22} color="#FFF" />
+        <Text style={{ color: '#FFF', fontSize: 22, fontWeight: '700', lineHeight: 24 }}>☰</Text>
       </View>
     </Pressable>
 

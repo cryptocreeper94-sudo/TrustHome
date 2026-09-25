@@ -1,4 +1,5 @@
 import express from "express";
+import compression from "compression";
 import type { Request, Response, NextFunction } from "express";
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
@@ -16,6 +17,7 @@ import { registerTrustLayerSSO } from './trustLayerSSO';
 import { registerAffiliateRoutes } from "./affiliate";
 
 const app = express();
+app.use(compression());
 const log = console.log;
 
 declare module "http" {
@@ -244,9 +246,9 @@ function configureExpoAndLanding(app: express.Application) {
     next();
   });
 
-  app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
-  app.use("/invite-assets", express.static(path.resolve(process.cwd(), "server", "templates", "invite-assets")));
-  app.use(express.static(path.resolve(process.cwd(), "static-build")));
+  app.use("/assets", express.static(path.resolve(process.cwd(), "assets"), { maxAge: '7d' }));
+  app.use("/invite-assets", express.static(path.resolve(process.cwd(), "server", "templates", "invite-assets"), { maxAge: '7d' }));
+  app.use(express.static(path.resolve(process.cwd(), "static-build"), { maxAge: '1y', immutable: true }));
 
   const inviteTemplate = fs.readFileSync(
     path.resolve(process.cwd(), "server", "templates", "invite-jennifer.html"),

@@ -215,13 +215,31 @@ function configureExpoAndLanding(app: express.Application) {
       }
     }
 
+    function serveWebIndex(res: Response) {
+      const webIndex = path.resolve(process.cwd(), "static-build", "index.html");
+      if (!fs.existsSync(webIndex)) return false;
+      let html = fs.readFileSync(webIndex, 'utf-8');
+      // Inject PWA meta tags
+      const pwaTags = `
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0F766E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TrustHome">
+    <meta name="description" content="Your complete real estate agent platform">
+    <link rel="apple-touch-icon" href="/favicon.ico">`;
+      const swScript = `
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>`;
+      html = html.replace('</head>', pwaTags + '\n  </head>');
+      html = html.replace('</body>', swScript + '\n</body>');
+      res.type('html').send(html);
+      return true;
+    }
+
     const isExpoRoute = req.path.startsWith("/app") || expoAppRoutes.some(r => req.path === r || req.path.startsWith(r + '/'));
 
     if (isExpoRoute) {
-      const webIndex = path.resolve(process.cwd(), "static-build", "index.html");
-      if (fs.existsSync(webIndex)) {
-        return res.sendFile(webIndex);
-      }
+      if (serveWebIndex(res)) return;
       return serveLandingPage({
         req,
         res,
@@ -231,10 +249,7 @@ function configureExpoAndLanding(app: express.Application) {
     }
 
     if (req.path === "/") {
-      const webIndex = path.resolve(process.cwd(), "static-build", "index.html");
-      if (fs.existsSync(webIndex)) {
-        return res.sendFile(webIndex);
-      }
+      if (serveWebIndex(res)) return;
       return serveLandingPage({
         req,
         res,

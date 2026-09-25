@@ -117,14 +117,14 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
                   end={{ x: 1, y: 0 }}
                 >
                   <Text style={styles.heroBtnText}>Get Started</Text>
-                  <Ionicons name="arrow-forward" size={16} color="#FFF" />
+                  <Text style={{ color: '#FFF', fontSize: 14 }}> →</Text>
                 </LinearGradient>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [styles.heroSecondaryBtn, pressed && { opacity: 0.85 }]}
                 onPress={toggleDrawer}
               >
-                <Ionicons name="grid-outline" size={16} color="#FFF" />
+                <Text style={{ color: '#FFF', fontSize: 14 }}>⊞ </Text>
                 <Text style={styles.heroSecondaryBtnText}>Explore Tools</Text>
               </Pressable>
             </View>
@@ -264,7 +264,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
           colors={isDark ? ['#0F172A', '#1E293B'] : ['#F8FAFC', '#F1F5F9']}
           style={styles.ctaInner}
         >
-          <Ionicons name="shield-checkmark" size={40} color="#1A8A7E" />
+          <Text style={{ fontSize: 36 }}>🛡️</Text>
           <Text style={[styles.ctaTitle, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
             Ready to streamline your business?
           </Text>
@@ -283,7 +283,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
               end={{ x: 1, y: 0 }}
             >
               <Text style={styles.ctaBtnText}>Get Started Free</Text>
-              <Ionicons name="arrow-forward" size={16} color="#FFF" />
+              <Text style={{ color: '#FFF', fontSize: 14 }}> →</Text>
             </LinearGradient>
           </Pressable>
         </LinearGradient>

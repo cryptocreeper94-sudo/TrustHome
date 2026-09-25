@@ -57,12 +57,12 @@ const STATS = [
 ];
 
 const TOOLS_QUICK = [
-  { icon: 'swap-horizontal-outline' as const, label: 'Transactions', route: '/transactions', color: '#0EA5E9' },
-  { icon: 'business-outline' as const, label: 'Properties', route: '/properties', color: '#8B5CF6' },
-  { icon: 'document-text-outline' as const, label: 'Documents', route: '/documents', color: '#10B981' },
-  { icon: 'chatbubbles-outline' as const, label: 'Messages', route: '/messages', color: '#F59E0B' },
-  { icon: 'film-outline' as const, label: 'Media Studio', route: '/media-studio', color: '#EC4899' },
-  { icon: 'briefcase-outline' as const, label: 'Business Suite', route: '/business', color: '#6366F1' },
+  { emoji: '📋', label: 'Transactions', route: '/transactions', color: '#0EA5E9' },
+  { emoji: '🏠', label: 'Properties', route: '/properties', color: '#8B5CF6' },
+  { emoji: '📄', label: 'Documents', route: '/documents', color: '#10B981' },
+  { emoji: '💬', label: 'Messages', route: '/messages', color: '#F59E0B' },
+  { emoji: '🎬', label: 'Media Studio', route: '/media-studio', color: '#EC4899' },
+  { emoji: '💼', label: 'Business Suite', route: '/business', color: '#6366F1' },
 ];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -247,12 +247,12 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
               onPress={() => router.push(tool.route as any)}
             >
               <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '15' }]}>
-                <Ionicons name={tool.icon} size={22} color={tool.color} />
+                <Text style={{ fontSize: 18 }}>{tool.emoji}</Text>
               </View>
               <Text style={[styles.toolLabel, { color: isDark ? '#E2E8F0' : '#1E293B' }]}>
                 {tool.label}
               </Text>
-              <Ionicons name="chevron-forward" size={14} color={isDark ? '#475569' : '#94A3B8'} />
+              <Text style={{ color: isDark ? '#475569' : '#94A3B8', fontSize: 16 }}>›</Text>
             </Pressable>
           ))}
         </View>
@@ -523,12 +523,12 @@ const styles = StyleSheet.create({
 
   // Tools Grid
   toolsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+    flexDirection: SCREEN_WIDTH > 600 ? 'row' : 'column',
+    flexWrap: SCREEN_WIDTH > 600 ? 'wrap' : 'nowrap',
+    gap: 10,
     paddingHorizontal: 20,
     justifyContent: 'center',
-  },
+  } as any,
   toolCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -537,10 +537,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 1,
-    width: SCREEN_WIDTH > 600 ? '30%' : '47%',
-    minWidth: 150,
+    ...(SCREEN_WIDTH > 600 ? { width: '30%', minWidth: 200 } : {}),
     ...(Platform.OS === 'web' ? { boxShadow: '0 1px 3px rgba(0,0,0,0.08)' } as any : {}),
-  },
+  } as any,
   toolIconWrap: {
     width: 38,
     height: 38,

@@ -10,15 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 make g++ git curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package files first for layer caching
+# Copy package files and patches for layer caching
 COPY package.json package-lock.json ./
-
-# Install dependencies
-RUN npm ci --legacy-peer-deps
-
-# Copy patches and apply
 COPY patches/ ./patches/
-RUN npx patch-package || true
+
+# Install dependencies (skip postinstall to avoid patch-package PATH issue)
+# Then run patch-package manually via npx
+RUN npm ci --legacy-peer-deps --ignore-scripts && npx patch-package || true
 
 # Copy the rest of the source
 COPY . .

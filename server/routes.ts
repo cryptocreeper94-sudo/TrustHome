@@ -1091,17 +1091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/media-studio/walkthrough-request", async (req: Request, res: Response) => {
     try {
-      const { propertyId, propertyAddress, requestType, notes, agentId } = req.body;
-      if (!propertyAddress) {
-        return res.status(400).json({ error: "Property address is required" });
-      }
-      const result = await mediaStudioRequestWalkthrough({
-        propertyAddress,
-        propertyId,
-        requestType: requestType || "Video Walkthrough",
-        notes,
-        agentId,
-      });
+      const result = await mediaStudioRequestWalkthrough(req.body);
       res.status(201).json({ ...result, tenantSpace: "trusthome" });
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });

@@ -8,13 +8,47 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 
 interface MenuItem {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: string;
+  emoji: string;
   label: string;
   route?: string;
   onPress?: () => void;
   agentOnly?: boolean;
   dividerAfter?: boolean;
 }
+
+const E: Record<string, string> = {
+  'home': '🏠',
+  'swap-horizontal-outline': '📝',
+  'business-outline': '🏢',
+  'calendar-outline': '📅',
+  'chatbubbles-outline': '💬',
+  'document-text-outline': '📄',
+  'people-outline': '👥',
+  'megaphone-outline': '📣',
+  'newspaper-outline': '📰',
+  'bar-chart-outline': '📊',
+  'globe-outline': '🌐',
+  'briefcase-outline': '💼',
+  'film-outline': '🎬',
+  'leaf-outline': '🌳',
+  'color-palette-outline': '🎨',
+  'brush-outline': '🖌️',
+  'person-outline': '👤',
+  'grid-outline': '⊞',
+  'code-slash-outline': '💻',
+  'map-outline': '🗟a️',
+  'shield-checkmark-outline': '🛡️',
+  'gift-outline': '🎁',
+  'help-circle-outline': '❓',
+  'sunny-outline': '☀️',
+  'moon-outline': '🌙',
+  'log-in-outline': '🔑',
+  'log-out-outline': '🚪',
+  'hand-right-outline': '✋',
+  'exit-outline': '🚪',
+  'close': '✕',
+};
 
 function AnimatedMenuItem({ item, index, onPress, colors }: { item: MenuItem; index: number; onPress: (item: MenuItem) => void; colors: any }) {
   return (
@@ -26,7 +60,7 @@ function AnimatedMenuItem({ item, index, onPress, colors }: { item: MenuItem; in
           pressed && { backgroundColor: colors.backgroundTertiary, opacity: 0.8 },
         ]}
       >
-        <Ionicons name={item.icon} size={22} color={colors.textSecondary} />
+        <Text style={{ fontSize: 18, width: 28, textAlign: 'center' }}>{item.emoji}</Text>
         <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
       </Pressable>
       {item.dividerAfter ? (
@@ -45,33 +79,33 @@ export function DrawerMenu() {
   const isAgent = isAgentAuthenticated && !isBrowsing;
 
   const menuItems: MenuItem[] = isBrowsing ? [
-    { icon: 'home', label: 'Home', route: '/' },
-    { icon: 'shield-checkmark-outline', label: 'Trust Layer', route: '/ecosystem' },
-    { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
+    { icon: 'home', emoji: E['home'], label: 'Home', route: '/' },
+    { icon: 'shield-checkmark-outline', emoji: E['shield-checkmark-outline'], label: 'Trust Layer', route: '/ecosystem' },
+    { icon: 'help-circle-outline', emoji: E['help-circle-outline'], label: 'Help & Support', route: '/support' },
   ] : [
-    { icon: 'home', label: 'Home', route: '/' },
-    { icon: 'swap-horizontal-outline', label: 'Transactions', route: '/transactions' },
-    { icon: 'business-outline', label: 'Properties', route: '/properties' },
-    { icon: 'calendar-outline', label: 'Showings', route: '/showings' },
-    { icon: 'chatbubbles-outline', label: 'Messages', route: '/messages', dividerAfter: true },
-    { icon: 'document-text-outline', label: 'Documents', route: '/documents' },
-    { icon: 'people-outline', label: 'Leads', route: '/leads', agentOnly: true },
-    { icon: 'megaphone-outline', label: 'Marketing', route: '/marketing', agentOnly: true },
-    { icon: 'newspaper-outline', label: 'Blog', route: '/blog', agentOnly: true },
-    { icon: 'bar-chart-outline', label: 'Analytics', route: '/analytics', agentOnly: true },
-    { icon: 'globe-outline', label: 'Network', route: '/network', agentOnly: true, dividerAfter: true },
-    { icon: 'briefcase-outline', label: 'Business Suite', route: '/business', agentOnly: true },
-    { icon: 'film-outline', label: 'Media Studio', route: '/media-studio', agentOnly: true },
-    { icon: 'leaf-outline', label: 'Tree Services', route: '/tree-services', agentOnly: true },
-    { icon: 'color-palette-outline', label: 'Branding', route: '/branding', agentOnly: true },
-    { icon: 'brush-outline', label: 'Room Visualizer', onPress: () => Linking.openURL('https://paintpros.io/npp/estimate'), dividerAfter: true },
-    { icon: 'person-outline', label: 'Profile & Settings', route: '/settings' },
-    { icon: 'grid-outline', label: 'Command Center', route: '/command-center', agentOnly: true },
-    { icon: 'code-slash-outline', label: 'Developer Console', route: '/developer', agentOnly: true },
-    { icon: 'map-outline', label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); }, agentOnly: true },
-    { icon: 'shield-checkmark-outline', label: 'Trust Layer', route: '/ecosystem' },
-    { icon: 'gift-outline', label: 'Share & Earn', route: '/affiliate' },
-    { icon: 'help-circle-outline', label: 'Help & Support', route: '/support' },
+    { icon: 'home', emoji: E['home'], label: 'Home', route: '/' },
+    { icon: 'swap-horizontal-outline', emoji: E['swap-horizontal-outline'], label: 'Transactions', route: '/transactions' },
+    { icon: 'business-outline', emoji: E['business-outline'], label: 'Properties', route: '/properties' },
+    { icon: 'calendar-outline', emoji: E['calendar-outline'], label: 'Showings', route: '/showings' },
+    { icon: 'chatbubbles-outline', emoji: E['chatbubbles-outline'], label: 'Messages', route: '/messages', dividerAfter: true },
+    { icon: 'document-text-outline', emoji: E['document-text-outline'], label: 'Documents', route: '/documents' },
+    { icon: 'people-outline', emoji: E['people-outline'], label: 'Leads', route: '/leads', agentOnly: true },
+    { icon: 'megaphone-outline', emoji: E['megaphone-outline'], label: 'Marketing', route: '/marketing', agentOnly: true },
+    { icon: 'newspaper-outline', emoji: E['newspaper-outline'], label: 'Blog', route: '/blog', agentOnly: true },
+    { icon: 'bar-chart-outline', emoji: E['bar-chart-outline'], label: 'Analytics', route: '/analytics', agentOnly: true },
+    { icon: 'globe-outline', emoji: E['globe-outline'], label: 'Network', route: '/network', agentOnly: true, dividerAfter: true },
+    { icon: 'briefcase-outline', emoji: E['briefcase-outline'], label: 'Business Suite', route: '/business', agentOnly: true },
+    { icon: 'film-outline', emoji: E['film-outline'], label: 'Media Studio', route: '/media-studio', agentOnly: true },
+    { icon: 'leaf-outline', emoji: E['leaf-outline'], label: 'Tree Services', route: '/tree-services', agentOnly: true },
+    { icon: 'color-palette-outline', emoji: E['color-palette-outline'], label: 'Branding', route: '/branding', agentOnly: true },
+    { icon: 'brush-outline', emoji: E['brush-outline'], label: 'Room Visualizer', onPress: () => Linking.openURL('https://paintpros.io/npp/estimate'), dividerAfter: true },
+    { icon: 'person-outline', emoji: E['person-outline'], label: 'Profile & Settings', route: '/settings' },
+    { icon: 'grid-outline', emoji: E['grid-outline'], label: 'Command Center', route: '/command-center', agentOnly: true },
+    { icon: 'code-slash-outline', emoji: E['code-slash-outline'], label: 'Developer Console', route: '/developer', agentOnly: true },
+    { icon: 'map-outline', emoji: E['map-outline'], label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); }, agentOnly: true },
+    { icon: 'shield-checkmark-outline', emoji: E['shield-checkmark-outline'], label: 'Trust Layer', route: '/ecosystem' },
+    { icon: 'gift-outline', emoji: E['gift-outline'], label: 'Share & Earn', route: '/affiliate' },
+    { icon: 'help-circle-outline', emoji: E['help-circle-outline'], label: 'Help & Support', route: '/support' },
   ];
 
   const handleItemPress = (item: MenuItem) => {
@@ -145,7 +179,7 @@ export function DrawerMenu() {
               )}
             </View>
             <Pressable onPress={closeDrawer} style={({ pressed }) => [styles.closeBtn, { opacity: pressed ? 0.7 : 1 }]}>
-              <Ionicons name="close" size={24} color={colors.text} />
+              <Text style={{ fontSize: 20, color: colors.text }}>✕</Text>
             </Pressable>
           </View>
 
@@ -163,7 +197,7 @@ export function DrawerMenu() {
 
           <View style={[styles.drawerFooter, { borderTopColor: colors.divider }]}>
             <Pressable onPress={toggleTheme} style={({ pressed }) => [styles.themeToggle, { opacity: pressed ? 0.7 : 1 }]}>
-              <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textSecondary} />
+              <Text style={{ fontSize: 18, width: 28, textAlign: 'center' }}>{isDark ? '☀️' : '🌙'}</Text>
               <Text style={[styles.themeText, { color: colors.textSecondary }]}>{isDark ? 'Light Mode' : 'Dark Mode'}</Text>
             </Pressable>
             {isBrowsing ? (
@@ -172,7 +206,7 @@ export function DrawerMenu() {
                 style={styles.menuItem}
                 testID="drawer-get-started"
               >
-                <Ionicons name="log-in-outline" size={22} color={colors.primary} />
+                <Text style={{ fontSize: 18, width: 28, textAlign: 'center' }}>🔑</Text>
                 <Text style={[styles.menuLabel, { color: colors.primary }]}>Sign In / Get Started</Text>
               </Pressable>
             ) : demoMode ? (
@@ -182,7 +216,7 @@ export function DrawerMenu() {
                   style={styles.menuItem}
                   testID="drawer-request-access"
                 >
-                  <Ionicons name="hand-right-outline" size={22} color={colors.primary} />
+                  <Text style={{ fontSize: 18, width: 28, textAlign: 'center' }}>✋</Text>
                   <Text style={[styles.menuLabel, { color: colors.primary }]}>Request Access</Text>
                 </Pressable>
                 <Pressable
@@ -190,18 +224,18 @@ export function DrawerMenu() {
                   style={styles.menuItem}
                   testID="drawer-exit-demo"
                 >
-                  <Ionicons name="exit-outline" size={22} color={colors.error} />
+                  <Text style={{ fontSize: 18, width: 28, textAlign: 'center' }}>🚪</Text>
                   <Text style={[styles.menuLabel, { color: colors.error }]}>Exit Demo</Text>
                 </Pressable>
               </>
             ) : isAuthenticated ? (
               <Pressable onPress={handleSignOut} style={styles.menuItem} testID="drawer-sign-out">
-                <Ionicons name="log-out-outline" size={22} color={colors.error} />
+                <Text style={{ fontSize: 18, width: 28, textAlign: 'center' }}>🚪</Text>
                 <Text style={[styles.menuLabel, { color: colors.error }]}>Sign Out</Text>
               </Pressable>
             ) : (
               <Pressable onPress={handleSignIn} style={styles.menuItem} testID="drawer-sign-in">
-                <Ionicons name="log-in-outline" size={22} color={colors.primary} />
+                <Text style={{ fontSize: 18, width: 28, textAlign: 'center' }}>🔑</Text>
                 <Text style={[styles.menuLabel, { color: colors.primary }]}>Sign In</Text>
               </Pressable>
             )}

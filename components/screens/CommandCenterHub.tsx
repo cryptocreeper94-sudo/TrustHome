@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, Platform,
   Dimensions, Linking, Image,
@@ -25,7 +25,7 @@ const FEATURES = [
     subtitle: 'Never lose a lead again',
     description: 'Track every client from first contact to closing day. Smart lead scoring, automated follow-ups, and a pipeline view that keeps you on top of every deal.',
     image: require('@/assets/images/feature-crm.jpg'),
-    icon: 'people-outline' as const,
+    emoji: '👥',
     route: '/leads',
     gradient: ['#0EA5E9', '#0284C7'] as [string, string],
   },
@@ -34,7 +34,7 @@ const FEATURES = [
     subtitle: 'Stand out in every market',
     description: 'AI-powered listing descriptions, social media templates, branded flyers, and a blog manager that positions you as the local expert.',
     image: require('@/assets/images/feature-marketing.jpg'),
-    icon: 'megaphone-outline' as const,
+    emoji: '📣',
     route: '/marketing',
     gradient: ['#8B5CF6', '#7C3AED'] as [string, string],
   },
@@ -43,7 +43,7 @@ const FEATURES = [
     subtitle: 'Data-driven decisions',
     description: 'Real-time performance dashboards, market trend analysis, and transaction metrics that help you understand what\'s working and where to focus.',
     image: require('@/assets/images/feature-analytics.jpg'),
-    icon: 'bar-chart-outline' as const,
+    emoji: '📊',
     route: '/analytics',
     gradient: ['#10B981', '#059669'] as [string, string],
   },
@@ -78,6 +78,44 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
   const router = useRouter();
 
   const cardWidth = Math.min(SCREEN_WIDTH > 900 ? (SCREEN_WIDTH - 80) / 3 : SCREEN_WIDTH > 600 ? (SCREEN_WIDTH - 60) / 2 : SCREEN_WIDTH - 40, 400);
+
+  // PWA Install
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const isIOS = Platform.OS === 'web' && typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = Platform.OS === 'web' && typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || (window.navigator as any).standalone);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || isStandalone) return;
+    const dismissed = typeof localStorage !== 'undefined' && localStorage.getItem('pwa-dismissed');
+    if (dismissed) return;
+
+    if (isIOS) {
+      setShowInstallBanner(true);
+      return;
+    }
+
+    const handler = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = useCallback(async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const result = await installPrompt.userChoice;
+      if (result.outcome === 'accepted') setShowInstallBanner(false);
+    }
+  }, [installPrompt]);
+
+  const dismissBanner = () => {
+    setShowInstallBanner(false);
+    if (typeof localStorage !== 'undefined') localStorage.setItem('pwa-dismissed', '1');
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -178,7 +216,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
                   colors={feature.gradient}
                   style={styles.featureIconBg}
                 >
-                  <Ionicons name={feature.icon} size={20} color="#FFF" />
+                  <Text style={{ fontSize: 18 }}>{feature.emoji}</Text>
                 </LinearGradient>
               </View>
               <Text style={[styles.featureTitle, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
@@ -197,7 +235,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
                 <Text style={[styles.featureBtnText, { color: feature.gradient[0] }]}>
                   Learn More
                 </Text>
-                <Ionicons name="arrow-forward" size={14} color={feature.gradient[0]} />
+                <Text style={{ color: feature.gradient[0], fontSize: 14 }}> →</Text>
               </Pressable>
             </View>
           </View>
@@ -288,6 +326,47 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
           </Pressable>
         </LinearGradient>
       </Animated.View>
+
+      {/* ─── PWA INSTALL BANNER ─── */}
+      {showInstallBanner && (
+        <View style={[styles.installBanner, { backgroundColor: isDark ? '#1E293B' : '#F1F5F9', borderColor: isDark ? '#334155' : '#E2E8F0' }]}>
+          <View style={styles.installContent}>
+            <Text style={{ fontSize: 28 }}>📲</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.installTitle, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
+                Install TrustHome
+              </Text>
+              <Text style={[styles.installBody, { color: isDark ? '#94A3B8' : '#64748B' }]}>
+                {isIOS
+                  ? 'Tap the Share button (⬆) then "Add to Home Screen"'
+                  : 'Add TrustHome to your home screen for quick access'}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.installActions}>
+            {!isIOS && installPrompt && (
+              <Pressable
+                style={({ pressed }) => [styles.installBtn, pressed && { opacity: 0.85 }]}
+                onPress={handleInstall}
+              >
+                <LinearGradient
+                  colors={['#1A8A7E', '#0F766E']}
+                  style={styles.installBtnGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Text style={styles.installBtnText}>Install</Text>
+                </LinearGradient>
+              </Pressable>
+            )}
+            <Pressable onPress={dismissBanner}>
+              <Text style={{ color: isDark ? '#64748B' : '#94A3B8', fontSize: 13, fontWeight: '600' }}>
+                {isIOS ? 'Got it' : 'Not now'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
 
       {/* ─── FOOTER ─── */}
       <View style={[styles.footer, { borderTopColor: isDark ? '#1E293B' : '#E2E8F0' }]}>
@@ -610,4 +689,44 @@ const styles = StyleSheet.create({
   footerLinks: { flexDirection: 'row', alignItems: 'center' },
   footerLink: { fontSize: 12, fontWeight: '500' },
   footerDot: { fontSize: 12 },
+
+  // Install Banner
+  installBanner: {
+    marginHorizontal: 20,
+    marginVertical: 16,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+  },
+  installContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginBottom: 14,
+  },
+  installTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  installBody: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  installActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 16,
+  },
+  installBtn: { borderRadius: 10, overflow: 'hidden' },
+  installBtnGradient: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  installBtnText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
 });

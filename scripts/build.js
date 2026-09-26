@@ -506,36 +506,35 @@ async function buildWebExport(domain) {
     webBuild.on("close", (code) => {
       if (code === 0) {
         console.log("Web export complete");
-        // Inject @font-face declarations for vector icon fonts
+        // Copy icon fonts to a simple /fonts/ path and inject @font-face CSS
         const indexPath = path.join("static-build", "index.html");
         if (fs.existsSync(indexPath)) {
           let html = fs.readFileSync(indexPath, "utf-8");
           
-          // Find the actual hashed font filenames
+          // Copy font files to static-build/fonts/ for reliable serving
           const fontsDir = path.join("static-build", "assets", "node_modules", "@expo", "vector-icons", "build", "vendor", "react-native-vector-icons", "Fonts");
-          let ioniconsFile = "Ionicons.ttf";
-          let materialFile = "MaterialCommunityIcons.ttf";
+          const outFontsDir = path.join("static-build", "fonts");
+          if (!fs.existsSync(outFontsDir)) fs.mkdirSync(outFontsDir, { recursive: true });
           
           if (fs.existsSync(fontsDir)) {
             const fontFiles = fs.readdirSync(fontsDir);
             const ionMatch = fontFiles.find(f => f.startsWith("Ionicons.") && f.endsWith(".ttf"));
             const matMatch = fontFiles.find(f => f.startsWith("MaterialCommunityIcons.") && f.endsWith(".ttf"));
-            if (ionMatch) ioniconsFile = ionMatch;
-            if (matMatch) materialFile = matMatch;
-            console.log(`Found font files: ${ioniconsFile}, ${materialFile}`);
+            if (ionMatch) fs.copyFileSync(path.join(fontsDir, ionMatch), path.join(outFontsDir, "Ionicons.ttf"));
+            if (matMatch) fs.copyFileSync(path.join(fontsDir, matMatch), path.join(outFontsDir, "MaterialCommunityIcons.ttf"));
+            console.log(`Copied font files to /fonts/: ${ionMatch}, ${matMatch}`);
           }
           
-          const fontBasePath = "/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts";
           const fontFaceCSS = `
     <style id="expo-fonts">
       @font-face {
         font-family: 'Ionicons';
-        src: url('${fontBasePath}/${ioniconsFile}') format('truetype');
+        src: url('/fonts/Ionicons.ttf') format('truetype');
         font-display: block;
       }
       @font-face {
         font-family: 'MaterialCommunityIcons';
-        src: url('${fontBasePath}/${materialFile}') format('truetype');
+        src: url('/fonts/MaterialCommunityIcons.ttf') format('truetype');
         font-display: block;
       }
     </style>`;

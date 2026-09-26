@@ -150,7 +150,7 @@ function AnimatedFilterChip({ label, isActive, color, borderColor, onPress }: { 
         onPressIn={() => { scale.value = withSpring(0.93, { damping: 15, stiffness: 300 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
       >
-        <Text style={[styles.filterChipText, { color: isActive ? '#FFF' : 'rgba(255,255,255,0.6)' }]}>
+        <Text style={[styles.filterChipText, { color: isActive ? '#FFF' : color }]}>
           {label}
         </Text>
       </Pressable>

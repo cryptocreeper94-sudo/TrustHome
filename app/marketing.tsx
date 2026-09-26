@@ -387,7 +387,6 @@ export default function MarketingScreen() {
       </Animated.View>
     </View>
     );
-  };
 
   const renderAnalytics = () => (
     <View style={styles.section}>

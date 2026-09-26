@@ -261,9 +261,11 @@ function configureExpoAndLanding(app: express.Application) {
     next();
   });
 
+  // Serve Expo web export first (fonts, JS bundles live in static-build/assets/)
+  app.use(express.static(path.resolve(process.cwd(), "static-build"), { maxAge: '1y', immutable: true }));
+  // Fallback for project-root assets
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets"), { maxAge: '7d' }));
   app.use("/invite-assets", express.static(path.resolve(process.cwd(), "server", "templates", "invite-assets"), { maxAge: '7d' }));
-  app.use(express.static(path.resolve(process.cwd(), "static-build"), { maxAge: '1y', immutable: true }));
 
   const inviteTemplate = fs.readFileSync(
     path.resolve(process.cwd(), "server", "templates", "invite-jennifer.html"),

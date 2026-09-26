@@ -133,7 +133,7 @@ export default function MarketingScreen() {
           <Ionicons name="megaphone" size={28} color={colors.primary} />
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={[styles.welcomeTitle, { color: colors.text }]}>Marketing Hub</Text>
-            <Text style={[styles.welcomeSub, { color: colors.textSecondary }]}>3 posts scheduled this week, 1 needs review</Text>
+            <Text style={[styles.welcomeSub, { color: colors.textSecondary }]}>{CONTENT_ITEMS.length > 0 ? `${CONTENT_ITEMS.length} posts, ${scheduledItems.length} scheduled` : 'No posts yet — create your first one'}</Text>
           </View>
         </View>
       </GlassCard>
@@ -161,10 +161,11 @@ export default function MarketingScreen() {
       <Animated.View entering={FadeInDown.duration(400).delay(350)}>
       <View style={{ marginTop: 14 }}>
         <AccordionSection title="Today's Suggested Post" icon="sparkles" iconColor="#FF9500" defaultOpen={true}>
+          {CONTENT_ITEMS.length > 0 ? (
           <View style={styles.suggestedPost}>
             <View style={styles.suggestedHeader}>
               <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
-                <Text style={styles.avatarText}>JL</Text>
+                <Text style={styles.avatarText}>{(user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')}</Text>
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={[styles.suggestedName, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : 'Your Name'}</Text>
@@ -175,10 +176,10 @@ export default function MarketingScreen() {
               </View>
             </View>
             <Text style={[styles.suggestedBody, { color: colors.text }]}>
-              Spring is the perfect time to sell! Our latest market analysis shows prices up 4.2% in your neighborhood. Curious about your home's value? Send me a DM for a free, no-obligation assessment.
+              {CONTENT_ITEMS[0]?.preview || 'No content available yet.'}
             </Text>
             <View style={styles.suggestedPlatforms}>
-              {['FB', 'IG'].map(p => (
+              {(CONTENT_ITEMS[0]?.platforms || ['FB', 'IG']).map((p: string) => (
                 <View key={p} style={[styles.platformPill, { backgroundColor: platformColor(p) + '20' }]}>
                   <Text style={[styles.platformPillText, { color: platformColor(p) }]}>{p}</Text>
                 </View>
@@ -199,6 +200,14 @@ export default function MarketingScreen() {
               </Pressable>
             </View>
           </View>
+          ) : (
+          <View style={[styles.suggestedPost, { alignItems: 'center', paddingVertical: 24 }]}>
+            <Ionicons name="create-outline" size={32} color={colors.textSecondary} />
+            <Text style={[styles.suggestedBody, { color: colors.textSecondary, textAlign: 'center', marginTop: 8 }]}>
+              No posts yet. Connect your social accounts to get started.
+            </Text>
+          </View>
+          )}
         </AccordionSection>
       </View>
 

@@ -1131,41 +1131,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!analytics) {
         const [newAnalytics] = await db.insert(marketingAnalytics).values({
           agentId,
-          impressions: 24850,
-          reach: 12430,
-          clicks: 1840,
-          engagement: 3620,
-          shares: 890,
-          avgCtr: 3.2,
-          costPerClick: 0.42
+          impressions: 0,
+          reach: 0,
+          clicks: 0,
+          engagement: 0,
+          shares: 0,
+          avgCtr: 0,
+          costPerClick: 0
         }).returning();
         analytics = newAnalytics;
+      } else if (analytics.reach === 12430 || analytics.impressions === 24850) {
+        // Reset previously-seeded fake demo data
+        const [reset] = await db.update(marketingAnalytics)
+          .set({ impressions: 0, reach: 0, clicks: 0, engagement: 0, shares: 0, avgCtr: 0, costPerClick: 0 })
+          .where(eq(marketingAnalytics.agentId, agentId))
+          .returning();
+        analytics = reset;
       }
       
-      // If no posts exist, seed some initial posts for the dashboard
-      if (posts.length === 0) {
-        const seedPosts = [
-          { type: 'Social Post', title: 'New Listing Announcement', preview: 'Just listed! Stunning 4BR/3BA in Oakwood Estates...', platforms: ['FB','IG'], status: 'Published', scheduledDate: new Date() },
-          { type: 'Ad Copy', title: 'Spring Buyer Campaign', preview: 'Ready to find your dream home? Spring inventory is here...', platforms: ['FB','IG','X'], status: 'Scheduled', scheduledDate: new Date(Date.now() + 86400000 * 2) },
-          { type: 'Email', title: 'Monthly Market Update', preview: 'January market stats are in: median price up 4.2%...', platforms: ['Email'], status: 'Draft', scheduledDate: null },
-          { type: 'Social Post', title: 'Client Testimonial', preview: '"Jennifer made our first home purchase seamless!"...', platforms: ['FB','IG'], status: 'Published', scheduledDate: new Date(Date.now() - 86400000 * 2) },
-        ];
-        
-        for (const post of seedPosts) {
-          await db.insert(marketingPosts).values({
-            agentId,
-            ...post
-          });
-        }
-        
-        const freshPosts = await db.query.marketingPosts.findMany({
-          where: eq(marketingPosts.agentId, agentId),
-          orderBy: [desc(marketingPosts.scheduledDate), desc(marketingPosts.createdAt)],
-        });
-        
-        return res.json({ posts: freshPosts, analytics });
-      }
-      
+      // If no posts exist, return empty array (no fake seeding)
       res.json({ posts, analytics });
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });

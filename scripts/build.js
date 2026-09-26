@@ -510,16 +510,32 @@ async function buildWebExport(domain) {
         const indexPath = path.join("static-build", "index.html");
         if (fs.existsSync(indexPath)) {
           let html = fs.readFileSync(indexPath, "utf-8");
+          
+          // Find the actual hashed font filenames
+          const fontsDir = path.join("static-build", "assets", "node_modules", "@expo", "vector-icons", "build", "vendor", "react-native-vector-icons", "Fonts");
+          let ioniconsFile = "Ionicons.ttf";
+          let materialFile = "MaterialCommunityIcons.ttf";
+          
+          if (fs.existsSync(fontsDir)) {
+            const fontFiles = fs.readdirSync(fontsDir);
+            const ionMatch = fontFiles.find(f => f.startsWith("Ionicons.") && f.endsWith(".ttf"));
+            const matMatch = fontFiles.find(f => f.startsWith("MaterialCommunityIcons.") && f.endsWith(".ttf"));
+            if (ionMatch) ioniconsFile = ionMatch;
+            if (matMatch) materialFile = matMatch;
+            console.log(`Found font files: ${ioniconsFile}, ${materialFile}`);
+          }
+          
+          const fontBasePath = "/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts";
           const fontFaceCSS = `
     <style id="expo-fonts">
       @font-face {
         font-family: 'Ionicons';
-        src: url('/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf') format('truetype');
+        src: url('${fontBasePath}/${ioniconsFile}') format('truetype');
         font-display: block;
       }
       @font-face {
         font-family: 'MaterialCommunityIcons';
-        src: url('/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf') format('truetype');
+        src: url('${fontBasePath}/${materialFile}') format('truetype');
         font-display: block;
       }
     </style>`;

@@ -28,93 +28,35 @@ interface PeriodData {
   vsLast: { closings: number; revenue: number; avgSalePrice: number; avgDOM: number };
 }
 
+const EMPTY_PERIOD: PeriodData = {
+  closings: 0,
+  revenue: 0,
+  avgSalePrice: 0,
+  avgDOM: 0,
+  revenueByMonth: [
+    { label: 'Sep', value: 0 },
+    { label: 'Oct', value: 0 },
+    { label: 'Nov', value: 0 },
+    { label: 'Dec', value: 0 },
+    { label: 'Jan', value: 0 },
+    { label: 'Feb', value: 0 },
+  ],
+  funnel: { leads: 0, showings: 0, offers: 0, closings: 0 },
+  sources: [
+    { name: 'Referrals', value: 0, color: '#1A8A7E' },
+    { name: 'Zillow', value: 0, color: '#007AFF' },
+    { name: 'Open House', value: 0, color: '#FF9500' },
+    { name: 'Social Media', value: 0, color: '#AF52DE' },
+    { name: 'Cold Outreach', value: 0, color: '#FF3B30' },
+  ],
+  recentClosings: [],
+  vsLast: { closings: 0, revenue: 0, avgSalePrice: 0, avgDOM: 0 },
+};
+
 const SAMPLE_DATA: Record<Period, PeriodData> = {
-  'This Month': {
-    closings: 3,
-    revenue: 128500,
-    avgSalePrice: 1425000,
-    avgDOM: 24,
-    revenueByMonth: [
-      { label: 'Sep', value: 72000 },
-      { label: 'Oct', value: 95000 },
-      { label: 'Nov', value: 88000 },
-      { label: 'Dec', value: 110000 },
-      { label: 'Jan', value: 145000 },
-      { label: 'Feb', value: 128500 },
-    ],
-    funnel: { leads: 42, showings: 18, offers: 7, closings: 3 },
-    sources: [
-      { name: 'Referrals', value: 38, color: '#1A8A7E' },
-      { name: 'Zillow', value: 24, color: '#007AFF' },
-      { name: 'Open House', value: 18, color: '#FF9500' },
-      { name: 'Social Media', value: 12, color: '#AF52DE' },
-      { name: 'Cold Outreach', value: 8, color: '#FF3B30' },
-    ],
-    recentClosings: [
-      { address: '88 Maple Dr, Redwood City', price: 985000, date: 'Jan 31, 2026', commission: 29550 },
-      { address: '220 Cedar Ln, Palo Alto', price: 1650000, date: 'Jan 18, 2026', commission: 49500 },
-      { address: '415 Bay Ave, Menlo Park', price: 1640000, date: 'Feb 04, 2026', commission: 49200 },
-    ],
-    vsLast: { closings: 50, revenue: 12.3, avgSalePrice: 5.2, avgDOM: -8.5 },
-  },
-  Quarter: {
-    closings: 9,
-    revenue: 412000,
-    avgSalePrice: 1380000,
-    avgDOM: 27,
-    revenueByMonth: [
-      { label: 'Sep', value: 72000 },
-      { label: 'Oct', value: 95000 },
-      { label: 'Nov', value: 88000 },
-      { label: 'Dec', value: 110000 },
-      { label: 'Jan', value: 145000 },
-      { label: 'Feb', value: 128500 },
-    ],
-    funnel: { leads: 128, showings: 54, offers: 19, closings: 9 },
-    sources: [
-      { name: 'Referrals', value: 45, color: '#1A8A7E' },
-      { name: 'Zillow', value: 30, color: '#007AFF' },
-      { name: 'Open House', value: 22, color: '#FF9500' },
-      { name: 'Social Media', value: 18, color: '#AF52DE' },
-      { name: 'Cold Outreach', value: 13, color: '#FF3B30' },
-    ],
-    recentClosings: [
-      { address: '88 Maple Dr, Redwood City', price: 985000, date: 'Jan 31, 2026', commission: 29550 },
-      { address: '220 Cedar Ln, Palo Alto', price: 1650000, date: 'Jan 18, 2026', commission: 49500 },
-      { address: '415 Bay Ave, Menlo Park', price: 1640000, date: 'Feb 04, 2026', commission: 49200 },
-      { address: '900 Willow St, San Carlos', price: 1120000, date: 'Dec 15, 2025', commission: 33600 },
-    ],
-    vsLast: { closings: 28.6, revenue: 18.7, avgSalePrice: 3.1, avgDOM: -12.0 },
-  },
-  Year: {
-    closings: 31,
-    revenue: 1420000,
-    avgSalePrice: 1310000,
-    avgDOM: 29,
-    revenueByMonth: [
-      { label: 'Sep', value: 72000 },
-      { label: 'Oct', value: 95000 },
-      { label: 'Nov', value: 88000 },
-      { label: 'Dec', value: 110000 },
-      { label: 'Jan', value: 145000 },
-      { label: 'Feb', value: 128500 },
-    ],
-    funnel: { leads: 480, showings: 192, offers: 68, closings: 31 },
-    sources: [
-      { name: 'Referrals', value: 42, color: '#1A8A7E' },
-      { name: 'Zillow', value: 28, color: '#007AFF' },
-      { name: 'Open House', value: 15, color: '#FF9500' },
-      { name: 'Social Media', value: 10, color: '#AF52DE' },
-      { name: 'Cold Outreach', value: 5, color: '#FF3B30' },
-    ],
-    recentClosings: [
-      { address: '88 Maple Dr, Redwood City', price: 985000, date: 'Jan 31, 2026', commission: 29550 },
-      { address: '220 Cedar Ln, Palo Alto', price: 1650000, date: 'Jan 18, 2026', commission: 49500 },
-      { address: '415 Bay Ave, Menlo Park', price: 1640000, date: 'Feb 04, 2026', commission: 49200 },
-      { address: '900 Willow St, San Carlos', price: 1120000, date: 'Dec 15, 2025', commission: 33600 },
-    ],
-    vsLast: { closings: 14.8, revenue: 22.1, avgSalePrice: 6.8, avgDOM: -4.2 },
-  },
+  'This Month': EMPTY_PERIOD,
+  Quarter: EMPTY_PERIOD,
+  Year: EMPTY_PERIOD,
 };
 
 function formatCurrency(val: number): string {

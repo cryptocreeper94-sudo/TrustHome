@@ -506,6 +506,27 @@ async function buildWebExport(domain) {
     webBuild.on("close", (code) => {
       if (code === 0) {
         console.log("Web export complete");
+        // Inject @font-face declarations for vector icon fonts
+        const indexPath = path.join("static-build", "index.html");
+        if (fs.existsSync(indexPath)) {
+          let html = fs.readFileSync(indexPath, "utf-8");
+          const fontFaceCSS = `
+    <style id="expo-fonts">
+      @font-face {
+        font-family: 'Ionicons';
+        src: url('/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf') format('truetype');
+        font-display: block;
+      }
+      @font-face {
+        font-family: 'MaterialCommunityIcons';
+        src: url('/assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf') format('truetype');
+        font-display: block;
+      }
+    </style>`;
+          html = html.replace('</head>', fontFaceCSS + '\n  </head>');
+          fs.writeFileSync(indexPath, html);
+          console.log("Injected @font-face CSS for vector icons");
+        }
         resolve();
       } else {
         reject(new Error(`Web export failed with code ${code}\n${output}`));

@@ -23,26 +23,15 @@ const STAGE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 const URGENT_STAGES = new Set(['under_contract', 'inspection', 'offer']);
 
-const PIPELINE_STAGES = [
-  { key: 'pre_approval', label: 'Pre-Approval', color: '#FBBF24', count: 2 },
-  { key: 'home_search', label: 'Home Search', color: '#60A5FA', count: 3 },
-  { key: 'offer', label: 'Offer', color: '#38bdf8', count: 1 },
-  { key: 'under_contract', label: 'Under Contract', color: '#1A8A7E', count: 2 },
-  { key: 'inspection', label: 'Inspection', color: '#F87171', count: 1 },
-  { key: 'closing', label: 'Closing', color: '#34D399', count: 1 },
-];
+const DEALS: { id: string; address: string; client: string; type: string; price: string; stage: string; daysInStage: number; agent: string; deadline: string; parties: string[] }[] = [];
 
-const DEALS = [
-  { id: '1', address: '1847 Oak Valley Dr', client: 'Sarah Mitchell', type: 'Buyer', price: '$425,000', stage: 'under_contract', daysInStage: 8, agent: 'Jennifer Lambert', deadline: 'Inspection by Feb 12', parties: ['Inspector', 'Lender', 'Title'] },
-  { id: '2', address: '890 Magnolia Way', client: 'Robert Kim', type: 'Seller', price: '$580,000', stage: 'offer', daysInStage: 3, agent: 'Jennifer Lambert', deadline: 'Counter expires Feb 10', parties: ['Buyer Agent', 'Lender'] },
-  { id: '3', address: '302 Elm Park Ct', client: 'David Park', type: 'Buyer', price: '$389,000', stage: 'home_search', daysInStage: 14, agent: 'Jennifer Lambert', deadline: 'Pre-approval expires Mar 1', parties: ['Lender'] },
-  { id: '4', address: '445 Sunset Blvd', client: 'Lisa Nguyen', type: 'Seller', price: '$375,000', stage: 'home_search', daysInStage: 21, agent: 'Jennifer Lambert', deadline: 'Open house Feb 15', parties: [] },
-  { id: '5', address: '55 Lakeview Terrace', client: 'Mike Torres', type: 'Buyer', price: '$510,000', stage: 'pre_approval', daysInStage: 5, agent: 'Jennifer Lambert', deadline: 'Docs needed', parties: ['Lender'] },
-  { id: '6', address: '2205 Birch Creek Ln', client: 'Amanda Chen', type: 'Buyer', price: '$445,000', stage: 'under_contract', daysInStage: 12, agent: 'Jennifer Lambert', deadline: 'Appraisal Feb 14', parties: ['Inspector', 'Lender', 'Title', 'Appraiser'] },
-  { id: '7', address: '1200 Pine Ridge Dr', client: 'James Wilson', type: 'Buyer', price: '$350,000', stage: 'inspection', daysInStage: 2, agent: 'Jennifer Lambert', deadline: 'Report due Feb 11', parties: ['Inspector', 'Lender'] },
-  { id: '8', address: '780 Oakwood Ln', client: 'Rachel Green', type: 'Seller', price: '$620,000', stage: 'closing', daysInStage: 4, agent: 'Jennifer Lambert', deadline: 'Closing Feb 18', parties: ['Title', 'Lender', 'Buyer Agent'] },
-  { id: '9', address: '456 Maple Ave', client: 'Tom Harris', type: 'Buyer', price: '$295,000', stage: 'pre_approval', daysInStage: 1, agent: 'Jennifer Lambert', deadline: 'Awaiting docs', parties: [] },
-  { id: '10', address: '910 Cedar Ridge', client: 'Emily Davis', type: 'Buyer', price: '$475,000', stage: 'home_search', daysInStage: 7, agent: 'Jennifer Lambert', deadline: 'Showing scheduled', parties: ['Lender'] },
+const PIPELINE_STAGES = [
+  { key: 'pre_approval', label: 'Pre-Approval', color: '#FBBF24', count: DEALS.filter(d => d.stage === 'pre_approval').length },
+  { key: 'home_search', label: 'Home Search', color: '#60A5FA', count: DEALS.filter(d => d.stage === 'home_search').length },
+  { key: 'offer', label: 'Offer', color: '#38bdf8', count: DEALS.filter(d => d.stage === 'offer').length },
+  { key: 'under_contract', label: 'Under Contract', color: '#1A8A7E', count: DEALS.filter(d => d.stage === 'under_contract').length },
+  { key: 'inspection', label: 'Inspection', color: '#F87171', count: DEALS.filter(d => d.stage === 'inspection').length },
+  { key: 'closing', label: 'Closing', color: '#34D399', count: DEALS.filter(d => d.stage === 'closing').length },
 ];
 
 interface DealCardProps {

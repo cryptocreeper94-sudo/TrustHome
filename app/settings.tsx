@@ -33,7 +33,7 @@ interface SettingsSection {
 
 export default function SettingsScreen() {
   const { colors, isDark, mode, setMode } = useTheme();
-  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack, greetingName, setGreetingName } = useApp();
+  const { replayWelcomeGuide, isJenniferUser, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack, greetingName, setGreetingName, user } = useApp();
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [showGreetingModal, setShowGreetingModal] = useState(false);
   const [greetingInput, setGreetingInput] = useState('');
@@ -188,19 +188,19 @@ export default function SettingsScreen() {
             <GlassCard>
               <View style={styles.profileSection}>
                 <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
-                  <Text style={styles.profileAvatarText}>JL</Text>
+                  <Text style={styles.profileAvatarText}>{(user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')}</Text>
                 </View>
-                <Text style={[styles.profileName, { color: colors.text }]}>Jennifer Lambert</Text>
-                <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>jennifer@lambertrealty.com</Text>
-                <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>(555) 123-4567</Text>
+                <Text style={[styles.profileName, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : 'Not signed in'}</Text>
+                <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>{user?.email || ''}</Text>
+                <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>{user?.phone || ''}</Text>
                 <View style={styles.profileMeta}>
                   <View style={styles.metaItem}>
                     <Ionicons name="card-outline" size={14} color={colors.textSecondary} />
-                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>License #RE-2024-84721</Text>
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>{user?.licenseNumber || 'No license on file'}</Text>
                   </View>
                   <View style={styles.metaItem}>
                     <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
-                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>Lambert Realty Group</Text>
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>{user?.brokerage || 'No brokerage set'}</Text>
                   </View>
                 </View>
               </View>

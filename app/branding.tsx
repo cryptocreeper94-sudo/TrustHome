@@ -10,6 +10,7 @@ import { AccordionSection } from '@/components/ui/AccordionSection';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 import { Footer } from '@/components/ui/Footer';
+import { useApp } from '@/contexts/AppContext';
 
 interface BrandColor {
   label: string;
@@ -38,6 +39,7 @@ const WHITE_LABEL_ITEMS: WhiteLabelItem[] = [
 
 export default function BrandingScreen() {
   const { colors, isDark } = useTheme();
+  const { user } = useApp();
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>('#1A8A7E');
 
@@ -92,19 +94,19 @@ export default function BrandingScreen() {
                 <GlassCard style={{ marginBottom: 12 }}>
                   <View style={styles.profileSection}>
                     <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
-                      <Text style={styles.profileAvatarText}>JL</Text>
+                      <Text style={styles.profileAvatarText}>{(user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')}</Text>
                     </View>
-                    <Text style={[styles.profileName, { color: colors.text }]}>Jennifer Lambert</Text>
-                    <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>jennifer@lambertrealty.com</Text>
-                    <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>(555) 123-4567</Text>
+                    <Text style={[styles.profileName, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : 'Not signed in'}</Text>
+                    <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>{user?.email || ''}</Text>
+                    <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>{user?.phone || ''}</Text>
                     <View style={styles.profileMeta}>
                       <View style={styles.metaItem}>
                         <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
-                        <Text style={[styles.metaText, { color: colors.textSecondary }]}>Lambert Realty Group</Text>
+                        <Text style={[styles.metaText, { color: colors.textSecondary }]}>{user?.brokerage || 'No brokerage set'}</Text>
                       </View>
                       <View style={styles.metaItem}>
                         <Ionicons name="card-outline" size={14} color={colors.textSecondary} />
-                        <Text style={[styles.metaText, { color: colors.textSecondary }]}>License #RE-2024-84721</Text>
+                        <Text style={[styles.metaText, { color: colors.textSecondary }]}>{user?.licenseNumber || 'No license on file'}</Text>
                       </View>
                     </View>
                   </View>

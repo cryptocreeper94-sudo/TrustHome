@@ -12,6 +12,7 @@ import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
 import { useQuery } from '@tanstack/react-query';
+import { useApp } from '@/contexts/AppContext';
 
 const TABS = ['Overview', 'Content', 'Schedule', 'Analytics'] as const;
 type Tab = typeof TABS[number];
@@ -38,6 +39,7 @@ const DAY_FULL_NAMES: Record<string, string> = {
 
 export default function MarketingScreen() {
   const { colors, isDark } = useTheme();
+  const { user } = useApp();
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
@@ -165,8 +167,8 @@ export default function MarketingScreen() {
                 <Text style={styles.avatarText}>JL</Text>
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={[styles.suggestedName, { color: colors.text }]}>Jennifer Lambert</Text>
-                <Text style={[styles.suggestedHandle, { color: colors.textSecondary }]}>Lambert Realty Group</Text>
+                <Text style={[styles.suggestedName, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : 'Your Name'}</Text>
+                <Text style={[styles.suggestedHandle, { color: colors.textSecondary }]}>{user?.brokerage || 'Your Brokerage'}</Text>
               </View>
               <View style={[styles.badge, { backgroundColor: colors.info + '20' }]}>
                 <Text style={[styles.badgeText, { color: colors.info }]}>AI Generated</Text>
@@ -230,7 +232,7 @@ export default function MarketingScreen() {
             <Ionicons name="logo-facebook" size={24} color="#1877F2" />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.autopilotName, { color: colors.text }]}>Facebook</Text>
-              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Lambert Realty Page</Text>
+              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>{user?.brokerage || 'Your Page'}</Text>
             </View>
             <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
             <Text style={[styles.statusText, { color: colors.success }]}>Connected</Text>
@@ -240,7 +242,7 @@ export default function MarketingScreen() {
             <Ionicons name="logo-instagram" size={24} color="#E4405F" />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.autopilotName, { color: colors.text }]}>Instagram</Text>
-              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>@lambert_realty</Text>
+              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Not connected</Text>
             </View>
             <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
             <Text style={[styles.statusText, { color: colors.success }]}>Connected</Text>

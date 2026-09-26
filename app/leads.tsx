@@ -242,7 +242,7 @@ export default function LeadsScreen() {
   const apiLeads = leadsQuery.data && !('error' in leadsQuery.data) && Array.isArray(leadsQuery.data) 
     ? leadsQuery.data.map(mapApiLead) 
     : null;
-  const LEADS = apiLeads && apiLeads.length > 0 ? apiLeads : SAMPLE_LEADS;
+  const LEADS = apiLeads && apiLeads.length > 0 ? apiLeads : [];
 
   const [viewMode, setViewMode] = useState<'list' | 'pipeline'>('list');
   const [expandedLead, setExpandedLead] = useState<string | null>(null);

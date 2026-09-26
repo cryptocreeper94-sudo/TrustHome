@@ -179,7 +179,7 @@ export default function NetworkScreen() {
     ? subcontractorsQuery.data 
     : null;
 
-  const vendorsList = apiSubcontractors || SAMPLE_VENDORS;
+  const vendorsList = apiSubcontractors || [];
 
   const catColor = (cat: string) => CATEGORY_COLORS[cat] || colors.primary;
 
@@ -221,9 +221,9 @@ export default function NetworkScreen() {
           <Animated.View entering={FadeInDown.duration(400).delay(100)}>
           <BentoGrid columns={3} gap={10}>
             {[
-              { label: 'Connected Vendors', value: '24', icon: 'people' as const },
-              { label: 'Referrals This Month', value: '7', icon: 'swap-horizontal' as const },
-              { label: 'Avg Trust Score', value: '94.2', icon: 'shield-checkmark' as const },
+              { label: 'Connected Vendors', value: vendorsList.length.toString(), icon: 'people' as const },
+              { label: 'Referrals This Month', value: '0', icon: 'swap-horizontal' as const },
+              { label: 'Avg Trust Score', value: vendorsList.length > 0 ? (vendorsList.reduce((a: number, v: any) => a + (v.trustScore || 0), 0) / vendorsList.length).toFixed(1) : '—', icon: 'shield-checkmark' as const },
             ].map((stat, i) => (
               <GlassCard key={i} compact style={styles.statCard}>
                 <Ionicons name={stat.icon} size={20} color={colors.primary} />

@@ -43,18 +43,7 @@ const EVENT_ICONS: Record<EventType, keyof typeof Ionicons.glyphMap> = {
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const EVENTS: CalendarEvent[] = [
-  { id: '1', day: 8, month: 1, year: 2026, time: '10:00 AM', type: 'Showing', address: '1847 Oak Valley Dr', client: 'Sarah Mitchell' },
-  { id: '2', day: 8, month: 1, year: 2026, time: '2:30 PM', type: 'Meeting', address: 'Office - Downtown', client: 'James Rivera' },
-  { id: '3', day: 10, month: 1, year: 2026, time: '11:00 AM', type: 'Open House', address: '302 Maple Heights Blvd', client: 'Public Event' },
-  { id: '4', day: 12, month: 1, year: 2026, time: '9:00 AM', type: 'Inspection', address: '55 Riverside Ln', client: 'Emily Chen' },
-  { id: '5', day: 14, month: 1, year: 2026, time: '1:00 PM', type: 'Listing Appt', address: '410 Birch Creek Way', client: 'Lisa Thompson' },
-  { id: '6', day: 14, month: 1, year: 2026, time: '4:00 PM', type: 'Showing', address: '88 Lakeview Estates', client: 'Rachel Nguyen' },
-  { id: '7', day: 18, month: 1, year: 2026, time: '10:30 AM', type: 'Open House', address: '225 Sunset Ridge', client: 'Public Event' },
-  { id: '8', day: 20, month: 1, year: 2026, time: '3:00 PM', type: 'Meeting', address: 'Coffee House on Main', client: 'David Okafor' },
-  { id: '9', day: 22, month: 1, year: 2026, time: '9:30 AM', type: 'Showing', address: '1520 Elm St', client: 'Carlos Gutierrez' },
-  { id: '10', day: 25, month: 1, year: 2026, time: '11:00 AM', type: 'Inspection', address: '302 Maple Heights Blvd', client: 'James Rivera' },
-];
+const EVENTS: CalendarEvent[] = [];
 
 function getDaysInMonth(month: number, year: number) {
   return new Date(year, month + 1, 0).getDate();
@@ -66,13 +55,14 @@ function getFirstDayOfMonth(month: number, year: number) {
 
 export default function ShowingsScreen() {
   const { colors, isDark } = useTheme();
-  const [currentMonth, setCurrentMonth] = useState(1);
-  const [currentYear, setCurrentYear] = useState(2026);
-  const [selectedDay, setSelectedDay] = useState(8);
+  const now = new Date();
+  const [currentMonth, setCurrentMonth] = useState(now.getMonth());
+  const [currentYear, setCurrentYear] = useState(now.getFullYear());
+  const [selectedDay, setSelectedDay] = useState(now.getDate());
   const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Month');
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
-  const today = { day: 8, month: 1, year: 2026 };
+  const today = { day: now.getDate(), month: now.getMonth(), year: now.getFullYear() };
   const daysInMonth = getDaysInMonth(currentMonth, currentYear);
   const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
 

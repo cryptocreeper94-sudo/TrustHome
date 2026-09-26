@@ -300,4 +300,44 @@ export const affiliateCommissions = pgTable("affiliate_commissions", {
 
 export type AffiliateCommission = typeof affiliateCommissions.$inferSelect;
 
+export const marketingPosts = pgTable("marketing_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  type: text("type").notNull().default('Social Post'), // 'Social Post', 'Ad Copy', 'Email'
+  title: text("title").notNull(),
+  preview: text("preview").notNull(),
+  platforms: text("platforms").array().notNull().default(sql`ARRAY[]::text[]`), // 'FB', 'IG', 'X', 'Email'
+  status: text("status").notNull().default('Draft'), // 'Draft', 'Scheduled', 'Published'
+  scheduledDate: timestamp("scheduled_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertMarketingPostSchema = createInsertSchema(marketingPosts).pick({
+  type: true,
+  title: true,
+  preview: true,
+  platforms: true,
+  status: true,
+  scheduledDate: true,
+});
+
+export type InsertMarketingPost = z.infer<typeof insertMarketingPostSchema>;
+export type MarketingPost = typeof marketingPosts.$inferSelect;
+
+export const marketingAnalytics = pgTable("marketing_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  impressions: integer("impressions").notNull().default(0),
+  reach: integer("reach").notNull().default(0),
+  clicks: integer("clicks").notNull().default(0),
+  engagement: integer("engagement").notNull().default(0),
+  shares: integer("shares").notNull().default(0),
+  avgCtr: real("avg_ctr").notNull().default(0.0),
+  costPerClick: real("cost_per_click").notNull().default(0.0),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type MarketingAnalytics = typeof marketingAnalytics.$inferSelect;
+
 export * from "./models/chat";

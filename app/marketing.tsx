@@ -11,6 +11,7 @@ import { SCREEN_HELP } from '@/constants/helpContent';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
+import { useQuery } from '@tanstack/react-query';
 
 const TABS = ['Overview', 'Content', 'Schedule', 'Analytics'] as const;
 type Tab = typeof TABS[number];
@@ -24,34 +25,6 @@ interface ContentItem {
   status: 'Published' | 'Scheduled' | 'Draft';
   date: string;
 }
-
-const CONTENT_ITEMS: ContentItem[] = [
-  { id: '1', type: 'Social Post', title: 'New Listing Announcement', preview: 'Just listed! Stunning 4BR/3BA in Oakwood Estates. Open house this Saturday 1-4pm...', platforms: ['FB', 'IG'], status: 'Published', date: 'Feb 7' },
-  { id: '2', type: 'Ad Copy', title: 'Spring Buyer Campaign', preview: 'Ready to find your dream home? Spring inventory is here. Contact us for exclusive previews...', platforms: ['FB', 'IG', 'X'], status: 'Scheduled', date: 'Feb 10' },
-  { id: '3', type: 'Email', title: 'Monthly Market Update', preview: 'January market stats are in: median price up 4.2%, inventory down 12%. Here\'s what it means...', platforms: ['Email'], status: 'Draft', date: '' },
-  { id: '4', type: 'Social Post', title: 'Client Testimonial', preview: '"Jennifer made our first home purchase seamless!" - The Martinez Family. Another happy client!', platforms: ['FB', 'IG'], status: 'Published', date: 'Feb 5' },
-  { id: '5', type: 'Social Post', title: 'Home Staging Tips', preview: '5 budget-friendly staging tips that can increase your home\'s value by up to 10%...', platforms: ['IG', 'X'], status: 'Scheduled', date: 'Feb 12' },
-  { id: '6', type: 'Ad Copy', title: 'Seller Lead Gen', preview: 'Thinking of selling? Get a free home valuation in 24 hours. Our AI-powered tool analyzes...', platforms: ['FB'], status: 'Draft', date: '' },
-  { id: '7', type: 'Email', title: 'Open House Invite', preview: 'You\'re invited! Join us this weekend for exclusive open houses in the greater metro area...', platforms: ['Email'], status: 'Scheduled', date: 'Feb 14' },
-];
-
-const SCHEDULE_DATA = [
-  { day: 'Mon', posts: [{ title: 'Market Update', time: '9:00 AM', platform: 'FB' }] },
-  { day: 'Tue', posts: [] },
-  { day: 'Wed', posts: [{ title: 'Listing Photos', time: '11:00 AM', platform: 'IG' }, { title: 'Blog Share', time: '3:00 PM', platform: 'X' }] },
-  { day: 'Thu', posts: [{ title: 'Testimonial', time: '10:00 AM', platform: 'FB' }] },
-  { day: 'Fri', posts: [] },
-  { day: 'Sat', posts: [{ title: 'Open House', time: '8:00 AM', platform: 'FB' }, { title: 'Open House', time: '8:00 AM', platform: 'IG' }] },
-  { day: 'Sun', posts: [{ title: 'Weekly Recap', time: '6:00 PM', platform: 'Email' }] },
-];
-
-const ANALYTICS_DATA = [
-  { label: 'Impressions', value: 24850, max: 30000, color: '#1A8A7E' },
-  { label: 'Reach', value: 12430, max: 30000, color: '#26A69A' },
-  { label: 'Clicks', value: 1840, max: 30000, color: '#4DB6A8' },
-  { label: 'Engagement', value: 3620, max: 30000, color: '#80CBC1' },
-  { label: 'Shares', value: 890, max: 30000, color: '#B3E0DA' },
-];
 
 const DAY_FULL_NAMES: Record<string, string> = {
   Mon: 'Monday',
@@ -67,6 +40,34 @@ export default function MarketingScreen() {
   const { colors, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [showHelp, setShowHelp] = useState<boolean>(false);
+
+  const { data: dashboardData, isLoading } = useQuery({
+    queryKey: ['marketing-dashboard'],
+    queryFn: async () => {
+      const res = await fetch('/api/marketing/dashboard');
+      if (!res.ok) throw new Error('Failed to fetch');
+      return res.json();
+    }
+  });
+
+  const CONTENT_ITEMS: ContentItem[] = dashboardData?.posts?.map((p: any) => ({
+    id: p.id,
+    type: p.type,
+    title: p.title,
+    preview: p.preview,
+    platforms: p.platforms || [],
+    status: p.status,
+    date: p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''
+  })) || [];
+
+  const dbAnalytics = dashboardData?.analytics;
+  const ANALYTICS_DATA = [
+    { label: 'Impressions', value: dbAnalytics?.impressions || 0, max: 30000, color: '#1A8A7E' },
+    { label: 'Reach', value: dbAnalytics?.reach || 0, max: 30000, color: '#26A69A' },
+    { label: 'Clicks', value: dbAnalytics?.clicks || 0, max: 30000, color: '#4DB6A8' },
+    { label: 'Engagement', value: dbAnalytics?.engagement || 0, max: 30000, color: '#80CBC1' },
+    { label: 'Shares', value: dbAnalytics?.shares || 0, max: 30000, color: '#B3E0DA' },
+  ];
 
   const statusColor = (status: string) => {
     if (status === 'Published') return colors.success;
@@ -140,10 +141,10 @@ export default function MarketingScreen() {
       <View style={{ marginTop: 14 }}>
         <BentoGrid columns={2} gap={10}>
           {[
-            { label: 'Posts This Week', value: '5', icon: 'document-text' as const },
-            { label: 'Scheduled', value: '3', icon: 'time' as const },
-            { label: 'Total Reach', value: '12.4K', icon: 'eye' as const },
-            { label: 'Engagement', value: '4.8%', icon: 'trending-up' as const },
+            { label: 'Posts This Week', value: CONTENT_ITEMS.length.toString(), icon: 'document-text' as const },
+            { label: 'Scheduled', value: scheduledItems.length.toString(), icon: 'time' as const },
+            { label: 'Total Reach', value: ((dbAnalytics?.reach || 0) / 1000).toFixed(1) + 'K', icon: 'eye' as const },
+            { label: 'Engagement', value: dbAnalytics?.avgCtr ? dbAnalytics.avgCtr + '%' : '0%', icon: 'trending-up' as const },
           ].map((stat, i) => (
             <GlassCard key={i} compact style={styles.statCard}>
               <Ionicons name={stat.icon} size={20} color={colors.primary} />
@@ -374,7 +375,8 @@ export default function MarketingScreen() {
       ))}
       </Animated.View>
     </View>
-  );
+    );
+  };
 
   const renderAnalytics = () => (
     <View style={styles.section}>
@@ -407,8 +409,8 @@ export default function MarketingScreen() {
       <Animated.View entering={FadeInDown.duration(400).delay(300)}>
       <View style={styles.statsRow}>
         {[
-          { label: 'Avg CTR', value: '3.2%', icon: 'finger-print' as const, change: '+0.4%' },
-          { label: 'Cost/Click', value: '$0.42', icon: 'cash' as const, change: '-$0.08' },
+          { label: 'Avg CTR', value: dbAnalytics?.avgCtr ? dbAnalytics.avgCtr + '%' : '0%', icon: 'finger-print' as const, change: '+0.4%' },
+          { label: 'Cost/Click', value: dbAnalytics?.costPerClick ? '$' + dbAnalytics.costPerClick.toFixed(2) : '$0.00', icon: 'cash' as const, change: '-$0.08' },
         ].map((stat, i) => (
           <GlassCard key={i} style={styles.statCard}>
             <Ionicons name={stat.icon} size={20} color={colors.primary} />
@@ -445,15 +447,22 @@ export default function MarketingScreen() {
           </Pressable>
         ))}
       </View>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Animated.View entering={FadeInDown.duration(500).delay(100)}>
-          {activeTab === 'Overview' && renderOverview()}
-          {activeTab === 'Content' && renderContent()}
-          {activeTab === 'Schedule' && renderSchedule()}
-          {activeTab === 'Analytics' && renderAnalytics()}
-        </Animated.View>
-        <Footer />
-      </ScrollView>
+      
+      {isLoading ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: colors.textSecondary }}>Loading Marketing Data...</Text>
+        </View>
+      ) : (
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <Animated.View entering={FadeInDown.duration(500).delay(100)}>
+            {activeTab === 'Overview' && renderOverview()}
+            {activeTab === 'Content' && renderContent()}
+            {activeTab === 'Schedule' && renderSchedule()}
+            {activeTab === 'Analytics' && renderAnalytics()}
+          </Animated.View>
+          <Footer />
+        </ScrollView>
+      )}
       <InfoModal
         visible={showHelp}
         onClose={() => setShowHelp(false)}

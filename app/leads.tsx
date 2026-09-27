@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -9,7 +9,7 @@ import { Footer } from '@/components/ui/Footer';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Lead {
   id: string;
@@ -234,6 +234,31 @@ function AnimatedPipelineCard({ lead, index }: { lead: Lead; index: number }) {
 
 export default function LeadsScreen() {
   const { colors, isDark } = useTheme();
+  const queryClient = useQueryClient();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newLead, setNewLead] = useState({ firstName: '', lastName: '', phone: '', email: '', source: 'Website', budget: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddLead = async () => {
+    if (!newLead.firstName && !newLead.lastName && !newLead.email) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newLead, status: 'new' }),
+      });
+      if (res.ok) {
+        await queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+        setShowAddModal(false);
+        setNewLead({ firstName: '', lastName: '', phone: '', email: '', source: 'Website', budget: '' });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const leadsQuery = useQuery<ApiLead[]>({
     queryKey: ['/api/leads'],
@@ -279,7 +304,16 @@ export default function LeadsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Leads & CRM" showBack />
+      <Header 
+        title="Leads & CRM" 
+        showBack 
+        rightAction={
+          <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
+            <Ionicons name="add" size={20} color={colors.primary} />
+            <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Lead</Text>
+          </Pressable>
+        }
+      />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {leadsQuery.isLoading && <SkeletonLoader />}
 
@@ -439,6 +473,49 @@ export default function LeadsScreen() {
 
         <Footer />
       </ScrollView>
+
+      <Modal visible={showAddModal} transparent animationType="fade" onRequestClose={() => setShowAddModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1A1D24' : '#FFF', borderColor: colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.divider }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Add New Lead</Text>
+              <Pressable onPress={() => setShowAddModal(false)} style={styles.modalClose}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>First Name</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.firstName} onChangeText={t => setNewLead({...newLead, firstName: t})} placeholder="John" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Last Name</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.lastName} onChangeText={t => setNewLead({...newLead, lastName: t})} placeholder="Doe" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.email} onChangeText={t => setNewLead({...newLead, email: t})} placeholder="john@example.com" keyboardType="email-address" autoCapitalize="none" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Phone</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.phone} onChangeText={t => setNewLead({...newLead, phone: t})} placeholder="(555) 123-4567" keyboardType="phone-pad" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Budget</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.budget} onChangeText={t => setNewLead({...newLead, budget: t})} placeholder="$500,000" placeholderTextColor={colors.textTertiary} />
+              </View>
+            </ScrollView>
+            <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
+                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddLead} disabled={isSubmitting}>
+                {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Lead</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -496,4 +573,77 @@ const styles = StyleSheet.create({
   barWrap: { flex: 1, height: 16, borderRadius: 8, backgroundColor: 'rgba(128,128,128,0.12)', marginHorizontal: 10, overflow: 'hidden' as const },
   bar: { height: '100%', borderRadius: 8 },
   sourceCount: { width: 24, fontSize: 14, fontWeight: '700' as const, textAlign: 'right' as const },
+  headerAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  headerAddText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    borderWidth: 1,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    padding: 16,
+    borderTopWidth: 1,
+  },
+  modalBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  modalBtnText: {
+    fontWeight: '600' as const,
+    fontSize: 14,
+  },
 });

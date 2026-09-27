@@ -24,6 +24,8 @@ function RootLayoutNav() {
         <Stack.Screen name="transactions" />
         <Stack.Screen name="properties" />
         <Stack.Screen name="showings" />
+        <Stack.Screen name="tasks" />
+        <Stack.Screen name="kiosk" />
         <Stack.Screen name="messages" />
         <Stack.Screen name="documents" />
         <Stack.Screen name="leads" />

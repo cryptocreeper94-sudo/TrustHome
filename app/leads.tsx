@@ -184,17 +184,55 @@ function AnimatedLeadCard({ lead, isExpanded, onToggle, index }: { lead: Lead; i
         )}
         {isExpanded && (
           <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
-            <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Stage</Text>
-            <Text style={[styles.expandedValue, { color: colors.text }]}>{lead.stage}</Text>
-            <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Last Activity</Text>
-            <Text style={[styles.expandedValue, { color: colors.text }]}>{lead.lastActivity}</Text>
-            <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Notes</Text>
-            <Text style={[styles.expandedValue, { color: colors.text }]}>{lead.notes}</Text>
-            <View style={styles.actionRow}>
+            <View style={{ flexDirection: 'row', gap: 16, marginBottom: 16 }}>
               <AnimatedActionButton icon="call" color="#34D399" />
               <AnimatedActionButton icon="mail" color="#60A5FA" />
               <AnimatedActionButton icon="chatbubble" color="#38bdf8" />
               <AnimatedActionButton icon="calendar" color="#FBBF24" />
+            </View>
+
+            <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>ACTIVITY FEED</Text>
+            
+            <View style={{ marginTop: 12 }}>
+              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#60A5FA20', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#60A5FA' }}>
+                  <Ionicons name="mail" size={16} color="#60A5FA" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>Sent Email - Property Inquiry</Text>
+                    <Text style={{ color: colors.textTertiary, fontSize: 11 }}>2 hours ago</Text>
+                  </View>
+                  <Text style={{ color: colors.textSecondary, marginTop: 4, fontSize: 13 }}>Follow-up regarding {lead.property !== 'TBD' ? lead.property : 'showing'}.</Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#34D39920', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#34D399' }}>
+                  <Ionicons name="business" size={16} color="#34D399" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>Viewed Property details</Text>
+                    <Text style={{ color: colors.textTertiary, fontSize: 11 }}>Yesterday</Text>
+                  </View>
+                  <Text style={{ color: colors.textSecondary, marginTop: 4, fontSize: 13 }}>Spent 18 mins reviewing details and photos.</Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#FBBF2420', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#FBBF24' }}>
+                  <Ionicons name="call" size={16} color="#FBBF24" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>Left Voicemail - Setup</Text>
+                    <Text style={{ color: colors.textTertiary, fontSize: 11 }}>3 days ago</Text>
+                  </View>
+                  <Text style={{ color: colors.textSecondary, marginTop: 4, fontSize: 13 }}>Called to schedule initial consultation.</Text>
+                </View>
+              </View>
+
             </View>
           </View>
         )}

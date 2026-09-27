@@ -87,6 +87,8 @@ export function DrawerMenu() {
     { icon: 'swap-horizontal-outline', emoji: E['swap-horizontal-outline'], label: 'Transactions', route: '/transactions' },
     { icon: 'business-outline', emoji: E['business-outline'], label: 'Properties', route: '/properties' },
     { icon: 'calendar-outline', emoji: E['calendar-outline'], label: 'Showings', route: '/showings' },
+    { icon: 'checkmark-circle-outline', emoji: '✅', label: 'Tasks & To-Do', route: '/tasks' },
+    { icon: 'tablet-portrait-outline', emoji: '📲', label: 'Open House Kiosk', route: '/kiosk' },
     { icon: 'chatbubbles-outline', emoji: E['chatbubbles-outline'], label: 'Messages', route: '/messages', dividerAfter: true },
     { icon: 'document-text-outline', emoji: E['document-text-outline'], label: 'Documents', route: '/documents' },
     { icon: 'people-outline', emoji: E['people-outline'], label: 'Leads', route: '/leads', agentOnly: true },

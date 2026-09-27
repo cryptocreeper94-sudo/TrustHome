@@ -499,13 +499,13 @@ export default function CommandCenterScreen() {
   if (!authed) {
     return (
       <View style={[styles.authContainer, { paddingTop: topInset, paddingBottom: bottomInset }]}>
-        {isDark && <LinearGradient
+        <LinearGradient
           colors={['#070B16', '#0C1222', '#070B16']}
           style={StyleSheet.absoluteFill}
-        />}
+        />
 
         <Pressable onPress={() => router.replace('/')} style={styles.authBackBtn}>
-          <Ionicons name="home" size={20} color={isDark ? 'rgba(255,255,255,0.6)' : colors.textSecondary} />
+          <Ionicons name="home" size={20} color="rgba(255,255,255,0.6)" />
         </Pressable>
 
         <Animated.View entering={FadeInDown.duration(600).springify()} style={styles.authContent}>
@@ -566,18 +566,18 @@ export default function CommandCenterScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingBottom: bottomInset, backgroundColor: colors.background }]}>
-      {isDark && <LinearGradient
+    <View style={[styles.container, { paddingBottom: bottomInset, backgroundColor: '#070B16' }]}>
+      <LinearGradient
         colors={['#070B16', '#0C1222', '#070B16']}
         style={StyleSheet.absoluteFill}
-      />}
+      />
 
       <Animated.View
         entering={FadeInUp.duration(400)}
         style={[styles.stickyHeader, { paddingTop: topInset + 8 }]}
       >
         <LinearGradient
-          colors={isDark ? ['rgba(7,11,22,0.95)', 'rgba(7,11,22,0.8)', 'rgba(7,11,22,0)'] : ['rgba(248,250,251,0.95)', 'rgba(248,250,251,0.8)', 'rgba(248,250,251,0)']}
+          colors={['rgba(7,11,22,0.95)', 'rgba(7,11,22,0.8)', 'rgba(7,11,22,0)']}
           style={StyleSheet.absoluteFill}
         />
         <View style={styles.headerRow}>

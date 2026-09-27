@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
@@ -34,7 +34,7 @@ interface Property {
   isMyListing: boolean;
 }
 
-const PROPERTIES: Property[] = [];
+let PROPERTIES: Property[] = [];
 
 const FILTER_TABS: FilterTab[] = ['All', 'My Listings', 'Buyer Shortlist', 'Under Contract', 'Sold'];
 
@@ -185,23 +185,28 @@ function PropertyCard({ prop, expanded, onToggle, isFav, onToggleFav, index, col
 
 export default function PropertiesScreen() {
   const { colors, isDark } = useTheme();
+  const [properties, setProperties] = useState(PROPERTIES);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set(['5', '7']));
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProp, setNewProp] = useState({ address: '', city: '', price: '', status: 'Active' as PropertyStatus });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const filtered = activeFilter === 'All'
-    ? PROPERTIES
+    ? properties
     : activeFilter === 'My Listings'
-    ? PROPERTIES.filter(p => p.isMyListing)
-    : PROPERTIES.filter(p => p.status === activeFilter);
+    ? properties.filter(p => p.isMyListing)
+    : properties.filter(p => p.status === activeFilter);
 
-  const activeCount = PROPERTIES.filter(p => p.status === 'Active').length;
-  const contractCount = PROPERTIES.filter(p => p.status === 'Under Contract').length;
-  const shortlistCount = PROPERTIES.filter(p => p.status === 'Buyer Shortlist').length;
-  const soldCount = PROPERTIES.filter(p => p.status === 'Sold').length;
+  const activeCount = properties.filter(p => p.status === 'Active').length;
+  const contractCount = properties.filter(p => p.status === 'Under Contract').length;
+  const shortlistCount = properties.filter(p => p.status === 'Buyer Shortlist').length;
+  const soldCount = properties.filter(p => p.status === 'Sold').length;
 
-  const featuredProperties = PROPERTIES.filter(p => p.status === 'Active');
+  const featuredProperties = properties.filter(p => p.status === 'Active');
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => {
@@ -213,9 +218,9 @@ export default function PropertiesScreen() {
   };
 
   const getPropertiesForSection = (status: PropertyStatus): Property[] => {
-    if (activeFilter === 'All') return PROPERTIES.filter(p => p.status === status);
-    if (activeFilter === 'My Listings') return PROPERTIES.filter(p => p.isMyListing && p.status === status);
-    return activeFilter === status ? PROPERTIES.filter(p => p.status === status) : [];
+    if (activeFilter === 'All') return properties.filter(p => p.status === status);
+    if (activeFilter === 'My Listings') return properties.filter(p => p.isMyListing && p.status === status);
+    return activeFilter === status ? properties.filter(p => p.status === status) : [];
   };
 
   const visibleSections = STATUS_SECTIONS.filter(section => {
@@ -224,9 +229,50 @@ export default function PropertiesScreen() {
     return activeFilter === section.status;
   });
 
+  const handleAddProperty = () => {
+    if (!newProp.address || !newProp.city) return;
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const prop: Property = {
+        id: Math.random().toString(),
+        address: newProp.address,
+        city: newProp.city,
+        price: parseInt(newProp.price.replace(/\D/g,'')) || 0,
+        beds: 0,
+        baths: 0,
+        sqft: 0,
+        status: newProp.status,
+        daysOnMarket: 0,
+        mls: 'MLS# NEW',
+        gradient: ['#34D399', '#059669'],
+        description: 'Newly added property.',
+        features: [],
+        showings: 0,
+        isMyListing: true
+      };
+      PROPERTIES.push(prop);
+      setProperties([...PROPERTIES]);
+      setShowAddModal(false);
+      setNewProp({ address: '', city: '', price: '', status: 'Active' });
+      setIsSubmitting(false);
+    }, 500);
+  };
+
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Properties" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      <Header 
+        title="Properties" 
+        showBack 
+        rightAction={
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="add" size={20} color={colors.primary} />
+              <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Property</Text>
+            </Pressable>
+            <InfoButton onPress={() => setShowHelp(true)} />
+          </View>
+        } 
+      />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.duration(400).delay(0)}>
           <View style={styles.bentoWrap}>
@@ -320,6 +366,52 @@ export default function PropertiesScreen() {
 
         <Footer />
       </ScrollView>
+
+      <Modal visible={showAddModal} transparent animationType="fade" onRequestClose={() => setShowAddModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1A1D24' : '#FFF', borderColor: colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.divider }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Add New Property</Text>
+              <Pressable onPress={() => setShowAddModal(false)} style={styles.modalClose}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Address</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newProp.address} onChangeText={t => setNewProp({...newProp, address: t})} placeholder="123 Ocean Dr" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>City</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newProp.city} onChangeText={t => setNewProp({...newProp, city: t})} placeholder="Miami, FL" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Price</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newProp.price} onChangeText={t => setNewProp({...newProp, price: t})} placeholder="500000" keyboardType="numeric" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Status</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {['Active', 'Under Contract', 'Buyer Shortlist', 'Sold'].map(s => (
+                    <Pressable key={s} onPress={() => setNewProp({...newProp, status: s as PropertyStatus})} style={[styles.stageSelectBtn, { backgroundColor: newProp.status === s ? '#34D399' : 'transparent', borderColor: '#34D399' }]}>
+                      <Text style={{ color: newProp.status === s ? '#FFF' : '#34D399', fontSize: 12, fontWeight: '600' }}>{s}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+            <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
+                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddProperty} disabled={isSubmitting}>
+                {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Property</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <InfoModal
         visible={showHelp}
         onClose={() => setShowHelp(false)}
@@ -384,4 +476,83 @@ const styles = StyleSheet.create({
   qAction: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, minHeight: 44 },
   qActionText: { fontSize: 13, fontWeight: '600' as const, color: '#FFFFFF' },
   qActionTextAlt: { fontSize: 13, fontWeight: '600' as const },
+  headerAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  headerAddText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    borderWidth: 1,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+  },
+  stageSelectBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    padding: 16,
+    borderTopWidth: 1,
+  },
+  modalBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  modalBtnText: {
+    fontWeight: '600' as const,
+    fontSize: 14,
+  },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
@@ -43,7 +43,7 @@ const EVENT_ICONS: Record<EventType, keyof typeof Ionicons.glyphMap> = {
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const EVENTS: CalendarEvent[] = [];
+let EVENTS: CalendarEvent[] = [];
 
 function getDaysInMonth(month: number, year: number) {
   return new Date(year, month + 1, 0).getDate();
@@ -56,35 +56,40 @@ function getFirstDayOfMonth(month: number, year: number) {
 export default function ShowingsScreen() {
   const { colors, isDark } = useTheme();
   const now = new Date();
+  const [events, setEvents] = useState(EVENTS);
   const [currentMonth, setCurrentMonth] = useState(now.getMonth());
   const [currentYear, setCurrentYear] = useState(now.getFullYear());
   const [selectedDay, setSelectedDay] = useState(now.getDate());
   const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Month');
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newEvent, setNewEvent] = useState({ address: '', client: '', time: '10:00 AM', type: 'Showing' as EventType });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const today = { day: now.getDate(), month: now.getMonth(), year: now.getFullYear() };
   const daysInMonth = getDaysInMonth(currentMonth, currentYear);
   const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
 
-  const eventsForMonth = EVENTS.filter(e => e.month === currentMonth && e.year === currentYear);
+  const eventsForMonth = events.filter(e => e.month === currentMonth && e.year === currentYear);
   const eventDays = new Set(eventsForMonth.map(e => e.day));
   const selectedEvents = eventsForMonth.filter(e => e.day === selectedDay);
 
-  const totalEvents = EVENTS.length;
+  const totalEvents = events.length;
   const upcomingCount = useMemo(() => {
     const todayDate = new Date(today.year, today.month, today.day);
     const weekLater = new Date(todayDate);
     weekLater.setDate(weekLater.getDate() + 7);
-    return EVENTS.filter(e => {
+    return events.filter(e => {
       const eDate = new Date(e.year, e.month, e.day);
       return eDate >= todayDate && eDate <= weekLater;
     }).length;
-  }, []);
-  const uniqueTypes = new Set(EVENTS.map(e => e.type)).size;
+  }, [events]);
+  const uniqueTypes = new Set(events.map(e => e.type)).size;
 
   const upcomingEvents = useMemo(() => {
     const todayDate = new Date(today.year, today.month, today.day);
-    return EVENTS
+    return events
       .filter(e => {
         const eDate = new Date(e.year, e.month, e.day);
         return eDate >= todayDate;
@@ -95,7 +100,7 @@ export default function ShowingsScreen() {
         return dA.getTime() - dB.getTime();
       })
       .slice(0, 5);
-  }, []);
+  }, [events]);
 
   const eventsByType = useMemo(() => {
     const grouped: Partial<Record<EventType, CalendarEvent[]>> = {};
@@ -118,6 +123,28 @@ export default function ShowingsScreen() {
     setSelectedDay(1);
   };
 
+  const handleAddEvent = () => {
+    if (!newEvent.address || !newEvent.client) return;
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const e: CalendarEvent = {
+        id: Math.random().toString(),
+        day: selectedDay,
+        month: currentMonth,
+        year: currentYear,
+        time: newEvent.time,
+        type: newEvent.type,
+        address: newEvent.address,
+        client: newEvent.client
+      };
+      EVENTS.push(e);
+      setEvents([...EVENTS]);
+      setShowAddModal(false);
+      setNewEvent({ address: '', client: '', time: '10:00 AM', type: 'Showing' });
+      setIsSubmitting(false);
+    }, 500);
+  };
+
   const calendarCells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) calendarCells.push(null);
   for (let d = 1; d <= daysInMonth; d++) calendarCells.push(d);
@@ -132,7 +159,19 @@ export default function ShowingsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header title="Calendar" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      <Header 
+        title="Calendar" 
+        showBack 
+        rightAction={
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="add" size={20} color={colors.primary} />
+              <Text style={[styles.headerAddText, { color: colors.primary }]}>Add</Text>
+            </Pressable>
+            <InfoButton onPress={() => setShowHelp(true)} />
+          </View>
+        } 
+      />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
         <BentoGrid columns={3} gap={10}>
@@ -329,6 +368,52 @@ export default function ShowingsScreen() {
 
         <Footer />
       </ScrollView>
+
+      <Modal visible={showAddModal} transparent animationType="fade" onRequestClose={() => setShowAddModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1A1D24' : '#FFF', borderColor: colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.divider }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Add New Event</Text>
+              <Pressable onPress={() => setShowAddModal(false)} style={styles.modalClose}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Event Type</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {(Object.keys(EVENT_COLORS) as EventType[]).map(t => (
+                    <Pressable key={t} onPress={() => setNewEvent({...newEvent, type: t})} style={[styles.stageSelectBtn, { backgroundColor: newEvent.type === t ? EVENT_COLORS[t] : 'transparent', borderColor: EVENT_COLORS[t] }]}>
+                      <Text style={{ color: newEvent.type === t ? '#FFF' : EVENT_COLORS[t], fontSize: 12, fontWeight: '600' }}>{t}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Address / Location</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newEvent.address} onChangeText={t => setNewEvent({...newEvent, address: t})} placeholder="123 Main St" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Client</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newEvent.client} onChangeText={t => setNewEvent({...newEvent, client: t})} placeholder="John Doe" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Time</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newEvent.time} onChangeText={t => setNewEvent({...newEvent, time: t})} placeholder="10:00 AM" placeholderTextColor={colors.textTertiary} />
+              </View>
+            </ScrollView>
+            <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
+                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddEvent} disabled={isSubmitting}>
+                {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Event</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <InfoModal
         visible={showHelp}
         onClose={() => setShowHelp(false)}
@@ -388,4 +473,83 @@ const styles = StyleSheet.create({
   eventAddress: { fontSize: 14, fontWeight: '600' as const, marginBottom: 4 },
   eventClientRow: { flexDirection: 'row', alignItems: 'center' as const, gap: 4 },
   eventClient: { fontSize: 12 },
+  headerAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  headerAddText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    borderWidth: 1,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+  },
+  stageSelectBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    padding: 16,
+    borderTopWidth: 1,
+  },
+  modalBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  modalBtnText: {
+    fontWeight: '600' as const,
+    fontSize: 14,
+  },
 });

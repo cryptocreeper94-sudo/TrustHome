@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -23,16 +23,11 @@ const STAGE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 const URGENT_STAGES = new Set(['under_contract', 'inspection', 'offer']);
 
-const DEALS: { id: string; address: string; client: string; type: string; price: string; stage: string; daysInStage: number; agent: string; deadline: string; parties: string[] }[] = [];
+let DEALS: { id: string; address: string; client: string; type: string; price: string; stage: string; daysInStage: number; agent: string; deadline: string; parties: string[] }[] = [];
 
-const PIPELINE_STAGES = [
-  { key: 'pre_approval', label: 'Pre-Approval', color: '#FBBF24', count: DEALS.filter(d => d.stage === 'pre_approval').length },
-  { key: 'home_search', label: 'Home Search', color: '#60A5FA', count: DEALS.filter(d => d.stage === 'home_search').length },
-  { key: 'offer', label: 'Offer', color: '#38bdf8', count: DEALS.filter(d => d.stage === 'offer').length },
-  { key: 'under_contract', label: 'Under Contract', color: '#1A8A7E', count: DEALS.filter(d => d.stage === 'under_contract').length },
-  { key: 'inspection', label: 'Inspection', color: '#F87171', count: DEALS.filter(d => d.stage === 'inspection').length },
-  { key: 'closing', label: 'Closing', color: '#34D399', count: DEALS.filter(d => d.stage === 'closing').length },
-];
+export interface PipelineStageType {
+  key: string; label: string; color: string; count: number;
+}
 
 interface DealCardProps {
   deal: typeof DEALS[0];
@@ -121,7 +116,7 @@ function DealCard({ deal, isExpanded, onToggle, index }: DealCardProps) {
   );
 }
 
-function AnimatedStagePill({ stage, isActive, onPress, colors, isDark }: { stage: typeof PIPELINE_STAGES[0]; isActive: boolean; onPress: () => void; colors: any; isDark: boolean }) {
+function AnimatedStagePill({ stage, isActive, onPress, colors, isDark }: { stage: PipelineStageType; isActive: boolean; onPress: () => void; colors: any; isDark: boolean }) {
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -145,17 +140,67 @@ function AnimatedStagePill({ stage, isActive, onPress, colors, isDark }: { stage
 
 export default function TransactionsScreen() {
   const { colors, isDark } = useTheme();
+  const [deals, setDeals] = useState(DEALS);
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const [expandedDeal, setExpandedDeal] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState<boolean>(false);
+  
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newDeal, setNewDeal] = useState({ address: '', client: '', price: '', type: 'Buy', stage: 'pre_approval' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const PIPELINE_STAGES: PipelineStageType[] = [
+    { key: 'pre_approval', label: 'Pre-Approval', color: '#FBBF24', count: deals.filter(d => d.stage === 'pre_approval').length },
+    { key: 'home_search', label: 'Home Search', color: '#60A5FA', count: deals.filter(d => d.stage === 'home_search').length },
+    { key: 'offer', label: 'Offer', color: '#38bdf8', count: deals.filter(d => d.stage === 'offer').length },
+    { key: 'under_contract', label: 'Under Contract', color: '#1A8A7E', count: deals.filter(d => d.stage === 'under_contract').length },
+    { key: 'inspection', label: 'Inspection', color: '#F87171', count: deals.filter(d => d.stage === 'inspection').length },
+    { key: 'closing', label: 'Closing', color: '#34D399', count: deals.filter(d => d.stage === 'closing').length },
+  ];
 
   const stagesToShow = activeStage
     ? PIPELINE_STAGES.filter(s => s.key === activeStage)
     : PIPELINE_STAGES;
 
+  const handleAddDeal = () => {
+    if (!newDeal.address || !newDeal.client) return;
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const deal = {
+        id: Math.random().toString(),
+        address: newDeal.address,
+        client: newDeal.client,
+        price: newDeal.price || '$0',
+        type: newDeal.type,
+        stage: newDeal.stage,
+        daysInStage: 0,
+        agent: 'Me',
+        deadline: 'TBD',
+        parties: []
+      };
+      DEALS.push(deal);
+      setDeals([...DEALS]);
+      setShowAddModal(false);
+      setNewDeal({ address: '', client: '', price: '', type: 'Buy', stage: 'pre_approval' });
+      setIsSubmitting(false);
+    }, 500);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Transactions" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      <Header 
+        title="Transactions" 
+        showBack 
+        rightAction={
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="add" size={20} color={colors.primary} />
+              <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Deal</Text>
+            </Pressable>
+            <InfoButton onPress={() => setShowHelp(true)} />
+          </View>
+        } 
+      />
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         <Animated.View entering={FadeInDown.duration(400).delay(0)}>
@@ -249,6 +294,52 @@ export default function TransactionsScreen() {
 
         <Footer />
       </ScrollView>
+
+      <Modal visible={showAddModal} transparent animationType="fade" onRequestClose={() => setShowAddModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1A1D24' : '#FFF', borderColor: colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.divider }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Add New Deal</Text>
+              <Pressable onPress={() => setShowAddModal(false)} style={styles.modalClose}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Property Address</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.address} onChangeText={t => setNewDeal({...newDeal, address: t})} placeholder="123 Main St" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Client Name</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.client} onChangeText={t => setNewDeal({...newDeal, client: t})} placeholder="John Doe" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Price / Value</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.price} onChangeText={t => setNewDeal({...newDeal, price: t})} placeholder="$450,000" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Stage</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {PIPELINE_STAGES.map(s => (
+                    <Pressable key={s.key} onPress={() => setNewDeal({...newDeal, stage: s.key})} style={[styles.stageSelectBtn, { backgroundColor: newDeal.stage === s.key ? s.color : 'transparent', borderColor: s.color }]}>
+                      <Text style={{ color: newDeal.stage === s.key ? '#FFF' : s.color, fontSize: 12, fontWeight: '600' }}>{s.label}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+            <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
+                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddDeal} disabled={isSubmitting}>
+                {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Deal</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <InfoModal
         visible={showHelp}
         onClose={() => setShowHelp(false)}
@@ -300,4 +391,83 @@ const styles = StyleSheet.create({
   dealActions: { flexDirection: 'row', gap: 10, marginTop: 6 },
   dealActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, minHeight: 44 },
   dealActionText: { fontSize: 13, fontWeight: '600' as const, color: '#FFF' },
+  headerAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  headerAddText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    borderWidth: 1,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+  },
+  stageSelectBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    padding: 16,
+    borderTopWidth: 1,
+  },
+  modalBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  modalBtnText: {
+    fontWeight: '600' as const,
+    fontSize: 14,
+  },
 });

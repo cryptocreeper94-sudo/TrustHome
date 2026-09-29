@@ -179,7 +179,7 @@ function UserCommandCenter() {
   const allTiles = FEATURE_CATEGORIES.flatMap(cat => cat.items);
 
   return (
-    <View style={[styles.container, { backgroundColor: '#020617' }]}>
+    <View style={[styles.container, { backgroundColor: 'transparent' }]}>
       <ScrollView
         style={styles.flex}
         contentContainerStyle={[styles.publicScroll, { paddingTop: topPad + 16, paddingBottom: bottomPad + 20 }]}

@@ -189,7 +189,7 @@ function configureExpoAndLanding(app: express.Application) {
 
   log("Serving static Expo files with dynamic manifest routing");
 
-  const expoAppRoutes = ['/team', '/auth', '/settings', '/leads', '/messages', '/transactions', '/documents', '/properties', '/showings', '/analytics', '/marketing', '/blog', '/network', '/developer', '/mls-setup', '/business', '/branding', '/support', '/command-center', '/tree-services', '/media-studio'];
+  const expoAppRoutes = ['/team', '/auth', '/settings', '/leads', '/messages', '/transactions', '/documents', '/properties', '/showings', '/analytics', '/marketing', '/blog', '/network', '/developer', '/mls-setup', '/business', '/branding', '/support', '/command-center', '/tree-services', '/media-studio', '/agent'];
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api")) {

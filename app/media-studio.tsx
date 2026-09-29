@@ -33,13 +33,23 @@ export default function WalkthroughMakerScreen() {
   
   // State for the simplified editor
   const [clips, setClips] = useState<{ id: string, name: string }[]>([]);
+  
+  // Music State
   const [addMusic, setAddMusic] = useState(false);
+  const [musicSource, setMusicSource] = useState<'ai' | 'custom'>('ai');
+  const [aiMusicVibe, setAiMusicVibe] = useState('cinematic');
+  const [customMusic, setCustomMusic] = useState<string | null>(null);
+
+  // Captions State
+  const [addCaptions, setAddCaptions] = useState(false);
+  const [captionStyle, setCaptionStyle] = useState('standard');
+
+  // Voiceover State
   const [addVoiceover, setAddVoiceover] = useState(false);
   const [voiceoverSource, setVoiceoverSource] = useState<'ai' | 'custom'>('ai');
   const [voiceoverScript, setVoiceoverScript] = useState('');
   const [aiVoice, setAiVoice] = useState('alloy');
   const [customAudio, setCustomAudio] = useState<string | null>(null);
-  const [addCaptions, setAddCaptions] = useState(false);
   
   // Recording state
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -124,6 +134,11 @@ export default function WalkthroughMakerScreen() {
         title: `Walkthrough ${new Date().toLocaleDateString()}`,
         clips: clips.map(c => c.name),
         addMusic,
+        musicSource: addMusic ? musicSource : undefined,
+        musicVibe: addMusic && musicSource === 'ai' ? aiMusicVibe : undefined,
+        customMusicFile: addMusic && musicSource === 'custom' ? customMusic : undefined,
+        addCaptions,
+        captionStyle: addCaptions ? captionStyle : undefined,
         addVoiceover,
         voiceoverSource,
         voiceoverScript: voiceoverSource === 'ai' ? voiceoverScript : undefined,
@@ -131,7 +146,6 @@ export default function WalkthroughMakerScreen() {
         customAudio: voiceoverSource === 'custom' ? customAudio : undefined,
         customAudioTrimStart: voiceoverSource === 'custom' ? Number(trimStart) || 0 : undefined,
         customAudioTrimEnd: voiceoverSource === 'custom' && trimEnd ? Number(trimEnd) : undefined,
-        addCaptions
       });
       
       Alert.alert(
@@ -222,6 +236,66 @@ export default function WalkthroughMakerScreen() {
               />
             </View>
 
+            {addMusic && (
+              <View style={s.optionsWrap}>
+                <View style={s.tabsRow}>
+                  <Pressable 
+                    style={[s.tab, musicSource === 'ai' && { backgroundColor: isDark ? 'rgba(26,138,126,0.2)' : 'rgba(26,138,126,0.1)' }]}
+                    onPress={() => setMusicSource('ai')}
+                  >
+                    <Text style={[s.tabText, musicSource === 'ai' ? { color: '#1A8A7E', fontWeight: '600' } : { color: colors.textSecondary }]}>AI Vibe</Text>
+                  </Pressable>
+                  <Pressable 
+                    style={[s.tab, musicSource === 'custom' && { backgroundColor: isDark ? 'rgba(26,138,126,0.2)' : 'rgba(26,138,126,0.1)' }]}
+                    onPress={() => setMusicSource('custom')}
+                  >
+                    <Text style={[s.tabText, musicSource === 'custom' ? { color: '#1A8A7E', fontWeight: '600' } : { color: colors.textSecondary }]}>My Audio</Text>
+                  </Pressable>
+                </View>
+
+                {musicSource === 'ai' ? (
+                  <View style={s.selectorGroup}>
+                    <Text style={[s.scriptLabel, { color: colors.textSecondary }]}>Select Mood</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.pillsList}>
+                      {['cinematic', 'upbeat', 'ambient', 'lo-fi', 'corporate'].map(v => (
+                        <Pressable 
+                          key={v} 
+                          style={[s.pill, aiMusicVibe === v && { backgroundColor: '#1A8A7E', borderColor: '#1A8A7E' }]}
+                          onPress={() => setAiMusicVibe(v)}
+                        >
+                          <Text style={[s.pillText, aiMusicVibe === v ? { color: '#fff' } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </View>
+                ) : (
+                  <View style={s.selectorGroup}>
+                    {!customMusic ? (
+                      <Pressable 
+                        style={[s.uploadBtn, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}
+                        onPress={() => setCustomMusic('user_uploaded_audio.mp3')}
+                      >
+                        <Ionicons name="musical-notes" size={24} color="#1A8A7E" />
+                        <Text style={[s.uploadBtnText, { color: colors.text }]}>Browse for MP3/WAV</Text>
+                      </Pressable>
+                    ) : (
+                      <View style={[s.audioPreviewCard, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}>
+                        <View style={s.customAudioTop}>
+                          <View style={s.customAudioInfo}>
+                            <Ionicons name="musical-note" size={20} color="#1A8A7E" />
+                            <Text style={[s.customAudioName, { color: colors.text }]}>{customMusic}</Text>
+                          </View>
+                          <Pressable onPress={() => setCustomMusic(null)}>
+                            <Ionicons name="trash-outline" size={20} color={colors.textTertiary} />
+                          </Pressable>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+            )}
+
             <View style={[s.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
               <View style={s.settingInfo}>
                 <Ionicons name="text-outline" size={20} color="#F59E0B" />
@@ -234,6 +308,25 @@ export default function WalkthroughMakerScreen() {
                 thumbColor="#fff"
               />
             </View>
+
+            {addCaptions && (
+              <View style={s.optionsWrap}>
+                <View style={s.selectorGroup}>
+                  <Text style={[s.scriptLabel, { color: colors.textSecondary }]}>Caption Style</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.pillsList}>
+                    {['standard', 'bold', 'minimal', 'karaoke'].map(v => (
+                      <Pressable 
+                        key={v} 
+                        style={[s.pill, captionStyle === v && { backgroundColor: '#F59E0B', borderColor: '#F59E0B' }]}
+                        onPress={() => setCaptionStyle(v)}
+                      >
+                        <Text style={[s.pillText, captionStyle === v ? { color: '#fff' } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+            )}
 
             <View style={[s.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
               <View style={s.settingInfo}>
@@ -494,6 +587,65 @@ const s = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  optionsWrap: {
+    padding: 16,
+    paddingTop: 0,
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 16,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  selectorGroup: {
+    marginBottom: 16,
+  },
+  pillsList: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  pill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(150,150,150,0.3)',
+    marginRight: 8,
+  },
+  pillText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  uploadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: 24,
+  },
+  uploadBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  audioPreviewCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
   },
   scriptWrap: {
     padding: 16,

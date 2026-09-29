@@ -89,7 +89,7 @@ export default function WalkthroughMakerScreen() {
   const handleUploadClips = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['video'],
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         allowsMultipleSelection: true,
       });
 
@@ -102,12 +102,7 @@ export default function WalkthroughMakerScreen() {
       }
     } catch (error) {
       console.error("Error picking video:", error);
-      // Fallback for demo if error occurs
-      const newClip = {
-        id: Math.random().toString(36).substring(7),
-        name: `Clip_00${clips.length + 1}.mp4`
-      };
-      setClips(prev => [...prev, newClip]);
+      Alert.alert('Upload Error', 'Could not open the file picker. Ensure you have granted permissions.');
     }
   };
 

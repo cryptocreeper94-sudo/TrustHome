@@ -1,15 +1,16 @@
 const palette = {
-  teal: {
-    50: '#E6F5F3',
-    100: '#B3E0DA',
-    200: '#80CBC1',
-    300: '#4DB6A8',
-    400: '#26A69A',
-    500: '#1A8A7E',
-    600: '#157A70',
-    700: '#0F6B62',
-    800: '#0A5B54',
-    900: '#064A44',
+  metallic: {
+    50: '#F9FAFB',
+    100: '#F3F4F6',
+    200: '#E5E7EB',
+    300: '#D1D5DB',
+    400: '#9CA3AF',
+    500: '#6B7280',
+    600: '#4B5563',
+    700: '#374151',
+    800: '#1F2937',
+    900: '#111827',
+    950: '#030712',
   },
   neutral: {
     0: '#FFFFFF',
@@ -22,24 +23,29 @@ const palette = {
     500: '#737373',
     600: '#525252',
     700: '#404040',
-    750: '#333333',
     800: '#262626',
     850: '#1C1C1E',
     900: '#171717',
-    950: '#0D0D0D',
+    950: '#0A0A0A',
     1000: '#000000',
   },
-  success: '#34C759',
-  warning: '#FF9500',
-  error: '#FF3B30',
-  info: '#007AFF',
+  success: '#2E3A2F', // Subdued luxury green
+  warning: '#5C4A26', // Subdued luxury gold/amber
+  error: '#4A1515',   // Deep oxblood
+  info: '#1A2F4C',    // Deep navy
+  
+  // High contrast vibrant versions for text/icons on dark surfaces
+  successBright: '#4ADE80',
+  warningBright: '#FBBF24',
+  errorBright: '#F87171',
+  infoBright: '#60A5FA',
 };
 
 const light = {
-  primary: palette.teal[500],
-  primaryLight: palette.teal[100],
-  primaryDark: palette.teal[700],
-  accent: palette.teal[400],
+  primary: palette.neutral[950],
+  primaryLight: palette.neutral[500],
+  primaryDark: palette.neutral[1000],
+  accent: palette.metallic[500],
 
   background: palette.neutral[50],
   backgroundSecondary: palette.neutral[0],
@@ -47,8 +53,8 @@ const light = {
   surface: palette.neutral[0],
   surfaceElevated: palette.neutral[0],
 
-  text: palette.neutral[900],
-  textSecondary: palette.neutral[500],
+  text: palette.neutral[950],
+  textSecondary: palette.neutral[600],
   textTertiary: palette.neutral[400],
   textInverse: palette.neutral[0],
 
@@ -56,57 +62,57 @@ const light = {
   borderLight: palette.neutral[150],
   divider: palette.neutral[150],
 
-  cardGlass: 'rgba(255, 255, 255, 0.72)',
-  cardGlassBorder: 'rgba(255, 255, 255, 0.5)',
-  overlay: 'rgba(0, 0, 0, 0.4)',
-  shadow: 'rgba(0, 0, 0, 0.08)',
+  cardGlass: 'rgba(255, 255, 255, 0.85)',
+  cardGlassBorder: 'rgba(0, 0, 0, 0.05)',
+  overlay: 'rgba(0, 0, 0, 0.2)',
+  shadow: 'rgba(0, 0, 0, 0.04)',
 
-  success: palette.success,
-  warning: palette.warning,
-  error: palette.error,
-  info: palette.info,
+  success: palette.successBright,
+  warning: palette.warningBright,
+  error: palette.errorBright,
+  info: palette.infoBright,
 
   statusBar: 'dark' as const,
-  tint: palette.teal[500],
+  tint: palette.neutral[950],
   tabIconDefault: palette.neutral[400],
-  tabIconSelected: palette.teal[500],
+  tabIconSelected: palette.neutral[950],
 };
 
 const dark = {
-  primary: palette.teal[400],
-  primaryLight: palette.teal[900],
-  primaryDark: palette.teal[300],
-  accent: palette.teal[300],
+  primary: palette.neutral[50],
+  primaryLight: palette.neutral[300],
+  primaryDark: palette.neutral[0],
+  accent: palette.metallic[400],
 
-  background: '#020617',
-  backgroundSecondary: '#0f172a',
-  backgroundTertiary: '#1e293b',
-  surface: '#0f172a',
-  surfaceElevated: '#1e293b',
+  background: palette.neutral[1000],
+  backgroundSecondary: palette.neutral[950],
+  backgroundTertiary: palette.neutral[900],
+  surface: palette.neutral[950],
+  surfaceElevated: palette.neutral[900],
 
-  text: '#F8FAFC',
-  textSecondary: '#94A3B8',
-  textTertiary: '#64748B',
-  textInverse: palette.neutral[900],
+  text: palette.neutral[50],
+  textSecondary: palette.neutral[400],
+  textTertiary: palette.neutral[600],
+  textInverse: palette.neutral[950],
 
-  border: 'rgba(255,255,255,0.08)',
+  border: 'rgba(255,255,255,0.1)',
   borderLight: 'rgba(255,255,255,0.05)',
-  divider: 'rgba(255,255,255,0.06)',
+  divider: 'rgba(255,255,255,0.08)',
 
-  cardGlass: 'rgba(12,18,36,0.65)',
-  cardGlassBorder: 'rgba(255,255,255,0.08)',
-  overlay: 'rgba(0,0,0,0.6)',
-  shadow: 'rgba(6,182,212,0.08)',
+  cardGlass: 'rgba(10, 10, 10, 0.75)',
+  cardGlassBorder: 'rgba(255, 255, 255, 0.08)',
+  overlay: 'rgba(0,0,0,0.8)',
+  shadow: 'rgba(0,0,0,0.4)',
 
-  success: '#34D399',
-  warning: '#FBBF24',
-  error: '#F87171',
-  info: '#60A5FA',
+  success: palette.successBright,
+  warning: palette.warningBright,
+  error: palette.errorBright,
+  info: palette.infoBright,
 
   statusBar: 'light' as const,
-  tint: palette.teal[400],
-  tabIconDefault: '#64748B',
-  tabIconSelected: palette.teal[400],
+  tint: palette.neutral[50],
+  tabIconDefault: palette.neutral[600],
+  tabIconSelected: palette.neutral[50],
 };
 
 export type ThemeColors = Omit<typeof light, 'statusBar'> & { statusBar: 'light' | 'dark' };

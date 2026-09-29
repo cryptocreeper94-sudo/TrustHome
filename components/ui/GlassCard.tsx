@@ -93,16 +93,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...Platform.select({
       ios: {
-        shadowColor: 'rgba(6,182,212,0.2)',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 1,
-        shadowRadius: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.15,
+        shadowRadius: 24,
       },
       android: {
         elevation: 12,
       },
       web: {
-        boxShadow: '0px 8px 30px rgba(6,182,212,0.08), 0px 2px 8px rgba(0,0,0,0.15)',
+        boxShadow: '0px 12px 32px rgba(0,0,0,0.12), 0px 4px 12px rgba(0,0,0,0.06)',
       } as any,
     }),
   },

@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
-import { View, ImageBackground } from "react-native";
+import { View, Image, StyleSheet, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { useFonts } from 'expo-font';
@@ -75,14 +75,17 @@ export default function RootLayout() {
             <ThemeProvider>
               <AppProvider>
                 <LocationProvider>
-                  <View style={{ flex: 1, backgroundColor: '#000' }}>
-                    <ImageBackground 
+                  <View style={{ flex: 1, backgroundColor: '#000', minHeight: Platform.OS === 'web' ? '100vh' : '100%' }}>
+                    <Image 
                       source={require('@/assets/images/luxury-bg.jpg')} 
-                      style={{ flex: 1 }} 
+                      style={[
+                        StyleSheet.absoluteFill, 
+                        { width: '100%', height: '100%', opacity: 1 },
+                        Platform.OS === 'web' && { position: 'fixed', width: '100vw', height: '100vh' } as any
+                      ]} 
                       resizeMode="cover"
-                    >
-                      <RootLayoutNav />
-                    </ImageBackground>
+                    />
+                    <RootLayoutNav />
                   </View>
                 </LocationProvider>
               </AppProvider>

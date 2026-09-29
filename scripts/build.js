@@ -585,16 +585,19 @@ async function main() {
   const webMetadataContent = fs.existsSync(webMetadataPath) ? fs.readFileSync(webMetadataPath, "utf-8") : null;
   const webExpoDir = path.join("static-build", "_expo");
   const webAssetsDir = path.join("static-build", "assets");
-  let webExpoDirBackup = null;
-  let webAssetsDirBackup = null;
+  const webExpoDirBackup = null;
+  const webAssetsDirBackup = null;
+  const webFontsDirBackup = null;
 
   if (fs.existsSync(webExpoDir)) {
-    webExpoDirBackup = path.join(process.cwd(), "_expo_web_backup");
-    fs.cpSync(webExpoDir, webExpoDirBackup, { recursive: true });
+    fs.cpSync(webExpoDir, path.join(process.cwd(), "_expo_web_backup"), { recursive: true });
   }
   if (fs.existsSync(webAssetsDir)) {
-    webAssetsDirBackup = path.join(process.cwd(), "_assets_web_backup");
-    fs.cpSync(webAssetsDir, webAssetsDirBackup, { recursive: true });
+    fs.cpSync(webAssetsDir, path.join(process.cwd(), "_assets_web_backup"), { recursive: true });
+  }
+  const webFontsDir = path.join("static-build", "fonts");
+  if (fs.existsSync(webFontsDir)) {
+    fs.cpSync(webFontsDir, path.join(process.cwd(), "_fonts_web_backup"), { recursive: true });
   }
 
   prepareDirectories(timestamp);
@@ -603,13 +606,18 @@ async function main() {
   if (webIndexContent) fs.writeFileSync(path.join("static-build", "index.html"), webIndexContent);
   if (webFaviconContent) fs.writeFileSync(path.join("static-build", "favicon.ico"), webFaviconContent);
   if (webMetadataContent) fs.writeFileSync(path.join("static-build", "metadata.json"), webMetadataContent);
-  if (webExpoDirBackup) {
-    fs.cpSync(webExpoDirBackup, path.join("static-build", "_expo"), { recursive: true });
-    fs.rmSync(webExpoDirBackup, { recursive: true });
+  
+  if (fs.existsSync(path.join(process.cwd(), "_expo_web_backup"))) {
+    fs.cpSync(path.join(process.cwd(), "_expo_web_backup"), path.join("static-build", "_expo"), { recursive: true });
+    fs.rmSync(path.join(process.cwd(), "_expo_web_backup"), { recursive: true });
   }
-  if (webAssetsDirBackup) {
-    fs.cpSync(webAssetsDirBackup, path.join("static-build", "assets"), { recursive: true });
-    fs.rmSync(webAssetsDirBackup, { recursive: true });
+  if (fs.existsSync(path.join(process.cwd(), "_assets_web_backup"))) {
+    fs.cpSync(path.join(process.cwd(), "_assets_web_backup"), path.join("static-build", "assets"), { recursive: true });
+    fs.rmSync(path.join(process.cwd(), "_assets_web_backup"), { recursive: true });
+  }
+  if (fs.existsSync(path.join(process.cwd(), "_fonts_web_backup"))) {
+    fs.cpSync(path.join(process.cwd(), "_fonts_web_backup"), path.join("static-build", "fonts"), { recursive: true });
+    fs.rmSync(path.join(process.cwd(), "_fonts_web_backup"), { recursive: true });
   }
 
   await startMetro(domain);

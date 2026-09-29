@@ -142,28 +142,29 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
 
   const goHome = () => router.replace('/');
 
+  const isWeb = Platform.OS === 'web';
   return (
-    <View style={[{ backgroundColor: transparent ? 'transparent' : colors.primary }, transparent && { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }]}>
+    <View style={[{ backgroundColor: transparent ? 'transparent' : 'rgba(0,0,0,0.35)' }, transparent && { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }]}>
       <View style={[styles.container, { paddingTop: topPadding }]}>
         <View style={styles.content}>
           <View style={styles.left}>
             {showBack ? (
               <Pressable onPress={goHome} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
-                <Ionicons name="arrow-back" size={22} color={colors.textInverse} />
+                <Ionicons name="arrow-back" size={24} color="#FFF" style={styles.iconShadow} />
               </Pressable>
             ) : showClose ? (
               <Pressable onPress={onClose} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-close">
-                <Ionicons name="close" size={22} color={colors.textInverse} />
+                <Ionicons name="close" size={26} color="#FFF" style={styles.iconShadow} />
               </Pressable>
             ) : <View style={styles.iconButton} />}
           </View>
 
-          <Text style={[styles.title, { color: colors.textInverse }]} numberOfLines={1}>{title}</Text>
+          <Text style={[styles.title, { color: '#FFF' }]} numberOfLines={1}>{title}</Text>
 
           <View style={styles.right}>
             {rightAction || (
               <Pressable onPress={toggleDrawer} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-menu">
-                <Ionicons name="menu" size={24} color={colors.textInverse} />
+                <Ionicons name="menu" size={26} color="#FFF" style={styles.iconShadow} />
               </Pressable>
             )}
           </View>
@@ -204,35 +205,49 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     zIndex: 100,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 52,
-    paddingHorizontal: 8,
+    height: 60,
+    paddingHorizontal: 12,
   },
   left: {
-    width: 48,
+    width: 52,
     alignItems: 'flex-start',
   },
   right: {
-    minWidth: 48,
+    minWidth: 52,
     alignItems: 'flex-end',
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800' as const,
-    letterSpacing: -0.3,
+    fontSize: 28,
+    fontWeight: '900' as const,
+    letterSpacing: -1,
     textAlign: 'center',
     flex: 1,
+    textTransform: 'uppercase',
+    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 8,
+  },
+  iconShadow: {
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   iconButton: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 22,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   demoBanner: {
     flexDirection: 'row' as const,

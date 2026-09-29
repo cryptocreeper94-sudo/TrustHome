@@ -84,11 +84,11 @@ const dark = {
   primaryDark: palette.neutral[0],
   accent: palette.metallic[400],
 
-  background: palette.neutral[1000],
-  backgroundSecondary: palette.neutral[950],
-  backgroundTertiary: palette.neutral[900],
-  surface: palette.neutral[950],
-  surfaceElevated: palette.neutral[900],
+  background: 'rgba(0, 0, 0, 0.6)',
+  backgroundSecondary: 'rgba(10, 10, 10, 0.7)',
+  backgroundTertiary: 'rgba(23, 23, 23, 0.8)',
+  surface: 'rgba(10, 10, 10, 0.75)',
+  surfaceElevated: 'rgba(23, 23, 23, 0.85)',
 
   text: palette.neutral[50],
   textSecondary: palette.neutral[400],

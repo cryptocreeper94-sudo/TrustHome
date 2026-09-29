@@ -275,14 +275,14 @@ export default function WalkthroughMakerScreen() {
                         style={[s.uploadBtn, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}
                         onPress={() => setCustomMusic('user_uploaded_audio.mp3')}
                       >
-                        <Ionicons name="musical-notes" size={24} color=colors.text />
+                        <Ionicons name="musical-notes" size={24} color={colors.text} />
                         <Text style={[s.uploadBtnText, { color: colors.text }]}>Browse for MP3/WAV</Text>
                       </Pressable>
                     ) : (
                       <View style={[s.audioPreviewCard, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}>
                         <View style={s.customAudioTop}>
                           <View style={s.customAudioInfo}>
-                            <Ionicons name="musical-note" size={20} color=colors.text />
+                            <Ionicons name="musical-note" size={20} color={colors.text} />
                             <Text style={[s.customAudioName, { color: colors.text }]}>{customMusic}</Text>
                           </View>
                           <Pressable onPress={() => setCustomMusic(null)}>
@@ -405,7 +405,7 @@ export default function WalkthroughMakerScreen() {
                       <View style={[s.customAudioPreview, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}>
                         <View style={s.customAudioTop}>
                           <View style={s.customAudioInfo}>
-                            <Ionicons name="volume-medium" size={20} color=colors.text />
+                            <Ionicons name="volume-medium" size={20} color={colors.text} />
                             <Text style={[s.customAudioName, { color: colors.text }]}>My Recording</Text>
                           </View>
                           <Pressable onPress={() => { setCustomAudio(null); setTrimStart('0'); setTrimEnd(''); }}>

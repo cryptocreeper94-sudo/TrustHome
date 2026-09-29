@@ -249,7 +249,7 @@ export default function WalkthroughMakerScreen() {
             </View>
 
             {addVoiceover && (
-              <Animated.View entering={FadeInDown.duration(300)} style={s.voiceOptionsWrap}>
+              <View style={s.voiceOptionsWrap}>
                 <View style={s.voiceTabs}>
                   <Pressable 
                     style={[s.voiceTab, voiceoverSource === 'ai' && { backgroundColor: isDark ? 'rgba(26,138,126,0.2)' : 'rgba(26,138,126,0.1)' }]}
@@ -351,7 +351,7 @@ export default function WalkthroughMakerScreen() {
                     )}
                   </View>
                 )}
-              </Animated.View>
+              </View>
             )}
           </GlassCard>
         </Animated.View>

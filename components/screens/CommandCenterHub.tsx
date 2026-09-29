@@ -27,7 +27,7 @@ const FEATURES = [
     image: require('@/assets/images/feature-crm.jpg'),
     emoji: '👥',
     route: '/leads',
-    gradient: ['#0EA5E9', '#0284C7'] as [string, string],
+    gradient: ['#71717A', '#3F3F46'] as [string, string],
   },
   {
     title: 'Marketing Suite',
@@ -36,7 +36,7 @@ const FEATURES = [
     image: require('@/assets/images/feature-marketing.jpg'),
     emoji: '📣',
     route: '/marketing',
-    gradient: ['#8B5CF6', '#7C3AED'] as [string, string],
+    gradient: ['#52525B', '#27272A'] as [string, string],
   },
   {
     title: 'Analytics & Insights',
@@ -45,7 +45,7 @@ const FEATURES = [
     image: require('@/assets/images/feature-analytics.jpg'),
     emoji: '📊',
     route: '/analytics',
-    gradient: ['#10B981', '#059669'] as [string, string],
+    gradient: ['#3F3F46', '#18181B'] as [string, string],
   },
 ];
 
@@ -57,12 +57,12 @@ const STATS = [
 ];
 
 const TOOLS_QUICK = [
-  { emoji: '📋', label: 'Transactions', route: '/transactions', color: '#0EA5E9' },
-  { emoji: '🏠', label: 'Properties', route: '/properties', color: '#8B5CF6' },
-  { emoji: '📄', label: 'Documents', route: '/documents', color: '#10B981' },
-  { emoji: '💬', label: 'Messages', route: '/messages', color: '#F59E0B' },
-  { emoji: '🎬', label: 'Media Studio', route: '/media-studio', color: '#EC4899' },
-  { emoji: '💼', label: 'Business Suite', route: '/business', color: '#6366F1' },
+  { emoji: '📋', label: 'Transactions', route: '/transactions', color: '#52525B' },
+  { emoji: '🏠', label: 'Properties', route: '/properties', color: '#52525B' },
+  { emoji: '📄', label: 'Documents', route: '/documents', color: '#52525B' },
+  { emoji: '💬', label: 'Messages', route: '/messages', color: '#52525B' },
+  { emoji: '🎬', label: 'Media Studio', route: '/media-studio', color: '#52525B' },
+  { emoji: '💼', label: 'Business Suite', route: '/business', color: '#52525B' },
 ];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -149,7 +149,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
                 onPress={() => router.push('/team')}
               >
                 <LinearGradient
-                  colors={['#1A8A7E', '#0F766E']}
+                  colors={['#27272A', '#09090B']}
                   style={styles.heroBtnGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
@@ -173,7 +173,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       {/* ─── INTRO SECTION ─── */}
       <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.section}>
         <View style={styles.sectionInner}>
-          <Text style={[styles.sectionEyebrow, { color: '#1A8A7E' }]}>BUILT FOR AGENTS</Text>
+          <Text style={[styles.sectionEyebrow, { color: isDark ? '#E5E5E5' : '#18181B' }]}>BUILT FOR AGENTS</Text>
           <Text style={[styles.sectionHeading, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
             Everything you need.{'\n'}Nothing you don't.
           </Text>
@@ -245,7 +245,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       {/* ─── STATS BAR ─── */}
       <Animated.View entering={FadeInDown.delay(700).duration(600)}>
         <LinearGradient
-          colors={isDark ? ['#0F766E', '#065F46'] : ['#1A8A7E', '#0D9488']}
+          colors={isDark ? ['#18181B', '#000000'] : ['#27272A', '#000000']}
           style={styles.statsBar}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -262,7 +262,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
       {/* ─── QUICK ACCESS TOOLS ─── */}
       <Animated.View entering={FadeInDown.delay(800).duration(600)} style={styles.section}>
         <View style={styles.sectionInner}>
-          <Text style={[styles.sectionEyebrow, { color: '#1A8A7E' }]}>QUICK ACCESS</Text>
+          <Text style={[styles.sectionEyebrow, { color: isDark ? '#E5E5E5' : '#18181B' }]}>QUICK ACCESS</Text>
           <Text style={[styles.sectionHeading, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
             Your toolkit
           </Text>
@@ -315,7 +315,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
             onPress={() => router.push('/team')}
           >
             <LinearGradient
-              colors={['#1A8A7E', '#0F766E']}
+              colors={['#27272A', '#09090B']}
               style={styles.ctaBtnGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
@@ -350,7 +350,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
                 onPress={handleInstall}
               >
                 <LinearGradient
-                  colors={['#1A8A7E', '#0F766E']}
+                  colors={['#27272A', '#09090B']}
                   style={styles.installBtnGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}

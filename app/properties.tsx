@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Modal, TextInput, ActivityIndicator } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, ImageBackground, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { Footer } from '@/components/ui/Footer';
-import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
-import { SCREEN_HELP } from '@/constants/helpContent';
-import { BentoGrid } from '@/components/ui/BentoGrid';
-import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
-import { AccordionSection } from '@/components/ui/AccordionSection';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const CARD_WIDTH = Platform.OS === 'web' ? Math.min(SCREEN_WIDTH * 0.85, 600) : SCREEN_WIDTH * 0.85;
+const CARD_MARGIN = 16;
+const SNAP_INTERVAL = CARD_WIDTH + (CARD_MARGIN * 2);
 
 type PropertyStatus = 'Active' | 'Under Contract' | 'Buyer Shortlist' | 'Sold';
-type FilterTab = 'All' | 'My Listings' | 'Buyer Shortlist' | 'Under Contract' | 'Sold';
 
 interface Property {
   id: string;
@@ -27,532 +25,366 @@ interface Property {
   status: PropertyStatus;
   daysOnMarket: number;
   mls: string;
-  gradient: [string, string];
+  image: any;
   description: string;
   features: string[];
   showings: number;
-  isMyListing: boolean;
 }
 
-let PROPERTIES: Property[] = [];
-
-const FILTER_TABS: FilterTab[] = ['All', 'My Listings', 'Buyer Shortlist', 'Under Contract', 'Sold'];
-
-const statusColors: Record<PropertyStatus, string> = {
-  Active: '#34D399',
-  'Under Contract': '#FBBF24',
-  'Buyer Shortlist': '#60A5FA',
-  Sold: '#38bdf8',
-};
+const PROPERTIES: Property[] = [
+  {
+    id: '1',
+    address: '1428 Elm Street',
+    city: 'Beverly Hills, CA',
+    price: 4250000,
+    beds: 5,
+    baths: 6,
+    sqft: 6200,
+    status: 'Active',
+    daysOnMarket: 12,
+    mls: 'MLS# 1002345',
+    image: require('@/assets/images/hero-1.jpg'),
+    description: 'A stunning modern masterpiece featuring panoramic city views, infinity pool, and integrated smart home technology.',
+    features: ['Infinity Pool', 'Wine Cellar', 'Smart Home', 'Home Theater'],
+    showings: 8,
+  },
+  {
+    id: '2',
+    address: '890 Fifth Avenue',
+    city: 'New York, NY',
+    price: 8900000,
+    beds: 4,
+    baths: 4.5,
+    sqft: 4500,
+    status: 'Buyer Shortlist',
+    daysOnMarket: 3,
+    mls: 'MLS# 1004592',
+    image: require('@/assets/images/hero-2.jpg'),
+    description: 'Exclusive penthouse with sweeping Central Park views. Completely renovated with imported Italian marble and custom millwork.',
+    features: ['Penthouse', 'Park Views', 'Doorman', 'Private Elevator'],
+    showings: 14,
+  },
+  {
+    id: '3',
+    address: '742 Evergreen Terrace',
+    city: 'Aspen, CO',
+    price: 12500000,
+    beds: 6,
+    baths: 8,
+    sqft: 8400,
+    status: 'Under Contract',
+    daysOnMarket: 45,
+    mls: 'MLS# 1009841',
+    image: require('@/assets/images/hero-3.jpg'),
+    description: 'Ski-in/ski-out luxury chalet. Features massive exposed timber beams, three stone fireplaces, and a heated driveway.',
+    features: ['Ski-in/Ski-out', 'Heated Driveway', 'Spa', 'Guest House'],
+    showings: 22,
+  },
+  {
+    id: '4',
+    address: '10086 Sunset Blvd',
+    city: 'Los Angeles, CA',
+    price: 18900000,
+    beds: 8,
+    baths: 11,
+    sqft: 14000,
+    status: 'Active',
+    daysOnMarket: 5,
+    mls: 'MLS# 1007732',
+    image: require('@/assets/images/hero-4.jpg'),
+    description: 'Unparalleled luxury on the Sunset Strip. Includes a 20-car subterranean garage, indoor basketball court, and recording studio.',
+    features: ['20-Car Garage', 'Basketball Court', 'Recording Studio', 'Guard Gated'],
+    showings: 4,
+  }
+];
 
 function formatPrice(price: number): string {
   if (price >= 1000000) return '$' + (price / 1000000).toFixed(price % 1000000 === 0 ? 0 : 2) + 'M';
   return '$' + (price / 1000).toFixed(0) + 'K';
 }
 
-const STATUS_SECTIONS: { status: PropertyStatus; title: string; icon: keyof typeof Ionicons.glyphMap; iconColor: string }[] = [
-  { status: 'Active', title: 'Active Listings', icon: 'home', iconColor: '#34D399' },
-  { status: 'Under Contract', title: 'Under Contract', icon: 'document-lock', iconColor: '#FBBF24' },
-  { status: 'Buyer Shortlist', title: 'Buyer Shortlist', icon: 'heart', iconColor: '#60A5FA' },
-  { status: 'Sold', title: 'Sold', icon: 'checkmark-circle', iconColor: '#38bdf8' },
-];
+const statusColors: Record<PropertyStatus, string> = {
+  Active: '#4ADE80',
+  'Under Contract': '#FBBF24',
+  'Buyer Shortlist': '#60A5FA',
+  Sold: '#38BDF8',
+};
 
-function AnimatedFilterPill({ tab, isActive, colors, onPress }: { tab: FilterTab; isActive: boolean; colors: any; onPress: () => void }) {
+function AnimatedButton({ icon, label, onPress, primary = false }: { icon: keyof typeof Ionicons.glyphMap, label: string, onPress?: () => void, primary?: boolean }) {
   const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
     <Animated.View style={animStyle}>
       <Pressable
         onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.93, { damping: 15, stiffness: 300 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
-        style={[styles.filterPill, { backgroundColor: isActive ? colors.primary : colors.cardGlass, borderColor: isActive ? colors.primary : colors.border }]}
+        onPressIn={() => { scale.value = withSpring(0.92); }}
+        onPressOut={() => { scale.value = withSpring(1); }}
+        style={[styles.actionBtn, primary ? styles.actionBtnPrimary : styles.actionBtnSecondary]}
       >
-        <Text style={[styles.filterText, { color: isActive ? '#FFFFFF' : colors.textSecondary }]}>{tab}</Text>
+        <Ionicons name={icon} size={16} color={primary ? '#000' : '#FFF'} />
+        <Text style={[styles.actionBtnText, { color: primary ? '#000' : '#FFF' }]}>{label}</Text>
       </Pressable>
-    </Animated.View>
-  );
-}
-
-function AnimatedPropertyQuickAction({ icon, label, primary, colors, isDark }: { icon: keyof typeof Ionicons.glyphMap; label: string; primary?: boolean; colors: any; isDark: boolean }) {
-  const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-  return (
-    <Animated.View style={animStyle}>
-      <Pressable
-        onPressIn={() => { scale.value = withSpring(0.92, { damping: 15, stiffness: 300 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
-        style={[styles.qAction, primary
-          ? { backgroundColor: colors.primary }
-          : { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderWidth: 1, borderColor: colors.border }
-        ]}
-      >
-        <Ionicons name={icon} size={16} color={primary ? '#FFFFFF' : colors.primary} />
-        <Text style={primary ? styles.qActionText : [styles.qActionTextAlt, { color: colors.primary }]}>{label}</Text>
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-function AnimatedHeartButton({ isFav, onPress }: { isFav: boolean; onPress: () => void }) {
-  const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-  return (
-    <Animated.View style={[styles.heartBtn, animStyle]}>
-      <Pressable
-        onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.85, { damping: 15, stiffness: 300 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
-        style={{ width: 44, height: 44, alignItems: 'center' as const, justifyContent: 'center' as const }}
-      >
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#F87171' : '#FFFFFF'} />
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-function PropertyCard({ prop, expanded, onToggle, isFav, onToggleFav, index, colors, isDark }: { prop: Property; expanded: boolean; onToggle: () => void; isFav: boolean; onToggleFav: () => void; index: number; colors: any; isDark: boolean }) {
-  return (
-    <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
-      <GlassCard onPress={onToggle} style={styles.propCard}>
-        <View style={styles.photoWrap}>
-          <LinearGradient colors={prop.gradient as [string, string]} style={styles.photoGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-            <Ionicons name="home" size={32} color="rgba(255,255,255,0.3)" />
-          </LinearGradient>
-          <AnimatedHeartButton isFav={isFav} onPress={onToggleFav} />
-          <View style={[styles.statusPill, { backgroundColor: statusColors[prop.status] }]}>
-            <Text style={styles.statusPillText}>{prop.status}</Text>
-          </View>
-        </View>
-        <View style={styles.propBody}>
-          <View style={styles.propHeader}>
-            <View style={styles.propAddrWrap}>
-              <Text style={[styles.propAddr, { color: colors.text }]} numberOfLines={1}>{prop.address}</Text>
-              <Text style={[styles.propCity, { color: colors.textSecondary }]}>{prop.city}</Text>
-            </View>
-            <Text style={[styles.propPrice, { color: colors.primary }]}>{formatPrice(prop.price)}</Text>
-          </View>
-          <View style={styles.propDetails}>
-            <View style={styles.detailChip}>
-              <Ionicons name="bed" size={14} color={colors.textSecondary} />
-              <Text style={[styles.detailText, { color: colors.textSecondary }]}>{prop.beds}</Text>
-            </View>
-            <View style={styles.detailChip}>
-              <Ionicons name="water" size={14} color={colors.textSecondary} />
-              <Text style={[styles.detailText, { color: colors.textSecondary }]}>{prop.baths}</Text>
-            </View>
-            <View style={styles.detailChip}>
-              <Ionicons name="resize" size={14} color={colors.textSecondary} />
-              <Text style={[styles.detailText, { color: colors.textSecondary }]}>{prop.sqft.toLocaleString()} sqft</Text>
-            </View>
-            <Text style={[styles.domText, { color: colors.textTertiary }]}>{prop.daysOnMarket}d on market</Text>
-          </View>
-          <Text style={[styles.mlsText, { color: colors.textTertiary }]}>{prop.mls}</Text>
-
-          {expanded && (
-            <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
-              <Text style={[styles.propDesc, { color: colors.text }]}>{prop.description}</Text>
-              <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>Features</Text>
-              <View style={styles.featureWrap}>
-                {prop.features.map((f, i) => (
-                  <View key={i} style={[styles.featureChip, { backgroundColor: colors.primary + '15' }]}>
-                    <Text style={[styles.featureText, { color: colors.primary }]}>{f}</Text>
-                  </View>
-                ))}
-              </View>
-              <View style={styles.showingRow}>
-                <Ionicons name="eye" size={16} color={colors.textSecondary} />
-                <Text style={[styles.showingText, { color: colors.textSecondary }]}>{prop.showings} showings scheduled</Text>
-              </View>
-              <View style={styles.quickActions}>
-                <AnimatedPropertyQuickAction icon="call" label="Contact" primary colors={colors} isDark={isDark} />
-                <AnimatedPropertyQuickAction icon="share" label="Share" colors={colors} isDark={isDark} />
-                <AnimatedPropertyQuickAction icon="calendar" label="Showing" colors={colors} isDark={isDark} />
-              </View>
-            </View>
-          )}
-        </View>
-      </GlassCard>
     </Animated.View>
   );
 }
 
 export default function PropertiesScreen() {
-  const { colors, isDark } = useTheme();
-  const [properties, setProperties] = useState(PROPERTIES);
-  const [activeFilter, setActiveFilter] = useState<FilterTab>('All');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(['5', '7']));
-  const [showHelp, setShowHelp] = useState<boolean>(false);
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newProp, setNewProp] = useState({ address: '', city: '', price: '', status: 'Active' as PropertyStatus });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const filtered = activeFilter === 'All'
-    ? properties
-    : activeFilter === 'My Listings'
-    ? properties.filter(p => p.isMyListing)
-    : properties.filter(p => p.status === activeFilter);
-
-  const activeCount = properties.filter(p => p.status === 'Active').length;
-  const contractCount = properties.filter(p => p.status === 'Under Contract').length;
-  const shortlistCount = properties.filter(p => p.status === 'Buyer Shortlist').length;
-  const soldCount = properties.filter(p => p.status === 'Sold').length;
-
-  const featuredProperties = properties.filter(p => p.status === 'Active');
-
-  const toggleFavorite = (id: string) => {
-    setFavorites(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const getPropertiesForSection = (status: PropertyStatus): Property[] => {
-    if (activeFilter === 'All') return properties.filter(p => p.status === status);
-    if (activeFilter === 'My Listings') return properties.filter(p => p.isMyListing && p.status === status);
-    return activeFilter === status ? properties.filter(p => p.status === status) : [];
-  };
-
-  const visibleSections = STATUS_SECTIONS.filter(section => {
-    const props = getPropertiesForSection(section.status);
-    if (activeFilter === 'All' || activeFilter === 'My Listings') return props.length > 0;
-    return activeFilter === section.status;
-  });
-
-  const handleAddProperty = () => {
-    if (!newProp.address || !newProp.city) return;
-    setIsSubmitting(true);
-    setTimeout(() => {
-      const prop: Property = {
-        id: Math.random().toString(),
-        address: newProp.address,
-        city: newProp.city,
-        price: parseInt(newProp.price.replace(/\D/g,'')) || 0,
-        beds: 0,
-        baths: 0,
-        sqft: 0,
-        status: newProp.status,
-        daysOnMarket: 0,
-        mls: 'MLS# NEW',
-        gradient: ['#34D399', '#059669'],
-        description: 'Newly added property.',
-        features: [],
-        showings: 0,
-        isMyListing: true
-      };
-      PROPERTIES.push(prop);
-      setProperties([...PROPERTIES]);
-      setShowAddModal(false);
-      setNewProp({ address: '', city: '', price: '', status: 'Active' });
-      setIsSubmitting(false);
-    }, 500);
+  const handleScroll = (event: any) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const index = Math.round(scrollPosition / SNAP_INTERVAL);
+    setActiveIndex(index);
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Header 
-        title="Properties" 
-        showBack 
-        rightAction={
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-              <Ionicons name="add" size={20} color="#FFFFFF" />
-              <Text style={[styles.headerAddText, { color: '#FFFFFF' }]}>Add Property</Text>
-            </Pressable>
-            <InfoButton onPress={() => setShowHelp(true)} />
-          </View>
-        } 
-      />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Animated.View entering={FadeInDown.duration(400).delay(0)}>
-          <View style={styles.bentoWrap}>
-            <BentoGrid columns={3} gap={10}>
-              {[
-                { label: 'Active Listings', value: activeCount, icon: 'home' as const, color: '#34D399' },
-                { label: 'Under Contract', value: contractCount, icon: 'document-lock' as const, color: '#FBBF24' },
-                { label: 'Buyer Shortlist', value: shortlistCount, icon: 'heart' as const, color: '#60A5FA' },
-              ].map(stat => (
-                <GlassCard key={stat.label} compact style={styles.statCard}>
-                  <View style={styles.statInner}>
-                    <Ionicons name={stat.icon} size={22} color={stat.color} />
-                    <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
-                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
-                  </View>
-                </GlassCard>
-              ))}
-            </BentoGrid>
-          </View>
-        </Animated.View>
+    <View style={styles.container}>
+      <Header title="Exclusive Listings" showBack transparent />
+      
+      <View style={styles.carouselContainer}>
+        <ScrollView
+          horizontal
+          pagingEnabled={Platform.OS === 'web' ? false : true}
+          snapToInterval={SNAP_INTERVAL}
+          snapToAlignment="center"
+          decelerationRate="fast"
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {PROPERTIES.map((prop, index) => (
+            <Animated.View key={prop.id} entering={FadeInDown.delay(index * 150).springify()} style={styles.cardWrapper}>
+              <View style={styles.card}>
+                <ImageBackground source={prop.image} style={styles.cardImage} imageStyle={styles.cardImageStyle}>
+                  <LinearGradient
+                    colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)', '#000000']}
+                    locations={[0, 0.5, 1]}
+                    style={styles.cardGradient}
+                  >
+                    {/* Top Status Badge */}
+                    <View style={styles.badgeRow}>
+                      <View style={[styles.statusBadge, { backgroundColor: statusColors[prop.status] + '20', borderColor: statusColors[prop.status] }]}>
+                        <View style={[styles.statusDot, { backgroundColor: statusColors[prop.status] }]} />
+                        <Text style={[styles.statusText, { color: statusColors[prop.status] }]}>{prop.status}</Text>
+                      </View>
+                      <View style={styles.favBtn}>
+                        <Ionicons name="heart-outline" size={24} color="#FFF" />
+                      </View>
+                    </View>
 
-        <Animated.View entering={FadeInDown.duration(400).delay(80)}>
-          <HorizontalCarousel title="Featured" itemWidth={220} style={styles.carouselWrap}>
-            {featuredProperties.map(prop => (
-              <Pressable key={prop.id} onPress={() => setExpandedId(expandedId === prop.id ? null : prop.id)} style={[styles.featuredCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
-                <View style={styles.featuredPhotoWrap}>
-                  <LinearGradient colors={prop.gradient as [string, string]} style={styles.featuredPhotoGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                    <Ionicons name="home" size={24} color="rgba(255,255,255,0.3)" />
+                    {/* Bottom Details */}
+                    <View style={styles.cardDetails}>
+                      <Text style={styles.price}>{formatPrice(prop.price)}</Text>
+                      <Text style={styles.address} numberOfLines={1}>{prop.address}</Text>
+                      <Text style={styles.city}>{prop.city}</Text>
+
+                      <View style={styles.metricsRow}>
+                        <View style={styles.metric}>
+                          <Ionicons name="bed-outline" size={16} color="#A1A1AA" />
+                          <Text style={styles.metricText}>{prop.beds} Beds</Text>
+                        </View>
+                        <View style={styles.metric}>
+                          <Ionicons name="water-outline" size={16} color="#A1A1AA" />
+                          <Text style={styles.metricText}>{prop.baths} Baths</Text>
+                        </View>
+                        <View style={styles.metric}>
+                          <Ionicons name="resize-outline" size={16} color="#A1A1AA" />
+                          <Text style={styles.metricText}>{prop.sqft.toLocaleString()} SqFt</Text>
+                        </View>
+                      </View>
+
+                      <Text style={styles.description} numberOfLines={2}>{prop.description}</Text>
+
+                      <View style={styles.actionsRow}>
+                        <AnimatedButton icon="document-text" label="Details" />
+                        <AnimatedButton icon="calendar" label="Tour" primary />
+                      </View>
+                    </View>
                   </LinearGradient>
-                </View>
-                <View style={styles.featuredBody}>
-                  <Text style={[styles.featuredAddr, { color: colors.text }]} numberOfLines={1}>{prop.address}</Text>
-                  <Text style={[styles.featuredPrice, { color: colors.primary }]}>{formatPrice(prop.price)}</Text>
-                  <View style={styles.featuredDetails}>
-                    <Ionicons name="bed" size={12} color={colors.textSecondary} />
-                    <Text style={[styles.featuredDetailText, { color: colors.textSecondary }]}>{prop.beds}</Text>
-                    <Ionicons name="water" size={12} color={colors.textSecondary} />
-                    <Text style={[styles.featuredDetailText, { color: colors.textSecondary }]}>{prop.baths}</Text>
-                  </View>
-                </View>
-              </Pressable>
-            ))}
-          </HorizontalCarousel>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.duration(400).delay(160)}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={styles.filterContent}>
-            {FILTER_TABS.map(tab => (
-              <AnimatedFilterPill
-                key={tab}
-                tab={tab}
-                isActive={activeFilter === tab}
-                colors={colors}
-                onPress={() => setActiveFilter(tab)}
-              />
-            ))}
-          </ScrollView>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.duration(400).delay(240)}>
-          <View style={styles.sectionsWrap}>
-            {visibleSections.map(section => {
-              const sectionProps = getPropertiesForSection(section.status);
-              return (
-                <AccordionSection
-                  key={section.status}
-                  title={section.title}
-                  icon={section.icon}
-                  iconColor={section.iconColor}
-                  badge={sectionProps.length}
-                  defaultOpen={sectionProps.length > 0}
-                >
-                  {sectionProps.map((prop, idx) => (
-                    <PropertyCard
-                      key={prop.id}
-                      prop={prop}
-                      expanded={expandedId === prop.id}
-                      onToggle={() => setExpandedId(expandedId === prop.id ? null : prop.id)}
-                      isFav={favorites.has(prop.id)}
-                      onToggleFav={() => toggleFavorite(prop.id)}
-                      index={idx}
-                      colors={colors}
-                      isDark={isDark}
-                    />
-                  ))}
-                </AccordionSection>
-              );
-            })}
-          </View>
-        </Animated.View>
-
-        <Footer />
-      </ScrollView>
-
-      <Modal visible={showAddModal} transparent animationType="fade" onRequestClose={() => setShowAddModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1A1D24' : '#FFF', borderColor: colors.border }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.divider }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Add New Property</Text>
-              <Pressable onPress={() => setShowAddModal(false)} style={styles.modalClose}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
-              </Pressable>
-            </View>
-            <ScrollView style={styles.modalBody}>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Address</Text>
-                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newProp.address} onChangeText={t => setNewProp({...newProp, address: t})} placeholder="123 Ocean Dr" placeholderTextColor={colors.textTertiary} />
+                </ImageBackground>
               </View>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>City</Text>
-                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newProp.city} onChangeText={t => setNewProp({...newProp, city: t})} placeholder="Miami, FL" placeholderTextColor={colors.textTertiary} />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Price</Text>
-                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newProp.price} onChangeText={t => setNewProp({...newProp, price: t})} placeholder="500000" keyboardType="numeric" placeholderTextColor={colors.textTertiary} />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Status</Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                  {['Active', 'Under Contract', 'Buyer Shortlist', 'Sold'].map(s => (
-                    <Pressable key={s} onPress={() => setNewProp({...newProp, status: s as PropertyStatus})} style={[styles.stageSelectBtn, { backgroundColor: newProp.status === s ? '#34D399' : 'transparent', borderColor: '#34D399' }]}>
-                      <Text style={{ color: newProp.status === s ? '#FFF' : '#34D399', fontSize: 12, fontWeight: '600' }}>{s}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            </ScrollView>
-            <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
-                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
-              </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddProperty} disabled={isSubmitting}>
-                {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Property</Text>}
-              </Pressable>
-            </View>
-          </View>
+            </Animated.View>
+          ))}
+        </ScrollView>
+
+        {/* Carousel Pagination Dots */}
+        <View style={[styles.pagination, { bottom: insets.bottom + 20 }]}>
+          {PROPERTIES.map((_, i) => (
+            <View key={i} style={[styles.dot, activeIndex === i && styles.dotActive]} />
+          ))}
         </View>
-      </Modal>
-
-      <InfoModal
-        visible={showHelp}
-        onClose={() => setShowHelp(false)}
-        title={SCREEN_HELP.properties.title}
-        description={SCREEN_HELP.properties.description}
-        details={SCREEN_HELP.properties.details}
-        examples={SCREEN_HELP.properties.examples}
-      />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 32 },
-  bentoWrap: { paddingHorizontal: 16, marginTop: 16 },
-  statCard: { minHeight: 84 },
-  statInner: { alignItems: 'center' as const, gap: 6 },
-  statValue: { fontSize: 24, fontWeight: '800' as const },
-  statLabel: { fontSize: 12, fontWeight: '600' as const, textAlign: 'center' as const },
-  carouselWrap: { marginTop: 20 },
-  featuredCard: { width: 220, borderRadius: 16, borderWidth: 1, overflow: 'hidden' },
-  featuredPhotoWrap: { height: 110, overflow: 'hidden' },
-  featuredPhotoGradient: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const },
-  featuredBody: { padding: 12, gap: 3 },
-  featuredAddr: { fontSize: 14, fontWeight: '600' as const },
-  featuredPrice: { fontSize: 16, fontWeight: '700' as const },
-  featuredDetails: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, marginTop: 4 },
-  featuredDetailText: { fontSize: 12, fontWeight: '500' as const },
-  filterRow: { marginTop: 18, maxHeight: 48 },
-  filterContent: { paddingHorizontal: 16, gap: 10 },
-  filterPill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 22, borderWidth: 1, minHeight: 44, minWidth: 140, alignItems: 'center', justifyContent: 'center' },
-  filterText: { fontSize: 13, fontWeight: '600' as const },
-  sectionsWrap: { paddingHorizontal: 16, marginTop: 16 },
-  propCard: { marginTop: 12, minHeight: 0 },
-  photoWrap: { height: 140, borderRadius: 14, overflow: 'hidden', marginBottom: 12, position: 'relative' as const },
-  photoGradient: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const },
-  heartBtn: { position: 'absolute' as const, top: 6, right: 6, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.35)' },
-  statusPill: { position: 'absolute' as const, bottom: 10, left: 10, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10 },
-  statusPillText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' as const },
-  propBody: { gap: 6 },
-  propHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' as const },
-  propAddrWrap: { flex: 1, marginRight: 8 },
-  propAddr: { fontSize: 16, fontWeight: '600' as const },
-  propCity: { fontSize: 13, marginTop: 2 },
-  propPrice: { fontSize: 20, fontWeight: '700' as const },
-  propDetails: { flexDirection: 'row', alignItems: 'center' as const, gap: 14, marginTop: 6 },
-  detailChip: { flexDirection: 'row', alignItems: 'center' as const, gap: 4 },
-  detailText: { fontSize: 13, fontWeight: '500' as const },
-  domText: { fontSize: 12, marginLeft: 'auto' as any },
-  mlsText: { fontSize: 11, marginTop: 2 },
-  expandedSection: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, gap: 10 },
-  propDesc: { fontSize: 14, lineHeight: 20 },
-  expandedLabel: { fontSize: 11, fontWeight: '600' as const, textTransform: 'uppercase' as const, letterSpacing: 0.6 },
-  featureWrap: { flexDirection: 'row', flexWrap: 'wrap' as const, gap: 8 },
-  featureChip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10 },
-  featureText: { fontSize: 12, fontWeight: '600' as const },
-  showingRow: { flexDirection: 'row', alignItems: 'center' as const, gap: 8 },
-  showingText: { fontSize: 13 },
-  quickActions: { flexDirection: 'row', gap: 10, marginTop: 6 },
-  qAction: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, minHeight: 44 },
-  qActionText: { fontSize: 13, fontWeight: '600' as const, color: '#FFFFFF' },
-  qActionTextAlt: { fontSize: 13, fontWeight: '600' as const },
-  headerAddBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-  },
-  headerAddText: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-  },
-  modalOverlay: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'transparent',
+  },
+  carouselContainer: {
+    flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    alignItems: 'center',
   },
-  modalContent: {
-    borderRadius: 16,
+  scrollContent: {
+    paddingHorizontal: (SCREEN_WIDTH - CARD_WIDTH) / 2 - CARD_MARGIN,
+    alignItems: 'center',
+  },
+  cardWrapper: {
+    width: CARD_WIDTH,
+    height: Platform.OS === 'web' ? SCREEN_HEIGHT * 0.75 : SCREEN_HEIGHT * 0.7,
+    marginHorizontal: CARD_MARGIN,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.6,
+    shadowRadius: 30,
+    elevation: 20,
+  },
+  card: {
+    flex: 1,
+    borderRadius: 24,
     borderWidth: 1,
-    maxHeight: '80%',
+    borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
+    backgroundColor: '#09090B',
   },
-  modalHeader: {
+  cardImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  cardImageStyle: {
+    opacity: 0.8,
+  },
+  cardGradient: {
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 24,
+  },
+  badgeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  statusBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-  },
-  modalClose: {
-    padding: 4,
-  },
-  modalBody: {
-    padding: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 13,
-    fontWeight: '500' as const,
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-  },
-  stageSelectBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 20,
     borderWidth: 1,
+    gap: 6,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    padding: 16,
-    borderTopWidth: 1,
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
-  modalBtn: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    minWidth: 100,
+  statusText: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  favBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  modalBtnText: {
-    fontWeight: '600' as const,
+  cardDetails: {
+    gap: 8,
+  },
+  price: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: '#FFF',
+    letterSpacing: -2,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 8,
+  },
+  address: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFF',
+    letterSpacing: -0.5,
+  },
+  city: {
+    fontSize: 16,
+    color: '#A1A1AA',
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  metricsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 12,
+  },
+  metric: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  metricText: {
+    color: '#D4D4D8',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  description: {
+    color: '#A1A1AA',
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 16,
+    gap: 8,
+  },
+  actionBtnPrimary: {
+    backgroundColor: '#FFF',
+  },
+  actionBtnSecondary: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  actionBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  pagination: {
+    position: 'absolute',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  dotActive: {
+    backgroundColor: '#FFF',
+    width: 24,
   },
 });

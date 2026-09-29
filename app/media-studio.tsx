@@ -240,16 +240,16 @@ export default function WalkthroughMakerScreen() {
               <View style={s.optionsWrap}>
                 <View style={s.tabsRow}>
                   <Pressable 
-                    style={[s.tab, musicSource === 'ai' && { backgroundColor: isDark ? isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}
+                    style={[s.tab, musicSource === 'ai' && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}
                     onPress={() => setMusicSource('ai')}
                   >
-                    <Text style={[s.tabText, musicSource === 'ai' ? { color: 'colors.text', fontWeight: '600' } : { color: colors.textSecondary }]}>AI Vibe</Text>
+                    <Text style={[s.tabText, musicSource === 'ai' ? { color: colors.text, fontWeight: '600' } : { color: colors.textSecondary }]}>AI Vibe</Text>
                   </Pressable>
                   <Pressable 
-                    style={[s.tab, musicSource === 'custom' && { backgroundColor: isDark ? isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}
+                    style={[s.tab, musicSource === 'custom' && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}
                     onPress={() => setMusicSource('custom')}
                   >
-                    <Text style={[s.tabText, musicSource === 'custom' ? { color: 'colors.text', fontWeight: '600' } : { color: colors.textSecondary }]}>My Audio</Text>
+                    <Text style={[s.tabText, musicSource === 'custom' ? { color: colors.text, fontWeight: '600' } : { color: colors.textSecondary }]}>My Audio</Text>
                   </Pressable>
                 </View>
 
@@ -260,7 +260,7 @@ export default function WalkthroughMakerScreen() {
                       {['cinematic', 'upbeat', 'ambient', 'lo-fi', 'corporate'].map(v => (
                         <Pressable 
                           key={v} 
-                          style={[s.pill, aiMusicVibe === v && { backgroundColor: 'colors.text', borderColor: 'colors.text' }]}
+                          style={[s.pill, aiMusicVibe === v && { backgroundColor: colors.text, borderColor: colors.text }]}
                           onPress={() => setAiMusicVibe(v)}
                         >
                           <Text style={[s.pillText, aiMusicVibe === v ? { color: colors.background } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
@@ -275,14 +275,14 @@ export default function WalkthroughMakerScreen() {
                         style={[s.uploadBtn, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}
                         onPress={() => setCustomMusic('user_uploaded_audio.mp3')}
                       >
-                        <Ionicons name="musical-notes" size={24} color="colors.text" />
+                        <Ionicons name="musical-notes" size={24} color=colors.text />
                         <Text style={[s.uploadBtnText, { color: colors.text }]}>Browse for MP3/WAV</Text>
                       </Pressable>
                     ) : (
                       <View style={[s.audioPreviewCard, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}>
                         <View style={s.customAudioTop}>
                           <View style={s.customAudioInfo}>
-                            <Ionicons name="musical-note" size={20} color="colors.text" />
+                            <Ionicons name="musical-note" size={20} color=colors.text />
                             <Text style={[s.customAudioName, { color: colors.text }]}>{customMusic}</Text>
                           </View>
                           <Pressable onPress={() => setCustomMusic(null)}>
@@ -317,7 +317,7 @@ export default function WalkthroughMakerScreen() {
                     {['standard', 'bold', 'minimal', 'karaoke'].map(v => (
                       <Pressable 
                         key={v} 
-                        style={[s.pill, captionStyle === v && { backgroundColor: 'colors.text', borderColor: 'colors.text' }]}
+                        style={[s.pill, captionStyle === v && { backgroundColor: colors.text, borderColor: colors.text }]}
                         onPress={() => setCaptionStyle(v)}
                       >
                         <Text style={[s.pillText, captionStyle === v ? { color: colors.background } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
@@ -345,16 +345,16 @@ export default function WalkthroughMakerScreen() {
               <View style={s.voiceOptionsWrap}>
                 <View style={s.voiceTabs}>
                   <Pressable 
-                    style={[s.voiceTab, voiceoverSource === 'ai' && { backgroundColor: isDark ? isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}
+                    style={[s.voiceTab, voiceoverSource === 'ai' && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}
                     onPress={() => setVoiceoverSource('ai')}
                   >
-                    <Text style={[s.voiceTabText, voiceoverSource === 'ai' ? { color: 'colors.text', fontWeight: '600' } : { color: colors.textSecondary }]}>AI Voice</Text>
+                    <Text style={[s.voiceTabText, voiceoverSource === 'ai' ? { color: colors.text, fontWeight: '600' } : { color: colors.textSecondary }]}>AI Voice</Text>
                   </Pressable>
                   <Pressable 
-                    style={[s.voiceTab, voiceoverSource === 'custom' && { backgroundColor: isDark ? isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}
+                    style={[s.voiceTab, voiceoverSource === 'custom' && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}
                     onPress={() => setVoiceoverSource('custom')}
                   >
-                    <Text style={[s.voiceTabText, voiceoverSource === 'custom' ? { color: 'colors.text', fontWeight: '600' } : { color: colors.textSecondary }]}>My Voice</Text>
+                    <Text style={[s.voiceTabText, voiceoverSource === 'custom' ? { color: colors.text, fontWeight: '600' } : { color: colors.textSecondary }]}>My Voice</Text>
                   </Pressable>
                 </View>
 
@@ -366,7 +366,7 @@ export default function WalkthroughMakerScreen() {
                         {['alloy', 'onyx', 'nova', 'echo', 'fable', 'shimmer'].map(v => (
                           <Pressable 
                             key={v} 
-                            style={[s.voicePill, aiVoice === v && { backgroundColor: 'colors.text', borderColor: 'colors.text' }]}
+                            style={[s.voicePill, aiVoice === v && { backgroundColor: colors.text, borderColor: colors.text }]}
                             onPress={() => setAiVoice(v)}
                           >
                             <Text style={[s.voicePillText, aiVoice === v ? { color: colors.background } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
@@ -390,14 +390,14 @@ export default function WalkthroughMakerScreen() {
                   <View style={s.customVoiceWrap}>
                     {!customAudio ? (
                       <Pressable 
-                        style={[s.customUploadBtn, { borderColor: isRecording ? 'colors.error' : colors.divider, backgroundColor: isRecording ? isDark ? 'rgba(255,59,48,0.1)' : 'rgba(255,59,48,0.05)' : (isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)') }]}
+                        style={[s.customUploadBtn, { borderColor: isRecording ? colors.error : colors.divider, backgroundColor: isRecording ? 'rgba(255,59,48,0.1)' : (isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)') }]}
                         onPressIn={startRecording}
                         onPressOut={stopRecording}
                       >
-                        <View style={[s.recordIconWrap, isRecording && { backgroundColor: 'colors.error' }]}>
-                          <Ionicons name="mic" size={32} color={isRecording ? "#fff" : "colors.text"} />
+                        <View style={[s.recordIconWrap, isRecording && { backgroundColor: colors.error }]}>
+                          <Ionicons name="mic" size={32} color={isRecording ? "#fff" : colors.text} />
                         </View>
-                        <Text style={[s.customUploadText, { color: isRecording ? 'colors.error' : colors.text }]}>
+                        <Text style={[s.customUploadText, { color: isRecording ? colors.error : colors.text }]}>
                           {isRecording ? "Recording... Release to Stop" : "Hold to Record Voice"}
                         </Text>
                       </Pressable>
@@ -405,7 +405,7 @@ export default function WalkthroughMakerScreen() {
                       <View style={[s.customAudioPreview, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}>
                         <View style={s.customAudioTop}>
                           <View style={s.customAudioInfo}>
-                            <Ionicons name="volume-medium" size={20} color="colors.text" />
+                            <Ionicons name="volume-medium" size={20} color=colors.text />
                             <Text style={[s.customAudioName, { color: colors.text }]}>My Recording</Text>
                           </View>
                           <Pressable onPress={() => { setCustomAudio(null); setTrimStart('0'); setTrimEnd(''); }}>
@@ -526,7 +526,7 @@ const s = StyleSheet.create({
   },
   uploadSubtext: {
     fontSize: 13,
-    color: 'colors.text',
+    color: colors.text,
     fontWeight: '500',
   },
   clipsList: {
@@ -550,7 +550,7 @@ const s = StyleSheet.create({
     marginRight: 12,
   },
   clipNumber: {
-    color: 'colors.text',
+    color: colors.text,
     fontWeight: '700',
     fontSize: 13,
   },
@@ -806,7 +806,7 @@ const s = StyleSheet.create({
   },
   poweredBy: {
     fontSize: 12,
-    color: 'colors.text',
+    color: colors.text,
     fontWeight: '600',
   }
 });

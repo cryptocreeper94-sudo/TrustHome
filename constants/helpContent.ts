@@ -69,7 +69,6 @@ export const SCREEN_HELP: Record<string, FeatureHelp> = {
       'Conversations are organized by contact with unread badges',
       'Transaction context appears at the top of each thread',
       'Supports text, documents, and image attachments',
-      'Connected to Signal Chat for cross-ecosystem messaging',
     ],
   },
   documents: {

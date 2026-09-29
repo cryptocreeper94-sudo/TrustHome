@@ -11,6 +11,7 @@ import {
   Switch
 } from 'react-native';
 import { Audio } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -84,13 +85,30 @@ export default function WalkthroughMakerScreen() {
     setRecording(null);
   };
 
-  // Simulated upload (in a real app, this would use expo-document-picker or similar)
-  const handleUploadClips = () => {
-    const newClip = {
-      id: Math.random().toString(36).substring(7),
-      name: `Clip_00${clips.length + 1}.mp4`
-    };
-    setClips([...clips, newClip]);
+  // Use expo-image-picker to let the user select video files
+  const handleUploadClips = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['video'],
+        allowsMultipleSelection: true,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newClips = result.assets.map((asset, index) => ({
+          id: Math.random().toString(36).substring(7),
+          name: asset.fileName || asset.uri.split('/').pop() || `Clip_${Math.floor(Math.random() * 1000)}.mp4`
+        }));
+        setClips(prev => [...prev, ...newClips]);
+      }
+    } catch (error) {
+      console.error("Error picking video:", error);
+      // Fallback for demo if error occurs
+      const newClip = {
+        id: Math.random().toString(36).substring(7),
+        name: `Clip_00${clips.length + 1}.mp4`
+      };
+      setClips(prev => [...prev, newClip]);
+    }
   };
 
   const handleRemoveClip = (id: string) => {

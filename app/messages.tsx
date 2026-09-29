@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Platform, Modal, TextInput, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -102,6 +102,17 @@ export default function MessagesScreen() {
   const [expandedConvo, setExpandedConvo] = useState<string | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const [showHelp, setShowHelp] = useState<boolean>(false);
+  
+  // New Message Modal State
+  const [showNewMessage, setShowNewMessage] = useState(false);
+  const [msgType, setMsgType] = useState<'email' | 'sms'>('email');
+  const [msgTo, setMsgTo] = useState('');
+  const [msgSubject, setMsgSubject] = useState('');
+  const [msgBody, setMsgBody] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  // Mock compliance check (in reality, this would check the selected contact's DB record)
+  const isSmsOptedIn = false;
 
   const totalUnread = CONVERSATIONS.reduce((sum, c) => sum + c.unread, 0);
   const unreadConversations = CONVERSATIONS.filter(c => c.unread > 0);
@@ -140,7 +151,7 @@ export default function MessagesScreen() {
 
         <Animated.View entering={FadeInDown.duration(400).delay(180)}>
         <View style={styles.actionRow}>
-          <GlassCard style={styles.actionCard} compact onPress={() => {}}>
+          <GlassCard style={styles.actionCard} compact onPress={() => setShowNewMessage(true)}>
             <View style={styles.actionInner}>
               <Ionicons name="create-outline" size={20} color={colors.primary} />
               <Text style={[styles.actionText, { color: colors.text }]}>New Message</Text>
@@ -233,6 +244,120 @@ export default function MessagesScreen() {
 
         <Footer />
       </ScrollView>
+
+      {/* New Message Modal */}
+      <Modal visible={showNewMessage} transparent animationType="fade" onRequestClose={() => setShowNewMessage(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1A1D24' : '#FFF', borderColor: colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.divider }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>New Message</Text>
+              <Pressable onPress={() => setShowNewMessage(false)} style={styles.modalClose}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
+              
+              {/* Type Toggle */}
+              <View style={[styles.typeToggleRow, { backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.05)' }]}>
+                <Pressable 
+                  style={[styles.typeToggleBtn, msgType === 'email' && { backgroundColor: colors.cardGlass, borderColor: colors.primary, borderWidth: 1 }]} 
+                  onPress={() => setMsgType('email')}
+                >
+                  <Ionicons name="mail" size={16} color={msgType === 'email' ? colors.primary : colors.textSecondary} />
+                  <Text style={[styles.typeToggleText, { color: msgType === 'email' ? colors.primary : colors.textSecondary }]}>Email</Text>
+                </Pressable>
+                <Pressable 
+                  style={[styles.typeToggleBtn, msgType === 'sms' && { backgroundColor: colors.cardGlass, borderColor: colors.primary, borderWidth: 1 }]} 
+                  onPress={() => setMsgType('sms')}
+                >
+                  <Ionicons name="chatbubble" size={16} color={msgType === 'sms' ? colors.primary : colors.textSecondary} />
+                  <Text style={[styles.typeToggleText, { color: msgType === 'sms' ? colors.primary : colors.textSecondary }]}>SMS</Text>
+                </Pressable>
+              </View>
+
+              {/* SMS Compliance Warning */}
+              {msgType === 'sms' && !isSmsOptedIn && (
+                <View style={[styles.warningBox, { backgroundColor: isDark ? 'rgba(245,158,11,0.1)' : '#FEF3C7', borderColor: '#FDE68A' }]}>
+                  <View style={styles.warningHeader}>
+                    <Ionicons name="warning" size={18} color="#D97706" />
+                    <Text style={styles.warningTitle}>A2P 10DLC Compliance Required</Text>
+                  </View>
+                  <Text style={styles.warningText}>This contact has not opted-in to receive SMS messages. You must receive explicit consent before sending automated texts.</Text>
+                  <Pressable style={styles.requestOptInBtn}>
+                    <Ionicons name="paper-plane" size={14} color="#D97706" />
+                    <Text style={styles.requestOptInText}>Send Opt-In Request via Email</Text>
+                  </Pressable>
+                </View>
+              )}
+
+              {/* Form Fields */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>To</Text>
+                <TextInput 
+                  style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} 
+                  value={msgTo} 
+                  onChangeText={setMsgTo} 
+                  placeholder={msgType === 'email' ? "client@example.com" : "(555) 123-4567"} 
+                  placeholderTextColor={colors.textTertiary} 
+                />
+              </View>
+
+              {msgType === 'email' && (
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Subject</Text>
+                  <TextInput 
+                    style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} 
+                    value={msgSubject} 
+                    onChangeText={setMsgSubject} 
+                    placeholder="Property update..." 
+                    placeholderTextColor={colors.textTertiary} 
+                  />
+                </View>
+              )}
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Message</Text>
+                <TextInput 
+                  style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} 
+                  value={msgBody} 
+                  onChangeText={setMsgBody} 
+                  placeholder="Type your message here..." 
+                  placeholderTextColor={colors.textTertiary} 
+                  multiline 
+                  numberOfLines={4} 
+                  textAlignVertical="top"
+                />
+              </View>
+
+            </ScrollView>
+            <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowNewMessage(false)}>
+                <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
+              </Pressable>
+              <Pressable 
+                style={[styles.modalBtn, { backgroundColor: colors.primary, opacity: (msgType === 'sms' && !isSmsOptedIn) ? 0.5 : 1 }]} 
+                disabled={isSending || (msgType === 'sms' && !isSmsOptedIn)}
+                onPress={() => {
+                  setIsSending(true);
+                  setTimeout(() => {
+                    setIsSending(false);
+                    setShowNewMessage(false);
+                    setMsgTo(''); setMsgSubject(''); setMsgBody('');
+                  }, 1000);
+                }}
+              >
+                {isSending ? <ActivityIndicator color="#FFF" /> : (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Ionicons name="send" size={14} color="#FFF" />
+                    <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Send</Text>
+                  </View>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <InfoModal
         visible={showHelp}
         onClose={() => setShowHelp(false)}
@@ -291,4 +416,26 @@ const styles = StyleSheet.create({
   msgActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   replyBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 4, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, minHeight: 44, justifyContent: 'center' as const },
   replyBtnText: { fontSize: 12, fontWeight: '600' as const },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },
+  modalContent: { borderRadius: 16, borderWidth: 1, maxHeight: '85%', overflow: 'hidden' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
+  modalTitle: { fontSize: 18, fontWeight: '700' as const },
+  modalClose: { padding: 4 },
+  modalBody: { padding: 16 },
+  typeToggleRow: { flexDirection: 'row', padding: 4, borderRadius: 12, marginBottom: 20 },
+  typeToggleBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 8, gap: 6, borderWidth: 1, borderColor: 'transparent' },
+  typeToggleText: { fontSize: 14, fontWeight: '600' as const },
+  warningBox: { padding: 14, borderRadius: 12, borderWidth: 1, marginBottom: 20 },
+  warningHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  warningTitle: { fontSize: 14, fontWeight: '700' as const, color: '#D97706' },
+  warningText: { fontSize: 13, color: '#92400E', lineHeight: 18, marginBottom: 12 },
+  requestOptInBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: 'rgba(217,119,6,0.15)', paddingVertical: 10, borderRadius: 8 },
+  requestOptInText: { fontSize: 13, fontWeight: '600' as const, color: '#D97706' },
+  inputGroup: { marginBottom: 16 },
+  inputLabel: { fontSize: 13, fontWeight: '500' as const, marginBottom: 8 },
+  input: { borderWidth: 1, borderRadius: 8, padding: 12, fontSize: 15 },
+  textArea: { minHeight: 120 },
+  modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, padding: 16, borderTopWidth: 1 },
+  modalBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, minWidth: 100, alignItems: 'center', justifyContent: 'center' },
+  modalBtnText: { fontWeight: '600' as const, fontSize: 14 },
 });

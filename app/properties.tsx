@@ -265,9 +265,9 @@ export default function PropertiesScreen() {
         showBack 
         rightAction={
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="add" size={20} color={colors.primary} />
-              <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Property</Text>
+            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+              <Ionicons name="add" size={20} color="#FFFFFF" />
+              <Text style={[styles.headerAddText, { color: '#FFFFFF' }]}>Add Property</Text>
             </Pressable>
             <InfoButton onPress={() => setShowHelp(true)} />
           </View>
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   featuredDetailText: { fontSize: 12, fontWeight: '500' as const },
   filterRow: { marginTop: 18, maxHeight: 48 },
   filterContent: { paddingHorizontal: 16, gap: 10 },
-  filterPill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 22, borderWidth: 1, minHeight: 44 },
+  filterPill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 22, borderWidth: 1, minHeight: 44, minWidth: 140, alignItems: 'center', justifyContent: 'center' },
   filterText: { fontSize: 13, fontWeight: '600' as const },
   sectionsWrap: { paddingHorizontal: 16, marginTop: 16 },
   propCard: { marginTop: 12, minHeight: 0 },

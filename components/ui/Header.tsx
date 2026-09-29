@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   right: {
-    width: 48,
+    minWidth: 48,
     alignItems: 'flex-end',
   },
   title: {

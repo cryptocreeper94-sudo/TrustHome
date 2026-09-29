@@ -35,19 +35,19 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     title: 'Your Home Journey',
     items: [
-      { icon: 'business-outline', label: 'Browse Properties', color: '#0E7490' },
-      { icon: 'calendar-outline', label: 'Schedule Showings', color: '#1A8A7E' },
-      { icon: 'swap-horizontal-outline', label: 'Track Transactions', color: '#0D9488' },
-      { icon: 'map-outline', label: 'Neighborhood Intel', color: '#059669' },
+      { icon: 'business-outline', label: 'Browse Properties', color: '#737373' },
+      { icon: 'calendar-outline', label: 'Schedule Showings', color: '#E5E5E5' },
+      { icon: 'swap-horizontal-outline', label: 'Track Transactions', color: '#A3A3A3' },
+      { icon: 'map-outline', label: 'Neighborhood Intel', color: '#525252' },
     ],
   },
   {
     title: 'Tools & Security',
     items: [
-      { icon: 'lock-closed-outline', label: 'Document Vault', color: '#047857' },
-      { icon: 'calculator-outline', label: 'Mortgage Tools', color: '#0369A1' },
-      { icon: 'chatbubbles-outline', label: 'Direct Messaging', color: '#1E40AF' },
-      { icon: 'sparkles-outline', label: 'AI Assistant', color: '#0369a1' },
+      { icon: 'lock-closed-outline', label: 'Document Vault', color: '#737373' },
+      { icon: 'calculator-outline', label: 'Mortgage Tools', color: '#D4D4D4' },
+      { icon: 'chatbubbles-outline', label: 'Direct Messaging', color: '#404040' },
+      { icon: 'sparkles-outline', label: 'AI Assistant', color: '#D4D4D4' },
     ],
   },
 ];
@@ -110,7 +110,7 @@ function CTAButton({ text, icon, onPress, variant = 'primary' }: { text: string;
         <Text style={isPrimary ? styles.ctaButtonTextPrimary : styles.ctaButtonTextSecondary}>
           {text}
         </Text>
-        <Ionicons name={icon} size={16} color={isPrimary ? '#1A8A7E' : '#FFFFFF'} />
+        <Ionicons name={icon} size={16} color={isPrimary ? '#E5E5E5' : '#FFFFFF'} />
       </Pressable>
     </Animated.View>
   );
@@ -188,7 +188,7 @@ function UserCommandCenter() {
         {/* Brand Section */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.brandArea}>
           <LinearGradient
-            colors={['rgba(26,138,126,0.25)', 'rgba(26,138,126,0.08)']}
+            colors={['rgba(255,255,255,0.15)', 'rgba(255,255,255,0.02)']}
             style={styles.brandGlow}
           >
             <View style={styles.brandIcon}>
@@ -204,7 +204,7 @@ function UserCommandCenter() {
         {/* Hero Card */}
         <Animated.View entering={FadeInDown.delay(150).duration(500)} style={styles.heroCard}>
           <LinearGradient
-            colors={['#1A8A7E', '#0F766E']}
+            colors={['#E5E5E5', '#0F766E']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.heroGradient}
@@ -243,7 +243,7 @@ function UserCommandCenter() {
         {/* Trust Banner */}
         <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.trustBanner}>
           <LinearGradient
-            colors={['rgba(26,138,126,0.15)', 'rgba(26,138,126,0.05)']}
+            colors={['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.01)']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[
@@ -256,7 +256,7 @@ function UserCommandCenter() {
             ]}
           >
             <View style={styles.trustBannerRow}>
-              <View style={[styles.trustBadge, { backgroundColor: 'rgba(26,138,126,0.2)' }]}>
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
                 <Ionicons name="shield-checkmark" size={18} color="#1A8A7E" />
               </View>
               <View style={styles.trustBannerText}>
@@ -265,7 +265,7 @@ function UserCommandCenter() {
               </View>
             </View>
             <View style={styles.trustBannerRow}>
-              <View style={[styles.trustBadge, { backgroundColor: 'rgba(3,105,161,0.2)' }]}>
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
                 <Ionicons name="sparkles" size={18} color="#0369a1" />
               </View>
               <View style={styles.trustBannerText}>
@@ -274,7 +274,7 @@ function UserCommandCenter() {
               </View>
             </View>
             <View style={styles.trustBannerRow}>
-              <View style={[styles.trustBadge, { backgroundColor: 'rgba(37,99,235,0.2)' }]}>
+              <View style={[styles.trustBadge, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
                 <Ionicons name="globe" size={18} color="#2563EB" />
               </View>
               <View style={styles.trustBannerText}>
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 20,
-    backgroundColor: '#1A8A7E',
+    backgroundColor: '#E5E5E5',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   ctaButtonTextPrimary: {
-    color: '#1A8A7E',
+    color: '#E5E5E5',
     fontSize: 14,
     fontWeight: '700' as const,
   },

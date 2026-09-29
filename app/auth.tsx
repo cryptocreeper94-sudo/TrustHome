@@ -421,15 +421,6 @@ export default function AuthScreen() {
                   <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>Create Account</Text>
                 </Pressable>
 
-                <Pressable
-                  onPress={() => { clearError(); setStep('ecosystem'); setShowEcoCredential(false); }}
-                  style={[styles.ecosystemBtn, { borderColor: 'rgba(26,138,126,0.3)' }]}
-                  testID="go-ecosystem"
-                >
-                  <Ionicons name="shield-checkmark" size={18} color="#1A8A7E" />
-                  <Text style={[styles.ecosystemBtnText, { color: '#1A8A7E' }]}>Sign in with Trust Layer</Text>
-                </Pressable>
-
               </>
             )}
 

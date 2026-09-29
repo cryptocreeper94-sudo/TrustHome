@@ -238,7 +238,7 @@ export default function WalkthroughMakerScreen() {
             <View style={[s.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
               <View style={s.settingInfo}>
                 <Ionicons name="mic-outline" size={20} color="#6366F1" />
-                <Text style={[s.settingLabel, { color: colors.text }]}>AI Voiceover</Text>
+                <Text style={[s.settingLabel, { color: colors.text }]}>Voiceover</Text>
               </View>
               <Switch
                 value={addVoiceover}

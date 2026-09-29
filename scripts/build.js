@@ -117,6 +117,7 @@ async function startMetro(expoPublicDomain) {
   metroProcess = spawn("npm", ["run", "expo:start:static:build"], {
     stdio: ["ignore", "pipe", "pipe"],
     detached: false,
+    shell: true,
     env,
   });
 
@@ -496,6 +497,7 @@ async function buildWebExport(domain) {
   console.log("Building Expo web export...");
   const webBuild = spawn("npx", ["expo", "export", "--platform", "web", "--output-dir", "static-build"], {
     stdio: ["ignore", "pipe", "pipe"],
+    shell: true,
     env: { ...process.env, EXPO_PUBLIC_DOMAIN: domain },
   });
 

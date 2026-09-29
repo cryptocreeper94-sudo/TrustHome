@@ -179,7 +179,7 @@ export default function WalkthroughMakerScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.delay(100).springify()} style={s.section}>
           <Text style={[s.sectionTitle, { color: '#FFFFFF' }]}>1. Upload Clips</Text>
-          <Text style={[s.sectionDesc, { color: '#FFFFFF'Secondary }]}>
+          <Text style={[s.sectionDesc, { color: colors.textSecondary }]}>
             Upload short video clips from your phone. We'll stitch them together in order.
           </Text>
           
@@ -192,7 +192,7 @@ export default function WalkthroughMakerScreen() {
                 <Ionicons name="cloud-upload-outline" size={28} color={colors.text} />
               </View>
               <Text style={[s.uploadText, { color: '#FFFFFF' }]}>Tap to Upload Video Clips</Text>
-              <Text style={[s.uploadSubtext, { color: '#FFFFFF'Secondary }]}>MP4, MOV up to 500MB</Text>
+              <Text style={[s.uploadSubtext, { color: colors.textSecondary }]}>MP4, MOV up to 500MB</Text>
             </LinearGradient>
           </Pressable>
 
@@ -218,7 +218,7 @@ export default function WalkthroughMakerScreen() {
 
         <Animated.View entering={FadeInDown.delay(200).springify()} style={s.section}>
           <Text style={[s.sectionTitle, { color: '#FFFFFF' }]}>2. Enhancements</Text>
-          <Text style={[s.sectionDesc, { color: '#FFFFFF'Secondary }]}>
+          <Text style={[s.sectionDesc, { color: colors.textSecondary }]}>
             Select what Axiom42 should automatically add to your video.
           </Text>
 
@@ -243,19 +243,19 @@ export default function WalkthroughMakerScreen() {
                     style={[s.tab, musicSource === 'ai' && { backgroundColor: 'rgba(150,150,150,0.1)' }]}
                     onPress={() => setMusicSource('ai')}
                   >
-                    <Text style={[s.tabText, musicSource === 'ai' ? { color: '#FFFFFF', fontWeight: '600' } : { color: '#FFFFFF'Secondary }]}>AI Vibe</Text>
+                    <Text style={[s.tabText, musicSource === 'ai' ? { color: '#FFFFFF', fontWeight: '600' } : { color: colors.textSecondary }]}>AI Vibe</Text>
                   </Pressable>
                   <Pressable 
                     style={[s.tab, musicSource === 'custom' && { backgroundColor: 'rgba(150,150,150,0.1)' }]}
                     onPress={() => setMusicSource('custom')}
                   >
-                    <Text style={[s.tabText, musicSource === 'custom' ? { color: '#FFFFFF', fontWeight: '600' } : { color: '#FFFFFF'Secondary }]}>My Audio</Text>
+                    <Text style={[s.tabText, musicSource === 'custom' ? { color: '#FFFFFF', fontWeight: '600' } : { color: colors.textSecondary }]}>My Audio</Text>
                   </Pressable>
                 </View>
 
                 {musicSource === 'ai' ? (
                   <View style={s.selectorGroup}>
-                    <Text style={[s.scriptLabel, { color: '#FFFFFF'Secondary }]}>Select Mood</Text>
+                    <Text style={[s.scriptLabel, { color: colors.textSecondary }]}>Select Mood</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.pillsList}>
                       {['cinematic', 'upbeat', 'ambient', 'lo-fi', 'corporate'].map(v => (
                         <Pressable 
@@ -312,7 +312,7 @@ export default function WalkthroughMakerScreen() {
             {addCaptions && (
               <View style={s.optionsWrap}>
                 <View style={s.selectorGroup}>
-                  <Text style={[s.scriptLabel, { color: '#FFFFFF'Secondary }]}>Caption Style</Text>
+                  <Text style={[s.scriptLabel, { color: colors.textSecondary }]}>Caption Style</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.pillsList}>
                     {['standard', 'bold', 'minimal', 'karaoke'].map(v => (
                       <Pressable 
@@ -348,20 +348,20 @@ export default function WalkthroughMakerScreen() {
                     style={[s.voiceTab, voiceoverSource === 'ai' && { backgroundColor: 'rgba(150,150,150,0.1)' }]}
                     onPress={() => setVoiceoverSource('ai')}
                   >
-                    <Text style={[s.voiceTabText, voiceoverSource === 'ai' ? { color: '#FFFFFF', fontWeight: '600' } : { color: '#FFFFFF'Secondary }]}>AI Voice</Text>
+                    <Text style={[s.voiceTabText, voiceoverSource === 'ai' ? { color: '#FFFFFF', fontWeight: '600' } : { color: colors.textSecondary }]}>AI Voice</Text>
                   </Pressable>
                   <Pressable 
                     style={[s.voiceTab, voiceoverSource === 'custom' && { backgroundColor: 'rgba(150,150,150,0.1)' }]}
                     onPress={() => setVoiceoverSource('custom')}
                   >
-                    <Text style={[s.voiceTabText, voiceoverSource === 'custom' ? { color: '#FFFFFF', fontWeight: '600' } : { color: '#FFFFFF'Secondary }]}>My Voice</Text>
+                    <Text style={[s.voiceTabText, voiceoverSource === 'custom' ? { color: '#FFFFFF', fontWeight: '600' } : { color: colors.textSecondary }]}>My Voice</Text>
                   </Pressable>
                 </View>
 
                 {voiceoverSource === 'ai' ? (
                   <View style={s.aiVoiceWrap}>
                     <View style={s.aiVoiceSelector}>
-                      <Text style={[s.scriptLabel, { color: '#FFFFFF'Secondary }]}>Select Voice</Text>
+                      <Text style={[s.scriptLabel, { color: colors.textSecondary }]}>Select Voice</Text>
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.voicePillsList}>
                         {['alloy', 'onyx', 'nova', 'echo', 'fable', 'shimmer'].map(v => (
                           <Pressable 
@@ -374,7 +374,7 @@ export default function WalkthroughMakerScreen() {
                         ))}
                       </ScrollView>
                     </View>
-                    <Text style={[s.scriptLabel, { color: '#FFFFFF'Secondary }]}>Voiceover Script</Text>
+                    <Text style={[s.scriptLabel, { color: colors.textSecondary }]}>Voiceover Script</Text>
                     <TextInput
                       style={[s.scriptInput, { color: '#FFFFFF', borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}
                       placeholder="Type the script for the AI to read..."
@@ -414,10 +414,10 @@ export default function WalkthroughMakerScreen() {
                         </View>
                         
                         <View style={s.trimWrap}>
-                          <Text style={[s.trimTitle, { color: '#FFFFFF'Secondary }]}>Trim Audio (seconds)</Text>
+                          <Text style={[s.trimTitle, { color: colors.textSecondary }]}>Trim Audio (seconds)</Text>
                           <View style={s.trimInputs}>
                             <View style={s.trimInputGroup}>
-                              <Text style={[s.trimLabel, { color: '#FFFFFF'Tertiary }]}>Start</Text>
+                              <Text style={[s.trimLabel, { color: colors.textTertiary }]}>Start</Text>
                               <TextInput 
                                 style={[s.trimInput, { color: '#FFFFFF', borderColor: colors.divider }]}
                                 value={trimStart}
@@ -428,7 +428,7 @@ export default function WalkthroughMakerScreen() {
                               />
                             </View>
                             <View style={s.trimInputGroup}>
-                              <Text style={[s.trimLabel, { color: '#FFFFFF'Tertiary }]}>End</Text>
+                              <Text style={[s.trimLabel, { color: colors.textTertiary }]}>End</Text>
                               <TextInput 
                                 style={[s.trimInput, { color: '#FFFFFF', borderColor: colors.divider }]}
                                 value={trimEnd}
@@ -471,7 +471,7 @@ export default function WalkthroughMakerScreen() {
               )}
             </LinearGradient>
           </Pressable>
-          <Text style={[s.poweredBy, { color: '#FFFFFF'Secondary }]}>Powered by Axiom42 Suite</Text>
+          <Text style={[s.poweredBy, { color: colors.textSecondary }]}>Powered by Axiom42 Suite</Text>
         </Animated.View>
 
         <Footer />

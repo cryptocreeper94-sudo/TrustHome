@@ -659,6 +659,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  toolCardCarousel: {
+    width: 210,
+    height: 280,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  toolCardImg: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  toolCardGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  toolCardContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 20,
+  },
+  toolLabelCarousel: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '700',
+    marginTop: 4,
+  },
 
   // CTA
   ctaSection: {

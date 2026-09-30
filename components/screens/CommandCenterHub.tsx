@@ -58,12 +58,12 @@ const STATS = [
 ];
 
 const TOOLS_QUICK = [
-  { emoji: '📋', label: 'Transactions', route: '/transactions', color: '#52525B' },
-  { emoji: '🏠', label: 'Properties', route: '/properties', color: '#52525B' },
-  { emoji: '📄', label: 'Documents', route: '/documents', color: '#52525B' },
-  { emoji: '💬', label: 'Messages', route: '/messages', color: '#52525B' },
-  { emoji: '🎬', label: 'Media Studio', route: '/media-studio', color: '#52525B' },
-  { emoji: '💼', label: 'Business Suite', route: '/business', color: '#52525B' },
+  { emoji: '📋', label: 'Transactions', route: '/transactions', color: '#52525B', image: require('@/assets/images/guide-transactions.jpg') },
+  { emoji: '🏠', label: 'Properties', route: '/properties', color: '#52525B', image: require('@/assets/images/guide-properties.jpg') },
+  { emoji: '📄', label: 'Documents', route: '/documents', color: '#52525B', image: require('@/assets/images/guide-documents.jpg') },
+  { emoji: '💬', label: 'Messages', route: '/messages', color: '#52525B', image: require('@/assets/images/guide-messages.jpg') },
+  { emoji: '🎬', label: 'Media Studio', route: '/media-studio', color: '#52525B', image: require('@/assets/images/guide-media.jpg') },
+  { emoji: '💼', label: 'Business Suite', route: '/business', color: '#52525B', image: require('@/assets/images/guide-business.jpg') },
 ];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -185,20 +185,21 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
         </View>
       </Animated.View>
 
-      {/* ─── FEATURES CAROUSEL ─── */}
+      {/* ─── FEATURES DESKTOP ROW ─── */}
       <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.section}>
         <View style={styles.sectionInner}>
           <Text style={[styles.sectionHeading, { color: isDark ? '#F8FAFC' : '#0F172A', textAlign: 'left', marginBottom: 20 }]}>
             Platform Features
           </Text>
         </View>
-        <HorizontalCarousel itemWidth={SCREEN_WIDTH > 600 ? 400 : 320}>
+        <View style={styles.featuresRowDesktop}>
           {FEATURES.map((feature, index) => (
             <Pressable
               key={feature.title}
               style={({ pressed }) => [
                 styles.featureCardCarousel,
-                { opacity: pressed ? 0.95 : 1 }
+                { opacity: pressed ? 0.95 : 1 },
+                SCREEN_WIDTH > 900 && { flex: 1, width: 'auto' } // Fill width evenly on desktop
               ]}
               onPress={() => router.push(feature.route as any)}
             >
@@ -219,7 +220,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
               </View>
             </Pressable>
           ))}
-        </HorizontalCarousel>
+        </View>
       </Animated.View>
 
       {/* ─── STATS BAR ─── */}
@@ -250,30 +251,30 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
             Jump straight into any tool. Everything else is in the menu.
           </Text>
         </View>
-        <View style={styles.toolsGrid}>
+        <HorizontalCarousel itemWidth={220}>
           {TOOLS_QUICK.map((tool) => (
             <Pressable
               key={tool.label}
               style={({ pressed }) => [
-                styles.toolCard,
-                {
-                  backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-                  borderColor: isDark ? '#334155' : '#E2E8F0',
-                  ...(pressed ? { transform: [{ scale: 0.97 }] } : {}),
-                },
+                styles.toolCardCarousel,
+                { opacity: pressed ? 0.9 : 1 }
               ]}
               onPress={() => router.push(tool.route as any)}
             >
-              <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '15' }]}>
-                <Text style={{ fontSize: 18 }}>{tool.emoji}</Text>
+              <Image source={tool.image} style={styles.toolCardImg} resizeMode="cover" />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+                style={styles.toolCardGradient}
+              />
+              <View style={styles.toolCardContent}>
+                <View style={[styles.toolIconWrap, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                  <Text style={{ fontSize: 20 }}>{tool.emoji}</Text>
+                </View>
+                <Text style={styles.toolLabelCarousel}>{tool.label}</Text>
               </View>
-              <Text style={[styles.toolLabel, { color: isDark ? '#E2E8F0' : '#1E293B' }]}>
-                {tool.label}
-              </Text>
-              <Text style={{ color: isDark ? '#475569' : '#94A3B8', fontSize: 16 }}>›</Text>
             </Pressable>
           ))}
-        </View>
+        </HorizontalCarousel>
       </Animated.View>
 
       {/* ─── CTA SECTION ─── */}
@@ -485,6 +486,11 @@ const styles = StyleSheet.create({
   },
 
   // Features
+  featuresRowDesktop: {
+    paddingHorizontal: 20,
+    gap: 20,
+    ...(SCREEN_WIDTH > 900 ? { flexDirection: 'row', justifyContent: 'space-between' } : {}),
+  },
   featureCardCarousel: {
     width: 320,
     height: 480,

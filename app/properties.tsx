@@ -142,7 +142,6 @@ export default function PropertiesScreen() {
     setActiveIndex(index);
   };
 
-  const { colors, isDark } = useTheme();
 
   return (
     <ScrollView 

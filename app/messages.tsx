@@ -120,8 +120,8 @@ export default function MessagesScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Messages" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header title="Messages" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)}  imageBanner={require('@/assets/images/guide-messages.jpg')} />} />
 
         <Animated.View entering={FadeInDown.duration(400).delay(100)}>
         <BentoGrid columns={3} gap={10}>

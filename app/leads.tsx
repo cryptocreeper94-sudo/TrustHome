@@ -342,7 +342,8 @@ export default function LeadsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.65)' }]}>
-      <Header 
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header 
         title="Leads & CRM" 
         showBack 
         transparent={false}
@@ -351,11 +352,11 @@ export default function LeadsScreen() {
         rightAction={
           <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
             <Ionicons name="add" size={20} color={colors.primary} />
-            <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Lead</Text>
+
+        <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Lead</Text>
           </Pressable>
         }
       />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {leadsQuery.isLoading && <SkeletonLoader />}
 
         <Animated.View entering={FadeInDown.duration(400).delay(0)}>

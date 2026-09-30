@@ -188,20 +188,20 @@ export default function TransactionsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header 
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <Header 
         title="Transactions" 
         showBack 
         rightAction={
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
             <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="add" size={20} color={colors.primary} />
+              <Ionicons name="add" size={20} color={colors.primary}  imageBanner={require('@/assets/images/guide-transactions.jpg')} />
               <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Deal</Text>
             </Pressable>
             <InfoButton onPress={() => setShowHelp(true)} />
           </View>
         } 
       />
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         <Animated.View entering={FadeInDown.duration(400).delay(0)}>
           <View style={styles.bentoWrap}>

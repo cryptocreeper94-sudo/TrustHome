@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, Modal, ScrollView, Linking, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, Modal, ScrollView, Linking } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -226,7 +227,7 @@ export function Header({
         <Image
           source={imageBanner}
           style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
-          resizeMode="cover"
+          contentFit="cover"
         />
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.3)' }]} />
         <LinearGradient

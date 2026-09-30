@@ -70,8 +70,8 @@ export default function DocumentsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Documents" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header title="Documents" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)}  imageBanner={require('@/assets/images/guide-documents.jpg')} />} />
         <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.bentoWrap}>
           <BentoGrid columns={3} gap={10}>
             {[

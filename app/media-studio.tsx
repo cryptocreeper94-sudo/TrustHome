@@ -174,14 +174,14 @@ export default function WalkthroughMakerScreen() {
 
   return (
     <View style={[s.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header 
+      <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header 
         title="Walkthrough Maker" 
         showBack 
         transparent={false}
         imageBanner={require('@/assets/images/guide-media.jpg')}
       />
-      
-      <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+
         <Animated.View entering={FadeInDown.delay(100).springify()} style={s.section}>
           <Text style={[s.sectionTitle, { color: colors.text }]}>1. Upload Clips</Text>
           <Text style={[s.sectionDesc, { color: colors.textSecondary }]}>
@@ -488,7 +488,7 @@ export default function WalkthroughMakerScreen() {
 const s = StyleSheet.create({
   container: { flex: 1 },
   scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 40, paddingTop: 16 },
+  scrollContent: { paddingBottom: 40 },
   section: {
     paddingHorizontal: 20,
     marginBottom: 32,

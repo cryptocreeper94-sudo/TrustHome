@@ -449,7 +449,7 @@ export default function MarketingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Marketing Hub" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      } />
       <View style={[styles.tabBar, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
         {TABS.map(tab => (
           <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}>
@@ -464,6 +464,8 @@ export default function MarketingScreen() {
         </View>
       ) : (
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header title="Marketing Hub" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)}  imageBanner={require('@/assets/images/guide-marketing.jpg')} />
+
           <Animated.View entering={FadeInDown.duration(500).delay(100)}>
             {activeTab === 'Overview' && renderOverview()}
             {activeTab === 'Content' && renderContent()}

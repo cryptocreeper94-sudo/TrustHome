@@ -112,7 +112,7 @@ export default function EcosystemScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Ecosystem" showBack />
+      <Header imageBanner={require('@/assets/images/guide-ecosystem.jpg')} title="Ecosystem" showBack />
 
       <ScrollView
         style={styles.scroll}

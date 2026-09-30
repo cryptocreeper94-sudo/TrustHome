@@ -201,8 +201,8 @@ export function BusinessSuiteScreen() {
   const isPending = segment === 'expenses' ? addExpenseMutation.isPending : addMileageMutation.isPending;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Business Suite" showBack />
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
+      <Header title="Business Suite" showBack imageBanner={require('@/assets/images/guide-business.jpg')} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}

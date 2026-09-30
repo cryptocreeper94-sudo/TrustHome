@@ -209,7 +209,7 @@ export default function NetworkScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Professional Network" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Professional Network" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       {apiSubcontractors && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
           <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />

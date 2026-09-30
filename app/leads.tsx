@@ -343,11 +343,10 @@ export default function LeadsScreen() {
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.65)' }]}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Header 
+        <Header imageBanner={require('@/assets/images/guide-leads.jpg')} 
         title="Leads & CRM" 
         showBack 
         transparent={false}
-        imageBanner={require('@/assets/images/guide-leads.jpg')}
          
         rightAction={
           <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>

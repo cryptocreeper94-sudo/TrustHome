@@ -91,7 +91,7 @@ export default function AnalyticsScreen() {
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Header title="Analytics" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)}  imageBanner={require('@/assets/images/guide-analytics.jpg')} />} />
+        <Header imageBanner={require('@/assets/images/guide-analytics.jpg')} title="Analytics" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
         <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.periodRow}>
           {(['This Month', 'Quarter', 'Year'] as Period[]).map(p => {
             const isActive = period === p;

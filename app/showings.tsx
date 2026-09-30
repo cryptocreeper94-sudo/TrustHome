@@ -159,7 +159,7 @@ export default function ShowingsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header 
+      <Header imageBanner={require('@/assets/images/guide-showings.jpg')} 
         title="Calendar" 
         showBack 
         rightAction={

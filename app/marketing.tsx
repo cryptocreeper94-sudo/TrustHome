@@ -464,7 +464,7 @@ export default function MarketingScreen() {
         </View>
       ) : (
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Header title="Marketing Hub" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} imageBanner={require('@/assets/images/guide-marketing.jpg')} />
+        <Header imageBanner={require('@/assets/images/guide-marketing.jpg')} title="Marketing Hub" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
 
           <Animated.View entering={FadeInDown.duration(500).delay(100)}>
             {activeTab === 'Overview' && renderOverview()}

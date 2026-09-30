@@ -175,11 +175,10 @@ export default function WalkthroughMakerScreen() {
   return (
     <View style={[s.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
-        <Header 
+        <Header imageBanner={require('@/assets/images/guide-media.jpg')} 
         title="Walkthrough Maker" 
         showBack 
         transparent={false}
-        imageBanner={require('@/assets/images/guide-media.jpg')}
       />
 
         <Animated.View entering={FadeInDown.delay(100).springify()} style={s.section}>

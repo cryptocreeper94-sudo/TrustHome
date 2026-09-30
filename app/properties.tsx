@@ -141,8 +141,7 @@ export default function PropertiesScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title="Exclusive Listings" showBack transparent={false}
-        imageBanner={require('@/assets/images/guide-properties.jpg')} />
+      <Header imageBanner={require('@/assets/images/guide-properties.jpg')} title="Exclusive Listings" showBack transparent={false} />
       
       <View style={styles.carouselContainer}>
         <ScrollView

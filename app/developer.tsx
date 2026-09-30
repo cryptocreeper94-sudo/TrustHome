@@ -75,7 +75,7 @@ interface AccessRequestItem {
 }
 
 export default function DeveloperScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { isAuthenticated, isLoading: authLoading, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();

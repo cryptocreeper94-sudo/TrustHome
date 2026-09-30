@@ -13,7 +13,7 @@ type AuthStep = 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'eco
 type VerifySource = 'login' | 'register';
 
 export default function AuthScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 

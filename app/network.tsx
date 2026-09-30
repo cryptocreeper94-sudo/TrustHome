@@ -166,7 +166,7 @@ function VendorCard({ vendor, isExpanded, onToggle, catColor, colors }: {
 }
 
 export default function NetworkScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState<boolean>(false);

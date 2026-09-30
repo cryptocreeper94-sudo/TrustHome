@@ -185,63 +185,42 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
         </View>
       </Animated.View>
 
-      {/* ─── FEATURES ─── */}
-      {FEATURES.map((feature, index) => (
-        <Animated.View
-          key={feature.title}
-          entering={FadeInDown.delay(300 + index * 150).duration(600)}
-          style={[
-            styles.featureSection,
-            index % 2 === 1 && styles.featureSectionAlt,
-            { backgroundColor: index % 2 === 1 ? (isDark ? '#0F172A' : '#F1F5F9') : 'transparent' },
-          ]}
-        >
-          <View style={[styles.featureInner, index % 2 === 1 && styles.featureInnerReversed]}>
+      {/* ─── FEATURES CAROUSEL ─── */}
+      <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.section}>
+        <View style={styles.sectionInner}>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#F8FAFC' : '#0F172A', textAlign: 'left', marginBottom: 20 }]}>
+            Platform Features
+          </Text>
+        </View>
+        <HorizontalCarousel itemWidth={SCREEN_WIDTH > 600 ? 400 : 320}>
+          {FEATURES.map((feature, index) => (
             <Pressable
-              style={styles.featureImageWrap}
+              key={feature.title}
+              style={({ pressed }) => [
+                styles.featureCardCarousel,
+                { opacity: pressed ? 0.95 : 1 }
+              ]}
               onPress={() => router.push(feature.route as any)}
             >
-              <Image
-                source={feature.image}
-                style={styles.featureImage}
-                resizeMode="cover"
-              />
+              <Image source={feature.image} style={styles.featureCardImg} resizeMode="cover" />
               <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.3)']}
-                style={styles.featureImageOverlay}
+                colors={['transparent', 'rgba(0,0,0,0.8)', 'rgba(0,0,0,1)']}
+                style={styles.featureCardGradient}
               />
-            </Pressable>
-            <View style={styles.featureText}>
-              <View style={styles.featureIconRow}>
-                <LinearGradient
-                  colors={feature.gradient}
-                  style={styles.featureIconBg}
-                >
-                  <Text style={{ fontSize: 18 }}>{feature.emoji}</Text>
-                </LinearGradient>
+              <View style={styles.featureCardContent}>
+                <View style={styles.featureIconRow}>
+                  <LinearGradient colors={feature.gradient} style={styles.featureIconBg}>
+                    <Text style={{ fontSize: 18 }}>{feature.emoji}</Text>
+                  </LinearGradient>
+                </View>
+                <Text style={[styles.featureTitle, { color: '#F8FAFC', fontSize: 24 }]}>{feature.title}</Text>
+                <Text style={[styles.featureSubtitle, { color: feature.gradient[0] }]}>{feature.subtitle}</Text>
+                <Text style={[styles.featureDescription, { color: '#94A3B8' }]} numberOfLines={3}>{feature.description}</Text>
               </View>
-              <Text style={[styles.featureTitle, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
-                {feature.title}
-              </Text>
-              <Text style={[styles.featureSubtitle, { color: feature.gradient[0] }]}>
-                {feature.subtitle}
-              </Text>
-              <Text style={[styles.featureDescription, { color: isDark ? '#94A3B8' : '#475569' }]}>
-                {feature.description}
-              </Text>
-              <Pressable
-                style={({ pressed }) => [styles.featureBtn, pressed && { opacity: 0.8 }]}
-                onPress={() => router.push(feature.route as any)}
-              >
-                <Text style={[styles.featureBtnText, { color: feature.gradient[0] }]}>
-                  Learn More
-                </Text>
-                <Text style={{ color: feature.gradient[0], fontSize: 14 }}> →</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Animated.View>
-      ))}
+            </Pressable>
+          ))}
+        </HorizontalCarousel>
+      </Animated.View>
 
       {/* ─── STATS BAR ─── */}
       <Animated.View entering={FadeInDown.delay(700).duration(600)}>

@@ -98,7 +98,7 @@ export default function AffiliateScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
         <Header title="Affiliate Program" showBack />
         <View style={styles.skeletonWrap}>
           <View style={{ alignItems: 'center', marginBottom: 16, marginTop: 8 }}>
@@ -124,7 +124,7 @@ export default function AffiliateScreen() {
 
   if (data?.error) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
         <Header title="Affiliate Program" showBack />
         <View style={styles.loadingWrap}>
           <Ionicons name="lock-closed-outline" size={48} color={colors.textTertiary} />
@@ -135,7 +135,7 @@ export default function AffiliateScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Share & Earn" showBack />
       <ScrollView
         style={styles.scroll}

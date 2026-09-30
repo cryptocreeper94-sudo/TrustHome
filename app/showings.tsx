@@ -158,7 +158,7 @@ export default function ShowingsScreen() {
   const typesWithEvents = Object.keys(eventsByType) as EventType[];
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header 
         title="Calendar" 
         showBack 
@@ -403,7 +403,7 @@ export default function ShowingsScreen() {
               </View>
             </ScrollView>
             <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
               <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddEvent} disabled={isSubmitting}>
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: 20,
   },

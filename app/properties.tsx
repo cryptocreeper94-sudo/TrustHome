@@ -141,7 +141,7 @@ export default function PropertiesScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title="Exclusive Listings" showBack transparent />
+      <Header title="Exclusive Listings" showBack transparent={false} />
       
       <View style={styles.carouselContainer}>
         <ScrollView

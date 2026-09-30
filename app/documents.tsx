@@ -69,7 +69,7 @@ export default function DocumentsScreen() {
   const transactionKeys = Object.keys(groupedByTransaction);
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Documents" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.bentoWrap}>

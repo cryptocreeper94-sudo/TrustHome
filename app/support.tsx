@@ -174,7 +174,7 @@ export default function SupportScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Help & Support" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>

@@ -89,7 +89,7 @@ export default function AnalyticsScreen() {
   const maxSource = Math.max(...data.sources.map(s => s.value));
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Analytics" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.periodRow}>

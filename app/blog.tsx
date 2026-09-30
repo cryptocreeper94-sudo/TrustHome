@@ -233,7 +233,7 @@ export default function BlogScreen() {
   ) => {
     if (!visible) return null;
     return (
-      <View style={[styles.pickerDropdown, { backgroundColor: colors.backgroundSecondary, borderColor: colors.divider }]}>
+      <View style={[styles.pickerDropdown, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderColor: colors.divider }]}>
         {items.map((item) => (
           <Pressable
             key={item}
@@ -387,7 +387,7 @@ export default function BlogScreen() {
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Title</Text>
         <TextInput
           testID="blog-title-input"
-          style={[styles.input, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.input, { color: colors.text, backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
           value={title}
           onChangeText={handleTitleChange}
           placeholder="Enter post title"
@@ -397,7 +397,7 @@ export default function BlogScreen() {
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Slug</Text>
         <TextInput
           testID="blog-slug-input"
-          style={[styles.input, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.input, { color: colors.text, backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
           value={slug}
           onChangeText={setSlug}
           placeholder="auto-generated-from-title"
@@ -408,7 +408,7 @@ export default function BlogScreen() {
         <Pressable
           testID="blog-category-picker"
           onPress={() => setShowFormCategoryPicker(!showFormCategoryPicker)}
-          style={[styles.pickerButton, { backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.pickerButton, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
         >
           <Text style={[styles.pickerButtonText, { color: colors.text }]}>{category}</Text>
           <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
@@ -418,7 +418,7 @@ export default function BlogScreen() {
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Tags (comma separated)</Text>
         <TextInput
           testID="blog-tags-input"
-          style={[styles.input, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.input, { color: colors.text, backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
           value={tags}
           onChangeText={setTags}
           placeholder="real-estate, market, tips"
@@ -428,7 +428,7 @@ export default function BlogScreen() {
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Author Name</Text>
         <TextInput
           testID="blog-author-input"
-          style={[styles.input, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.input, { color: colors.text, backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
           value={authorName}
           onChangeText={setAuthorName}
           placeholder="Author name"
@@ -439,7 +439,7 @@ export default function BlogScreen() {
         <Pressable
           testID="blog-status-picker"
           onPress={() => setShowStatusPicker(!showStatusPicker)}
-          style={[styles.pickerButton, { backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.pickerButton, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
         >
           <Text style={[styles.pickerButtonText, { color: colors.text }]}>{status}</Text>
           <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
@@ -451,7 +451,7 @@ export default function BlogScreen() {
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Excerpt</Text>
         <TextInput
           testID="blog-excerpt-input"
-          style={[styles.input, styles.multilineInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.input, styles.multilineInput, { color: colors.text, backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
           value={excerpt}
           onChangeText={setExcerpt}
           placeholder="Brief description of the post"
@@ -463,7 +463,7 @@ export default function BlogScreen() {
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Content</Text>
         <TextInput
           testID="blog-content-input"
-          style={[styles.input, styles.contentInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.input, styles.contentInput, { color: colors.text, backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
           value={content}
           onChangeText={setContent}
           placeholder="Write your blog post content (HTML supported)"
@@ -478,7 +478,7 @@ export default function BlogScreen() {
           <Pressable
             testID="blog-cancel-edit"
             onPress={resetForm}
-            style={[styles.formButton, { backgroundColor: colors.backgroundTertiary }]}
+            style={[styles.formButton, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]}
           >
             <Text style={[styles.formButtonText, { color: colors.text }]}>Cancel</Text>
           </Pressable>
@@ -507,7 +507,7 @@ export default function BlogScreen() {
         <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Topic</Text>
         <TextInput
           testID="ai-topic-input"
-          style={[styles.input, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.input, { color: colors.text, backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
           value={topic}
           onChangeText={setTopic}
           placeholder="e.g., Spring home buying tips for first-time buyers"
@@ -518,7 +518,7 @@ export default function BlogScreen() {
         <Pressable
           testID="ai-category-picker"
           onPress={() => setShowCategoryPicker(!showCategoryPicker)}
-          style={[styles.pickerButton, { backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.pickerButton, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
         >
           <Text style={[styles.pickerButtonText, { color: colors.text }]}>{aiCategory}</Text>
           <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
@@ -529,7 +529,7 @@ export default function BlogScreen() {
         <Pressable
           testID="ai-tone-picker"
           onPress={() => setShowTonePicker(!showTonePicker)}
-          style={[styles.pickerButton, { backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}
+          style={[styles.pickerButton, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}
         >
           <Text style={[styles.pickerButtonText, { color: colors.text }]}>{aiTone}</Text>
           <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
@@ -572,7 +572,7 @@ export default function BlogScreen() {
           {generatedPost.excerpt ? (
             <Text style={[styles.generatedExcerpt, { color: colors.textSecondary }]}>{generatedPost.excerpt}</Text>
           ) : null}
-          <View style={[styles.generatedContentPreview, { backgroundColor: colors.backgroundTertiary, borderColor: colors.divider }]}>
+          <View style={[styles.generatedContentPreview, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.divider }]}>
             <Text style={[styles.generatedContent, { color: colors.text }]} numberOfLines={12}>
               {(generatedPost.content || '').replace(/<[^>]*>/g, '')}
             </Text>
@@ -589,7 +589,7 @@ export default function BlogScreen() {
             <Pressable
               testID="ai-edit-button"
               onPress={() => openEditFromGenerated(generatedPost)}
-              style={[styles.formButton, { backgroundColor: colors.backgroundTertiary }]}
+              style={[styles.formButton, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]}
             >
               <Ionicons name="create-outline" size={18} color={colors.primary} />
               <Text style={[styles.formButtonText, { color: colors.primary }]}>Use This Post</Text>
@@ -601,7 +601,7 @@ export default function BlogScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Blog Management" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -621,7 +621,7 @@ export default function BlogScreen() {
                 styles.tabPill,
                 activeTab === tab
                   ? { backgroundColor: colors.primary }
-                  : { backgroundColor: colors.backgroundSecondary, borderColor: colors.divider, borderWidth: 1 },
+                  : { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderColor: colors.divider, borderWidth: 1 },
               ]}
             >
               <Text

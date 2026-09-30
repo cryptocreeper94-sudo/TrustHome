@@ -39,7 +39,7 @@ export default function TasksScreen() {
   const completedCount = tasks.filter(t => t.completed).length;
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Tasks & To-Do" showBack />
       <ScrollView contentContainerStyle={styles.scroll}>
         

@@ -180,7 +180,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Profile & Settings" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.section}>
@@ -378,7 +378,7 @@ export default function SettingsScreen() {
               placeholder="e.g. Jenn, Boss, Captain"
               placeholderTextColor={colors.textTertiary}
               style={{
-                backgroundColor: colors.background,
+                backgroundColor: isDark ? '#0B1021' : colors.background,
                 borderRadius: 10,
                 borderWidth: 1,
                 borderColor: colors.border,

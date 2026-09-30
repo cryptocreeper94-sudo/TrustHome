@@ -208,7 +208,7 @@ export default function NetworkScreen() {
   }, [activeCategory, vendorsByCategory]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Professional Network" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       {apiSubcontractors && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>

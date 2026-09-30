@@ -341,12 +341,12 @@ export default function LeadsScreen() {
   const maxSourceCount = Math.max(...computedSources.map(s => s.count));
 
   return (
-    <View style={[styles.root, { backgroundColor: 'rgba(0,0,0,0.65)' }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.65)' }]}>
       <Header 
         title="Leads & CRM" 
         showBack 
-        transparent
-        imageBanner={require('@/assets/images/luxury-bg.jpg')} 
+        transparent={false}
+         
         rightAction={
           <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
             <Ionicons name="add" size={20} color={colors.primary} />
@@ -546,7 +546,7 @@ export default function LeadsScreen() {
               </View>
             </ScrollView>
             <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
               <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddLead} disabled={isSubmitting}>
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: 20,
   },

@@ -293,7 +293,7 @@ export default function AuthScreen() {
           style={[
             styles.codeBox,
             {
-              backgroundColor: colors.backgroundTertiary,
+              backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary,
               borderColor: digit ? colors.primary : colors.border,
               color: colors.text,
             },
@@ -311,7 +311,7 @@ export default function AuthScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: topInset, paddingBottom: bottomInset }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background, paddingTop: topInset, paddingBottom: bottomInset }]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -338,7 +338,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -356,7 +356,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -443,7 +443,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Trust Layer ID or Email</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="finger-print-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -460,7 +460,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Password or Ecosystem PIN</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="key-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -511,7 +511,7 @@ export default function AuthScreen() {
                 <View style={styles.nameRow}>
                   <View style={[styles.inputGroup, styles.halfInput]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>First Name</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={firstName}
@@ -524,7 +524,7 @@ export default function AuthScreen() {
                   </View>
                   <View style={[styles.inputGroup, styles.halfInput]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Last Name</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={lastName}
@@ -539,7 +539,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -557,7 +557,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -577,7 +577,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Phone (optional)</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="call-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -682,7 +682,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -730,7 +730,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>New Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -750,7 +750,7 @@ export default function AuthScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Confirm Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}

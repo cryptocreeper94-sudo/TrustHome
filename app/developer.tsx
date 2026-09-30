@@ -263,7 +263,7 @@ export default function DeveloperScreen() {
               </Text>
             </View>
           </View>
-          <View style={[styles.uptimeBadge, { backgroundColor: colors.backgroundTertiary }]}>
+          <View style={[styles.uptimeBadge, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]}>
             <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
             <Text style={[styles.uptimeText, { color: colors.textSecondary }]}>{formatUptime(data.uptime)}</Text>
           </View>
@@ -331,7 +331,7 @@ export default function DeveloperScreen() {
               {configured} of {data.connections.length} connected
             </Text>
           </View>
-          <View style={[styles.connProgress, { backgroundColor: colors.backgroundTertiary }]}>
+          <View style={[styles.connProgress, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]}>
             <View style={[styles.connProgressFill, { backgroundColor: colors.primary, width: `${(configured / data.connections.length) * 100}%` as any }]} />
           </View>
         </Animated.View>
@@ -466,7 +466,7 @@ export default function DeveloperScreen() {
               </View>
             )}
             {req.message && (
-              <View style={[styles.reqMessage, { backgroundColor: colors.backgroundTertiary }]}>
+              <View style={[styles.reqMessage, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]}>
                 <Text style={[styles.reqMessageText, { color: colors.textSecondary }]}>{req.message}</Text>
               </View>
             )}
@@ -505,7 +505,7 @@ export default function DeveloperScreen() {
             style={[styles.reqCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder, opacity: 0.7 }]}
           >
             <View style={styles.reqCardHeader}>
-              <View style={[styles.reqAvatar, { backgroundColor: colors.backgroundTertiary }]}>
+              <View style={[styles.reqAvatar, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]}>
                 <Text style={[styles.reqAvatarText, { color: colors.textTertiary }]}>
                   {req.firstName[0]}{req.lastName[0]}
                 </Text>
@@ -586,7 +586,7 @@ export default function DeveloperScreen() {
 
   if (authLoading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles.loadingContainer, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
         <DevConsoleSkeleton />
       </View>
     );
@@ -594,7 +594,7 @@ export default function DeveloperScreen() {
 
   if (!pinUnlocked) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
         <Header title="Developer Console" showBack />
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
         <View style={styles.pinGateContainer}>
@@ -614,7 +614,7 @@ export default function DeveloperScreen() {
                   style={[
                     styles.pinCell,
                     {
-                      backgroundColor: colors.backgroundTertiary,
+                      backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary,
                       borderColor: pinError ? colors.error : digit ? colors.primary : colors.cardGlassBorder,
                     },
                   ]}
@@ -769,10 +769,10 @@ export default function DeveloperScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Developer Console" showBack />
 
-      <View style={[styles.tabBar, { backgroundColor: colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
+      <View style={[styles.tabBar, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
         {tabs.map(tab => (
           <Pressable
             key={tab.id}

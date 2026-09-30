@@ -130,7 +130,7 @@ function AssessModal({ visible, onClose, colors, isDark }: { visible: boolean; o
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View style={[ms.overlay, { backgroundColor: colors.overlay }]}>
-        <View style={[ms.sheet, { backgroundColor: colors.backgroundSecondary, paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 16 }]}>
+        <View style={[ms.sheet, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 16 }]}>
           <View style={ms.handle}><View style={[ms.handleBar, { backgroundColor: colors.border }]} /></View>
           <View style={ms.mHeader}>
             <Text style={[ms.mTitle, { color: colors.text }]}>Property Assessment</Text>
@@ -223,7 +223,7 @@ function RemovalModal({ visible, onClose, colors, isDark }: { visible: boolean; 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View style={[ms.overlay, { backgroundColor: colors.overlay }]}>
-        <View style={[ms.sheet, { backgroundColor: colors.backgroundSecondary, paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 16 }]}>
+        <View style={[ms.sheet, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 16 }]}>
           <View style={ms.handle}><View style={[ms.handleBar, { backgroundColor: colors.border }]} /></View>
           <View style={ms.mHeader}>
             <Text style={[ms.mTitle, { color: colors.text }]}>Removal Planning</Text>
@@ -314,7 +314,7 @@ function SpeciesModal({ visible, onClose, colors, isDark }: { visible: boolean; 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View style={[ms.overlay, { backgroundColor: colors.overlay }]}>
-        <View style={[ms.sheet, { backgroundColor: colors.backgroundSecondary, paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 16 }]}>
+        <View style={[ms.sheet, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 16 }]}>
           <View style={ms.handle}><View style={[ms.handleBar, { backgroundColor: colors.border }]} /></View>
           <View style={ms.mHeader}>
             <Text style={[ms.mTitle, { color: colors.text }]}>Species Lookup</Text>
@@ -386,7 +386,7 @@ export default function TreeServicesScreen() {
   };
 
   return (
-    <View style={[s.container, { backgroundColor: colors.background }]}>
+    <View style={[s.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Tree Services" showBack />
 
       <ScrollView

@@ -187,7 +187,7 @@ export default function TransactionsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header 
         title="Transactions" 
         showBack 
@@ -329,7 +329,7 @@ export default function TransactionsScreen() {
               </View>
             </ScrollView>
             <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
               <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddDeal} disabled={isSubmitting}>
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: 20,
   },

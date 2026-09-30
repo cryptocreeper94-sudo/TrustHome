@@ -79,7 +79,7 @@ export default function BrandingScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Branding & Profile" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
@@ -192,7 +192,7 @@ export default function BrandingScreen() {
               >
                 <GlassCard style={{ marginBottom: 12 }}>
                   <View style={styles.landingPreview}>
-                    <View style={[styles.landingUrlRow, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.landingUrlRow, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <Ionicons name="link-outline" size={16} color={colors.primary} />
                       <Text style={[styles.landingUrl, { color: colors.text }]} numberOfLines={1}>{agentLandingUrl}</Text>
                     </View>
@@ -228,7 +228,7 @@ export default function BrandingScreen() {
               >
                 <GlassCard style={{ marginBottom: 12 }}>
                   <View style={styles.qrSection}>
-                    <View style={[styles.qrPlaceholder, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.qrPlaceholder, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <Ionicons name="qr-code-outline" size={64} color={colors.textTertiary} />
                     </View>
                     <Text style={[styles.qrDesc, { color: colors.textSecondary }]}>

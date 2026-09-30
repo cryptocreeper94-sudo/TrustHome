@@ -111,7 +111,7 @@ export default function EcosystemScreen() {
   const isWide = width >= 600;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Ecosystem" showBack />
 
       <ScrollView

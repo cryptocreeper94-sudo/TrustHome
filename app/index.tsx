@@ -338,7 +338,7 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles.loadingContainer, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
         <DashboardSkeleton />
       </View>
     );
@@ -352,7 +352,7 @@ export default function HomeScreen() {
   }, [isBrowsing]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       
       {view === 'hub' || isBrowsing ? (
         <CommandCenterHub onSwitchToDashboard={switchToDashboard} />

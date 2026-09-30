@@ -448,9 +448,9 @@ export default function MarketingScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Marketing Hub" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
-      <View style={[styles.tabBar, { backgroundColor: colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
+      <View style={[styles.tabBar, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
         {TABS.map(tab => (
           <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}>
             <Text style={[styles.tabText, { color: activeTab === tab ? colors.primary : colors.textSecondary }]}>{tab}</Text>

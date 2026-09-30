@@ -443,7 +443,7 @@ export default function TeamScreen() {
           style={[
             styles.codeBox,
             {
-              backgroundColor: colors.backgroundTertiary,
+              backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary,
               borderColor: digit ? colors.primary : colors.border,
               color: colors.text,
             },
@@ -504,7 +504,7 @@ export default function TeamScreen() {
                       style={[
                         styles.pinCell,
                         {
-                          backgroundColor: colors.backgroundTertiary,
+                          backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary,
                           borderColor: pinError ? colors.error : digit ? colors.primary : colors.border,
                         },
                       ]}
@@ -596,7 +596,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -614,7 +614,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -678,7 +678,7 @@ export default function TeamScreen() {
                 <View style={[styles.nameRow, { marginBottom: 16 }]}>
                   <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>First Name</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={firstName}
@@ -691,7 +691,7 @@ export default function TeamScreen() {
                   </View>
                   <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Last Name</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={lastName}
@@ -706,7 +706,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -723,7 +723,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Phone (optional)</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="call-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -738,7 +738,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -821,7 +821,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -861,7 +861,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>New Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -880,7 +880,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Confirm Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -917,7 +917,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>New Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -937,7 +937,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Confirm Password</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -983,7 +983,7 @@ export default function TeamScreen() {
                 <View style={[styles.nameRow, { marginBottom: 16 }]}>
                   <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>First Name *</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={reqFirstName}
@@ -997,7 +997,7 @@ export default function TeamScreen() {
                   </View>
                   <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Last Name *</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={reqLastName}
@@ -1013,7 +1013,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email *</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -1031,7 +1031,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Phone</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="call-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -1047,7 +1047,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Brokerage / Company</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="business-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -1063,7 +1063,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Tell us about your needs</Text>
-                  <View style={[styles.inputWrap, styles.textAreaWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, styles.textAreaWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <TextInput
                       style={[styles.input, styles.textArea, { color: colors.text }]}
                       value={reqMessage}
@@ -1114,7 +1114,7 @@ export default function TeamScreen() {
                 <View style={[styles.nameRow, { marginBottom: 16 }]}>
                   <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>First Name</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={demoFirstName}
@@ -1127,7 +1127,7 @@ export default function TeamScreen() {
                   </View>
                   <View style={[styles.inputGroup, styles.halfInput, { marginBottom: 0 }]}>
                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Last Name</Text>
-                    <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                    <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                       <TextInput
                         style={[styles.input, { color: colors.text }]}
                         value={demoLastName}
@@ -1142,7 +1142,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Email Address</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="mail-outline" size={18} color={colors.textTertiary} style={{ marginRight: 8 }} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -1159,7 +1159,7 @@ export default function TeamScreen() {
 
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Realtor License Number</Text>
-                  <View style={[styles.inputWrap, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                  <View style={[styles.inputWrap, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                     <Ionicons name="card-outline" size={18} color={colors.textTertiary} style={{ marginRight: 8 }} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
@@ -1186,7 +1186,7 @@ export default function TeamScreen() {
                   )}
                 </Pressable>
 
-                <View style={[styles.privacyNote, { backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}>
+                <View style={[styles.privacyNote, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary, borderColor: colors.border }]}>
                   <Ionicons name="lock-closed-outline" size={14} color={colors.textTertiary} />
                   <Text style={[styles.privacyText, { color: colors.textTertiary }]}>
                     Your information is used solely for verification. We will never spam you or share your data with third parties.

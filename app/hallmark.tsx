@@ -136,7 +136,7 @@ export default function HallmarkDetailScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
         <Header title="Hallmark" showBack />
         <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: isWeb ? 74 : insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
           <HallmarkSkeleton />
@@ -146,7 +146,7 @@ export default function HallmarkDetailScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header title="Hallmark" showBack />
       <ScrollView
         style={styles.scroll}

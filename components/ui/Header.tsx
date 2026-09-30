@@ -223,12 +223,6 @@ export function Header({
   if (imageBanner) {
     return (
       <View style={{ width: '100%', height: Platform.OS === 'web' ? 240 : 200 + insets.top, overflow: 'hidden' }}>
-        <Image
-          source={imageBanner}
-          style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
-          resizeMode="cover"
-        />
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)' }]} />
         <LinearGradient
           colors={['rgba(0,0,0,0.7)', 'transparent', 'rgba(0,0,0,0.8)']}
           style={StyleSheet.absoluteFill}

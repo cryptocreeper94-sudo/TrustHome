@@ -319,7 +319,7 @@ function UserCommandCenter() {
 }
 
 export default function HomeScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { currentRole, isAuthenticated, isLoading, showWelcomeGuide, setShowWelcomeGuide, showPartnerOnboarding, setShowPartnerOnboarding, showBrokerPitchDeck, setShowBrokerPitchDeck, showLicensingPack, setShowLicensingPack, isBrowsing, browseMode, enterBrowse, demoMode } = useApp();
   const router = useRouter();
   const [view, setView] = useState<HomeView>('hub');

@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   msgActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   replyBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 4, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, minHeight: 44, justifyContent: 'center' as const },
   replyBtnText: { fontSize: 12, fontWeight: '600' as const },
-  modalOverlay: { flex: 1, backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },
   modalContent: { borderRadius: 16, borderWidth: 1, maxHeight: '85%', overflow: 'hidden' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
   modalTitle: { fontSize: 18, fontWeight: '700' as const },

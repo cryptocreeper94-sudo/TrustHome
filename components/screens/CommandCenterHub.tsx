@@ -251,30 +251,57 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
             Jump straight into any tool. Everything else is in the menu.
           </Text>
         </View>
-        <HorizontalCarousel itemWidth={220}>
-          {TOOLS_QUICK.map((tool) => (
-            <Pressable
-              key={tool.label}
-              style={({ pressed }) => [
-                styles.toolCardCarousel,
-                { opacity: pressed ? 0.9 : 1 }
-              ]}
-              onPress={() => router.push(tool.route as any)}
-            >
-              <Image source={tool.image} style={styles.toolCardImg} resizeMode="cover" />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
-                style={styles.toolCardGradient}
-              />
-              <View style={styles.toolCardContent}>
-                <View style={[styles.toolIconWrap, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-                  <Text style={{ fontSize: 20 }}>{tool.emoji}</Text>
+        {SCREEN_WIDTH > 1024 ? (
+          <View style={styles.toolsRowDesktop}>
+            {TOOLS_QUICK.map((tool) => (
+              <Pressable
+                key={tool.label}
+                style={({ pressed }) => [
+                  styles.toolCardCarousel,
+                  { opacity: pressed ? 0.9 : 1, flex: 1, width: 'auto' }
+                ]}
+                onPress={() => router.push(tool.route as any)}
+              >
+                <Image source={tool.image} style={styles.toolCardImg} resizeMode="cover" />
+                <LinearGradient
+                  colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+                  style={styles.toolCardGradient}
+                />
+                <View style={styles.toolCardContent}>
+                  <View style={[styles.toolIconWrap, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                    <Text style={{ fontSize: 20 }}>{tool.emoji}</Text>
+                  </View>
+                  <Text style={styles.toolLabelCarousel}>{tool.label}</Text>
                 </View>
-                <Text style={styles.toolLabelCarousel}>{tool.label}</Text>
-              </View>
-            </Pressable>
-          ))}
-        </HorizontalCarousel>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <HorizontalCarousel itemWidth={220}>
+            {TOOLS_QUICK.map((tool) => (
+              <Pressable
+                key={tool.label}
+                style={({ pressed }) => [
+                  styles.toolCardCarousel,
+                  { opacity: pressed ? 0.9 : 1 }
+                ]}
+                onPress={() => router.push(tool.route as any)}
+              >
+                <Image source={tool.image} style={styles.toolCardImg} resizeMode="cover" />
+                <LinearGradient
+                  colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+                  style={styles.toolCardGradient}
+                />
+                <View style={styles.toolCardContent}>
+                  <View style={[styles.toolIconWrap, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                    <Text style={{ fontSize: 20 }}>{tool.emoji}</Text>
+                  </View>
+                  <Text style={styles.toolLabelCarousel}>{tool.label}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </HorizontalCarousel>
+        )}
       </Animated.View>
 
       {/* ─── CTA SECTION ─── */}
@@ -647,6 +674,12 @@ const styles = StyleSheet.create({
     ...(SCREEN_WIDTH > 600 ? { width: '30%', minWidth: 200 } : {}),
     ...(Platform.OS === 'web' ? { boxShadow: '0 1px 3px rgba(0,0,0,0.08)' } as any : {}),
   } as any,
+  toolsRowDesktop: {
+    flexDirection: 'row',
+    gap: 16,
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+  },
   toolIconWrap: {
     width: 38,
     height: 38,

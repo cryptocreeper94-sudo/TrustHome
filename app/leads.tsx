@@ -341,10 +341,12 @@ export default function LeadsScreen() {
   const maxSourceCount = Math.max(...computedSources.map(s => s.count));
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: 'rgba(0,0,0,0.65)' }]}>
       <Header 
         title="Leads & CRM" 
         showBack 
+        transparent
+        imageBanner={require('@/assets/images/luxury-bg.jpg')} 
         rightAction={
           <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
             <Ionicons name="add" size={20} color={colors.primary} />
@@ -563,7 +565,17 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 32, paddingHorizontal: 16 },
   bentoStats: { marginTop: 16 },
-  statCard: { minHeight: 84 },
+  statCard: {
+    minHeight: 84,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
   statInner: { alignItems: 'center' as const, gap: 6 },
   statValue: { fontSize: 24, fontWeight: '800' as const },
   statLabel: { fontSize: 12, fontWeight: '600' as const },
@@ -574,12 +586,49 @@ const styles = StyleSheet.create({
   hotCardName: { fontSize: 15, fontWeight: '600' as const },
   hotCardBudget: { fontSize: 14, fontWeight: '700' as const },
   toggleRow: { flexDirection: 'row', gap: 10, marginTop: 20, marginBottom: 14 },
-  toggleBtn: { flexDirection: 'row', alignItems: 'center' as const, gap: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 22, minHeight: 44 },
+  toggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 22,
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
   toggleText: { fontSize: 14, fontWeight: '600' as const },
   filterRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
-  filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18, borderWidth: 1, minHeight: 44, justifyContent: 'center' as const },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 18,
+    borderWidth: 1,
+    minHeight: 44,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
   filterChipText: { fontSize: 13, fontWeight: '600' as const, textTransform: 'capitalize' as const },
-  leadCard: { marginBottom: 12, minHeight: 72 },
+  leadCard: {
+    marginBottom: 12,
+    minHeight: 72,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
   leadRow: { flexDirection: 'row', alignItems: 'center' as const, gap: 12 },
   scoreCircle: { width: 44, height: 44, borderRadius: 22, borderWidth: 2.5, alignItems: 'center' as const, justifyContent: 'center' as const },
   scoreText: { fontSize: 14, fontWeight: '700' as const },
@@ -596,7 +645,16 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', gap: 12, marginTop: 16 },
   actionBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center' as const, justifyContent: 'center' as const },
   pipelineAccordions: { marginBottom: 8 },
-  pipelineCard: { borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1 },
+  pipelineCard: {
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
   pipelineCardName: { fontSize: 14, fontWeight: '600' as const },
   pipelineCardBudget: { fontSize: 13, fontWeight: '700' as const, marginTop: 4 },
   pipelineCardRow: { flexDirection: 'row', alignItems: 'center' as const, justifyContent: 'space-between' as const, marginTop: 8 },
@@ -605,7 +663,17 @@ const styles = StyleSheet.create({
   scoreCircleSm: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, alignItems: 'center' as const, justifyContent: 'center' as const },
   scoreCircleSmText: { fontSize: 11, fontWeight: '700' as const },
   emptyStage: { fontSize: 13, fontStyle: 'italic' as const, paddingVertical: 10 },
-  sourcesAccordion: { marginTop: 24 },
+  sourcesAccordion: {
+    marginTop: 24,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    borderRadius: 16,
+  },
   sourceRow: { flexDirection: 'row', alignItems: 'center' as const, marginBottom: 12 },
   sourceLabel: { width: 84, fontSize: 13, fontWeight: '500' as const },
   barWrap: { flex: 1, height: 16, borderRadius: 8, backgroundColor: 'rgba(128,128,128,0.12)', marginHorizontal: 10, overflow: 'hidden' as const },

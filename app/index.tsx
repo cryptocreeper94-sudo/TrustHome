@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, Platform,
-  Linking,
+  Linking, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -353,6 +353,15 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Image 
+        source={require('@/assets/images/luxury-bg.jpg')} 
+        style={[
+          StyleSheet.absoluteFill, 
+          { width: '100%', height: '100%', opacity: 1 },
+          Platform.OS === 'web' && { position: 'fixed', width: '100vw', height: '100vh' } as any
+        ]} 
+        resizeMode="cover"
+      />
       {view === 'hub' || isBrowsing ? (
         <CommandCenterHub onSwitchToDashboard={switchToDashboard} />
       ) : (

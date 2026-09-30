@@ -173,8 +173,13 @@ export default function WalkthroughMakerScreen() {
   };
 
   return (
-    <View style={[s.container, { backgroundColor: 'transparent' }]}>
-      <Header title="Walkthrough Maker" showBack transparent />
+    <View style={[s.container, { backgroundColor: colors.background }]}>
+      <Header 
+        title="Walkthrough Maker" 
+        showBack 
+        transparent 
+        imageBanner={require('@/assets/images/luxury-bg.jpg')} 
+      />
       
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.delay(100).springify()} style={s.section}>
@@ -505,6 +510,12 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(26,138,126,0.3)',
     borderStyle: 'dashed',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 5,
   },
   uploadGradient: {
     paddingVertical: 32,
@@ -623,6 +634,12 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(150,150,150,0.3)',
     marginRight: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   pillText: {
     fontSize: 13,
@@ -688,6 +705,12 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(150,150,150,0.2)',
     marginRight: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   voicePillText: {
     fontSize: 13,
@@ -788,6 +811,11 @@ const s = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 12,
+    shadowColor: '#0F766E',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 15,
+    elevation: 8,
   },
   createBtnDisabled: {
     opacity: 0.7,

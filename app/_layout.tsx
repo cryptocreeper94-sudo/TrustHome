@@ -75,16 +75,7 @@ export default function RootLayout() {
             <ThemeProvider>
               <AppProvider>
                 <LocationProvider>
-                  <View style={{ flex: 1, backgroundColor: '#000', minHeight: Platform.OS === 'web' ? '100vh' : '100%' }}>
-                    <Image 
-                      source={require('@/assets/images/luxury-bg.jpg')} 
-                      style={[
-                        StyleSheet.absoluteFill, 
-                        { width: '100%', height: '100%', opacity: 1 },
-                        Platform.OS === 'web' && { position: 'fixed', width: '100vw', height: '100vh' } as any
-                      ]} 
-                      resizeMode="cover"
-                    />
+                  <View style={{ flex: 1, backgroundColor: '#000' }}>
                     <RootLayoutNav />
                   </View>
                 </LocationProvider>

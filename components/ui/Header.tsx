@@ -131,22 +131,41 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
   );
 }
 
-export function Header({ title = 'TrustHome', showBack = false, showClose = false, onClose, rightAction, extraAction, transparent = false }: { title?: string; showBack?: boolean; showClose?: boolean; onClose?: () => void; rightAction?: React.ReactNode; extraAction?: React.ReactNode; transparent?: boolean }) {
+export function Header({ 
+  title = 'TrustHome', 
+  showBack = false, 
+  showClose = false, 
+  onClose, 
+  rightAction, 
+  extraAction, 
+  transparent = false,
+  imageBanner
+}: { 
+  title?: string; 
+  showBack?: boolean; 
+  showClose?: boolean; 
+  onClose?: () => void; 
+  rightAction?: React.ReactNode; 
+  extraAction?: React.ReactNode; 
+  transparent?: boolean;
+  imageBanner?: any;
+}) {
   const { colors, isDark, toggleTheme } = useTheme();
   const { toggleDrawer, demoMode, exitDemo, isAuthenticated, isBrowsing } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [showTrustLayer, setShowTrustLayer] = useState(false);
 
-  const topPadding = Platform.OS === 'web' ? 67 : insets.top;
+  const topPadding = Platform.OS === 'web' ? 40 : insets.top;
 
   const goHome = () => router.replace('/');
 
   const isWeb = Platform.OS === 'web';
-  return (
-    <View style={[{ backgroundColor: transparent ? 'transparent' : 'rgba(0,0,0,0.35)' }, transparent && { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }]}>
-      <View style={[styles.container, { paddingTop: topPadding }]}>
-        <View style={styles.content}>
+  
+  const InnerContent = (
+    <>
+      <View style={[styles.container, { paddingTop: topPadding, borderBottomWidth: imageBanner ? 0 : 1 }]}>
+        <View style={[styles.content, imageBanner && { height: 160 }]}>
           <View style={styles.left}>
             {showBack ? (
               <Pressable onPress={goHome} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
@@ -197,6 +216,30 @@ export function Header({ title = 'TrustHome', showBack = false, showClose = fals
           </View>
         </View>
       )}
+    </>
+  );
+
+  if (imageBanner) {
+    return (
+      <View style={{ width: '100%', height: Platform.OS === 'web' ? 240 : 200 + insets.top, overflow: 'hidden' }}>
+        <Image
+          source={imageBanner}
+          style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
+          resizeMode="cover"
+        />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)' }]} />
+        <LinearGradient
+          colors={['rgba(0,0,0,0.7)', 'transparent', 'rgba(0,0,0,0.8)']}
+          style={StyleSheet.absoluteFill}
+        />
+        {InnerContent}
+      </View>
+    );
+  }
+
+  return (
+    <View style={[{ backgroundColor: transparent ? 'transparent' : 'rgba(0,0,0,0.35)' }, transparent && { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }]}>
+      {InnerContent}
     </View>
   );
 }

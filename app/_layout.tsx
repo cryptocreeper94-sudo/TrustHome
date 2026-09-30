@@ -10,6 +10,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeProvider as NavThemeProvider, DarkTheme } from '@react-navigation/native';
 import { AppProvider } from "@/contexts/AppContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { DrawerMenu } from "@/components/ui/DrawerMenu";
@@ -19,6 +20,7 @@ SplashScreen.preventAutoHideAsync();
 function RootLayoutNav() {
   return (
     <>
+      <NavThemeProvider value={{ ...DarkTheme, colors: { ...DarkTheme.colors, background: 'transparent' } }}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="auth" />
@@ -47,6 +49,7 @@ function RootLayoutNav() {
         <Stack.Screen name="affiliate" />
         <Stack.Screen name="command-center" />
       </Stack>
+      </NavThemeProvider>
       <DrawerMenu />
     </>
   );
@@ -85,6 +88,7 @@ export default function RootLayout() {
                       ]} 
                       resizeMode="cover"
                     />
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)', pointerEvents: 'none' }, Platform.OS === 'web' && { position: 'fixed', width: '100vw', height: '100vh' } as any]} />
                     <RootLayoutNav />
                   </View>
                 </LocationProvider>

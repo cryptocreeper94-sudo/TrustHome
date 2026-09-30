@@ -178,7 +178,7 @@ export default function WalkthroughMakerScreen() {
       
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.delay(100).springify()} style={s.section}>
-          <Text style={[s.sectionTitle, { color: '#FFFFFF' }]}>1. Upload Clips</Text>
+          <Text style={[s.sectionTitle, { color: colors.text }]}>1. Upload Clips</Text>
           <Text style={[s.sectionDesc, { color: colors.textSecondary }]}>
             Upload short video clips from your phone. We'll stitch them together in order.
           </Text>
@@ -191,7 +191,7 @@ export default function WalkthroughMakerScreen() {
               <View style={[s.uploadIconWrap, { backgroundColor: 'rgba(150,150,150,0.1)' }]}>
                 <Ionicons name="cloud-upload-outline" size={28} color={colors.text} />
               </View>
-              <Text style={[s.uploadText, { color: '#FFFFFF' }]}>Tap to Upload Video Clips</Text>
+              <Text style={[s.uploadText, { color: colors.text }]}>Tap to Upload Video Clips</Text>
               <Text style={[s.uploadSubtext, { color: colors.textSecondary }]}>MP4, MOV up to 500MB</Text>
             </LinearGradient>
           </Pressable>
@@ -204,7 +204,7 @@ export default function WalkthroughMakerScreen() {
                     <Text style={s.clipNumber}>{idx + 1}</Text>
                   </View>
                   <View style={s.clipInfo}>
-                    <Text style={[s.clipName, { color: '#FFFFFF' }]}>{clip.name}</Text>
+                    <Text style={[s.clipName, { color: colors.text }]}>{clip.name}</Text>
                     <Text style={s.clipMeta}>Ready to stitch</Text>
                   </View>
                   <Pressable onPress={() => handleRemoveClip(clip.id)} style={s.removeBtn}>
@@ -217,7 +217,7 @@ export default function WalkthroughMakerScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).springify()} style={s.section}>
-          <Text style={[s.sectionTitle, { color: '#FFFFFF' }]}>2. Enhancements</Text>
+          <Text style={[s.sectionTitle, { color: colors.text }]}>2. Enhancements</Text>
           <Text style={[s.sectionDesc, { color: colors.textSecondary }]}>
             Select what Axiom42 should automatically add to your video.
           </Text>
@@ -226,7 +226,7 @@ export default function WalkthroughMakerScreen() {
             <View style={s.settingRow}>
               <View style={s.settingInfo}>
                 <Ionicons name="musical-notes-outline" size={20} color={colors.text} />
-                <Text style={[s.settingLabel, { color: '#FFFFFF' }]}>Background Music</Text>
+                <Text style={[s.settingLabel, { color: colors.text }]}>Background Music</Text>
               </View>
               <Switch
                 value={addMusic}
@@ -263,7 +263,7 @@ export default function WalkthroughMakerScreen() {
                           style={[s.pill, aiMusicVibe === v && { backgroundColor: colors.text, borderColor: colors.text }]}
                           onPress={() => setAiMusicVibe(v)}
                         >
-                          <Text style={[s.pillText, aiMusicVibe === v ? { color: '#000000' } : { color: '#FFFFFF' }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
+                          <Text style={[s.pillText, aiMusicVibe === v ? { color: '#000000' } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
                         </Pressable>
                       ))}
                     </ScrollView>
@@ -276,14 +276,14 @@ export default function WalkthroughMakerScreen() {
                         onPress={() => setCustomMusic('user_uploaded_audio.mp3')}
                       >
                         <Ionicons name="musical-notes" size={24} color={colors.text} />
-                        <Text style={[s.uploadBtnText, { color: '#FFFFFF' }]}>Browse for MP3/WAV</Text>
+                        <Text style={[s.uploadBtnText, { color: colors.text }]}>Browse for MP3/WAV</Text>
                       </Pressable>
                     ) : (
                       <View style={[s.audioPreviewCard, { borderColor: colors.divider, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)' }]}>
                         <View style={s.customAudioTop}>
                           <View style={s.customAudioInfo}>
                             <Ionicons name="musical-note" size={20} color={colors.text} />
-                            <Text style={[s.customAudioName, { color: '#FFFFFF' }]}>{customMusic}</Text>
+                            <Text style={[s.customAudioName, { color: colors.text }]}>{customMusic}</Text>
                           </View>
                           <Pressable onPress={() => setCustomMusic(null)}>
                             <Ionicons name="trash-outline" size={20} color={colors.textTertiary} />
@@ -299,7 +299,7 @@ export default function WalkthroughMakerScreen() {
             <View style={[s.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
               <View style={s.settingInfo}>
                 <Ionicons name="text-outline" size={20} color={colors.text} />
-                <Text style={[s.settingLabel, { color: '#FFFFFF' }]}>Auto Captions</Text>
+                <Text style={[s.settingLabel, { color: colors.text }]}>Auto Captions</Text>
               </View>
               <Switch
                 value={addCaptions}
@@ -320,7 +320,7 @@ export default function WalkthroughMakerScreen() {
                         style={[s.pill, captionStyle === v && { backgroundColor: colors.text, borderColor: colors.text }]}
                         onPress={() => setCaptionStyle(v)}
                       >
-                        <Text style={[s.pillText, captionStyle === v ? { color: '#000000' } : { color: '#FFFFFF' }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
+                        <Text style={[s.pillText, captionStyle === v ? { color: '#000000' } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
                       </Pressable>
                     ))}
                   </ScrollView>
@@ -331,7 +331,7 @@ export default function WalkthroughMakerScreen() {
             <View style={[s.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
               <View style={s.settingInfo}>
                 <Ionicons name="mic-outline" size={20} color={colors.text} />
-                <Text style={[s.settingLabel, { color: '#FFFFFF' }]}>Voiceover</Text>
+                <Text style={[s.settingLabel, { color: colors.text }]}>Voiceover</Text>
               </View>
               <Switch
                 value={addVoiceover}
@@ -369,7 +369,7 @@ export default function WalkthroughMakerScreen() {
                             style={[s.voicePill, aiVoice === v && { backgroundColor: colors.text, borderColor: colors.text }]}
                             onPress={() => setAiVoice(v)}
                           >
-                            <Text style={[s.voicePillText, aiVoice === v ? { color: '#000000' } : { color: '#FFFFFF' }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
+                            <Text style={[s.voicePillText, aiVoice === v ? { color: '#000000' } : { color: colors.text }]}>{v.charAt(0).toUpperCase() + v.slice(1)}</Text>
                           </Pressable>
                         ))}
                       </ScrollView>
@@ -406,7 +406,7 @@ export default function WalkthroughMakerScreen() {
                         <View style={s.customAudioTop}>
                           <View style={s.customAudioInfo}>
                             <Ionicons name="volume-medium" size={20} color={colors.text} />
-                            <Text style={[s.customAudioName, { color: '#FFFFFF' }]}>My Recording</Text>
+                            <Text style={[s.customAudioName, { color: colors.text }]}>My Recording</Text>
                           </View>
                           <Pressable onPress={() => { setCustomAudio(null); setTrimStart('0'); setTrimEnd(''); }}>
                             <Ionicons name="trash-outline" size={20} color={colors.textTertiary} />

@@ -8,8 +8,11 @@ import { Header } from '@/components/ui/Header';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CARD_WIDTH = Platform.OS === 'web' ? Math.min(SCREEN_WIDTH * 0.85, 600) : SCREEN_WIDTH * 0.85;
+// Calculate to exactly fit 3 cards with margins on web, keeping original mobile calculation
 const CARD_MARGIN = 16;
+const CARD_WIDTH = Platform.OS === 'web' 
+  ? (SCREEN_WIDTH - (CARD_MARGIN * 6)) / 3 
+  : SCREEN_WIDTH * 0.85;
 const SNAP_INTERVAL = CARD_WIDTH + (CARD_MARGIN * 2);
 
 type PropertyStatus = 'Active' | 'Under Contract' | 'Buyer Shortlist' | 'Sold';
@@ -139,8 +142,14 @@ export default function PropertiesScreen() {
     setActiveIndex(index);
   };
 
+  const { colors, isDark } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
+      showsVerticalScrollIndicator={false}
+    >
       <Header imageBanner={require('@/assets/images/guide-properties.jpg')} title="Exclusive Listings" showBack transparent={false} />
       
       <View style={styles.carouselContainer}>
@@ -211,13 +220,13 @@ export default function PropertiesScreen() {
         </ScrollView>
 
         {/* Carousel Pagination Dots */}
-        <View style={[styles.pagination, { bottom: insets.bottom + 20 }]}>
+        <View style={[styles.pagination, { bottom: 20 }]}>
           {PROPERTIES.map((_, i) => (
             <View key={i} style={[styles.dot, activeIndex === i && styles.dotActive]} />
           ))}
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

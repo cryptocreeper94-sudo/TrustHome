@@ -222,12 +222,68 @@ export function Header({
 
   if (imageBanner) {
     return (
-      <View style={{ width: '100%', height: Platform.OS === 'web' ? 240 : 200 + insets.top, overflow: 'hidden' }}>
+      <View style={{ width: '100%', height: Platform.OS === 'web' ? 400 : 360 + insets.top, overflow: 'hidden' }}>
+        <Image
+          source={imageBanner}
+          style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
+          resizeMode="cover"
+        />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.3)' }]} />
         <LinearGradient
-          colors={['rgba(0,0,0,0.7)', 'transparent', 'rgba(0,0,0,0.8)']}
+          colors={['rgba(0,0,0,0.8)', 'transparent', '#0B1021']}
+          locations={[0, 0.4, 1]}
           style={StyleSheet.absoluteFill}
         />
-        {InnerContent}
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+          <View style={[styles.container, { paddingTop: topPadding, borderBottomWidth: 0 }]}>
+            <View style={styles.content}>
+              <View style={styles.left}>
+                {showBack ? (
+                  <Pressable onPress={goHome} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
+                    <Ionicons name="arrow-back" size={24} color="#FFF" style={styles.iconShadow} />
+                  </Pressable>
+                ) : showClose ? (
+                  <Pressable onPress={onClose} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-close">
+                    <Ionicons name="close" size={26} color="#FFF" style={styles.iconShadow} />
+                  </Pressable>
+                ) : <View style={styles.iconButton} />}
+              </View>
+
+              <View style={styles.right}>
+                {rightAction || (
+                  <Pressable onPress={toggleDrawer} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-menu">
+                    <Ionicons name="menu" size={26} color="#FFF" style={styles.iconShadow} />
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          </View>
+          {demoMode && !isBrowsing && (
+            <View style={styles.demoBanner}>
+              <View style={styles.demoLeft}>
+                <Ionicons name="eye-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.demoText}>Demo Mode</Text>
+              </View>
+              <View style={styles.demoActions}>
+                <Pressable
+                  style={({ pressed }) => [styles.demoRequestBtn, { opacity: pressed ? 0.7 : 1 }]}
+                  onPress={() => { router.replace('/team'); setTimeout(exitDemo, 150); }}
+                >
+                  <Text style={styles.demoRequestText}>Request Access</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [styles.demoExitBtn, { opacity: pressed ? 0.7 : 1 }]}
+                  onPress={() => { router.replace('/team'); setTimeout(exitDemo, 150); }}
+                >
+                  <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.8)" />
+                </Pressable>
+              </View>
+            </View>
+          )}
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 40, paddingHorizontal: 20 }}>
+          <Text style={{ color: '#FFF', fontSize: 48, fontWeight: '800', letterSpacing: -1, textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 }}>{title}</Text>
+        </View>
       </View>
     );
   }

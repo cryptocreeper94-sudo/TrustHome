@@ -178,6 +178,7 @@ export default function WalkthroughMakerScreen() {
         title="Walkthrough Maker" 
         showBack 
         transparent={false}
+        imageBanner={require('@/assets/images/guide-media.jpg')}
       />
       
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>

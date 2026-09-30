@@ -346,6 +346,7 @@ export default function LeadsScreen() {
         title="Leads & CRM" 
         showBack 
         transparent={false}
+        imageBanner={require('@/assets/images/guide-leads.jpg')}
          
         rightAction={
           <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>

@@ -235,9 +235,7 @@ export function Header({
           locations={[0, 0.4, 1]}
           style={StyleSheet.absoluteFill}
         />
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
-          {InnerContent}
-        </View>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>{InnerContent}</View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 40, paddingHorizontal: 20 }}>
           <Text style={{ color: '#FFF', fontSize: 48, fontWeight: 'bold', textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 }}>{title}</Text>
         </View>
@@ -246,9 +244,7 @@ export function Header({
   }
 
   return (
-    <View style={[{ backgroundColor: transparent ? 'transparent' : 'rgba(0,0,0,0.35)' }, transparent && { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }]}>
-      {InnerContent}
-    </View>
+    <View style={[{ backgroundColor: transparent ? 'transparent' : 'rgba(0,0,0,0.35)' }, transparent && { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }]}>{InnerContent}</View>
   );
 }
 

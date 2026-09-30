@@ -11,6 +11,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { KenBurnsHero } from '@/components/ui/VideoHero';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 
 const HERO_SLIDES = [
   { image: require('@/assets/images/hero-1.jpg'), label: 'Craftsman Homes' },

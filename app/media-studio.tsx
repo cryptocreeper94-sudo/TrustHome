@@ -173,7 +173,7 @@ export default function WalkthroughMakerScreen() {
   };
 
   return (
-    <View style={[s.container, { backgroundColor: 'rgba(0,0,0,0.65)' }]}>
+    <View style={[s.container, { backgroundColor: colors.background }]}>
       <Header 
         title="Walkthrough Maker" 
         showBack 

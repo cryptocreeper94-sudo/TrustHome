@@ -16,9 +16,16 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
   const scrollRef = useRef<ScrollView>(null);
   const scrollX = useRef(0);
 
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
   const handleScroll = useCallback((e: any) => {
-    scrollX.current = e.nativeEvent.contentOffset.x;
-  }, []);
+    const x = e.nativeEvent.contentOffset.x;
+    scrollX.current = x;
+    const index = Math.round(x / itemWidth);
+    if (index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  }, [itemWidth, activeIndex]);
 
   const scrollLeft = useCallback(() => {
     const newX = Math.max(0, scrollX.current - itemWidth);
@@ -29,6 +36,13 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
     const newX = scrollX.current + itemWidth;
     scrollRef.current?.scrollTo({ x: newX, animated: true });
   }, [itemWidth]);
+
+  const scrollToDot = useCallback((index: number) => {
+    scrollRef.current?.scrollTo({ x: index * itemWidth, animated: true });
+  }, [itemWidth]);
+
+  // Try to determine the number of children to render dots
+  const childrenCount = React.Children.count(children);
 
   return (
     <View style={[styles.container, style]}>
@@ -51,19 +65,35 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
         decelerationRate="fast"
+        snapToInterval={itemWidth + 10}
         snapToAlignment="start"
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
         {children}
       </ScrollView>
-      <View style={styles.arrowRow}>
+      <View style={styles.navRow}>
         <Pressable
           onPress={scrollLeft}
           style={[styles.arrowBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}
         >
           <Ionicons name="chevron-back" size={16} color={colors.textSecondary} />
         </Pressable>
+        
+        {childrenCount > 1 && (
+          <View style={styles.dotsContainer}>
+            {Array.from({ length: childrenCount }).map((_, i) => (
+              <Pressable key={i} onPress={() => scrollToDot(i)} style={styles.dotHitSlop}>
+                <View style={[
+                  styles.dot, 
+                  { backgroundColor: i === activeIndex ? colors.text : colors.textTertiary },
+                  i === activeIndex && styles.dotActive
+                ]} />
+              </Pressable>
+            ))}
+          </View>
+        )}
+
         <Pressable
           onPress={scrollRight}
           style={[styles.arrowBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}
@@ -109,11 +139,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 10,
   },
-  arrowRow: {
+  navRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 12,
-    marginTop: 10,
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 16,
     paddingHorizontal: 16,
   },
   arrowBtn: {
@@ -123,5 +154,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dotHitSlop: {
+    padding: 4,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    opacity: 0.5,
+  },
+  dotActive: {
+    width: 20,
+    opacity: 1,
   },
 });

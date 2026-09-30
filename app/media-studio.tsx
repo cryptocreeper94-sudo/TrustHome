@@ -173,12 +173,11 @@ export default function WalkthroughMakerScreen() {
   };
 
   return (
-    <View style={[s.container, { backgroundColor: colors.background }]}>
+    <View style={[s.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header 
         title="Walkthrough Maker" 
         showBack 
-        transparent 
-        imageBanner={require('@/assets/images/luxury-bg.jpg')} 
+        transparent={false}
       />
       
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>

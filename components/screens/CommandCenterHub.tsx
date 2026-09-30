@@ -485,9 +485,51 @@ const styles = StyleSheet.create({
   },
 
   // Features
-  featureSection: {
-    paddingVertical: 48,
-    paddingHorizontal: 20,
+  featureCardCarousel: {
+    width: 320,
+    height: 480,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  featureCardImg: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  featureCardGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  featureCardContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 24,
+  },
+  featureIconRow: {
+    marginBottom: 12,
+  },
+  featureIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureTitle: {
+    fontSize: 28,
+    fontWeight: '800' as const,
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  featureSubtitle: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    marginBottom: 12,
+  },
+  featureDescription: {
+    fontSize: 15,
+    lineHeight: 24,
   },
   featureSectionAlt: {},
   featureInner: {

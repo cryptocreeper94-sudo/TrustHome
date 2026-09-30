@@ -116,7 +116,7 @@ export default function DocumentsScreen() {
                 onPress={() => setActiveFilter(tab)}
                 style={[styles.filterPill, { backgroundColor: isActive ? colors.primary : colors.cardGlass, borderColor: isActive ? colors.primary : colors.border }]}
               >
-                <Text style={[styles.filterText, { color: isActive ? '#FFFFFF' : colors.textSecondary }]}>{tab}</Text>
+                <Text style={[styles.filterText, { color: isActive ? colors.textInverse : colors.textSecondary }]}>{tab}</Text>
               </Pressable>
             );
           })}
@@ -125,8 +125,8 @@ export default function DocumentsScreen() {
 
         <Animated.View entering={FadeInDown.duration(400).delay(340)} style={styles.actionsRow}>
           <Pressable style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
-            <Ionicons name="cloud-upload" size={18} color="#FFFFFF" />
-            <Text style={styles.actionBtnText}>Upload</Text>
+            <Ionicons name="cloud-upload" size={18} color={colors.textInverse} />
+            <Text style={[styles.actionBtnText, { color: colors.textInverse }]}>Upload</Text>
           </Pressable>
           <Pressable style={[styles.actionBtn, { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderWidth: 1, borderColor: colors.border }]}>
             <Ionicons name="pencil" size={18} color={colors.primary} />

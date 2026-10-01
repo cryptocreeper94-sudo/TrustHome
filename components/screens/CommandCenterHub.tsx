@@ -248,10 +248,10 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
         <View style={styles.sectionInner}>
           <Text style={[styles.sectionEyebrow, { color: isDark ? '#E5E5E5' : '#18181B' }]}>QUICK ACCESS</Text>
           <Text style={[styles.sectionHeading, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
-            Your toolkit
+            Command Deck
           </Text>
           <Text style={[styles.sectionBody, { color: isDark ? '#94A3B8' : '#64748B', marginBottom: 24 }]}>
-            Jump straight into any tool. Everything else is in the menu.
+            Jump straight into any module. Everything else is in the menu.
           </Text>
         </View>
         {SCREEN_WIDTH > 1024 ? (

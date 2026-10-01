@@ -39,6 +39,7 @@ const palette = {
   warningBright: '#FBBF24',
   errorBright: '#F87171',
   infoBright: '#60A5FA',
+  accentBlue: '#3B82F6',
 };
 
 const light = {

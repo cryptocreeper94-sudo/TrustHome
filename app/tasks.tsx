@@ -40,7 +40,7 @@ export default function TasksScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Tasks & To-Do" showBack />
+      <Header imageBanner={require('@/assets/images/guide-crm.jpg')} title="Tasks & To-Do" showBack />
       <ScrollView contentContainerStyle={styles.scroll}>
         
         <View style={[styles.card, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFF', borderColor: colors.border }]}>
@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
   card: { borderRadius: 16, borderWidth: 1, overflow: 'hidden', padding: 20 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   cardTitle: { fontSize: 16, fontWeight: 'bold', letterSpacing: 0.5 },
-  addBtn: { borderWidth: 1, borderColor: '#EF4444', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  addBtnText: { color: '#EF4444', fontSize: 12, fontWeight: 'bold' },
+  addBtn: { borderWidth: 1, borderColor: '#3B82F6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  addBtnText: { color: '#3B82F6', fontSize: 12, fontWeight: 'bold' },
   taskRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1 },
   checkbox: { width: 24, height: 24, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
   taskTitle: { flex: 1, fontSize: 15, fontWeight: '500' },

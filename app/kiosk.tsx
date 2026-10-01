@@ -24,7 +24,7 @@ export default function OpenHouseKioskScreen() {
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: '#111' }]}>
+    <View style={[styles.root, { backgroundColor: '#0B1021' }]}>
       <View style={styles.exitWrap}>
         <Pressable onPress={() => router.back()} style={styles.exitBtn}>
           <Ionicons name="close" size={24} color="#FFF" />
@@ -35,7 +35,7 @@ export default function OpenHouseKioskScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
         <View style={styles.card}>
           <Text style={styles.title}>OPEN HOUSE SIGN-IN</Text>
-          <Text style={styles.subtitle}>123 LUXURY LANE, BEVERLY HILLS</Text>
+          <Text style={styles.subtitle}>4821 CEDAR RIDGE DR, FRANKLIN TN</Text>
 
           <View style={styles.row}>
             <View style={styles.inputWrap}>
@@ -74,7 +74,7 @@ export default function OpenHouseKioskScreen() {
             <Text style={styles.submitText}>SUBMIT</Text>
           </Pressable>
 
-          <Text style={styles.footer}>Powered by APEX CRM</Text>
+          <Text style={styles.footer}>Powered by TrustHome</Text>
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   exitWrap: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
   exitBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  card: { width: '100%', maxWidth: 700, backgroundColor: 'rgba(20,20,20,0.8)', padding: 40, borderRadius: 24, borderWidth: 1, borderColor: '#333' },
+  card: { width: '100%', maxWidth: 700, backgroundColor: 'rgba(11,16,33,0.9)', padding: 40, borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   title: { fontSize: 32, fontWeight: '900', color: '#FFF', textAlign: 'center', marginBottom: 8, letterSpacing: 1 },
   subtitle: { fontSize: 16, color: '#AAA', textAlign: 'center', marginBottom: 40, textTransform: 'uppercase', letterSpacing: 0.5 },
   row: { flexDirection: 'row', gap: 20, marginBottom: 20 },
@@ -97,10 +97,10 @@ const styles = StyleSheet.create({
   agentLabel: { fontSize: 14, color: '#CCC', marginBottom: 16, fontWeight: '600', letterSpacing: 0.5 },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   toggleText: { fontSize: 16, color: '#666', fontWeight: 'bold' },
-  toggleTextActive: { color: '#007AFF' },
-  toggleTrack: { width: 56, height: 32, borderRadius: 16, backgroundColor: '#333', padding: 4, justifyContent: 'center' },
-  toggleKnob: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#007AFF' },
-  submitBtn: { backgroundColor: '#0055FF', padding: 20, borderRadius: 12, alignItems: 'center', marginTop: 10 },
-  submitText: { color: '#FFF', fontSize: 18, fontWeight: 'bold', letterSpacing: 1 },
+  toggleTextActive: { color: '#3B82F6' },
+  toggleTrack: { width: 56, height: 32, borderRadius: 16, backgroundColor: '#1E293B', padding: 4, justifyContent: 'center' },
+  toggleKnob: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#3B82F6' },
+  submitBtn: { backgroundColor: '#FAFAFA', padding: 20, borderRadius: 12, alignItems: 'center', marginTop: 10 },
+  submitText: { color: '#0B1021', fontSize: 18, fontWeight: 'bold', letterSpacing: 1 },
   footer: { textAlign: 'center', color: '#555', marginTop: 30, fontSize: 12 }
 });

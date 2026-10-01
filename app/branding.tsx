@@ -80,7 +80,7 @@ export default function BrandingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Branding & Profile" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      <Header imageBanner={require('@/assets/images/guide-business.jpg')} title="Branding & Profile" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
             <View style={styles.accordionGroup}>

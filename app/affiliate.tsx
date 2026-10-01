@@ -99,7 +99,7 @@ export default function AffiliateScreen() {
   if (isLoading) {
     return (
       <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-        <Header title="Affiliate Program" showBack />
+        <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Affiliate Program" showBack />
         <View style={styles.skeletonWrap}>
           <View style={{ alignItems: 'center', marginBottom: 16, marginTop: 8 }}>
             <SkeletonBlock width={56} height={56} borderRadius={16} />
@@ -125,7 +125,7 @@ export default function AffiliateScreen() {
   if (data?.error) {
     return (
       <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-        <Header title="Affiliate Program" showBack />
+        <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Affiliate Program" showBack />
         <View style={styles.loadingWrap}>
           <Ionicons name="lock-closed-outline" size={48} color={colors.textTertiary} />
           <Text style={[styles.errorText, { color: colors.textSecondary }]}>Sign in to access the affiliate program</Text>
@@ -136,7 +136,7 @@ export default function AffiliateScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Share & Earn" showBack />
+      <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Share & Earn" showBack />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: isWeb ? 74 : insets.bottom + 40 }]}

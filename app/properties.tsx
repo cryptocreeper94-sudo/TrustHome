@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
+import { Footer } from '@/components/ui/Footer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -37,66 +38,66 @@ interface Property {
 const PROPERTIES: Property[] = [
   {
     id: '1',
-    address: '1428 Elm Street',
-    city: 'Beverly Hills, CA',
-    price: 4250000,
-    beds: 5,
-    baths: 6,
-    sqft: 6200,
+    address: '4821 Cedar Ridge Dr',
+    city: 'Franklin, TN',
+    price: 875000,
+    beds: 4,
+    baths: 3.5,
+    sqft: 3400,
     status: 'Active',
     daysOnMarket: 12,
-    mls: 'MLS# 1002345',
+    mls: 'MLS# 2587341',
     image: require('@/assets/images/hero-1.jpg'),
-    description: 'A stunning modern masterpiece featuring panoramic city views, infinity pool, and integrated smart home technology.',
-    features: ['Infinity Pool', 'Wine Cellar', 'Smart Home', 'Home Theater'],
+    description: 'Stunning craftsman in the heart of Westhaven. Open floor plan with hardwood floors throughout, gourmet kitchen with quartz island, and a resort-style backyard with heated pool.',
+    features: ['Heated Pool', 'Smart Home', 'Walk-in Pantry', 'Covered Patio'],
     showings: 8,
   },
   {
     id: '2',
-    address: '890 Fifth Avenue',
-    city: 'New York, NY',
-    price: 8900000,
-    beds: 4,
-    baths: 4.5,
-    sqft: 4500,
+    address: '1012 Montrose Ave',
+    city: 'Nashville, TN',
+    price: 1150000,
+    beds: 5,
+    baths: 4,
+    sqft: 4200,
     status: 'Buyer Shortlist',
     daysOnMarket: 3,
-    mls: 'MLS# 1004592',
+    mls: 'MLS# 2591204',
     image: require('@/assets/images/hero-2.jpg'),
-    description: 'Exclusive penthouse with sweeping Central Park views. Completely renovated with imported Italian marble and custom millwork.',
-    features: ['Penthouse', 'Park Views', 'Doorman', 'Private Elevator'],
+    description: 'Completely renovated East Nashville showpiece. Chef\'s kitchen with Wolf range, custom millwork, primary suite with spa bath, and detached guest house with full kitchen.',
+    features: ['Guest House', 'Chef\'s Kitchen', 'Spa Bath', 'Fenced Yard'],
     showings: 14,
   },
   {
     id: '3',
-    address: '742 Evergreen Terrace',
-    city: 'Aspen, CO',
-    price: 12500000,
-    beds: 6,
-    baths: 8,
-    sqft: 8400,
+    address: '308 Autumn Glen Dr',
+    city: 'Murfreesboro, TN',
+    price: 485000,
+    beds: 4,
+    baths: 3,
+    sqft: 2800,
     status: 'Under Contract',
-    daysOnMarket: 45,
-    mls: 'MLS# 1009841',
+    daysOnMarket: 21,
+    mls: 'MLS# 2584917',
     image: require('@/assets/images/hero-3.jpg'),
-    description: 'Ski-in/ski-out luxury chalet. Features massive exposed timber beams, three stone fireplaces, and a heated driveway.',
-    features: ['Ski-in/Ski-out', 'Heated Driveway', 'Spa', 'Guest House'],
-    showings: 22,
+    description: 'Move-in ready in sought-after Salem Creek. New roof 2025, updated HVAC, granite countertops, bonus room above garage, and a level lot backing to mature trees.',
+    features: ['New Roof', 'Bonus Room', 'Level Lot', 'Updated HVAC'],
+    showings: 11,
   },
   {
     id: '4',
-    address: '10086 Sunset Blvd',
-    city: 'Los Angeles, CA',
-    price: 18900000,
-    beds: 8,
-    baths: 11,
-    sqft: 14000,
+    address: '7204 Pembrooke Farms Blvd',
+    city: 'Brentwood, TN',
+    price: 1475000,
+    beds: 6,
+    baths: 5.5,
+    sqft: 5600,
     status: 'Active',
     daysOnMarket: 5,
-    mls: 'MLS# 1007732',
+    mls: 'MLS# 2593108',
     image: require('@/assets/images/hero-4.jpg'),
-    description: 'Unparalleled luxury on the Sunset Strip. Includes a 20-car subterranean garage, indoor basketball court, and recording studio.',
-    features: ['20-Car Garage', 'Basketball Court', 'Recording Studio', 'Guard Gated'],
+    description: 'Brick estate on 1.2 acres in the Brentwood school district. Three-car garage, theater room, wine cellar, and an outdoor kitchen with stone fireplace overlooking the private backyard.',
+    features: ['Wine Cellar', 'Theater Room', 'Outdoor Kitchen', '3-Car Garage'],
     showings: 4,
   }
 ];
@@ -254,6 +255,7 @@ export default function PropertiesScreen() {
           </Pressable>
         </View>
       </View>
+      <Footer />
     </ScrollView>
   );
 }

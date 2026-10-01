@@ -175,7 +175,7 @@ export default function SupportScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Help & Support" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      <Header imageBanner={require('@/assets/images/guide-trust.jpg')} title="Help & Support" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <Animated.View entering={FadeInDown.duration(400).delay(100)}>

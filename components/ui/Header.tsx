@@ -241,33 +241,33 @@ export function Header({
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 40, paddingHorizontal: 24 }}>
           {subtitle ? (
             <Text style={{
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: 12,
-              fontWeight: '700',
-              letterSpacing: 3,
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: 13,
+              fontWeight: '800',
+              letterSpacing: 4,
               textTransform: 'uppercase',
-              marginBottom: 10,
-              textShadowColor: 'rgba(0,0,0,0.4)',
+              marginBottom: 12,
+              textShadowColor: 'rgba(0,0,0,0.5)',
               textShadowOffset: { width: 0, height: 1 },
-              textShadowRadius: 4,
+              textShadowRadius: 6,
             }}>{subtitle}</Text>
           ) : null}
           <Text style={{
             color: '#FFF',
-            fontSize: Platform.OS === 'web' ? 44 : 36,
-            fontWeight: '800',
+            fontSize: Platform.OS === 'web' ? 52 : 40,
+            fontWeight: '900',
             textAlign: 'center',
-            letterSpacing: -0.5,
-            textShadowColor: 'rgba(0,0,0,0.5)',
-            textShadowOffset: { width: 0, height: 2 },
-            textShadowRadius: 8,
+            letterSpacing: -1,
+            textShadowColor: 'rgba(0,0,0,0.6)',
+            textShadowOffset: { width: 0, height: 3 },
+            textShadowRadius: 12,
           }}>{title}</Text>
           <View style={{
-            width: 40,
-            height: 3,
-            backgroundColor: 'rgba(26,138,126,0.8)',
+            width: 48,
+            height: 4,
+            backgroundColor: 'rgba(26,138,126,0.9)',
             borderRadius: 2,
-            marginTop: 14,
+            marginTop: 16,
           }} />
         </View>
       </View>

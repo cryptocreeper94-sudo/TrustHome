@@ -195,9 +195,9 @@ export default function TransactionsScreen() {
         showBack 
         rightAction={
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="add" size={20} color={colors.primary} />
-              <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Deal</Text>
+            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary }]}>
+              <Ionicons name="add" size={20} color="#FFF" />
+              <Text style={[styles.headerAddText, { color: '#FFF' }]}>Add Deal</Text>
             </Pressable>
             <InfoButton onPress={() => setShowHelp(true)} />
           </View>

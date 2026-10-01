@@ -166,8 +166,8 @@ export default function ShowingsScreen() {
           showBack 
           rightAction={
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
-                <Ionicons name="add" size={20} color={colors.primary} />
+              <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary }]}>
+                <Ionicons name="add" size={20} color="#FFF" />
                 <Text style={[styles.headerAddText, { color: colors.primary }]}>Add</Text>
               </Pressable>
               <InfoButton onPress={() => setShowHelp(true)} />
@@ -178,7 +178,7 @@ export default function ShowingsScreen() {
         <BentoGrid columns={3} gap={10}>
           <GlassCard compact style={styles.statCard}>
             <View style={styles.statInner}>
-              <Ionicons name="calendar" size={20} color={colors.primary} />
+              <Ionicons name="calendar" size={20} color="#FFF" />
               <Text style={[styles.statValue, { color: colors.text }]}>{totalEvents}</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Events</Text>
             </View>
@@ -227,13 +227,13 @@ export default function ShowingsScreen() {
         <AccordionSection title="Calendar" icon="calendar" iconColor="#1A8A7E" defaultOpen={true}>
           <View style={styles.monthHeader}>
             <Pressable onPress={prevMonth} style={styles.navBtn}>
-              <Ionicons name="chevron-back" size={20} color={colors.primary} />
+              <Ionicons name="chevron-back" size={20} color="#FFF" />
             </Pressable>
             <Text style={[styles.monthTitle, { color: colors.text }]}>
               {MONTH_NAMES[currentMonth]} {currentYear}
             </Text>
             <Pressable onPress={nextMonth} style={styles.navBtn}>
-              <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+              <Ionicons name="chevron-forward" size={20} color="#FFF" />
             </Pressable>
           </View>
 

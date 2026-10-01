@@ -350,7 +350,7 @@ export default function LeadsScreen() {
         transparent={false}
          
         rightAction={
-          <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
+          <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary }]}>
             <Ionicons name="add" size={20} color={colors.primary} />
 
         <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Lead</Text>
@@ -363,7 +363,7 @@ export default function LeadsScreen() {
           <BentoGrid columns={3} gap={10} style={styles.bentoStats}>
             <GlassCard style={styles.statCard} compact>
               <View style={styles.statInner}>
-                <Ionicons name="people" size={22} color={colors.primary} />
+                <Ionicons name="people" size={22} color="#FFF" />
                 <Text style={[styles.statValue, { color: colors.text }]}>{LEADS.length}</Text>
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
               </View>

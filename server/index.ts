@@ -495,6 +495,35 @@ registerAffiliateRoutes(app);
   setupErrorHandler(app);
 
   const port = parseInt(process.env.PORT || "5000", 10);
+
+  // ─── Runtime Schema Migrations ──────────────────────────────────────
+  // Ensures new tables exist without requiring drizzle-kit at runtime
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS agent_profiles (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id VARCHAR NOT NULL UNIQUE,
+        slug TEXT NOT NULL UNIQUE,
+        display_name TEXT NOT NULL,
+        title TEXT NOT NULL DEFAULT 'Licensed Real Estate Professional',
+        brokerage TEXT,
+        phone TEXT,
+        email TEXT,
+        bio TEXT,
+        hero_image_url TEXT,
+        specialties TEXT NOT NULL DEFAULT '[]',
+        career_volume TEXT,
+        avg_list_to_sale TEXT,
+        active_listings INTEGER DEFAULT 0,
+        is_published BOOLEAN NOT NULL DEFAULT false,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+    log('✓ agent_profiles table ensured');
+  } catch (err) {
+    log('⚠ agent_profiles migration error:', err);
+  }
   server.listen(
     {
       port,

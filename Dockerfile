@@ -30,6 +30,6 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:5000/ || exit 1
 
-# Auto-migrate schema and start production server
+# Start production server
 ENV NODE_ENV=production
-CMD ["sh", "-c", "npx drizzle-kit push --force && node server_dist/index.js"]
+CMD ["node", "server_dist/index.js"]

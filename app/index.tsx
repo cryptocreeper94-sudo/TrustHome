@@ -11,6 +11,7 @@ import Animated, { FadeInDown, FadeInUp, useSharedValue, useAnimatedStyle, withS
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
+import { Footer } from '@/components/ui/Footer';
 import { AgentDashboard } from '@/components/screens/AgentDashboard';
 import { ClientDashboard } from '@/components/screens/ClientDashboard';
 import { CommandCenterHub } from '@/components/screens/CommandCenterHub';
@@ -285,34 +286,7 @@ function UserCommandCenter() {
           </LinearGradient>
         </Animated.View>
 
-        {/* Admin Footer */}
-        <Animated.View entering={FadeInUp.delay(650).duration(400)} style={styles.adminFooter}>
-          <View style={[styles.adminDivider, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
-          
-          <View style={styles.adminRow}>
-            <AdminLink icon="briefcase-outline" label="Agent Login" onPress={() => router.push('/team')} />
-            <View style={[styles.adminDot]} />
-            <AdminLink icon="diamond-outline" label="Owner / Partner" onPress={() => router.push('/team')} />
-            <View style={[styles.adminDot]} />
-            <AdminLink icon="code-slash-outline" label="Developer" onPress={() => router.push('/team')} />
-          </View>
-
-          <View style={styles.socialSection}>
-            <Text style={styles.socialLabel}>Connect With Us</Text>
-            <View style={styles.socialRow}>
-              <SocialButton icon="logo-facebook" url="https://www.facebook.com/profile.php?id=61585553137979" />
-              <SocialButton icon="logo-twitter" url="https://x.com/TrustSignal26" />
-            </View>
-          </View>
-
-          <View style={styles.copyrightArea}>
-            <View style={styles.copyrightRow}>
-              <Ionicons name="shield-checkmark-outline" size={12} color="rgba(255,255,255,0.5)" />
-              <Text style={styles.copyrightText}>Powered by TrustShield</Text>
-            </View>
-            <Text style={styles.copyrightText}>2026 DarkWave Studios LLC</Text>
-          </View>
-        </Animated.View>
+        <Footer />
       </ScrollView>
     </View>
   );

@@ -7,6 +7,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
+import { Footer } from '@/components/ui/Footer';
 
 const ECOSYSTEM_APPS = [
   { name: 'TrustHome', slug: 'trusthome', url: 'https://trusthome.replit.app', desc: 'White-label real estate platform', category: 'Real Estate', icon: 'home', color: '#1A8A7E' },
@@ -260,7 +261,9 @@ export default function EcosystemScreen() {
             ))}
           </View>
         </Animated.View>
-      </ScrollView>
+              <Footer />
+
+</ScrollView>
     </View>
   );
 }

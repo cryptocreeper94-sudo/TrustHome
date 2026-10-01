@@ -7,6 +7,7 @@ import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
+import { Footer } from '@/components/ui/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
 
 type BillingCycle = 'monthly' | 'annual';
@@ -357,7 +358,9 @@ export default function PricingScreen() {
           <Text style={styles.footerText}>All plans include 256-bit encryption & blockchain verification</Text>
         </Animated.View>
       </View>
-    </ScrollView>
+            <Footer />
+
+</ScrollView>
   );
 }
 

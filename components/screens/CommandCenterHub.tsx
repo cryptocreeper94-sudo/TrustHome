@@ -379,24 +379,8 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
         </View>
       )}
 
-      {/* ─── FOOTER ─── */}
-      <View style={[styles.footer, { borderTopColor: isDark ? '#1E293B' : '#E2E8F0' }]}>
-        <Text style={[styles.footerBrand, { color: isDark ? '#F8FAFC' : '#0F172A' }]}>
-          TrustHome
-        </Text>
-        <Text style={[styles.footerCopyright, { color: isDark ? '#475569' : '#94A3B8' }]}>
-          © {new Date().getFullYear()} DarkWave Studios
-        </Text>
-        <View style={styles.footerLinks}>
-          <Pressable onPress={() => Linking.openURL('https://darkwavestudios.io')}>
-            <Text style={[styles.footerLink, { color: isDark ? '#64748B' : '#94A3B8' }]}>DarkWave Studios</Text>
-          </Pressable>
-          <Text style={[styles.footerDot, { color: isDark ? '#334155' : '#CBD5E1' }]}> · </Text>
-          <Pressable onPress={() => Linking.openURL('https://dwtl.io')}>
-            <Text style={[styles.footerLink, { color: isDark ? '#64748B' : '#94A3B8' }]}>Trust Layer</Text>
-          </Pressable>
-        </View>
-      </View>
+
+      <Footer />
     </ScrollView>
     </View>
   );

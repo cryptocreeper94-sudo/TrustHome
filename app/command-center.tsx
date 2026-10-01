@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
+import { Footer } from '@/components/ui/Footer';
 import { apiRequest } from '@/lib/query-client';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -680,7 +681,9 @@ export default function CommandCenterScreen() {
             </Pressable>
           </View>
         </View>
-      </ScrollView>
+              <Footer />
+
+</ScrollView>
     </View>
   );
 }

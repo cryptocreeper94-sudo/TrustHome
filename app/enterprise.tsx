@@ -7,6 +7,7 @@ import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
+import { Footer } from '@/components/ui/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
 
 const COMPETITIVE_ADVANTAGES = [
@@ -299,7 +300,9 @@ export default function EnterpriseScreen() {
           <Text style={styles.footerText}>A DarkWave Studios Product</Text>
         </Animated.View>
       </View>
-    </ScrollView>
+            <Footer />
+
+</ScrollView>
   );
 }
 

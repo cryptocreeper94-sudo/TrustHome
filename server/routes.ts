@@ -33,7 +33,7 @@ import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
 import { createTrustStamp } from "./hallmark";
-import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, expenses, mileageEntries, mlsConfigurations, marketingPosts, marketingAnalytics } from "@shared/schema";
+import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, expenses, mileageEntries, mlsConfigurations, marketingPosts, marketingAnalytics, agentProfiles, insertAgentProfileSchema } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 import OpenAI from "openai";
@@ -2063,6 +2063,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'failed',
         error: error instanceof Error ? error.message : "Unknown error",
       });
+    }
+  });
+
+  // ─── Agent Profile Routes (public + authenticated) ──────────────────
+
+  // Public: Get agent profile by slug (buyer-facing landing page)
+  app.get("/api/agents/:slug", async (req: Request, res: Response) => {
+    try {
+      const { slug } = req.params;
+      const [profile] = await db.select().from(agentProfiles).where(eq(agentProfiles.slug, slug));
+      if (!profile || !profile.isPublished) {
+        return res.status(404).json({ error: "Agent profile not found" });
+      }
+      // Parse specialties from JSON string
+      const result = {
+        name: profile.displayName,
+        title: profile.title,
+        brokerage: profile.brokerage || 'TrustHome',
+        phone: profile.phone || '',
+        email: profile.email || '',
+        bio: profile.bio || '',
+        heroImageUrl: profile.heroImageUrl || null,
+        specialties: (() => { try { return JSON.parse(profile.specialties); } catch { return []; } })(),
+        stats: [
+          { label: 'Career Volume', value: profile.careerVolume || '—' },
+          { label: 'Avg List-to-Sale', value: profile.avgListToSale || '—' },
+          { label: 'Active Listings', value: profile.activeListings?.toString() || '—' },
+        ],
+      };
+      return res.json(result);
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // Authenticated: Get own agent profile
+  app.get("/api/agents/me/profile", async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).session?.userId;
+      if (!userId) return res.status(401).json({ error: "Not authenticated" });
+      const [profile] = await db.select().from(agentProfiles).where(eq(agentProfiles.userId, userId));
+      if (!profile) return res.json({ exists: false });
+      return res.json({ exists: true, profile });
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // Authenticated: Create or update own agent profile
+  app.put("/api/agents/me/profile", async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).session?.userId;
+      if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+      // Get user to auto-generate slug from name if needed
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      const displayName = req.body.displayName || `${user.firstName} ${user.lastName}`;
+      const slug = req.body.slug || `${user.firstName}-${user.lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+      // Check if profile already exists
+      const [existing] = await db.select().from(agentProfiles).where(eq(agentProfiles.userId, userId));
+
+      if (existing) {
+        // Update
+        const updates: Record<string, any> = {
+          updatedAt: new Date(),
+        };
+        if (req.body.displayName !== undefined) updates.displayName = req.body.displayName;
+        if (req.body.title !== undefined) updates.title = req.body.title;
+        if (req.body.brokerage !== undefined) updates.brokerage = req.body.brokerage;
+        if (req.body.phone !== undefined) updates.phone = req.body.phone;
+        if (req.body.email !== undefined) updates.email = req.body.email;
+        if (req.body.bio !== undefined) updates.bio = req.body.bio;
+        if (req.body.heroImageUrl !== undefined) updates.heroImageUrl = req.body.heroImageUrl;
+        if (req.body.specialties !== undefined) updates.specialties = JSON.stringify(req.body.specialties);
+        if (req.body.careerVolume !== undefined) updates.careerVolume = req.body.careerVolume;
+        if (req.body.avgListToSale !== undefined) updates.avgListToSale = req.body.avgListToSale;
+        if (req.body.activeListings !== undefined) updates.activeListings = req.body.activeListings;
+        if (req.body.isPublished !== undefined) updates.isPublished = req.body.isPublished;
+        if (req.body.slug !== undefined) updates.slug = req.body.slug;
+
+        const [updated] = await db.update(agentProfiles).set(updates).where(eq(agentProfiles.id, existing.id)).returning();
+        return res.json(updated);
+      } else {
+        // Create
+        const [created] = await db.insert(agentProfiles).values({
+          userId,
+          slug,
+          displayName,
+          title: req.body.title || 'Licensed Real Estate Professional',
+          brokerage: req.body.brokerage || user.brokerage || null,
+          phone: req.body.phone || user.phone || null,
+          email: req.body.email || user.email,
+          bio: req.body.bio || null,
+          heroImageUrl: req.body.heroImageUrl || null,
+          specialties: JSON.stringify(req.body.specialties || ['Residential Sales', 'Buyer Representation']),
+          careerVolume: req.body.careerVolume || null,
+          avgListToSale: req.body.avgListToSale || null,
+          activeListings: req.body.activeListings || 0,
+          isPublished: req.body.isPublished ?? false,
+        }).returning();
+        return res.json(created);
+      }
+    } catch (error) {
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 

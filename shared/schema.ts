@@ -340,4 +340,44 @@ export const marketingAnalytics = pgTable("marketing_analytics", {
 
 export type MarketingAnalytics = typeof marketingAnalytics.$inferSelect;
 
+// ─── Agent Public Profiles ──────────────────────────────────────────
+// Powers the /agent/[id] buyer-facing landing page
+
+export const agentProfiles = pgTable("agent_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  title: text("title").notNull().default('Licensed Real Estate Professional'),
+  brokerage: text("brokerage"),
+  phone: text("phone"),
+  email: text("email"),
+  bio: text("bio"),
+  heroImageUrl: text("hero_image_url"),
+  specialties: text("specialties").notNull().default('[]'),
+  careerVolume: text("career_volume"),
+  avgListToSale: text("avg_list_to_sale"),
+  activeListings: integer("active_listings").default(0),
+  isPublished: boolean("is_published").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertAgentProfileSchema = createInsertSchema(agentProfiles).pick({
+  displayName: true,
+  title: true,
+  brokerage: true,
+  phone: true,
+  email: true,
+  bio: true,
+  heroImageUrl: true,
+  specialties: true,
+  careerVolume: true,
+  avgListToSale: true,
+  activeListings: true,
+});
+
+export type InsertAgentProfile = z.infer<typeof insertAgentProfileSchema>;
+export type AgentProfile = typeof agentProfiles.$inferSelect;
+
 export * from "./models/chat";

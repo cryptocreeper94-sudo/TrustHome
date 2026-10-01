@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IS_SMALL = SCREEN_WIDTH < 400;
 
 /* ─── Tool Definitions ─── */
 interface ToolDef {
@@ -405,15 +406,19 @@ export const AgentToolkit = forwardRef<AgentToolkitRef>(function AgentToolkit(_,
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: IS_SMALL ? 'flex-end' : 'center',
     alignItems: 'center',
-    padding: Platform.OS === 'web' ? 40 : 16,
+    padding: IS_SMALL ? 0 : Platform.OS === 'web' ? 40 : 16,
   },
   modalContent: {
     width: '100%',
-    maxWidth: 560,
-    maxHeight: '90%',
-    borderRadius: 20,
+    maxWidth: IS_SMALL ? undefined : 560,
+    maxHeight: IS_SMALL ? '95%' : '90%',
+    borderRadius: IS_SMALL ? 20 : 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: IS_SMALL ? 0 : 20,
+    borderBottomRightRadius: IS_SMALL ? 0 : 20,
     borderWidth: 1,
     overflow: 'hidden',
     ...(Platform.OS === 'web' ? {
@@ -430,7 +435,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingHorizontal: 24,
+    paddingHorizontal: IS_SMALL ? 16 : 24,
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(128,128,128,0.15)',
@@ -453,8 +458,8 @@ const styles = StyleSheet.create({
   },
   contentArea: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingHorizontal: IS_SMALL ? 16 : 24,
+    paddingTop: IS_SMALL ? 14 : 20,
   },
   toolGrid: {
     gap: 12,
@@ -518,8 +523,8 @@ const styles = StyleSheet.create({
   },
   toolHeader: {
     alignItems: 'center',
-    marginBottom: 28,
-    gap: 8,
+    marginBottom: IS_SMALL ? 18 : 28,
+    gap: 6,
   },
   toolIconLarge: {
     width: 56,
@@ -547,8 +552,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inputHalf: {
-    width: '48%',
-    minWidth: 140,
+    width: IS_SMALL ? '100%' : '48%',
+    minWidth: IS_SMALL ? undefined : 140,
     flexGrow: 1,
   },
   inputLabel: {
@@ -598,7 +603,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   resultValue: {
-    fontSize: 36,
+    fontSize: IS_SMALL ? 28 : 36,
     fontWeight: '800',
     letterSpacing: -1,
     marginVertical: 4,

@@ -117,7 +117,7 @@ function AnimatedButton({ icon, label, onPress, primary = false }: { icon: keyof
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
-    <Animated.View style={animStyle}>
+    <Animated.View style={[animStyle, { flex: 1 }]}>
       <Pressable
         onPress={onPress}
         onPressIn={() => { scale.value = withSpring(0.92); }}

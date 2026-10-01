@@ -135,11 +135,24 @@ export default function PropertiesScreen() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
 
   const handleScroll = (event: any) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
     const index = Math.round(scrollPosition / SNAP_INTERVAL);
     setActiveIndex(index);
+  };
+
+  const scrollNext = () => {
+    if (activeIndex < PROPERTIES.length - 1) {
+      scrollRef.current?.scrollTo({ x: (activeIndex + 1) * SNAP_INTERVAL, animated: true });
+    }
+  };
+
+  const scrollPrev = () => {
+    if (activeIndex > 0) {
+      scrollRef.current?.scrollTo({ x: (activeIndex - 1) * SNAP_INTERVAL, animated: true });
+    }
   };
 
 
@@ -153,6 +166,7 @@ export default function PropertiesScreen() {
       
       <View style={styles.carouselContainer}>
         <ScrollView
+          ref={scrollRef}
           horizontal
           pagingEnabled={Platform.OS === 'web' ? false : true}
           snapToInterval={SNAP_INTERVAL}
@@ -218,11 +232,26 @@ export default function PropertiesScreen() {
           ))}
         </ScrollView>
 
-        {/* Carousel Pagination Dots */}
-        <View style={[styles.pagination, { bottom: 20 }]}>
-          {PROPERTIES.map((_, i) => (
-            <View key={i} style={[styles.dot, activeIndex === i && styles.dotActive]} />
-          ))}
+        {/* Carousel Navigation */}
+        <View style={styles.carouselNav}>
+          <Pressable onPress={scrollPrev} style={[styles.navArrowBtn, { opacity: activeIndex === 0 ? 0.3 : 1 }]}>
+            <Ionicons name="chevron-back" size={24} color={isDark ? '#FFF' : '#000'} />
+          </Pressable>
+          <View style={styles.pagination}>
+            {PROPERTIES.map((_, i) => (
+              <View 
+                key={i} 
+                style={[
+                  styles.dot, 
+                  activeIndex === i && styles.dotActive, 
+                  { backgroundColor: activeIndex === i ? (isDark ? '#FFF' : '#000') : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)') }
+                ]} 
+              />
+            ))}
+          </View>
+          <Pressable onPress={scrollNext} style={[styles.navArrowBtn, { opacity: activeIndex === PROPERTIES.length - 1 ? 0.3 : 1 }]}>
+            <Ionicons name="chevron-forward" size={24} color={isDark ? '#FFF' : '#000'} />
+          </Pressable>
         </View>
       </View>
     </ScrollView>
@@ -380,19 +409,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
+  carouselNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 24,
+    marginBottom: 32,
+  },
+  navArrowBtn: {
+    padding: 8,
+  },
   pagination: {
-    position: 'absolute',
     flexDirection: 'row',
     gap: 8,
+    alignItems: 'center',
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   dotActive: {
-    backgroundColor: '#FFF',
     width: 24,
   },
 });

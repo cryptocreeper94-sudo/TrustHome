@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trusthome-v2';
+const CACHE_NAME = 'trusthome-v3';
 const OFFLINE_URL = '/';
 
 const PRECACHE_URLS = [

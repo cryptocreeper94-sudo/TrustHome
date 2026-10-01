@@ -161,6 +161,7 @@ export default function ShowingsScreen() {
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <Header imageBanner={require('@/assets/images/guide-showings.jpg')} 
         title="Calendar" 
+        subtitle="Showings · Open houses · Appointments"
         showBack 
         rightAction={
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>

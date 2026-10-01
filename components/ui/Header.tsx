@@ -141,7 +141,8 @@ export function Header({
   rightAction, 
   extraAction, 
   transparent = false,
-  imageBanner
+  imageBanner,
+  subtitle
 }: { 
   title?: string; 
   showBack?: boolean; 
@@ -151,6 +152,7 @@ export function Header({
   extraAction?: React.ReactNode; 
   transparent?: boolean;
   imageBanner?: any;
+  subtitle?: string;
 }) {
   const { colors, isDark, toggleTheme } = useTheme();
   const { toggleDrawer, demoMode, exitDemo, isAuthenticated, isBrowsing } = useApp();
@@ -229,15 +231,44 @@ export function Header({
           style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
           contentFit="cover"
         />
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.3)' }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.35)' }]} />
         <LinearGradient
-          colors={['rgba(0,0,0,0.8)', 'transparent', '#0B1021']}
-          locations={[0, 0.4, 1]}
+          colors={['rgba(0,0,0,0.85)', 'transparent', '#0B1021']}
+          locations={[0, 0.35, 1]}
           style={StyleSheet.absoluteFill}
         />
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>{InnerContent}</View>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 40, paddingHorizontal: 20 }}>
-          <Text style={{ color: '#FFF', fontSize: 48, fontWeight: 'bold', textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 }}>{title}</Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 40, paddingHorizontal: 24 }}>
+          {subtitle ? (
+            <Text style={{
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: 12,
+              fontWeight: '700',
+              letterSpacing: 3,
+              textTransform: 'uppercase',
+              marginBottom: 10,
+              textShadowColor: 'rgba(0,0,0,0.4)',
+              textShadowOffset: { width: 0, height: 1 },
+              textShadowRadius: 4,
+            }}>{subtitle}</Text>
+          ) : null}
+          <Text style={{
+            color: '#FFF',
+            fontSize: Platform.OS === 'web' ? 44 : 36,
+            fontWeight: '800',
+            textAlign: 'center',
+            letterSpacing: -0.5,
+            textShadowColor: 'rgba(0,0,0,0.5)',
+            textShadowOffset: { width: 0, height: 2 },
+            textShadowRadius: 8,
+          }}>{title}</Text>
+          <View style={{
+            width: 40,
+            height: 3,
+            backgroundColor: 'rgba(26,138,126,0.8)',
+            borderRadius: 2,
+            marginTop: 14,
+          }} />
         </View>
       </View>
     );

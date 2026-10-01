@@ -191,6 +191,7 @@ export default function TransactionsScreen() {
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Header imageBanner={require('@/assets/images/guide-transactions.jpg')} 
         title="Transactions" 
+        subtitle="Track every deal from contract to close"
         showBack 
         rightAction={
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>

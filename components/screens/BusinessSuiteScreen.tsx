@@ -202,8 +202,6 @@ export function BusinessSuiteScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Business Suite" showBack imageBanner={require('@/assets/images/guide-business.jpg')} />
-
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -215,6 +213,8 @@ export function BusinessSuiteScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          <Header title="Business Suite" subtitle="Expenses · Mileage · Deductions" showBack imageBanner={require('@/assets/images/guide-business.jpg')} />
+
           {/* ── Summary Strip ── */}
           <View style={styles.summaryStrip}>
             <View style={styles.summaryItem}>
@@ -481,7 +481,7 @@ export function BusinessSuiteScreen() {
                   </View>
                   <Text style={[styles.emptyTitle, { color: colors.text }]}>No expenses yet</Text>
                   <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
-                    Tap + to add one, or scan a receipt
+                    Tap the + button to add one, or scan a receipt
                   </Text>
                 </View>
               ) : (
@@ -497,7 +497,7 @@ export function BusinessSuiteScreen() {
                   </View>
                   <Text style={[styles.emptyTitle, { color: colors.text }]}>No trips logged</Text>
                   <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
-                    Tap + to log your business drives
+                    Tap the + button to log your business drives
                   </Text>
                 </View>
               ) : (

@@ -40,7 +40,7 @@ export default function TasksScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-crm.jpg')} title="Tasks & To-Do" showBack />
+      <Header imageBanner={require('@/assets/images/guide-crm.jpg')} title="Tasks & To-Do" subtitle="Stay organized · Never miss a deadline" showBack />
       <ScrollView contentContainerStyle={styles.scroll}>
         
         <View style={[styles.card, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFF', borderColor: colors.border }]}>

@@ -163,7 +163,7 @@ export default function PropertiesScreen() {
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
     >
-      <Header imageBanner={require('@/assets/images/guide-properties.jpg')} title="Exclusive Listings" showBack transparent={false} />
+      <Header imageBanner={require('@/assets/images/guide-properties.jpg')} title="Exclusive Listings" subtitle="Curated Nashville market properties" showBack transparent={false} />
       
       <View style={styles.carouselContainer}>
         <ScrollView

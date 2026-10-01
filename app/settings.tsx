@@ -181,7 +181,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-dashboard.jpg')} title="Profile & Settings" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+      <Header imageBanner={require('@/assets/images/guide-dashboard.jpg')} title="Profile & Settings" subtitle="Customize your experience" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.section}>
           <Animated.View entering={FadeInDown.duration(500).delay(100)}>

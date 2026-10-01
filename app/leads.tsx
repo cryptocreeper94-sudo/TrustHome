@@ -345,6 +345,7 @@ export default function LeadsScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Header imageBanner={require('@/assets/images/guide-leads.jpg')} 
         title="Leads & CRM" 
+        subtitle="Capture · Nurture · Convert"
         showBack 
         transparent={false}
          

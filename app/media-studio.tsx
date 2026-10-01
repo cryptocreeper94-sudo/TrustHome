@@ -177,6 +177,7 @@ export default function WalkthroughMakerScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <Header imageBanner={require('@/assets/images/guide-media.jpg')} 
         title="Walkthrough Maker" 
+        subtitle="Create stunning property tours"
         showBack 
         transparent={false}
       />

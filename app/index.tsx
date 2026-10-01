@@ -298,7 +298,7 @@ function UserCommandCenter() {
           </View>
 
           <View style={styles.socialSection}>
-            <Text style={styles.socialLabel}>TrustHome Demo</Text>
+            <Text style={styles.socialLabel}>Connect With Us</Text>
             <View style={styles.socialRow}>
               <SocialButton icon="logo-facebook" url="https://www.facebook.com/profile.php?id=61585553137979" />
               <SocialButton icon="logo-twitter" url="https://x.com/TrustSignal26" />

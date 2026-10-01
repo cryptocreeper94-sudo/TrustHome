@@ -379,7 +379,7 @@ export default function TreeServicesScreen() {
       return;
     }
     if (serviceId === 'identify') {
-      Alert.alert('Coming Soon', 'Photo-based tree identification will be available in the next update. Use Property Assessment for now.');
+      Alert.alert('AI Identification', 'Photo-based tree identification is being finalized. Use Property Assessment for species analysis in the meantime.');
       return;
     }
     setActiveModal(serviceId);
@@ -551,7 +551,7 @@ export default function TreeServicesScreen() {
                     <Ionicons name="leaf-outline" size={20} color="#FFF" />
                   </View>
                   <Text style={s.bentoTitle}>AI Tree Identification</Text>
-                  <Text style={s.bentoDesc}>Photo-based species recognition (coming soon)</Text>
+                  <Text style={s.bentoDesc}>Photo-based species recognition</Text>
                 </View>
               </View>
             </GlassCard>

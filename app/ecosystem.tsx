@@ -112,8 +112,6 @@ export default function EcosystemScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-ecosystem.jpg')} title="Ecosystem" subtitle="The TrustHome connected platform" showBack />
-
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[
@@ -128,6 +126,7 @@ export default function EcosystemScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        <Header imageBanner={require('@/assets/images/guide-ecosystem.jpg')} title="Ecosystem" subtitle="The TrustHome connected platform" showBack />
         <Animated.View entering={FadeInDown.duration(400).delay(80)}>
           <View style={[styles.heroSection, { padding: isCompact ? 16 : 20 }]}>
             <LinearGradient

@@ -209,14 +209,14 @@ export default function NetworkScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Professional Network" subtitle="Build connections that close deals" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
-      {apiSubcontractors && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
-          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
-          <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live data</Text>
-        </View>
-      )}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Professional Network" subtitle="Build connections that close deals" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
+        {apiSubcontractors && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
+            <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live data</Text>
+          </View>
+        )}
         <View style={styles.section}>
           <Animated.View entering={FadeInDown.duration(400).delay(100)}>
           <BentoGrid columns={3} gap={10}>

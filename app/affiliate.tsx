@@ -136,12 +136,12 @@ export default function AffiliateScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Share & Earn" subtitle="Refer agents · Earn commissions" showBack />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: isWeb ? 74 : insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
+        <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Share & Earn" subtitle="Refer agents · Earn commissions" showBack />
         <Animated.View entering={FadeInDown.duration(400).delay(80)}>
           <View style={styles.heroSection}>
             <LinearGradient

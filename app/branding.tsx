@@ -43,7 +43,8 @@ export default function BrandingScreen() {
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>('#1A8A7E');
 
-  const agentLandingUrl = 'https://trusthome.io/agent/demo';
+  const agentSlug = user?.email?.split('@')[0] || 'profile';
+  const agentLandingUrl = `https://trusthome.io/agent/${agentSlug}`;
 
   const handleEditProfile = () => {
     Alert.alert(
@@ -80,8 +81,8 @@ export default function BrandingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-business.jpg')} title="Branding & Profile" subtitle="Your professional identity" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header imageBanner={require('@/assets/images/guide-business.jpg')} title="Branding & Profile" subtitle="Your professional identity" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
         <View style={styles.section}>
             <View style={styles.accordionGroup}>
               <Animated.View entering={FadeInDown.duration(400).delay(100)}>

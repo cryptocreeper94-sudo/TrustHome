@@ -602,9 +602,9 @@ export default function BlogScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-marketing.jpg')} title="Blog Management" subtitle="Content that drives organic traffic" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <Header imageBanner={require('@/assets/images/guide-marketing.jpg')} title="Blog Management" subtitle="Content that drives organic traffic" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
         <Animated.View entering={FadeInDown.duration(500).delay(100)}>
         <View style={styles.tabContainer}>
           {TABS.map((tab) => (

@@ -159,21 +159,21 @@ export default function ShowingsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header imageBanner={require('@/assets/images/guide-showings.jpg')} 
-        title="Calendar" 
-        subtitle="Showings · Open houses · Appointments"
-        showBack 
-        rightAction={
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="add" size={20} color={colors.primary} />
-              <Text style={[styles.headerAddText, { color: colors.primary }]}>Add</Text>
-            </Pressable>
-            <InfoButton onPress={() => setShowHelp(true)} />
-          </View>
-        } 
-      />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header imageBanner={require('@/assets/images/guide-showings.jpg')} 
+          title="Calendar" 
+          subtitle="Showings · Open houses · Appointments"
+          showBack 
+          rightAction={
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="add" size={20} color={colors.primary} />
+                <Text style={[styles.headerAddText, { color: colors.primary }]}>Add</Text>
+              </Pressable>
+              <InfoButton onPress={() => setShowHelp(true)} />
+            </View>
+          } 
+        />
 
         <BentoGrid columns={3} gap={10}>
           <GlassCard compact style={styles.statCard}>

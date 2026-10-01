@@ -373,7 +373,7 @@ export default function DeveloperScreen() {
           <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
           <View style={styles.tenantBoxText}>
             <Text style={[styles.tenantLabel, { color: colors.text }]}>Current Tenant Space</Text>
-            <Text style={[styles.tenantValue, { color: colors.textSecondary }]}>{data.tenantId} (Demo Space)</Text>
+            <Text style={[styles.tenantValue, { color: colors.textSecondary }]}>{data.tenantId}</Text>
           </View>
         </View>
       </View>

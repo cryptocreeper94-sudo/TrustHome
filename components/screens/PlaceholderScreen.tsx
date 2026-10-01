@@ -34,7 +34,7 @@ export function PlaceholderScreen({ title, icon, description, features }: Placeh
 
         {features && features.length > 0 ? (
           <GlassCard style={styles.featureCard}>
-            <Text style={[styles.featureTitle, { color: colors.text }]}>Coming Soon</Text>
+            <Text style={[styles.featureTitle, { color: colors.text }]}>What's Included</Text>
             {features.map((f, i) => (
               <View key={i} style={styles.featureRow}>
                 <Ionicons name="checkmark-circle" size={18} color={colors.primary} />

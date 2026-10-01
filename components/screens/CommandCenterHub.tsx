@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, Platform,
   Dimensions, Linking, Image,
@@ -12,6 +12,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { KenBurnsHero } from '@/components/ui/VideoHero';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
+import { AgentToolkit, AgentToolkitRef } from '@/components/ui/AgentToolkit';
 
 const HERO_SLIDES = [
   { image: require('@/assets/images/hero-1.jpg'), label: 'Craftsman Homes' },
@@ -77,6 +78,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
   const { toggleDrawer, isBrowsing } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const toolkitRef = useRef<AgentToolkitRef>(null);
 
   const cardWidth = Math.min(SCREEN_WIDTH > 900 ? (SCREEN_WIDTH - 80) / 3 : SCREEN_WIDTH > 600 ? (SCREEN_WIDTH - 60) / 2 : SCREEN_WIDTH - 40, 400);
 
@@ -120,6 +122,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
 
   return (
     <View style={{ flex: 1 }}>
+    <AgentToolkit ref={toolkitRef} />
     {/* Floating menu button */}
     <Pressable
       style={({ pressed }) => [styles.floatingMenuBtn, pressed && { opacity: 0.8 }]}
@@ -161,7 +164,7 @@ export function CommandCenterHub({ onSwitchToDashboard }: CommandCenterHubProps)
               </Pressable>
               <Pressable
                 style={({ pressed }) => [styles.heroSecondaryBtn, pressed && { opacity: 0.85 }]}
-                onPress={toggleDrawer}
+                onPress={() => toolkitRef.current?.open()}
               >
                 <Text style={{ color: '#FFF', fontSize: 14 }}>⊞ </Text>
                 <Text style={styles.heroSecondaryBtnText}>Explore Tools</Text>

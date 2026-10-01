@@ -9,7 +9,6 @@ import { Footer } from '@/components/ui/Footer';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 import { BentoGrid } from '@/components/ui/BentoGrid';
-import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
 
 const STAGE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -230,35 +229,27 @@ export default function TransactionsScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(80)}>
-          <HorizontalCarousel title="Pipeline" itemWidth={140}>
-            {PIPELINE_STAGES.map(s => (
-              <GlassCard key={s.key} compact style={styles.carouselCard} onPress={() => setActiveStage(activeStage === s.key ? null : s.key)}>
-                <View style={styles.carouselCardInner}>
-                  <View style={[styles.carouselDot, { backgroundColor: s.color }]} />
-                  <Text style={[styles.carouselLabel, { color: colors.text }]} numberOfLines={1}>{s.label}</Text>
-                  <Text style={[styles.carouselCount, { color: s.color }]}>{s.count}</Text>
+          <View style={{ paddingHorizontal: 16, paddingTop: 4 }}>
+            <Text style={{ fontSize: 13, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>PIPELINE</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              <Pressable onPress={() => setActiveStage(null)} style={[styles.stagePill, { backgroundColor: !activeStage ? colors.primary : (isDark ? colors.surface : colors.backgroundTertiary), borderColor: !activeStage ? colors.primary : colors.border }]}>
+                <Text style={[styles.stagePillText, { color: !activeStage ? '#FFF' : colors.text }]}>All</Text>
+                <View style={[styles.stageCountDot, { backgroundColor: !activeStage ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)' }]}>
+                  <Text style={[styles.stageCountText, { color: !activeStage ? '#FFF' : colors.textSecondary }]}>{DEALS.length}</Text>
                 </View>
-              </GlassCard>
-            ))}
-          </HorizontalCarousel>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.duration(400).delay(160)}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.stageRow}>
-            <Pressable onPress={() => setActiveStage(null)} style={[styles.stagePill, { backgroundColor: !activeStage ? colors.primary : (isDark ? colors.surface : colors.backgroundTertiary), borderColor: !activeStage ? colors.primary : colors.border }]}>
-              <Text style={[styles.stagePillText, { color: !activeStage ? '#FFF' : colors.text }]}>All ({DEALS.length})</Text>
-            </Pressable>
-            {PIPELINE_STAGES.map(s => (
-              <AnimatedStagePill
-                key={s.key}
-                stage={s}
-                isActive={activeStage === s.key}
-                onPress={() => setActiveStage(activeStage === s.key ? null : s.key)}
-                colors={colors}
-                isDark={isDark}
-              />
-            ))}
-          </ScrollView>
+              </Pressable>
+              {PIPELINE_STAGES.map(s => (
+                <AnimatedStagePill
+                  key={s.key}
+                  stage={s}
+                  isActive={activeStage === s.key}
+                  onPress={() => setActiveStage(activeStage === s.key ? null : s.key)}
+                  colors={colors}
+                  isDark={isDark}
+                />
+              ))}
+            </View>
+          </View>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(240)}>

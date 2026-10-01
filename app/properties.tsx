@@ -132,7 +132,7 @@ function AnimatedButton({ icon, label, onPress, primary = false }: { icon: keyof
 }
 
 export default function PropertiesScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(0);
 

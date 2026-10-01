@@ -42,7 +42,7 @@ export function Footer() {
         { label: 'Leads & CRM', route: '/leads' },
         { label: 'Marketing Tools', route: '/marketing' },
         { label: 'Analytics', route: '/analytics' },
-        { label: 'Transactions', route: '/transactions' },
+        { label: 'Pricing', route: '/pricing' },
       ],
     },
     {
@@ -53,6 +53,7 @@ export function Footer() {
         { label: 'Title Services', route: '/network' },
         { label: 'Contractor Hub', route: '/network' },
         { label: 'Referral Program', route: '/affiliate' },
+        { label: 'Enterprise Solutions', route: '/enterprise' },
       ],
     },
     {

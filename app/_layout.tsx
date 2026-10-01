@@ -47,6 +47,8 @@ function RootLayoutNav() {
         <Stack.Screen name="support" />
         <Stack.Screen name="hallmark" />
         <Stack.Screen name="affiliate" />
+        <Stack.Screen name="pricing" />
+        <Stack.Screen name="enterprise" />
         <Stack.Screen name="command-center" />
       </Stack>
       </NavThemeProvider>

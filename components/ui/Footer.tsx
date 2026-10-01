@@ -51,8 +51,8 @@ export function Footer() {
         { label: 'Inspector Tools', route: '/hallmark' },
         { label: 'Lender Portal', route: '/network' },
         { label: 'Title Services', route: '/network' },
-        { label: 'Tree Services', route: '/tree-services' },
         { label: 'Contractor Hub', route: '/network' },
+        { label: 'Referral Program', route: '/affiliate' },
       ],
     },
     {

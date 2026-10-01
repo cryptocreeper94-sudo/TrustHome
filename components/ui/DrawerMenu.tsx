@@ -98,7 +98,6 @@ export function DrawerMenu() {
     { icon: 'globe-outline', emoji: E['globe-outline'], label: 'Network', route: '/network', agentOnly: true, dividerAfter: true },
     { icon: 'briefcase-outline', emoji: E['briefcase-outline'], label: 'Business Suite', route: '/business', agentOnly: true },
     { icon: 'film-outline', emoji: E['film-outline'], label: 'Media Studio', route: '/media-studio', agentOnly: true },
-    { icon: 'leaf-outline', emoji: E['leaf-outline'], label: 'Tree Services', route: '/tree-services', agentOnly: true },
     { icon: 'color-palette-outline', emoji: E['color-palette-outline'], label: 'Branding', route: '/branding', agentOnly: true },
     { icon: 'brush-outline', emoji: E['brush-outline'], label: 'Room Visualizer', onPress: () => Linking.openURL('https://paintpros.io/npp/estimate'), dividerAfter: true },
     { icon: 'person-outline', emoji: E['person-outline'], label: 'Profile & Settings', route: '/settings' },

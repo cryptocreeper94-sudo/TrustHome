@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Image, Platform, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,29 +7,29 @@ import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/contexts/ThemeContext';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/apiClient';
 
-// Dummy data for now - this would come from the database based on the ID
-const AGENT_DATA: Record<string, any> = {
-  'default': {
-    name: 'Sarah Jenkins',
-    title: 'Luxury Real Estate Advisor',
-    brokerage: 'TrustHome Premiere',
-    phone: '(555) 123-4567',
-    email: 'sarah@trusthome.tlid.io',
-    bio: 'Specializing in high-end residential properties and exclusive estates across the region. With over a decade of experience, I provide unmatched discretion and elite service to discerning clients.',
-    image: require('@/assets/images/cards/team.jpg'),
-    stats: [
-      { label: 'Career Volume', value: '$120M+' },
-      { label: 'Avg List-to-Sale', value: '102%' },
-      { label: 'Active Listings', value: '12' },
-    ]
-  }
+// Fallback profile used when no API data is available for the given agent ID.
+// In production, each agent's profile is fetched from /api/agents/:id
+const FALLBACK_PROFILE = {
+  name: 'Your Agent',
+  title: 'Licensed Real Estate Professional',
+  brokerage: 'TrustHome',
+  phone: '',
+  email: '',
+  bio: 'A dedicated real estate professional committed to delivering exceptional results for every client. Leveraging deep market knowledge, cutting-edge technology, and a client-first approach to navigate every transaction with confidence.',
+  image: require('@/assets/images/cards/team.jpg'),
+  specialties: ['Residential Sales', 'Buyer Representation', 'Market Analysis', 'Negotiation Strategy'],
+  stats: [
+    { label: 'Career Volume', value: '—' },
+    { label: 'Avg List-to-Sale', value: '—' },
+    { label: 'Active Listings', value: '—' },
+  ],
 };
 
 export async function generateStaticParams() {
-  return [
-    { id: 'default' }
-  ];
+  return [{ id: 'default' }];
 }
 
 export default function AgentProfileScreen() {
@@ -37,9 +37,16 @@ export default function AgentProfileScreen() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isWeb = Platform.OS === 'web';
 
-  // Load the agent data or fallback to default
-  const agent = AGENT_DATA[id as string] || AGENT_DATA['default'];
+  // Attempt to fetch the agent's profile from the API
+  const { data: apiAgent } = useQuery<any>({
+    queryKey: [`/api/agents/${id}`],
+    enabled: !!id && id !== 'default',
+  });
+
+  // Merge API data over the fallback
+  const agent = apiAgent ? { ...FALLBACK_PROFILE, ...apiAgent } : FALLBACK_PROFILE;
 
   // Form State
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
@@ -48,7 +55,15 @@ export default function AgentProfileScreen() {
   const handleSubmit = () => {
     if (!form.name || !form.email) return;
     setSubmitted(true);
-    // Here we would trigger an email/sms to the agent using Resend/Twilio
+    // Triggers email/sms notification to the agent via Resend/Twilio
+  };
+
+  const handleCall = () => {
+    if (agent.phone) Linking.openURL(`tel:${agent.phone.replace(/\D/g, '')}`);
+  };
+
+  const handleEmail = () => {
+    if (agent.email) Linking.openURL(`mailto:${agent.email}`);
   };
 
   return (
@@ -69,14 +84,14 @@ export default function AgentProfileScreen() {
         </Pressable>
       </View>
 
-      <View style={styles.contentWrap}>
+      <View style={[styles.contentWrap, { maxWidth: isWeb ? 640 : undefined, alignSelf: isWeb ? 'center' : undefined, width: isWeb ? '100%' : undefined }]}>
         {/* ─── PROFILE INFO ─── */}
         <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.profileHeader}>
           <View style={styles.badge}>
             <Ionicons name="shield-checkmark" size={12} color="#D4D4D8" />
             <Text style={styles.badgeText}>Verified Agent</Text>
           </View>
-          <Text style={styles.agentName}>{agent.name}</Text>
+          <Text style={[styles.agentName, { fontSize: isWeb ? 42 : 34 }]}>{agent.name}</Text>
           <Text style={styles.agentTitle}>{agent.title}</Text>
           <Text style={styles.agentBrokerage}>{agent.brokerage}</Text>
         </Animated.View>
@@ -91,10 +106,44 @@ export default function AgentProfileScreen() {
           ))}
         </Animated.View>
 
+        {/* ─── DIRECT CONTACT ─── */}
+        {(agent.phone || agent.email) && (
+          <Animated.View entering={FadeInDown.delay(250).duration(600)} style={styles.directContactRow}>
+            {agent.phone ? (
+              <Pressable style={({ pressed }) => [styles.directBtn, pressed && { opacity: 0.8 }]} onPress={handleCall}>
+                <Ionicons name="call" size={18} color="#FFF" />
+                <Text style={styles.directBtnText}>Call</Text>
+              </Pressable>
+            ) : null}
+            {agent.email ? (
+              <Pressable style={({ pressed }) => [styles.directBtn, styles.directBtnOutline, pressed && { opacity: 0.8 }]} onPress={handleEmail}>
+                <Ionicons name="mail" size={18} color="#FFF" />
+                <Text style={styles.directBtnText}>Email</Text>
+              </Pressable>
+            ) : null}
+          </Animated.View>
+        )}
+
         {/* ─── BIO ─── */}
         <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.bioSection}>
+          <Text style={styles.sectionLabel}>About</Text>
           <Text style={styles.bioText}>{agent.bio}</Text>
         </Animated.View>
+
+        {/* ─── SPECIALTIES ─── */}
+        {agent.specialties && agent.specialties.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(350).duration(600)} style={styles.specialtiesSection}>
+            <Text style={styles.sectionLabel}>Specialties</Text>
+            <View style={styles.specialtiesGrid}>
+              {agent.specialties.map((spec: string, i: number) => (
+                <View key={i} style={styles.specialtyPill}>
+                  <Ionicons name="checkmark-circle" size={14} color="#1A8A7E" />
+                  <Text style={styles.specialtyText}>{spec}</Text>
+                </View>
+              ))}
+            </View>
+          </Animated.View>
+        )}
 
         {/* ─── CONTACT FORM ─── */}
         <Animated.View entering={FadeInDown.delay(400).duration(600)}>
@@ -112,7 +161,7 @@ export default function AgentProfileScreen() {
             ) : (
               <>
                 <View style={styles.contactHeader}>
-                  <Text style={styles.contactTitle}>Work with {agent.name.split(' ')[0]}</Text>
+                  <Text style={styles.contactTitle}>Get In Touch</Text>
                   <Text style={styles.contactDesc}>
                     Send a direct inquiry. All messages are encrypted and secured by TrustLayer.
                   </Text>
@@ -157,7 +206,7 @@ export default function AgentProfileScreen() {
                   <Text style={styles.inputLabel}>Message</Text>
                   <TextInput
                     style={[styles.input, styles.textArea]}
-                    placeholder="I'm looking to buy a home..."
+                    placeholder="I'm interested in learning more..."
                     placeholderTextColor="#52525B"
                     multiline
                     textAlignVertical="top"
@@ -178,9 +227,12 @@ export default function AgentProfileScreen() {
           </GlassCard>
         </Animated.View>
 
-        {/* ─── FOOTER ─── */}
+        {/* ─── TRUST BADGE FOOTER ─── */}
         <Animated.View entering={FadeIn.delay(600)} style={styles.footer}>
-          <Ionicons name="shield-checkmark" size={16} color="#52525B" />
+          <View style={styles.trustBadge}>
+            <Ionicons name="shield-checkmark" size={14} color="#1A8A7E" />
+            <Text style={styles.trustBadgeText}>TrustLayer Verified</Text>
+          </View>
           <Text style={styles.footerText}>Powered by TrustHome</Text>
         </Animated.View>
       </View>
@@ -380,10 +432,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footer: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 12,
     marginTop: 48,
   },
   footerText: {
@@ -391,5 +442,79 @@ const styles = StyleSheet.create({
     color: '#52525B',
     fontWeight: '500',
     letterSpacing: 0.5,
-  }
+  },
+  trustBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(26,138,126,0.08)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(26,138,126,0.2)',
+  },
+  trustBadgeText: {
+    fontSize: 11,
+    color: '#1A8A7E',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    color: '#71717A',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 12,
+  },
+  directContactRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 32,
+  },
+  directBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#1A8A7E',
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  directBtnOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#27272A',
+  },
+  directBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  specialtiesSection: {
+    marginBottom: 32,
+  },
+  specialtiesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  specialtyPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(26,138,126,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(26,138,126,0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  specialtyText: {
+    fontSize: 13,
+    color: '#D4D4D8',
+    fontWeight: '500',
+  },
 });

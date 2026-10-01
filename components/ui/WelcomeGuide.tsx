@@ -299,7 +299,7 @@ const SLIDES: GuideSlide[] = [
     title: 'Media\nStudio',
     subtitle: 'Professional video walkthroughs and property media — produced for you.',
     bullets: [
-      'Request property walkthroughs, voiceovers, and aerial footage',
+      'Request property walkthroughs, voiceovers, and professional footage',
       'DarkWave Media Studio produces broadcast-quality content',
       'Download completed projects directly from your dashboard',
       'Interior photography and virtual staging capabilities',

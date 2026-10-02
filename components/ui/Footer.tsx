@@ -136,29 +136,21 @@ export function Footer() {
       <View style={styles.bottomBar}>
         <View style={styles.bottomRow}>
           <Pressable onPress={() => Linking.openURL('https://darkwavestudios.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
-            <Text style={[styles.bottomText, styles.bottomLink, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>darkwavestudios.io</Text>
+            <Text style={[styles.bottomText, styles.bottomLink, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>DarkWave Studios LLC</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
           <Text style={[styles.bottomText, { color: isDark ? 'rgba(255,255,255,0.3)' : colors.textTertiary }]}>{'\u00A9'} 2026</Text>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Pressable onPress={() => Linking.openURL('https://trustshield.tech')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
+          <Pressable onPress={() => Linking.openURL('https://dwtl.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.bottomText, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>
-              Powered by <Text style={styles.bottomLink}>trustshield.tech</Text>
+              Powered by <Text style={[styles.bottomLink, { color: '#22d3ee' }]}>Trust Layer</Text>
             </Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
           <Pressable onPress={() => Linking.openURL('https://lumev.tlid.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.bottomText, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>
-              Verified by <Text style={[styles.bottomLink, { color: '#8B5CF6' }]}>Lume-V</Text>
+              Governed by <Text style={[styles.bottomLink, { color: '#8B5CF6' }]}>Lume-V</Text>
             </Text>
-          </Pressable>
-          <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Pressable onPress={() => Linking.openURL('https://dwtl.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
-            <Text style={[styles.bottomText, styles.bottomLink, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>dwtl.io</Text>
-          </Pressable>
-          <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Pressable onPress={() => Linking.openURL('https://dwtl.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
-            <Text style={[styles.bottomText, styles.bottomLink, { color: '#22d3ee' }]}>Trust Layer</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
           <Pressable onPress={() => router.push('/team' as any)} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]} testID="footer-team-link">

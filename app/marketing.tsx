@@ -275,6 +275,7 @@ export default function MarketingScreen() {
   const renderContent = () => (
     <View style={styles.section}>
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
+      {CONTENT_ITEMS.length > 0 ? (
       <HorizontalCarousel title="Recent Content" itemWidth={240} hideArrows>
         {CONTENT_ITEMS.map(item => (
           <GlassCard key={item.id} compact style={{ width: 240, marginBottom: 0 }}>
@@ -295,6 +296,31 @@ export default function MarketingScreen() {
           </GlassCard>
         ))}
       </HorizontalCarousel>
+      ) : (
+      <GlassCard>
+        <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+          <Ionicons name="create-outline" size={36} color="#1A8A7E" />
+          <Text style={[styles.welcomeTitle, { color: colors.text, marginTop: 12, textAlign: 'center' }]}>No content yet</Text>
+          <Text style={[styles.welcomeSub, { color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 16 }]}>
+            Create your first marketing post to start building your content library.
+          </Text>
+          <View style={{ marginTop: 14, gap: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Ionicons name="sparkles" size={14} color="#FF9500" />
+              <Text style={{ color: colors.textSecondary, fontSize: 13 }}>AI can generate posts from your active listings</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Ionicons name="calendar-outline" size={14} color="#1A8A7E" />
+              <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Schedule across Facebook, Instagram, and X</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Ionicons name="bar-chart-outline" size={14} color={colors.info} />
+              <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Track engagement and reach in Analytics</Text>
+            </View>
+          </View>
+        </View>
+      </GlassCard>
+      )}
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(400).delay(250)}>
@@ -307,12 +333,14 @@ export default function MarketingScreen() {
           badgeColor={colors.success}
           defaultOpen={true}
         >
-          {publishedItems.map((item, i) => (
+          {publishedItems.length > 0 ? publishedItems.map((item, i) => (
             <View key={item.id}>
               {i > 0 && <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />}
               {renderContentItem(item)}
             </View>
-          ))}
+          )) : (
+            <Text style={[styles.noPost, { color: colors.textTertiary }]}>Published posts will appear here after you post content</Text>
+          )}
         </AccordionSection>
 
         <AccordionSection
@@ -322,12 +350,14 @@ export default function MarketingScreen() {
           badge={scheduledItems.length}
           badgeColor={colors.info}
         >
-          {scheduledItems.map((item, i) => (
+          {scheduledItems.length > 0 ? scheduledItems.map((item, i) => (
             <View key={item.id}>
               {i > 0 && <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />}
               {renderContentItem(item)}
             </View>
-          ))}
+          )) : (
+            <Text style={[styles.noPost, { color: colors.textTertiary }]}>Schedule posts for future dates to plan your content calendar</Text>
+          )}
         </AccordionSection>
 
         <AccordionSection
@@ -337,12 +367,14 @@ export default function MarketingScreen() {
           badge={draftItems.length}
           badgeColor={colors.warning}
         >
-          {draftItems.map((item, i) => (
+          {draftItems.length > 0 ? draftItems.map((item, i) => (
             <View key={item.id}>
               {i > 0 && <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />}
               {renderContentItem(item)}
             </View>
-          ))}
+          )) : (
+            <Text style={[styles.noPost, { color: colors.textTertiary }]}>Drafts are saved here while you work on them before publishing</Text>
+          )}
         </AccordionSection>
       </View>
       </Animated.View>
@@ -500,10 +532,10 @@ export default function MarketingScreen() {
       <InfoModal
         visible={showHelp}
         onClose={() => setShowHelp(false)}
-        title={SCREEN_HELP.marketing.title}
-        description={SCREEN_HELP.marketing.description}
-        details={SCREEN_HELP.marketing.details}
-        examples={SCREEN_HELP.marketing.examples}
+        title={(SCREEN_HELP[`marketing${activeTab}` as keyof typeof SCREEN_HELP] || SCREEN_HELP.marketing).title}
+        description={(SCREEN_HELP[`marketing${activeTab}` as keyof typeof SCREEN_HELP] || SCREEN_HELP.marketing).description}
+        details={(SCREEN_HELP[`marketing${activeTab}` as keyof typeof SCREEN_HELP] || SCREEN_HELP.marketing).details}
+        examples={(SCREEN_HELP[`marketing${activeTab}` as keyof typeof SCREEN_HELP] || SCREEN_HELP.marketing).examples}
       />
     </View>
   );

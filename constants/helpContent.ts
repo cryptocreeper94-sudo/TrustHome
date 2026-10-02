@@ -105,6 +105,62 @@ export const SCREEN_HELP: Record<string, FeatureHelp> = {
       'Performance metrics show engagement and reach',
     ],
   },
+  marketingOverview: {
+    title: 'Marketing Overview',
+    description: 'Your marketing dashboard at a glance. Stats update in real time as you create and schedule posts.',
+    details: [
+      'Stat cards show your post count, scheduled items, total reach, and engagement rate',
+      'The Suggested Post section uses AI to draft content based on your active listings',
+      'Content Library breaks down your content by type — posts, emails, and ads',
+      'Autopilot Status shows which social platforms are connected for auto-posting',
+    ],
+    examples: [
+      'Tap "Post Now" on a suggested post to publish it immediately',
+      'Connect your Facebook page under Autopilot Status to enable scheduling',
+    ],
+  },
+  marketingContent: {
+    title: 'Content Management',
+    description: 'Create and manage social posts, email campaigns, and ad copy. Browse your content library and track status.',
+    details: [
+      'The carousel at the top shows your most recent content pieces',
+      'Content is organized by status: Published, Scheduled, and Draft',
+      'Each post shows its target platforms (FB, IG, X) and scheduled date',
+      'Type badges indicate whether content is a Social Post, Email, or Ad Copy',
+    ],
+    examples: [
+      'Expand the "Draft" section to find posts you haven\'t finished yet',
+      'Platform pills show which channels each post targets',
+    ],
+  },
+  marketingSchedule: {
+    title: 'Content Schedule',
+    description: 'Your weekly posting calendar. Plan your content distribution across the week for maximum reach.',
+    details: [
+      'Each day of the week is listed with a post count badge when content is queued',
+      'Expand any day to see the specific posts scheduled with their times and platforms',
+      'Days without content show "No posts scheduled" — tap to create content for that day',
+      'The week header automatically shows the current week\'s date range',
+    ],
+    examples: [
+      'Schedule posts from the Content tab, then see them appear here by day',
+      'Aim for 3-5 posts per week across different platforms for best engagement',
+    ],
+  },
+  marketingAnalytics: {
+    title: 'Marketing Analytics',
+    description: 'Track your marketing performance over the last 30 days. See what\'s working and optimize your strategy.',
+    details: [
+      'Performance bars show impressions, reach, clicks, engagement, and shares',
+      'Key metrics cards display CTR, conversion rate, and cost per click',
+      'Top Performing Content highlights your best posts by engagement',
+      'All metrics update automatically as your posts receive interactions',
+    ],
+    examples: [
+      'Compare your reach vs. engagement to understand content quality',
+      'Use top-performing content as a template for future posts',
+    ],
+  },
   network: {
     title: 'Professional Network',
     description: 'Manage your contacts across the real estate ecosystem. Find and connect with inspectors, lenders, title companies, and more.',

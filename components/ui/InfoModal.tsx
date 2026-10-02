@@ -69,13 +69,29 @@ export function InfoModal({ visible, onClose, title, description, details, examp
 
 interface InfoButtonProps {
   onPress: () => void;
+  label?: string;
 }
 
-export function InfoButton({ onPress }: InfoButtonProps) {
-  const { colors } = useTheme();
+export function InfoButton({ onPress, label = 'How to Use' }: InfoButtonProps) {
+  const { colors, isDark } = useTheme();
   return (
-    <Pressable onPress={onPress} hitSlop={8}>
-      <Ionicons name="information-circle-outline" size={18} color={colors.textTertiary} />
+    <Pressable
+      onPress={onPress}
+      hitSlop={8}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)',
+      }}
+    >
+      <Ionicons name="help-circle-outline" size={16} color={isDark ? '#E5E5E5' : colors.textSecondary} />
+      <Text style={{ fontSize: 12, fontWeight: '600', color: isDark ? '#E5E5E5' : colors.textSecondary }}>{label}</Text>
     </Pressable>
   );
 }

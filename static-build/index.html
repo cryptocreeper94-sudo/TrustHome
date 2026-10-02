@@ -23,36 +23,17 @@
         flex: 1;
       }
 
-      /* Desktop framing — constrained column with dark side panels */
+      /* Desktop framing — constrained column with matching dark side panels */
       @media (min-width: 768px) {
         body {
-          background: #04080F;
-          background-image:
-            repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 2px,
-              rgba(26, 138, 126, 0.015) 2px,
-              rgba(26, 138, 126, 0.015) 4px
-            ),
-            repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 2px,
-              rgba(26, 138, 126, 0.015) 2px,
-              rgba(26, 138, 126, 0.015) 4px
-            ),
-            radial-gradient(ellipse at 15% 50%, rgba(26, 138, 126, 0.06) 0%, transparent 50%),
-            radial-gradient(ellipse at 85% 50%, rgba(26, 138, 126, 0.06) 0%, transparent 50%);
+          background: #0B1120;
         }
         #root {
           max-width: 1200px;
           margin: 0 auto;
-          border-left: 1px solid rgba(255, 255, 255, 0.05);
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
           box-shadow:
-            -1px 0 30px rgba(0, 0, 0, 0.5),
-            1px 0 30px rgba(0, 0, 0, 0.5);
+            -1px 0 30px rgba(0, 0, 0, 0.4),
+            1px 0 30px rgba(0, 0, 0, 0.4);
           position: relative;
           z-index: 1;
         }

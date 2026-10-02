@@ -423,14 +423,14 @@ export default function LeadsScreen() {
         <Animated.View entering={FadeInDown.duration(400).delay(240)}>
           <View style={styles.toggleRow}>
             <Pressable
-              style={[styles.toggleBtn, viewMode === 'list' && { backgroundColor: colors.primaryAction }]}
+              style={[styles.toggleBtn, { backgroundColor: viewMode === 'list' ? '#1A8A7E' : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}
               onPress={() => setViewMode('list')}
             >
               <Ionicons name="list" size={16} color={viewMode === 'list' ? '#FFF' : colors.textSecondary} />
               <Text style={[styles.toggleText, { color: viewMode === 'list' ? '#FFF' : colors.textSecondary }]}>List</Text>
             </Pressable>
             <Pressable
-              style={[styles.toggleBtn, viewMode === 'pipeline' && { backgroundColor: colors.primaryAction }]}
+              style={[styles.toggleBtn, { backgroundColor: viewMode === 'pipeline' ? '#1A8A7E' : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}
               onPress={() => setViewMode('pipeline')}
             >
               <Ionicons name="git-branch" size={16} color={viewMode === 'pipeline' ? '#FFF' : colors.textSecondary} />
@@ -476,7 +476,7 @@ export default function LeadsScreen() {
                     key={t}
                     label={t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
                     isActive={filterTemp === t}
-                    color={t === 'all' ? colors.primary : tempColors[t]}
+                    color={t === 'all' ? '#1A8A7E' : tempColors[t]}
                     borderColor={colors.border}
                     onPress={() => setFilterTemp(t)}
                   />

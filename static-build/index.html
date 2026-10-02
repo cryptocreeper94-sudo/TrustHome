@@ -23,24 +23,38 @@
         flex: 1;
       }
 
-      /* Desktop framing — phone-width column with decorative side panels */
+      /* Desktop framing — constrained column with dark side panels */
       @media (min-width: 768px) {
         body {
-          background: #070B14;
+          background: #04080F;
           background-image:
-            radial-gradient(ellipse at 20% 50%, rgba(26, 138, 126, 0.08) 0%, transparent 60%),
-            radial-gradient(ellipse at 80% 30%, rgba(30, 60, 120, 0.06) 0%, transparent 50%),
-            radial-gradient(ellipse at 50% 80%, rgba(26, 138, 126, 0.04) 0%, transparent 40%);
+            repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 2px,
+              rgba(26, 138, 126, 0.015) 2px,
+              rgba(26, 138, 126, 0.015) 4px
+            ),
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 2px,
+              rgba(26, 138, 126, 0.015) 2px,
+              rgba(26, 138, 126, 0.015) 4px
+            ),
+            radial-gradient(ellipse at 15% 50%, rgba(26, 138, 126, 0.06) 0%, transparent 50%),
+            radial-gradient(ellipse at 85% 50%, rgba(26, 138, 126, 0.06) 0%, transparent 50%);
         }
         #root {
-          max-width: 480px;
+          max-width: 720px;
           margin: 0 auto;
-          border-left: 1px solid rgba(255, 255, 255, 0.06);
-          border-right: 1px solid rgba(255, 255, 255, 0.06);
+          border-left: 1px solid rgba(255, 255, 255, 0.05);
+          border-right: 1px solid rgba(255, 255, 255, 0.05);
           box-shadow:
-            0 0 60px rgba(26, 138, 126, 0.05),
-            0 0 120px rgba(0, 0, 0, 0.3);
+            -1px 0 30px rgba(0, 0, 0, 0.5),
+            1px 0 30px rgba(0, 0, 0, 0.5);
           position: relative;
+          z-index: 1;
         }
       }
     </style>

@@ -4,8 +4,11 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '@/components/ui/Header';
 import { useRouter } from 'expo-router';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 export default function OpenHouseKioskScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const router = useRouter();
   

@@ -25,10 +25,13 @@ import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Footer } from '@/components/ui/Footer';
 import { apiRequest } from '@/lib/query-client';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function WalkthroughMakerScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   
   // State for the simplified editor

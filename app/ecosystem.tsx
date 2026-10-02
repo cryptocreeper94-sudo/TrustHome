@@ -8,6 +8,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const ECOSYSTEM_APPS = [
   { name: 'TrustHome', slug: 'trusthome', url: 'https://trusthome.replit.app', desc: 'White-label real estate platform', category: 'Real Estate', icon: 'home', color: '#1A8A7E' },
@@ -103,6 +105,7 @@ function AppCard({ app, colors, isDark, isCompact }: { app: typeof ECOSYSTEM_APP
 }
 
 export default function EcosystemScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();

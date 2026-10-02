@@ -4,6 +4,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '@/components/ui/Header';
 import { Footer } from '@/components/ui/Footer';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 interface Task {
   id: string;
@@ -29,6 +31,7 @@ const PRIORITY_COLORS = {
 };
 
 export default function TasksScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const [tasks, setTasks] = useState(INITIAL_TASKS);
 

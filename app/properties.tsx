@@ -7,6 +7,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { Footer } from '@/components/ui/Footer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 // Calculate to exactly fit 3 cards with margins on web, keeping original mobile calculation
@@ -133,6 +135,7 @@ function AnimatedButton({ icon, label, onPress, primary = false }: { icon: keyof
 }
 
 export default function PropertiesScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [activeIndex, setActiveIndex] = useState(0);

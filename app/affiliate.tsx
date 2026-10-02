@@ -12,6 +12,8 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { getApiUrl, queryClient } from '@/lib/query-client';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -50,6 +52,7 @@ function AnimatedButton({ onPress, style, children }: { onPress: () => void; sty
 }
 
 export default function AffiliateScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === 'web';

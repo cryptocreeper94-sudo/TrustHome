@@ -9,6 +9,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { Footer } from '@/components/ui/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const COMPETITIVE_ADVANTAGES = [
   {
@@ -64,6 +66,7 @@ const SCALE_STATS = [
 ];
 
 export default function EnterpriseScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -83,7 +86,7 @@ export default function EnterpriseScreen() {
       contentContainerStyle={{ paddingBottom: insets.bottom + 60 }}
       showsVerticalScrollIndicator={false}
     >
-      <Header title="Enterprise" showBack />
+      <Header title="Enterprise" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
 
       {/* ─── HERO ─── */}
       <View style={[styles.heroSection, { paddingTop: 20 }]}>

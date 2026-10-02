@@ -238,4 +238,127 @@ export const SCREEN_HELP: Record<string, FeatureHelp> = {
       'App Info displays the current version and build details',
     ],
   },
+  leads: {
+    title: 'Leads & CRM',
+    description: 'Track every client from first contact to closing day. Smart lead scoring, automated follow-ups, and a pipeline view keep you organized.',
+    details: [
+      'Leads are organized by status: New, Contacted, Qualified, Under Contract',
+      'Lead score is calculated from engagement, response time, and activity',
+      'Contact cards show communication history and linked properties',
+      'Automated follow-up reminders prevent leads from going cold',
+    ],
+    examples: [
+      'Tap a lead card to see their full profile and conversation history',
+      'Use filters to focus on hot leads that need attention today',
+    ],
+  },
+  mediaStudio: {
+    title: 'Media Studio',
+    description: 'Create professional listing photos, virtual tours, and marketing materials. AI-powered tools help you produce stunning content.',
+    details: [
+      'Upload and edit photos with professional filters and adjustments',
+      'Create virtual tour slideshows from your listing photos',
+      'Generate branded flyers and social media graphics',
+      'AI enhancement tools improve lighting, staging, and composition',
+    ],
+  },
+  tasks: {
+    title: 'Tasks & To-Do',
+    description: 'Stay on top of your daily workflow. Tasks are linked to transactions, clients, and deadlines to keep everything connected.',
+    details: [
+      'Tasks are organized by priority and due date',
+      'Each task can be linked to a specific transaction or client',
+      'Overdue tasks are highlighted so nothing falls through the cracks',
+      'Recurring tasks auto-generate for routine activities',
+    ],
+  },
+  enterprise: {
+    title: 'Enterprise Solutions',
+    description: 'Explore TrustHome solutions for brokerages, teams, and large organizations. Custom branding, team management, and advanced analytics.',
+    details: [
+      'White-label the platform with your brokerage branding',
+      'Team management tools for assigning leads and tracking performance',
+      'Advanced analytics dashboards for office-wide metrics',
+      'Custom integrations with your existing tech stack',
+    ],
+  },
+  pricing: {
+    title: 'Pricing Plans',
+    description: 'Choose the plan that fits your business. From solo agents to enterprise brokerages, every plan includes core features with scaling options.',
+    details: [
+      'Compare features across Starter, Professional, and Enterprise tiers',
+      'All plans include CRM, marketing tools, and document management',
+      'Enterprise plans add team management and custom branding',
+      'Annual billing saves you 20% compared to monthly',
+    ],
+  },
+  hallmark: {
+    title: 'Hallmark Verification',
+    description: 'The TrustHome Hallmark is a blockchain-verified quality seal for inspections, appraisals, and professional services.',
+    details: [
+      'Each Hallmark is a unique, tamper-proof verification record',
+      'Inspectors and professionals earn Hallmarks for verified work',
+      'Clients can verify any Hallmark by scanning its QR code or ID',
+      'Hallmarks build your professional reputation on the Trust Layer',
+    ],
+  },
+  ecosystem: {
+    title: 'DarkWave Ecosystem',
+    description: 'Explore the full suite of DarkWave Studios products. TrustHome is part of a larger ecosystem of professional tools and platforms.',
+    details: [
+      'Browse all DarkWave products and services',
+      'Each ecosystem app integrates with your TrustHome account',
+      'Trust Layer provides cross-platform identity and verification',
+      'Lume-V governance ensures data integrity across all platforms',
+    ],
+  },
+  commandCenter: {
+    title: 'Command Center',
+    description: 'Your central dashboard with quick access to every tool. See your key metrics, upcoming tasks, and recent activity at a glance.',
+    details: [
+      'Stat cards show real-time metrics across all areas of your business',
+      'Quick-launch tiles take you directly to any feature',
+      'Activity feed shows the latest actions across your account',
+      'Notifications alert you to items needing immediate attention',
+    ],
+  },
+  affiliate: {
+    title: 'Referral & Affiliate',
+    description: 'Earn rewards by referring other agents and professionals to TrustHome. Track your referrals and commissions in real time.',
+    details: [
+      'Share your unique referral link to earn commissions',
+      'Track who signed up and their subscription status',
+      'Commissions are paid monthly for active referrals',
+      'Top referrers unlock exclusive perks and recognition',
+    ],
+  },
+  team: {
+    title: 'Your Team',
+    description: 'Meet the people behind TrustHome. Our team is dedicated to building the best tools for real estate professionals.',
+    details: [
+      'View team member profiles and roles',
+      'Reach out directly to team members with questions',
+      'Learn about the mission and values driving TrustHome',
+    ],
+  },
+  kiosk: {
+    title: 'Open House Kiosk',
+    description: 'A digital sign-in experience for open houses. Capture visitor information automatically and follow up instantly.',
+    details: [
+      'Set up a tablet as a self-service sign-in kiosk',
+      'Visitors enter their info and are automatically added as leads',
+      'Instant follow-up emails are sent after sign-in',
+      'All data syncs with your Leads & CRM in real time',
+    ],
+  },
+  developer: {
+    title: 'Developer Tools',
+    description: 'Advanced tools for managing your TrustHome deployment. API access, system health, and configuration options.',
+    details: [
+      'Monitor system health and API endpoint status',
+      'View and manage integration configurations',
+      'Access developer documentation and API references',
+      'Test webhooks and data sync connections',
+    ],
+  },
 };

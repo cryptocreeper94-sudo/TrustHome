@@ -11,6 +11,8 @@ import { Footer } from '@/components/ui/Footer';
 import { SkeletonBlock } from '@/components/ui/SkeletonLoader';
 import { useQuery } from '@tanstack/react-query';
 import { getApiUrl } from '@/lib/query-client';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -85,6 +87,7 @@ function DetailRow({ label, value, colors, mono, highlight, isLast }: { label: s
 }
 
 export default function HallmarkDetailScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === 'web';
@@ -137,7 +140,7 @@ export default function HallmarkDetailScreen() {
   if (isLoading) {
     return (
       <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-        <Header title="Hallmark" showBack />
+        <Header title="Hallmark" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
         <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: isWeb ? 74 : insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
           <HallmarkSkeleton />
         </ScrollView>
@@ -147,7 +150,7 @@ export default function HallmarkDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Hallmark" showBack />
+      <Header title="Hallmark" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: isWeb ? 74 : insets.bottom + 40 }]}

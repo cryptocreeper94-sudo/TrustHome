@@ -10,6 +10,8 @@ import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 interface Lead {
   id: string;
@@ -159,6 +161,7 @@ function AnimatedFilterChip({ label, isActive, color, borderColor, onPress }: { 
 }
 
 function AnimatedLeadCard({ lead, isExpanded, onToggle, index }: { lead: Lead; isExpanded: boolean; onToggle: () => void; index: number }) {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors } = useTheme();
   return (
     <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
@@ -242,6 +245,7 @@ function AnimatedLeadCard({ lead, isExpanded, onToggle, index }: { lead: Lead; i
 }
 
 function AnimatedPipelineCard({ lead, index }: { lead: Lead; index: number }) {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({
@@ -271,6 +275,7 @@ function AnimatedPipelineCard({ lead, index }: { lead: Lead; index: number }) {
 }
 
 export default function LeadsScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);

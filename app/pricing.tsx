@@ -9,6 +9,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { Footer } from '@/components/ui/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 type BillingCycle = 'monthly' | 'annual';
 
@@ -134,6 +136,7 @@ const FAQ_ITEMS = [
 ];
 
 export default function PricingScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -150,7 +153,7 @@ export default function PricingScreen() {
       contentContainerStyle={{ paddingBottom: insets.bottom + 60 }}
       showsVerticalScrollIndicator={false}
     >
-      <Header title="Pricing" showBack />
+      <Header title="Pricing" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
 
       {/* ─── HERO ─── */}
       <View style={styles.heroSection}>

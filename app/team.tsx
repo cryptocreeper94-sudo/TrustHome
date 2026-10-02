@@ -10,11 +10,14 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { apiRequest, queryClient } from '@/lib/query-client';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password' | 'request_access' | 'request_success' | 'demo_verify';
 type VerifySource = 'login' | 'register';
 
 export default function TeamScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const { enterDemo } = useApp();
   const insets = useSafeAreaInsets();

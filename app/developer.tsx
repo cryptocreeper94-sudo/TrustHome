@@ -13,6 +13,8 @@ import { useApp } from '@/contexts/AppContext';
 import { Header } from '@/components/ui/Header';
 import { DevConsoleSkeleton, ListSkeleton } from '@/components/ui/SkeletonLoader';
 import { getQueryFn, apiRequest, queryClient } from '@/lib/query-client';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 
 interface ServiceStatus {
@@ -75,6 +77,7 @@ interface AccessRequestItem {
 }
 
 export default function DeveloperScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const { isAuthenticated, isLoading: authLoading, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack } = useApp();
   const insets = useSafeAreaInsets();
@@ -595,7 +598,7 @@ export default function DeveloperScreen() {
   if (!pinUnlocked) {
     return (
       <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-        <Header title="Developer Console" showBack />
+        <Header title="Developer Console" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
         <View style={styles.pinGateContainer}>
           <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.pinGateContent}>
@@ -770,7 +773,7 @@ export default function DeveloperScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Developer Console" showBack />
+      <Header title="Developer Console" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
 
       <View style={[styles.tabBar, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
         {tabs.map(tab => (

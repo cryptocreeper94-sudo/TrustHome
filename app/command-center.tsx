@@ -14,6 +14,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import { Footer } from '@/components/ui/Footer';
 import { apiRequest } from '@/lib/query-client';
+import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
+import { SCREEN_HELP } from '@/constants/helpContent';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = Math.min(260, SCREEN_WIDTH * 0.72);
@@ -432,6 +434,7 @@ function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; o
 }
 
 export default function CommandCenterScreen() {
+  const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
   const { user, isAgentAuthenticated } = useApp();
   const insets = useSafeAreaInsets();

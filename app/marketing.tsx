@@ -349,11 +349,32 @@ export default function MarketingScreen() {
     </View>
   );
 
-  const renderSchedule = () => (
+  const renderSchedule = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((dayOfWeek + 6) % 7));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const weekLabel = `Week of ${monday.toLocaleDateString(undefined, { month: "short", day: "numeric" })} - ${sunday.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const SCHEDULE_DATA = DAYS.map(day => {
+      const scheduledForDay = scheduledItems.filter(item => {
+        if (!item.date) return false;
+        return true;
+      });
+      return {
+        day,
+        posts: [],
+      };
+    });
+
+    return (
     <View style={styles.section}>
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
       <GlassCard>
-        <Text style={[styles.scheduleWeek, { color: colors.text }]}>Week of Feb 10 - Feb 16</Text>
+        <Text style={[styles.scheduleWeek, { color: colors.text }]}>{weekLabel}</Text>
       </GlassCard>
       <View style={{ height: 12 }} />
       </Animated.View>
@@ -387,6 +408,7 @@ export default function MarketingScreen() {
       </Animated.View>
     </View>
     );
+  };
 
   const renderAnalytics = () => (
     <View style={styles.section}>

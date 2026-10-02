@@ -130,7 +130,7 @@ export default function MarketingScreen() {
       <Animated.View entering={FadeInDown.duration(400).delay(150)}>
       <GlassCard>
         <View style={styles.welcomeBanner}>
-          <Ionicons name="megaphone" size={28} color={colors.primary} />
+          <Ionicons name="megaphone" size={28} color="#1A8A7E" />
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={[styles.welcomeTitle, { color: colors.text }]}>Marketing Hub</Text>
             <Text style={[styles.welcomeSub, { color: colors.textSecondary }]}>{CONTENT_ITEMS.length > 0 ? `${CONTENT_ITEMS.length} posts, ${scheduledItems.length} scheduled` : 'No posts yet — create your first one'}</Text>
@@ -149,7 +149,7 @@ export default function MarketingScreen() {
             { label: 'Engagement', value: dbAnalytics?.avgCtr ? dbAnalytics.avgCtr + '%' : '0%', icon: 'trending-up' as const },
           ].map((stat, i) => (
             <GlassCard key={i} compact style={styles.statCard}>
-              <Ionicons name={stat.icon} size={20} color={colors.primary} />
+              <Ionicons name={stat.icon} size={20} color="#1A8A7E" />
               <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
             </GlassCard>
@@ -164,7 +164,7 @@ export default function MarketingScreen() {
           {CONTENT_ITEMS.length > 0 ? (
           <View style={styles.suggestedPost}>
             <View style={styles.suggestedHeader}>
-              <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
+              <View style={[styles.avatarCircle, { backgroundColor: '#27272A' }]}>
                 <Text style={styles.avatarText}>{(user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')}</Text>
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
@@ -186,7 +186,7 @@ export default function MarketingScreen() {
               ))}
             </View>
             <View style={styles.suggestedActions}>
-              <Pressable style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+              <Pressable style={[styles.actionBtn, { backgroundColor: '#27272A' }]}>
                 <Ionicons name="send" size={16} color="#FFF" />
                 <Text style={styles.actionBtnText}>Post Now</Text>
               </Pressable>
@@ -214,19 +214,19 @@ export default function MarketingScreen() {
       <AccordionSection title="Content Library" icon="library" iconColor="#007AFF">
         <View style={styles.libraryRow}>
           <View style={styles.libraryItem}>
-            <Ionicons name="image" size={24} color={colors.primary} />
+            <Ionicons name="image" size={24} color="#1A8A7E" />
             <Text style={[styles.libraryValue, { color: colors.text }]}>47</Text>
             <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Images</Text>
           </View>
           <View style={[styles.libraryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.libraryItem}>
-            <Ionicons name="chatbubble-ellipses" size={24} color={colors.primary} />
+            <Ionicons name="chatbubble-ellipses" size={24} color="#1A8A7E" />
             <Text style={[styles.libraryValue, { color: colors.text }]}>23</Text>
             <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Templates</Text>
           </View>
           <View style={[styles.libraryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.libraryItem}>
-            <Ionicons name="videocam" size={24} color={colors.primary} />
+            <Ionicons name="videocam" size={24} color="#1A8A7E" />
             <Text style={[styles.libraryValue, { color: colors.text }]}>8</Text>
             <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Videos</Text>
           </View>
@@ -363,9 +363,9 @@ export default function MarketingScreen() {
           key={i}
           title={DAY_FULL_NAMES[day.day] || day.day}
           icon="calendar-outline"
-          iconColor={day.posts.length > 0 ? colors.primary : colors.textTertiary}
+          iconColor={day.posts.length > 0 ? '#1A8A7E' : colors.textTertiary}
           badge={day.posts.length > 0 ? `${day.posts.length} post${day.posts.length > 1 ? 's' : ''}` : undefined}
-          badgeColor={colors.primary}
+          badgeColor={'#1A8A7E'}
           defaultOpen={day.posts.length > 0}
         >
           {day.posts.length === 0 ? (
@@ -393,7 +393,7 @@ export default function MarketingScreen() {
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
       <GlassCard>
         <View style={styles.analyticsPeriod}>
-          <Ionicons name="calendar" size={18} color={colors.primary} />
+          <Ionicons name="calendar" size={18} color="#1A8A7E" />
           <Text style={[styles.analyticsPeriodText, { color: colors.text }]}>Last 30 Days</Text>
         </View>
       </GlassCard>
@@ -401,7 +401,7 @@ export default function MarketingScreen() {
       <View style={{ height: 12 }} />
 
       <Animated.View entering={FadeInDown.duration(400).delay(200)}>
-      <AccordionSection title="Performance Overview" icon="bar-chart" iconColor={colors.primary} defaultOpen={true}>
+      <AccordionSection title="Performance Overview" icon="bar-chart" iconColor={'#1A8A7E'} defaultOpen={true}>
         {ANALYTICS_DATA.map((item, i) => (
           <View key={i} style={styles.analyticsRow}>
             <View style={styles.analyticsLabelRow}>
@@ -423,7 +423,7 @@ export default function MarketingScreen() {
           { label: 'Cost/Click', value: dbAnalytics?.costPerClick ? '$' + dbAnalytics.costPerClick.toFixed(2) : '$0.00', icon: 'cash' as const, change: '-$0.08' },
         ].map((stat, i) => (
           <GlassCard key={i} style={styles.statCard}>
-            <Ionicons name={stat.icon} size={20} color={colors.primary} />
+            <Ionicons name={stat.icon} size={20} color="#1A8A7E" />
             <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{stat.label}</Text>
             <Text style={[styles.statChange, { color: colors.success }]}>{stat.change}</Text>
@@ -435,7 +435,7 @@ export default function MarketingScreen() {
       <AccordionSection title="Top Performing Content" icon="trophy" iconColor={colors.warning}>
         {CONTENT_ITEMS.filter(c => c.status === 'Published').slice(0, 3).map((item, i) => (
           <View key={i} style={[styles.topContentRow, i > 0 && { borderTopWidth: 1, borderTopColor: colors.divider }]}>
-            <Text style={[styles.topRank, { color: colors.primary }]}>#{i + 1}</Text>
+            <Text style={[styles.topRank, { color: '#1A8A7E' }]}>#{i + 1}</Text>
             <View style={{ flex: 1 }}>
               <Text style={[styles.topTitle, { color: colors.text }]}>{item.title}</Text>
               <Text style={[styles.topMeta, { color: colors.textSecondary }]}>{item.platforms.join(', ')} - {item.date}</Text>
@@ -452,8 +452,8 @@ export default function MarketingScreen() {
       } />
       <View style={[styles.tabBar, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
         {TABS.map(tab => (
-          <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}>
-            <Text style={[styles.tabText, { color: activeTab === tab ? colors.primary : colors.textSecondary }]}>{tab}</Text>
+          <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && { borderBottomColor: '#E5E5E5', borderBottomWidth: 2 }]}>
+            <Text style={[styles.tabText, { color: activeTab === tab ? '#E5E5E5' : colors.textSecondary }]}>{tab}</Text>
           </Pressable>
         ))}
       </View>

@@ -86,11 +86,11 @@ export default function RootLayout() {
                       style={[
                         StyleSheet.absoluteFill, 
                         { width: '100%', height: '100%', opacity: 1 },
-                        Platform.OS === 'web' && { position: 'fixed', width: '100%', height: '100vh' } as any
+                        Platform.OS === 'web' && { position: 'absolute', width: '100%', height: '100%' } as any
                       ]} 
                       resizeMode="cover"
                     />
-                    <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)', pointerEvents: 'none' }, Platform.OS === 'web' && { position: 'fixed', width: '100%', height: '100vh' } as any]} />
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)', pointerEvents: 'none' }, Platform.OS === 'web' && { position: 'absolute', width: '100%', height: '100%' } as any]} />
                     <RootLayoutNav />
                   </View>
                 </LocationProvider>

@@ -191,6 +191,10 @@ function configureExpoAndLanding(app: express.Application) {
 
   const expoAppRoutes = ['/team', '/auth', '/settings', '/leads', '/messages', '/transactions', '/documents', '/properties', '/showings', '/analytics', '/marketing', '/blog', '/network', '/developer', '/mls-setup', '/business', '/branding', '/support', '/command-center', '/tree-services', '/media-studio', '/agent'];
 
+  // Serve static files FIRST — fonts, JS bundles, images from Expo export
+  app.use(express.static(path.resolve(process.cwd(), "static-build"), { maxAge: '1y', immutable: true }));
+  app.use("/assets", express.static(path.resolve(process.cwd(), "assets"), { maxAge: '7d' }));
+
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api")) {
       return next();
@@ -261,10 +265,7 @@ function configureExpoAndLanding(app: express.Application) {
     next();
   });
 
-  // Serve Expo web export first (fonts, JS bundles live in static-build/assets/)
-  app.use(express.static(path.resolve(process.cwd(), "static-build"), { maxAge: '1y', immutable: true }));
-  // Fallback for project-root assets
-  app.use("/assets", express.static(path.resolve(process.cwd(), "assets"), { maxAge: '7d' }));
+
   app.use("/invite-assets", express.static(path.resolve(process.cwd(), "server", "templates", "invite-assets"), { maxAge: '7d' }));
 
   const inviteTemplate = fs.readFileSync(

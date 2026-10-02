@@ -91,7 +91,8 @@ export default function DocumentsScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(180)} style={styles.carouselWrap}>
-          <HorizontalCarousel title="Verified on Chain" itemWidth={200}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Verified on Chain</Text>
+          <View style={styles.verifiedRow}>
             {verifiedDocs.map(doc => (
               <GlassCard key={doc.id} compact style={styles.verifiedCard}>
                 <View style={styles.verifiedCardInner}>
@@ -103,7 +104,7 @@ export default function DocumentsScreen() {
                 </View>
               </GlassCard>
             ))}
-          </HorizontalCarousel>
+          </View>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(260)} style={styles.filterRow}>
@@ -218,8 +219,10 @@ const styles = StyleSheet.create({
   statInner: { alignItems: 'center' as const, gap: 4 },
   statValue: { fontSize: 22, fontWeight: '700' as const },
   statLabel: { fontSize: 11, fontWeight: '500' as const },
-  carouselWrap: { marginTop: 18 },
-  verifiedCard: { width: 200, minHeight: 70 },
+  carouselWrap: { marginTop: 18, paddingHorizontal: 16 },
+  sectionTitle: { fontSize: 17, fontWeight: '700' as const, letterSpacing: 0.2, marginBottom: 10 },
+  verifiedRow: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 10 },
+  verifiedCard: { minWidth: 180, flex: 1, minHeight: 70 },
   verifiedCardInner: { gap: 6 },
   verifiedCardTop: { flexDirection: 'row', alignItems: 'center' as const, gap: 6 },
   verifiedCardName: { fontSize: 13, fontWeight: '600' as const, flex: 1 },

@@ -350,10 +350,10 @@ export default function LeadsScreen() {
         transparent={false}
          
         rightAction={
-          <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary }]}>
-            <Ionicons name="add" size={20} color={colors.primary} />
+          <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: '#27272A' }]}>
+            <Ionicons name="add" size={20} color="#FFF" />
 
-        <Text style={[styles.headerAddText, { color: colors.primary }]}>Add Lead</Text>
+        <Text style={[styles.headerAddText, { color: '#FFF' }]}>Add Lead</Text>
           </Pressable>
         }
       />
@@ -684,14 +684,17 @@ const styles = StyleSheet.create({
   headerAddBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 5,
+    minHeight: 36,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   headerAddText: {
     fontSize: 13,
-    fontWeight: '600' as const,
+    fontWeight: '700' as const,
   },
   modalOverlay: {
     flex: 1,

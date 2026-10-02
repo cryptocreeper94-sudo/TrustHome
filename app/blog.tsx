@@ -486,7 +486,7 @@ export default function BlogScreen() {
         <Pressable
           testID="blog-submit"
           onPress={handleSubmitForm}
-          style={[styles.formButton, styles.submitButton, { backgroundColor: colors.primary }]}
+          style={[styles.formButton, styles.submitButton, { backgroundColor: colors.primaryAction }]}
         >
           {createMutation.isPending ? (
             <ActivityIndicator size="small" color="#FFF" />
@@ -545,7 +545,7 @@ export default function BlogScreen() {
             }
             generateMutation.mutate({ topic, category: aiCategory, tone: aiTone });
           }}
-          style={[styles.formButton, styles.submitButton, { backgroundColor: colors.primary, marginTop: 16 }]}
+          style={[styles.formButton, styles.submitButton, { backgroundColor: colors.primaryAction, marginTop: 16 }]}
         >
           {generateMutation.isPending ? (
             <ActivityIndicator size="small" color="#FFF" />
@@ -620,7 +620,7 @@ export default function BlogScreen() {
               style={[
                 styles.tabPill,
                 activeTab === tab
-                  ? { backgroundColor: colors.primary }
+                  ? { backgroundColor: colors.primaryAction }
                   : { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderColor: colors.divider, borderWidth: 1 },
               ]}
             >

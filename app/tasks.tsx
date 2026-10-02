@@ -53,7 +53,7 @@ export default function TasksScreen() {
 
           {tasks.map((task) => (
             <Pressable key={task.id} onPress={() => toggleTask(task.id)} style={[styles.taskRow, { borderBottomColor: colors.divider }]}>
-              <View style={[styles.checkbox, task.completed ? { backgroundColor: colors.primary, borderColor: colors.primary } : { borderColor: colors.textSecondary }]}>
+              <View style={[styles.checkbox, task.completed ? { backgroundColor: colors.primaryAction, borderColor: colors.primary } : { borderColor: colors.textSecondary }]}>
                 {task.completed && <Ionicons name="checkmark" size={16} color="#FFF" />}
               </View>
               <Text style={[styles.taskTitle, { color: task.completed ? colors.textSecondary : colors.text, textDecorationLine: task.completed ? 'line-through' : 'none' }]}>

@@ -164,7 +164,7 @@ export default function MarketingScreen() {
           {CONTENT_ITEMS.length > 0 ? (
           <View style={styles.suggestedPost}>
             <View style={styles.suggestedHeader}>
-              <View style={[styles.avatarCircle, { backgroundColor: '#27272A' }]}>
+              <View style={[styles.avatarCircle, { backgroundColor: colors.primaryAction }]}>
                 <Text style={styles.avatarText}>{(user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')}</Text>
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
@@ -186,7 +186,7 @@ export default function MarketingScreen() {
               ))}
             </View>
             <View style={styles.suggestedActions}>
-              <Pressable style={[styles.actionBtn, { backgroundColor: '#27272A' }]}>
+              <Pressable style={[styles.actionBtn, { backgroundColor: colors.primaryAction }]}>
                 <Ionicons name="send" size={16} color="#FFF" />
                 <Text style={styles.actionBtnText}>Post Now</Text>
               </Pressable>

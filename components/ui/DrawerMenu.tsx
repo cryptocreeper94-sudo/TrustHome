@@ -161,7 +161,7 @@ export function DrawerMenu() {
             <View style={styles.headerLeft}>
               {isAuthenticated && user ? (
                 <>
-                  <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+                  <View style={[styles.avatar, { backgroundColor: colors.primaryAction }]}>
                     <Text style={[styles.avatarText, { color: colors.textInverse }]}>
                       {(user.firstName?.[0] || '').toUpperCase()}{(user.lastName?.[0] || '').toUpperCase()}
                     </Text>

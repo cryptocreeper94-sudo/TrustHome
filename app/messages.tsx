@@ -60,7 +60,7 @@ function ConversationCard({ convo, isExpanded, onToggle, colors, isDark }: {
           <Text style={[styles.convoPreview, { color: colors.textSecondary }]} numberOfLines={1}>{convo.lastMessage}</Text>
         </View>
         {convo.unread > 0 && (
-          <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
+          <View style={[styles.unreadBadge, { backgroundColor: colors.primaryAction }]}>
             <Text style={styles.unreadText}>{convo.unread}</Text>
           </View>
         )}
@@ -73,7 +73,7 @@ function ConversationCard({ convo, isExpanded, onToggle, colors, isDark }: {
               <View style={[
                 styles.msgBubble,
                 msg.sender === 'me'
-                  ? { backgroundColor: colors.primary }
+                  ? { backgroundColor: colors.primaryAction }
                   : { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary }
               ]}>
                 <Text style={[styles.msgText, { color: msg.sender === 'me' ? '#FFF' : colors.text }]}>{msg.text}</Text>
@@ -188,7 +188,7 @@ export default function MessagesScreen() {
                     <View style={[styles.carouselAvatar, { backgroundColor: convo.initialColor + '22' }]}>
                       <Text style={[styles.carouselAvatarText, { color: convo.initialColor }]}>{convo.initial}</Text>
                     </View>
-                    <View style={[styles.carouselBadge, { backgroundColor: colors.primary }]}>
+                    <View style={[styles.carouselBadge, { backgroundColor: colors.primaryAction }]}>
                       <Text style={styles.carouselBadgeText}>{convo.unread}</Text>
                     </View>
                   </View>
@@ -335,7 +335,7 @@ export default function MessagesScreen() {
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
               <Pressable 
-                style={[styles.modalBtn, { backgroundColor: colors.primary, opacity: (msgType === 'sms' && !isSmsOptedIn) ? 0.5 : 1 }]} 
+                style={[styles.modalBtn, { backgroundColor: colors.primaryAction, opacity: (msgType === 'sms' && !isSmsOptedIn) ? 0.5 : 1 }]} 
                 disabled={isSending || (msgType === 'sms' && !isSmsOptedIn)}
                 onPress={() => {
                   setIsSending(true);

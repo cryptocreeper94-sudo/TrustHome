@@ -43,7 +43,7 @@ export function InfoModal({ visible, onClose, title, description, details, examp
                 <Text style={[styles.sectionTitle, { color: colors.primary }]}>Details</Text>
                 {details.map((d, i) => (
                   <View key={i} style={styles.bulletRow}>
-                    <View style={[styles.bullet, { backgroundColor: colors.primary }]} />
+                    <View style={[styles.bullet, { backgroundColor: colors.primaryAction }]} />
                     <Text style={[styles.bulletText, { color: colors.textSecondary }]}>{d}</Text>
                   </View>
                 ))}

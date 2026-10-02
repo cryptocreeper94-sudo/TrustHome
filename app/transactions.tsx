@@ -44,7 +44,7 @@ function AnimatedDealActionButton({ icon, label, primary, colors, isDark }: { ic
     <Animated.View style={animStyle}>
       <Pressable
         style={[styles.dealActionBtn, primary
-          ? { backgroundColor: colors.primary }
+          ? { backgroundColor: colors.primaryAction }
           : { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderColor: colors.border, borderWidth: 1 }
         ]}
         onPressIn={() => { scale.value = withSpring(0.92, { damping: 15, stiffness: 300 }); }}
@@ -194,7 +194,7 @@ export default function TransactionsScreen() {
         showBack 
         rightAction={
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary }]}>
+            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primaryAction }]}>
               <Ionicons name="add" size={20} color="#FFF" />
               <Text style={[styles.headerAddText, { color: '#FFF' }]}>Add Deal</Text>
             </Pressable>
@@ -324,7 +324,7 @@ export default function TransactionsScreen() {
               <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddDeal} disabled={isSubmitting}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primaryAction }]} onPress={handleAddDeal} disabled={isSubmitting}>
                 {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Deal</Text>}
               </Pressable>
             </View>

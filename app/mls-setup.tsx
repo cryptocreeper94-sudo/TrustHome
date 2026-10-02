@@ -135,7 +135,7 @@ function ProviderCard({ provider, selected, onSelect, index }: {
             )}
           </View>
           {selected && (
-            <View style={[providerStyles.checkBadge, { backgroundColor: colors.primary }]}>
+            <View style={[providerStyles.checkBadge, { backgroundColor: colors.primaryAction }]}>
               <Ionicons name="checkmark" size={14} color="#FFF" />
             </View>
           )}
@@ -441,7 +441,7 @@ export default function MlsSetupScreen() {
                     <Text style={[styles.providerListDesc, { color: colors.textSecondary }]} numberOfLines={1}>{provider.description}</Text>
                   </View>
                   {selectedProvider === provider.id ? (
-                    <View style={[styles.providerListCheck, { backgroundColor: colors.primary }]}>
+                    <View style={[styles.providerListCheck, { backgroundColor: colors.primaryAction }]}>
                       <Ionicons name="checkmark" size={14} color="#FFF" />
                     </View>
                   ) : (
@@ -749,7 +749,7 @@ export default function MlsSetupScreen() {
                 <Pressable
                   onPress={handleSave}
                   disabled={saveMutation.isPending}
-                  style={[styles.saveBtn, { backgroundColor: colors.primary, flex: 1 }]}
+                  style={[styles.saveBtn, { backgroundColor: colors.primaryAction, flex: 1 }]}
                 >
                   {saveMutation.isPending ? (
                     <ActivityIndicator size="small" color="#FFF" />

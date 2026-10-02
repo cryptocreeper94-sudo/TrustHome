@@ -323,7 +323,7 @@ export default function AuthScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.logoArea}>
-            <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
+            <View style={[styles.logoCircle, { backgroundColor: colors.primaryAction }]}>
               <Ionicons name="shield-checkmark" size={36} color="#FFFFFF" />
             </View>
             <Text style={[styles.logoTitle, { color: colors.text }]}>TrustHome</Text>
@@ -397,7 +397,7 @@ export default function AuthScreen() {
                 <Pressable
                   onPress={handleLogin}
                   disabled={loading}
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={[styles.primaryBtn, { backgroundColor: colors.primaryAction, opacity: loading ? 0.7 : 1 }]}
                   testID="login-submit"
                 >
                   {loading ? (
@@ -616,7 +616,7 @@ export default function AuthScreen() {
                 <Pressable
                   onPress={handleRegister}
                   disabled={loading}
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={[styles.primaryBtn, { backgroundColor: colors.primaryAction, opacity: loading ? 0.7 : 1 }]}
                   testID="register-submit"
                 >
                   {loading ? (
@@ -652,7 +652,7 @@ export default function AuthScreen() {
                 <Pressable
                   onPress={handleVerify}
                   disabled={loading}
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={[styles.primaryBtn, { backgroundColor: colors.primaryAction, opacity: loading ? 0.7 : 1 }]}
                   testID="verify-submit"
                 >
                   {loading ? (
@@ -701,7 +701,7 @@ export default function AuthScreen() {
                 <Pressable
                   onPress={handleForgotPassword}
                   disabled={loading}
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={[styles.primaryBtn, { backgroundColor: colors.primaryAction, opacity: loading ? 0.7 : 1 }]}
                   testID="forgot-submit"
                 >
                   {loading ? (
@@ -775,7 +775,7 @@ export default function AuthScreen() {
                 <Pressable
                   onPress={handleResetPassword}
                   disabled={loading}
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: loading ? 0.7 : 1 }]}
+                  style={[styles.primaryBtn, { backgroundColor: colors.primaryAction, opacity: loading ? 0.7 : 1 }]}
                   testID="reset-submit"
                 >
                   {loading ? (

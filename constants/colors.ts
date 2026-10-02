@@ -46,6 +46,7 @@ const light = {
   primary: palette.neutral[950],
   primaryLight: palette.neutral[500],
   primaryDark: palette.neutral[1000],
+  primaryAction: palette.neutral[950],  // Button bg that pairs with white text
   accent: palette.metallic[500],
 
   background: palette.neutral[50],
@@ -83,6 +84,7 @@ const dark = {
   primary: palette.neutral[50],
   primaryLight: palette.neutral[300],
   primaryDark: palette.neutral[0],
+  primaryAction: palette.neutral[800],  // Button bg that pairs with white text
   accent: palette.metallic[400],
 
   background: 'rgba(0, 0, 0, 0.6)',

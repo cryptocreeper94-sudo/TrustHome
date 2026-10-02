@@ -125,7 +125,7 @@ export default function DocumentsScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(340)} style={styles.actionsRow}>
-          <Pressable style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+          <Pressable style={[styles.actionBtn, { backgroundColor: colors.primaryAction }]}>
             <Ionicons name="cloud-upload" size={18} color={colors.textInverse} />
             <Text style={[styles.actionBtnText, { color: colors.textInverse }]}>Upload</Text>
           </Pressable>

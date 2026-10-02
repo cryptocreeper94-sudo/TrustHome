@@ -94,7 +94,7 @@ export default function BrandingScreen() {
               >
                 <GlassCard style={{ marginBottom: 12 }}>
                   <View style={styles.profileSection}>
-                    <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
+                    <View style={[styles.profileAvatar, { backgroundColor: colors.primaryAction }]}>
                       <Text style={styles.profileAvatarText}>{(user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')}</Text>
                     </View>
                     <Text style={[styles.profileName, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : 'Not signed in'}</Text>
@@ -114,7 +114,7 @@ export default function BrandingScreen() {
                 </GlassCard>
                 <Pressable
                   onPress={handleEditProfile}
-                  style={[styles.actionBtn, { backgroundColor: colors.primary }]}
+                  style={[styles.actionBtn, { backgroundColor: colors.primaryAction }]}
                 >
                   <Ionicons name="create-outline" size={18} color="#FFF" />
                   <Text style={styles.actionBtnText}>Edit Profile</Text>
@@ -177,7 +177,7 @@ export default function BrandingScreen() {
                 </GlassCard>
                 <Pressable
                   onPress={handleLogoUpload}
-                  style={[styles.actionBtn, { backgroundColor: colors.primary }]}
+                  style={[styles.actionBtn, { backgroundColor: colors.primaryAction }]}
                 >
                   <Ionicons name="cloud-upload-outline" size={18} color="#FFF" />
                   <Text style={styles.actionBtnText}>Upload Logo</Text>
@@ -205,7 +205,7 @@ export default function BrandingScreen() {
                 <View style={styles.landingActions}>
                   <Pressable
                     onPress={handleCopyLink}
-                    style={[styles.actionBtnHalf, { backgroundColor: colors.primary }]}
+                    style={[styles.actionBtnHalf, { backgroundColor: colors.primaryAction }]}
                   >
                     <Ionicons name="copy-outline" size={18} color="#FFF" />
                     <Text style={styles.actionBtnText}>Copy Link</Text>
@@ -239,7 +239,7 @@ export default function BrandingScreen() {
                 </GlassCard>
                 <Pressable
                   onPress={handleGenerateQR}
-                  style={[styles.actionBtn, { backgroundColor: colors.primary }]}
+                  style={[styles.actionBtn, { backgroundColor: colors.primaryAction }]}
                 >
                   <Ionicons name="qr-code-outline" size={18} color="#FFF" />
                   <Text style={styles.actionBtnText}>Generate QR Code</Text>

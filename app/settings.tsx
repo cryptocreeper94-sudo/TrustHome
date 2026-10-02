@@ -187,7 +187,7 @@ export default function SettingsScreen() {
           <Animated.View entering={FadeInDown.duration(500).delay(100)}>
             <GlassCard>
               <View style={styles.profileSection}>
-                <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
+                <View style={[styles.profileAvatar, { backgroundColor: colors.primaryAction }]}>
                   <Text style={styles.profileAvatarText}>{(user?.firstName?.[0] || '') + (user?.lastName?.[0] || '')}</Text>
                 </View>
                 <Text style={[styles.profileName, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : 'Not signed in'}</Text>
@@ -404,7 +404,7 @@ export default function SettingsScreen() {
                   }
                   setShowGreetingModal(false);
                 }}
-                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: colors.primary, alignItems: 'center' as const }}
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: colors.primaryAction, alignItems: 'center' as const }}
               >
                 <Text style={{ color: '#fff', fontWeight: '600' as const }}>Save</Text>
               </Pressable>

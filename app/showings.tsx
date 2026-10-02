@@ -166,7 +166,7 @@ export default function ShowingsScreen() {
           showBack 
           rightAction={
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primary }]}>
+              <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primaryAction }]}>
                 <Ionicons name="add" size={20} color="#FFF" />
                 <Text style={[styles.headerAddText, { color: colors.primary }]}>Add</Text>
               </Pressable>
@@ -216,7 +216,7 @@ export default function ShowingsScreen() {
           {(['Month', 'Week', 'Day'] as const).map(mode => (
             <Pressable
               key={mode}
-              style={[styles.viewToggle, viewMode === mode && { backgroundColor: colors.primary }]}
+              style={[styles.viewToggle, viewMode === mode && { backgroundColor: colors.primaryAction }]}
               onPress={() => setViewMode(mode)}
             >
               <Text style={[styles.viewToggleText, { color: viewMode === mode ? '#FFF' : colors.textSecondary }]}>{mode}</Text>
@@ -254,7 +254,7 @@ export default function ShowingsScreen() {
                 return (
                   <Pressable
                     key={di}
-                    style={[styles.dayCell, isSelected && { backgroundColor: colors.primary }, isToday && !isSelected && { backgroundColor: colors.primary + '22' }]}
+                    style={[styles.dayCell, isSelected && { backgroundColor: colors.primaryAction }, isToday && !isSelected && { backgroundColor: colors.primary + '22' }]}
                     onPress={() => day !== null && setSelectedDay(day)}
                     disabled={day === null}
                   >
@@ -407,7 +407,7 @@ export default function ShowingsScreen() {
               <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddEvent} disabled={isSubmitting}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primaryAction }]} onPress={handleAddEvent} disabled={isSubmitting}>
                 {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Event</Text>}
               </Pressable>
             </View>

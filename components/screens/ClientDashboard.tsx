@@ -120,7 +120,7 @@ export function ClientDashboard() {
           <Text style={[styles.name, { color: colors.text }]}>{MOCK_CLIENT.name}</Text>
         </View>
         <View style={[styles.agentChip, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-          <View style={[styles.agentAvatar, { backgroundColor: colors.primary }]}>
+          <View style={[styles.agentAvatar, { backgroundColor: colors.primaryAction }]}>
             <Text style={styles.agentInitial}>{MOCK_CLIENT.agentName[0]}</Text>
           </View>
           <View>

@@ -147,7 +147,7 @@ export default function AnalyticsScreen() {
                 return (
                   <View key={i} style={styles.barCol}>
                     <View style={styles.barWrap}>
-                      <View style={[styles.bar, { height: `${heightPct}%` as any, backgroundColor: colors.primary, opacity: 0.6 + (i / data.revenueByMonth.length) * 0.4 }]} />
+                      <View style={[styles.bar, { height: `${heightPct}%` as any, backgroundColor: colors.primaryAction, opacity: 0.6 + (i / data.revenueByMonth.length) * 0.4 }]} />
                     </View>
                     <Text style={[styles.barLabel, { color: colors.textSecondary }]}>{m.label}</Text>
                     <Text style={[styles.barValue, { color: colors.textTertiary }]}>{formatCurrency(m.value)}</Text>
@@ -168,7 +168,7 @@ export default function AnalyticsScreen() {
             ].map((step, i, arr) => (
               <View key={step.label}>
                 <View style={styles.funnelRow}>
-                  <View style={[styles.funnelBar, { width: `${(step.value / data.funnel.leads) * 100}%` as any, backgroundColor: colors.primary, opacity: 1 - (i * 0.15) }]} />
+                  <View style={[styles.funnelBar, { width: `${(step.value / data.funnel.leads) * 100}%` as any, backgroundColor: colors.primaryAction, opacity: 1 - (i * 0.15) }]} />
                   <View style={styles.funnelLabelRow}>
                     <Text style={[styles.funnelLabel, { color: colors.text }]}>{step.label}</Text>
                     <Text style={[styles.funnelValue, { color: colors.text }]}>{step.value}</Text>

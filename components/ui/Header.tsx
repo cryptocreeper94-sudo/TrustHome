@@ -89,7 +89,7 @@ function TrustLayerModal({ visible, onClose }: { visible: boolean; onClose: () =
               </Text>
               <Pressable
                 onPress={() => Linking.openURL('https://dwtl.io')}
-                style={[modalStyles.membershipCta, { backgroundColor: colors.primary }]}
+                style={[modalStyles.membershipCta, { backgroundColor: colors.primaryAction }]}
               >
                 <MaterialCommunityIcons name="login" size={18} color={colors.textInverse} />
                 <Text style={[modalStyles.membershipCtaText, { color: colors.textInverse }]}>Log in at dwtl.io</Text>

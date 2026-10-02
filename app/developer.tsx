@@ -190,7 +190,7 @@ export default function DeveloperScreen() {
 
     return (
       <View style={styles.sectionContent}>
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.overviewHero, { backgroundColor: colors.primary }]}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.overviewHero, { backgroundColor: colors.primaryAction }]}>
           <View style={styles.heroTopRow}>
             <View style={styles.heroIcon}>
               <Ionicons name="shield-checkmark" size={28} color="rgba(255,255,255,0.9)" />
@@ -332,7 +332,7 @@ export default function DeveloperScreen() {
             </Text>
           </View>
           <View style={[styles.connProgress, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]}>
-            <View style={[styles.connProgressFill, { backgroundColor: colors.primary, width: `${(configured / data.connections.length) * 100}%` as any }]} />
+            <View style={[styles.connProgressFill, { backgroundColor: colors.primaryAction, width: `${(configured / data.connections.length) * 100}%` as any }]} />
           </View>
         </Animated.View>
 

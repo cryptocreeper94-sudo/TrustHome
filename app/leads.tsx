@@ -350,7 +350,7 @@ export default function LeadsScreen() {
         transparent={false}
          
         rightAction={
-          <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: '#27272A' }]}>
+          <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primaryAction }]}>
             <Ionicons name="add" size={20} color="#FFF" />
 
         <Text style={[styles.headerAddText, { color: '#FFF' }]}>Add Lead</Text>
@@ -418,14 +418,14 @@ export default function LeadsScreen() {
         <Animated.View entering={FadeInDown.duration(400).delay(240)}>
           <View style={styles.toggleRow}>
             <Pressable
-              style={[styles.toggleBtn, viewMode === 'list' && { backgroundColor: colors.primary }]}
+              style={[styles.toggleBtn, viewMode === 'list' && { backgroundColor: colors.primaryAction }]}
               onPress={() => setViewMode('list')}
             >
               <Ionicons name="list" size={16} color={viewMode === 'list' ? '#FFF' : colors.textSecondary} />
               <Text style={[styles.toggleText, { color: viewMode === 'list' ? '#FFF' : colors.textSecondary }]}>List</Text>
             </Pressable>
             <Pressable
-              style={[styles.toggleBtn, viewMode === 'pipeline' && { backgroundColor: colors.primary }]}
+              style={[styles.toggleBtn, viewMode === 'pipeline' && { backgroundColor: colors.primaryAction }]}
               onPress={() => setViewMode('pipeline')}
             >
               <Ionicons name="git-branch" size={16} color={viewMode === 'pipeline' ? '#FFF' : colors.textSecondary} />
@@ -551,7 +551,7 @@ export default function LeadsScreen() {
               <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleAddLead} disabled={isSubmitting}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primaryAction }]} onPress={handleAddLead} disabled={isSubmitting}>
                 {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Lead</Text>}
               </Pressable>
             </View>

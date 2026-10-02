@@ -22,7 +22,7 @@ function AiTab({ onPress }: { onPress: () => void }) {
   const { colors } = useTheme();
 
   return (
-    <Pressable onPress={onPress} style={[styles.tab, { backgroundColor: colors.primary }]} testID="ai-assistant-tab">
+    <Pressable onPress={onPress} style={[styles.tab, { backgroundColor: colors.primaryAction }]} testID="ai-assistant-tab">
       <MaterialCommunityIcons name="robot" size={20} color="#FFFFFF" />
       <Text style={styles.tabText}>AI</Text>
     </Pressable>
@@ -467,7 +467,7 @@ export function AiAssistant() {
     <View style={[styles.overlay]}>
       <Pressable style={styles.backdrop} onPress={closeAiAssistant} />
       <View style={[styles.panel, { width: PANEL_WIDTH, backgroundColor: colors.background, borderLeftColor: colors.border }]}>
-        <View style={[styles.panelHeader, { paddingTop: topPadding + 8, backgroundColor: colors.primary }]}>
+        <View style={[styles.panelHeader, { paddingTop: topPadding + 8, backgroundColor: colors.primaryAction }]}>
           <View style={styles.panelHeaderRow}>
             <View style={styles.panelTitleRow}>
               <MaterialCommunityIcons name="robot" size={22} color="#FFFFFF" />
@@ -555,7 +555,7 @@ export function AiAssistant() {
             <Pressable
               onPress={sendTextMessage}
               disabled={!inputText.trim() || voiceState !== 'idle'}
-              style={[styles.sendBtn, { backgroundColor: colors.primary, opacity: inputText.trim() && voiceState === 'idle' ? 1 : 0.4 }]}
+              style={[styles.sendBtn, { backgroundColor: colors.primaryAction, opacity: inputText.trim() && voiceState === 'idle' ? 1 : 0.4 }]}
             >
               <Ionicons name="send" size={18} color="#FFFFFF" />
             </Pressable>

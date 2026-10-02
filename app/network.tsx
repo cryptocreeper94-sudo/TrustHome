@@ -141,7 +141,7 @@ function VendorCard({ vendor, isExpanded, onToggle, catColor, colors }: {
                 <Ionicons name="chatbubble" size={16} color="#FFF" />
                 <Text style={styles.expandedBtnText}>Message</Text>
               </Pressable>
-              <Pressable style={[styles.expandedBtn, { backgroundColor: colors.primary }]}>
+              <Pressable style={[styles.expandedBtn, { backgroundColor: colors.primaryAction }]}>
                 <Ionicons name="add-circle" size={16} color="#FFF" />
                 <Text style={styles.expandedBtnText}>Assign to Deal</Text>
               </Pressable>
@@ -318,7 +318,7 @@ export default function NetworkScreen() {
             {REFERRAL_PARTNERS.map((partner, i) => (
               <GlassCard key={i} style={{ marginBottom: 10 }}>
                 <View style={styles.referralCard}>
-                  <View style={[styles.referralAvatar, { backgroundColor: colors.primary }]}>
+                  <View style={[styles.referralAvatar, { backgroundColor: colors.primaryAction }]}>
                     <Text style={styles.referralAvatarText}>{partner.initial}</Text>
                   </View>
                   <View style={styles.referralInfo}>

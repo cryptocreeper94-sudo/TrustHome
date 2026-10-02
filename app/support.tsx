@@ -298,7 +298,7 @@ export default function SupportScreen() {
                 </Text>
                 <Pressable
                   onPress={() => Linking.openURL('mailto:features@trusthome.io?subject=Feature%20Request')}
-                  style={[styles.featureBtn, { backgroundColor: colors.primary }]}
+                  style={[styles.featureBtn, { backgroundColor: colors.primaryAction }]}
                 >
                   <Ionicons name="send-outline" size={16} color="#FFFFFF" />
                   <Text style={styles.featureBtnText}>Submit Feature Request</Text>

@@ -275,7 +275,7 @@ export default function MarketingScreen() {
   const renderContent = () => (
     <View style={styles.section}>
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
-      <HorizontalCarousel title="Recent Content" itemWidth={240}>
+      <HorizontalCarousel title="Recent Content" itemWidth={240} hideArrows>
         {CONTENT_ITEMS.map(item => (
           <GlassCard key={item.id} compact style={{ width: 240, marginBottom: 0 }}>
             <View style={styles.carouselCard}>

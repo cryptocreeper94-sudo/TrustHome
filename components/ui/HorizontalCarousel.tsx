@@ -9,9 +9,10 @@ interface HorizontalCarouselProps {
   onSeeAll?: () => void;
   style?: any;
   itemWidth?: number;
+  hideArrows?: boolean;
 }
 
-export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth = 220 }: HorizontalCarouselProps) {
+export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth = 220, hideArrows = false }: HorizontalCarouselProps) {
   const { colors, isDark } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
   const scrollX = useRef(0);
@@ -73,12 +74,14 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
         {children}
       </ScrollView>
       <View style={styles.navRow}>
+        {!hideArrows && (
         <Pressable
           onPress={scrollLeft}
           style={[styles.arrowBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}
         >
           <ChevronBackIcon size={16} color={colors.textSecondary} />
         </Pressable>
+        )}
         
         {childrenCount > 1 && (
           <View style={styles.dotsContainer}>
@@ -94,12 +97,14 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
           </View>
         )}
 
+        {!hideArrows && (
         <Pressable
           onPress={scrollRight}
           style={[styles.arrowBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}
         >
           <ChevronForwardIcon size={16} color={colors.textSecondary} />
         </Pressable>
+        )}
       </View>
     </View>
   );

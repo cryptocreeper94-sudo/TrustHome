@@ -1,6 +1,6 @@
 import React, { ReactNode, useRef, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronBackIcon, ChevronForwardIcon } from '@/components/ui/SvgIcons';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface HorizontalCarouselProps {
@@ -53,7 +53,7 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
             {onSeeAll ? (
               <Pressable onPress={onSeeAll} style={styles.seeAllBtn}>
                 <Text style={[styles.seeAllText, { color: colors.primary }]}>See All</Text>
-                <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+                <ChevronForwardIcon size={14} color={colors.primary} />
               </Pressable>
             ) : null}
           </View>
@@ -77,7 +77,7 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
           onPress={scrollLeft}
           style={[styles.arrowBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}
         >
-          <Ionicons name="chevron-back" size={16} color={colors.textSecondary} />
+          <ChevronBackIcon size={16} color={colors.textSecondary} />
         </Pressable>
         
         {childrenCount > 1 && (
@@ -98,7 +98,7 @@ export function HorizontalCarousel({ title, children, onSeeAll, style, itemWidth
           onPress={scrollRight}
           style={[styles.arrowBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}
         >
-          <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+          <ChevronForwardIcon size={16} color={colors.textSecondary} />
         </Pressable>
       </View>
     </View>

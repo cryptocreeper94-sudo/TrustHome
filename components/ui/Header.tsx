@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, Modal, ScrollView, Linking } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { ArrowBackIcon, CloseIcon, MenuIcon } from '@/components/ui/SvgIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -173,11 +174,11 @@ export function Header({
           <View style={styles.left}>
             {showBack ? (
               <Pressable onPress={goHome} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-back">
-                <Ionicons name="arrow-back" size={24} color="#FFF" style={styles.iconShadow} />
+                <ArrowBackIcon size={24} color="#FFF" />
               </Pressable>
             ) : showClose ? (
               <Pressable onPress={onClose} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-close">
-                <Ionicons name="close" size={26} color="#FFF" style={styles.iconShadow} />
+                <CloseIcon size={26} color="#FFF" />
               </Pressable>
             ) : <View style={styles.iconButton} />}
           </View>
@@ -187,7 +188,7 @@ export function Header({
           <View style={styles.right}>
             {rightAction || (
               <Pressable onPress={toggleDrawer} style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.7 : 1 }]} testID="header-menu">
-                <Ionicons name="menu" size={26} color="#FFF" style={styles.iconShadow} />
+                <MenuIcon size={26} color="#FFF" />
               </Pressable>
             )}
           </View>

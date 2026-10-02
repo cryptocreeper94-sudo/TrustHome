@@ -13,6 +13,7 @@ import { useApp } from '@/contexts/AppContext';
 import { KenBurnsHero } from '@/components/ui/VideoHero';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AgentToolkit, AgentToolkitRef } from '@/components/ui/AgentToolkit';
+import { Footer } from '@/components/ui/Footer';
 
 const HERO_SLIDES = [
   { image: require('@/assets/images/hero-1.jpg'), label: 'Craftsman Homes' },

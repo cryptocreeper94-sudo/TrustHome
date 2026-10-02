@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Linking } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -237,35 +237,32 @@ export default function MarketingScreen() {
       <Animated.View entering={FadeInDown.duration(400).delay(450)}>
       <AccordionSection title="Autopilot Status" icon="rocket" iconColor="#1A8A7E">
         <View style={styles.autopilotRow}>
-          <View style={styles.autopilotItem}>
+          <Pressable style={styles.autopilotItem} onPress={() => Linking.openURL('https://www.facebook.com/pages/creation/')}>
             <Ionicons name="logo-facebook" size={24} color="#1877F2" />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.autopilotName, { color: colors.text }]}>Facebook</Text>
-              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Not connected</Text>
+              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Tap to open Pages Manager</Text>
             </View>
-            <View style={[styles.statusDot, { backgroundColor: colors.textTertiary }]} />
-            <Text style={[styles.statusText, { color: colors.textTertiary }]}>Connect</Text>
-          </View>
+            <Ionicons name="open-outline" size={16} color={colors.textTertiary} />
+          </Pressable>
           <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />
-          <View style={styles.autopilotItem}>
+          <Pressable style={styles.autopilotItem} onPress={() => Linking.openURL('https://accountscenter.instagram.com/')}>
             <Ionicons name="logo-instagram" size={24} color="#E4405F" />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.autopilotName, { color: colors.text }]}>Instagram</Text>
-              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Not connected</Text>
+              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Tap to open Accounts Center</Text>
             </View>
-            <View style={[styles.statusDot, { backgroundColor: colors.textTertiary }]} />
-            <Text style={[styles.statusText, { color: colors.textTertiary }]}>Connect</Text>
-          </View>
+            <Ionicons name="open-outline" size={16} color={colors.textTertiary} />
+          </Pressable>
           <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />
-          <View style={styles.autopilotItem}>
+          <Pressable style={styles.autopilotItem} onPress={() => Linking.openURL('https://x.com/settings/profile')}>
             <Ionicons name="logo-twitter" size={24} color={isDark ? '#FFF' : '#000'} />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.autopilotName, { color: colors.text }]}>X (Twitter)</Text>
-              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Not connected</Text>
+              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Tap to open your profile</Text>
             </View>
-            <View style={[styles.statusDot, { backgroundColor: colors.textTertiary }]} />
-            <Text style={[styles.statusText, { color: colors.textTertiary }]}>Connect</Text>
-          </View>
+            <Ionicons name="open-outline" size={16} color={colors.textTertiary} />
+          </Pressable>
         </View>
       </AccordionSection>
       </Animated.View>

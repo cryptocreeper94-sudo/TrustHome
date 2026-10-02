@@ -214,21 +214,21 @@ export default function MarketingScreen() {
       <AccordionSection title="Content Library" icon="library" iconColor="#007AFF">
         <View style={styles.libraryRow}>
           <View style={styles.libraryItem}>
-            <Ionicons name="image" size={24} color="#1A8A7E" />
-            <Text style={[styles.libraryValue, { color: colors.text }]}>47</Text>
-            <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Images</Text>
+            <Ionicons name="document-text" size={24} color="#1A8A7E" />
+            <Text style={[styles.libraryValue, { color: colors.text }]}>{CONTENT_ITEMS.filter(c => c.type === 'Social Post').length}</Text>
+            <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Posts</Text>
           </View>
           <View style={[styles.libraryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.libraryItem}>
-            <Ionicons name="chatbubble-ellipses" size={24} color="#1A8A7E" />
-            <Text style={[styles.libraryValue, { color: colors.text }]}>23</Text>
-            <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Templates</Text>
+            <Ionicons name="mail" size={24} color="#1A8A7E" />
+            <Text style={[styles.libraryValue, { color: colors.text }]}>{CONTENT_ITEMS.filter(c => c.type === 'Email').length}</Text>
+            <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Emails</Text>
           </View>
           <View style={[styles.libraryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.libraryItem}>
-            <Ionicons name="videocam" size={24} color="#1A8A7E" />
-            <Text style={[styles.libraryValue, { color: colors.text }]}>8</Text>
-            <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Videos</Text>
+            <Ionicons name="megaphone" size={24} color="#1A8A7E" />
+            <Text style={[styles.libraryValue, { color: colors.text }]}>{CONTENT_ITEMS.filter(c => c.type === 'Ad Copy').length}</Text>
+            <Text style={[styles.libraryLabel, { color: colors.textSecondary }]}>Ads</Text>
           </View>
         </View>
       </AccordionSection>
@@ -241,10 +241,10 @@ export default function MarketingScreen() {
             <Ionicons name="logo-facebook" size={24} color="#1877F2" />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.autopilotName, { color: colors.text }]}>Facebook</Text>
-              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>{user?.brokerage || 'Your Page'}</Text>
+              <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Not connected</Text>
             </View>
-            <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
-            <Text style={[styles.statusText, { color: colors.success }]}>Connected</Text>
+            <View style={[styles.statusDot, { backgroundColor: colors.textTertiary }]} />
+            <Text style={[styles.statusText, { color: colors.textTertiary }]}>Connect</Text>
           </View>
           <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.autopilotItem}>
@@ -253,8 +253,8 @@ export default function MarketingScreen() {
               <Text style={[styles.autopilotName, { color: colors.text }]}>Instagram</Text>
               <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Not connected</Text>
             </View>
-            <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
-            <Text style={[styles.statusText, { color: colors.success }]}>Connected</Text>
+            <View style={[styles.statusDot, { backgroundColor: colors.textTertiary }]} />
+            <Text style={[styles.statusText, { color: colors.textTertiary }]}>Connect</Text>
           </View>
           <View style={[styles.rowDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.autopilotItem}>
@@ -264,7 +264,7 @@ export default function MarketingScreen() {
               <Text style={[styles.autopilotSub, { color: colors.textSecondary }]}>Not connected</Text>
             </View>
             <View style={[styles.statusDot, { backgroundColor: colors.textTertiary }]} />
-            <Text style={[styles.statusText, { color: colors.textTertiary }]}>Disconnected</Text>
+            <Text style={[styles.statusText, { color: colors.textTertiary }]}>Connect</Text>
           </View>
         </View>
       </AccordionSection>

@@ -157,7 +157,7 @@ export function Footer() {
             <Text style={[styles.bottomText, styles.bottomLink, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>dwtl.io</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Pressable onPress={() => router.push('/ecosystem' as any)} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
+          <Pressable onPress={() => Linking.openURL('https://dwtl.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.bottomText, styles.bottomLink, { color: '#22d3ee' }]}>Trust Layer</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>

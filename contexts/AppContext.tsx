@@ -20,6 +20,8 @@ interface AppContextValue {
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
   isAgentAuthenticated: boolean;
+  /** True only for a real signed-in agent (not demo/browse). Use to decide live vs sample data. */
+  isRealAgent: boolean;
   signOut: () => Promise<void>;
   demoMode: boolean;
   enterDemo: () => void;
@@ -36,10 +38,6 @@ interface AppContextValue {
   openAiAssistant: () => void;
   closeAiAssistant: () => void;
   toggleAiAssistant: () => void;
-  signalChatOpen: boolean;
-  openSignalChat: () => void;
-  closeSignalChat: () => void;
-  toggleSignalChat: () => void;
   showWelcomeGuide: boolean;
   setShowWelcomeGuide: (show: boolean) => void;
   replayWelcomeGuide: () => void;
@@ -92,9 +90,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const user = demoMode ? DEMO_USER : browseMode ? BROWSE_USER : realUser;
   const isAuthenticated = !!user;
   const isAgentAuthenticated = isAuthenticated && user?.role === 'agent';
+  const isRealAgent = !demoMode && !browseMode && realUser?.role === 'agent';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
-  const [signalChatOpen, setSignalChatOpen] = useState(false);
   const [showWelcomeGuide, setShowWelcomeGuide] = useState(false);
   const [guideChecked, setGuideChecked] = useState(false);
   const [showPartnerOnboarding, setShowPartnerOnboarding] = useState(false);
@@ -185,9 +183,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const openAiAssistant = useCallback(() => setAiAssistantOpen(true), []);
   const closeAiAssistant = useCallback(() => setAiAssistantOpen(false), []);
   const toggleAiAssistant = useCallback(() => setAiAssistantOpen(prev => !prev), []);
-  const openSignalChat = useCallback(() => setSignalChatOpen(true), []);
-  const closeSignalChat = useCallback(() => setSignalChatOpen(false), []);
-  const toggleSignalChat = useCallback(() => setSignalChatOpen(prev => !prev), []);
 
   const handleSetShowWelcomeGuide = useCallback((show: boolean) => {
     setShowWelcomeGuide(show);
@@ -238,6 +233,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     currentRole,
     setCurrentRole,
     isAgentAuthenticated,
+    isRealAgent,
     signOut,
     demoMode,
     enterDemo,
@@ -254,10 +250,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openAiAssistant,
     closeAiAssistant,
     toggleAiAssistant,
-    signalChatOpen,
-    openSignalChat,
-    closeSignalChat,
-    toggleSignalChat,
     showWelcomeGuide,
     setShowWelcomeGuide: handleSetShowWelcomeGuide,
     replayWelcomeGuide,
@@ -273,7 +265,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     openLicensingPack,
     greetingName,
     setGreetingName,
-  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, signOut, demoMode, enterDemo, exitDemo, browseMode, enterBrowse, exitBrowse, isBrowsing, drawerOpen, aiAssistantOpen, signalChatOpen, showWelcomeGuide, showPartnerOnboarding, showBrokerPitchDeck, showLicensingPack, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, openSignalChat, closeSignalChat, toggleSignalChat, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack, greetingName, setGreetingName]);
+  }), [user, isLoading, isAuthenticated, currentRole, isAgentAuthenticated, isRealAgent, signOut, demoMode, enterDemo, exitDemo, browseMode, enterBrowse, exitBrowse, isBrowsing, drawerOpen, aiAssistantOpen, showWelcomeGuide, showPartnerOnboarding, showBrokerPitchDeck, showLicensingPack, isJenniferUser, openDrawer, closeDrawer, toggleDrawer, openAiAssistant, closeAiAssistant, toggleAiAssistant, handleSetShowWelcomeGuide, replayWelcomeGuide, handleSetShowPartnerOnboarding, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack, greetingName, setGreetingName]);
 
   return (
     <AppContext.Provider value={value}>

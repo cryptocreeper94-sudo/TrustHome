@@ -171,15 +171,9 @@ export default function NetworkScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
-  const subcontractorsQuery = useQuery<any[]>({
-    queryKey: ['/api/subcontractors'],
-  });
+  // Vendor directory was previously proxied from PaintPros; TrustHome-owned directory TBD.
+  const vendorsList: Vendor[] = [];
 
-  const apiSubcontractors = subcontractorsQuery.data && Array.isArray(subcontractorsQuery.data) && subcontractorsQuery.data.length > 0 
-    ? subcontractorsQuery.data 
-    : null;
-
-  const vendorsList = apiSubcontractors || [];
 
   const catColor = (cat: string) => CATEGORY_COLORS[cat] || colors.primary;
 
@@ -211,7 +205,7 @@ export default function NetworkScreen() {
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Header imageBanner={require('@/assets/images/guide-network.jpg')} title="Professional Network" subtitle="Build connections that close deals" showBack rightAction={<InfoButton onPress={() => setShowHelp(true)} />} />
-        {apiSubcontractors && (
+        {vendorsList.length > 0 && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
             <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live data</Text>
@@ -273,7 +267,7 @@ export default function NetworkScreen() {
           </ScrollView>
           </Animated.View>
 
-          {subcontractorsQuery.isLoading && (
+          {false && (
             <Animated.View entering={FadeInDown.duration(400).delay(100)} style={{ marginTop: 16 }}>
               <NetworkSkeleton />
             </Animated.View>

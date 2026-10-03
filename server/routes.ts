@@ -1,14 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import {
-  ecosystemGet,
-  ecosystemPost,
-  ecosystemPut,
-  ecosystemDelete,
-  getTenantId,
-} from "./ecosystem-client";
-import { setupSocketProxy } from "./socket-proxy";
-import {
   tlSyncUser,
   tlSyncPassword,
   tlVerifyCredentials,
@@ -33,7 +25,8 @@ import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./resend-client";
 import { createTrustStamp } from "./hallmark";
-import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, expenses, mileageEntries, mlsConfigurations, marketingPosts, marketingAnalytics, agentProfiles, insertAgentProfileSchema } from "@shared/schema";
+import { registerSchema, loginSchema, verificationCodes, users, blogPosts, accessRequests, insertAccessRequestSchema, marketingPosts, marketingAnalytics, agentProfiles, insertAgentProfileSchema } from "@shared/schema";
+import { requireOwner } from "./tenant-routes";
 import { db, pool } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 import OpenAI from "openai";
@@ -408,73 +401,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const PIN_ACCOUNTS: Record<string, { email: string; firstName: string; lastName: string; role: string; brokerage: string; tempPassword: string; mustReset: boolean }> = {
-    "0424": {
-      email: "developer@trusthome.io",
-      firstName: "Developer",
-      lastName: "Admin",
-      role: "agent",
-      brokerage: "DarkWave Studios",
-      tempPassword: "DevAccess!2026",
-      mustReset: false,
-    },
-    "7777": {
-      email: "jennifer@trusthome.io",
-      firstName: "Jennifer",
-      lastName: "Lambert",
-      role: "agent",
-      brokerage: "DarkWave Studios",
-      tempPassword: "TempAccess!2026",
-      mustReset: true,
-    },
-  };
-
-  app.post("/api/auth/dev-pin", async (req: Request, res: Response) => {
-    try {
-      const { pin } = req.body;
-      if (!pin) {
-        return res.status(400).json({ error: "PIN is required" });
-      }
-
-      const account = PIN_ACCOUNTS[pin];
-      if (!account) {
-        return res.status(401).json({ error: "Invalid PIN" });
-      }
-
-      let user = await storage.getUserByEmail(account.email);
-
-      if (!user) {
-        const hashedPassword = await bcrypt.hash(account.tempPassword, 12);
-        user = await storage.createUser({
-          email: account.email,
-          password: hashedPassword,
-          firstName: account.firstName,
-          lastName: account.lastName,
-          role: account.role,
-          phone: null,
-          brokerage: account.brokerage,
-          licenseNumber: null,
-        });
-        if (account.mustReset) {
-          await db.update(users).set({ mustResetPassword: true }).where(eq(users.id, user.id));
-        }
-      }
-
-      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-      req.session.userId = user.id;
-      req.session.userRole = user.role;
-      req.session.userEmail = user.email;
-      req.session.userName = user.firstName + ' ' + user.lastName;
-
-      return res.json({
-        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
-        mustResetPassword: user.mustResetPassword,
-      });
-    } catch (error) {
-      console.error("Dev PIN error:", error);
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
 
   app.post("/api/auth/set-password", async (req: Request, res: Response) => {
     try {
@@ -533,516 +459,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // ─── Health Check ───────────────────────────────────────────────────
+  // --- Health Check ---
   app.get("/api/health", (_req: Request, res: Response) => {
-    res.json({ status: "ok", tenantId: getTenantId(), connected: true });
-  });
-
-  // ─── CRM & Leads ───────────────────────────────────────────────────
-  app.get("/api/leads", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/leads", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/leads", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/leads", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/leads/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/leads/${req.params.id}`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/crm/deals", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/crm/deals", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/crm/deals/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/crm/deals/${req.params.id}`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/crm/activities", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/crm/activities", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/leads/score", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/leads/score", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/leads/score-ai", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/leads/score-ai", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/lead-sources", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/lead-sources", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Calendar ──────────────────────────────────────────────────────
-  app.get("/api/calendar/events", async (req: Request, res: Response) => {
-    try {
-      const params: Record<string, string> = {};
-      if (req.query.startDate) params.startDate = req.query.startDate as string;
-      if (req.query.endDate) params.endDate = req.query.endDate as string;
-      const data = await ecosystemGet("/calendar/events", params);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/calendar/events", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/calendar/events", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/calendar/events/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/calendar/events/${req.params.id}`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.delete("/api/calendar/events/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemDelete(`/calendar/events/${req.params.id}`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Bookings ──────────────────────────────────────────────────────
-  app.get("/api/bookings", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/bookings", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/bookings", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/bookings", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/bookings/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/bookings/${req.params.id}`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.patch("/api/bookings/:id/status", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost(`/bookings/${req.params.id}/status`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/availability", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/availability/${getTenantId()}`, _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Jobs ──────────────────────────────────────────────────────────
-  app.get("/api/jobs", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/jobs", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/jobs/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/jobs/${req.params.id}`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/jobs", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/jobs", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/jobs/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/jobs/${req.params.id}`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/jobs/:id/updates", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/jobs/${req.params.id}/updates`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/jobs/:id/updates", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost(`/jobs/${req.params.id}/updates`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Marketing ─────────────────────────────────────────────────────
-  app.get("/api/marketing/images", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/marketing/images/${getTenantId()}`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/marketing/images", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/marketing/images", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/marketing/posts", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/marketing/posts/${getTenantId()}`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/marketing/posts", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/marketing/posts", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/marketing/live-posts", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/marketing/${getTenantId()}/live-posts`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/marketing/quick-post", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost(`/marketing/${getTenantId()}/quick-post`, req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/marketing/generate-captions", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/marketing-autopilot/generate-captions", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Analytics ─────────────────────────────────────────────────────
-  app.get("/api/analytics/dashboard", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/analytics/dashboard", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/analytics/live", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/analytics/live", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/analytics/geography", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/analytics/geography", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Blockchain ────────────────────────────────────────────────────
-  app.post("/api/blockchain/stamp", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/blockchain/stamp", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/blockchain/hash", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/blockchain/hash", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/blockchain/stamps", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/blockchain/stamps", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/blockchain/wallet/balance", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/blockchain/wallet/balance", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Messaging ─────────────────────────────────────────────────────
-  app.post("/api/messages/send-message", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/messages/send-message", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/messages/online-users", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/messages/online-users", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Auth (Ecosystem) ──────────────────────────────────────────────
-  app.post("/api/auth/pin/verify", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/auth/pin/verify", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Payments ──────────────────────────────────────────────────────
-  app.get("/api/payments", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/payments", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.get("/api/payments/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/payments/${req.params.id}`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Referrals ─────────────────────────────────────────────────────
-  app.get("/api/referrals", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/referrals", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/referrals", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/referrals", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Subcontractors ────────────────────────────────────────────────
-  app.get("/api/subcontractors", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/subcontractors", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Webhooks ──────────────────────────────────────────────────────
-  app.get("/api/webhooks", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/webhooks", _req.query as Record<string, string>);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/webhooks", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/webhooks", req.body);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Tenant ────────────────────────────────────────────────────────
-  app.get("/api/tenant", async (_req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet(`/tenants/${getTenantId()}`);
-      if (data.error) return res.status(500).json(data);
-      res.json(data);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
+    res.json({ status: "ok", database: "postgres", connected: true });
   });
 
   // ─── DarkWave Media Studio (TrustVault) ──────────────────────────────
@@ -1282,7 +701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ─── Developer / Owner Admin Routes ─────────────────────────────────
 
-  app.get("/api/admin/system-health", async (req: Request, res: Response) => {
+  app.get("/api/admin/system-health", requireOwner, async (req: Request, res: Response) => {
     try {
       const services: Array<{
         name: string;
@@ -1301,21 +720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         services.push({ name: "PostgreSQL Database", endpoint: "localhost", status: "offline", details: e instanceof Error ? e.message : "Connection failed" });
       }
 
-      // 2. PaintPros.io Ecosystem
-      const ecoStart = Date.now();
-      try {
-        const ecoResult = await ecosystemGet("/health");
-        const ecoLatency = Date.now() - ecoStart;
-        if (ecoResult.error || ecoResult.notAvailable) {
-          services.push({ name: "PaintPros.io Ecosystem", endpoint: "https://paintpros.io/api", status: "degraded", latency: ecoLatency, details: ecoResult.error });
-        } else {
-          services.push({ name: "PaintPros.io Ecosystem", endpoint: "https://paintpros.io/api", status: "online", latency: ecoLatency });
-        }
-      } catch (e) {
-        services.push({ name: "PaintPros.io Ecosystem", endpoint: "https://paintpros.io/api", status: "offline", latency: Date.now() - ecoStart, details: e instanceof Error ? e.message : "Connection failed" });
-      }
-
-      // 3. Trust Layer (DWTL)
+      // 2. Trust Layer (DWTL)
       const tlStart = Date.now();
       if (tlIsConfigured()) {
         try {
@@ -1332,9 +737,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         services.push({ name: "DarkWave Trust Layer", endpoint: process.env.TRUSTLAYER_BASE_URL || "https://dwsc.io", status: "not_configured", details: "API credentials not set" });
       }
-
-      // 4. Socket.IO Proxy
-      services.push({ name: "Socket.IO Proxy", endpoint: "wss://paintpros.io", status: "online", details: "Relay active" });
 
       // 5. Resend Email
       try {
@@ -1379,24 +781,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || "development",
-        tenantId: getTenantId(),
       });
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
-  app.get("/api/admin/api-connections", async (_req: Request, res: Response) => {
+  app.get("/api/admin/api-connections", requireOwner, async (_req: Request, res: Response) => {
     try {
       const connections = [
         {
-          id: "orbit_ecosystem",
-          name: "Orbit Ecosystem (PaintPros.io)",
-          description: "CRM, Marketing, Analytics, Leads, Calendar, Messaging",
-          baseUrl: "https://paintpros.io/api",
-          configured: !!(process.env.ORBIT_ECOSYSTEM_API_KEY && process.env.ORBIT_ECOSYSTEM_API_SECRET),
-          keyMasked: process.env.ORBIT_ECOSYSTEM_API_KEY ? `${process.env.ORBIT_ECOSYSTEM_API_KEY.slice(0, 6)}...${process.env.ORBIT_ECOSYSTEM_API_KEY.slice(-4)}` : null,
-          icon: "globe-outline",
+          id: "postgres",
+          name: "TrustHome Database (PostgreSQL)",
+          description: "Agent tenants: leads, deals, calendar, properties, tasks, documents, messaging",
+          baseUrl: "coolify-internal",
+          configured: !!process.env.DATABASE_URL,
+          keyMasked: null,
+          icon: "server-outline",
         },
         {
           id: "orbit_staffing",
@@ -1431,15 +832,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           icon: "link-outline",
         },
         {
-          id: "financial_hub",
-          name: "Orbit Financial Hub",
-          description: "Payment processing, subscription management, tenant billing",
-          baseUrl: "https://paintpros.io/api/payments",
-          configured: !!process.env.ORBIT_FINANCIAL_HUB_SECRET,
-          keyMasked: process.env.ORBIT_FINANCIAL_HUB_SECRET ? `${process.env.ORBIT_FINANCIAL_HUB_SECRET.slice(0, 6)}...${process.env.ORBIT_FINANCIAL_HUB_SECRET.slice(-4)}` : null,
-          icon: "card-outline",
-        },
-        {
           id: "stripe",
           name: "Stripe",
           description: "Tenant space purchases, subscription billing (demo space)",
@@ -1453,8 +845,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: "Resend Email",
           description: "Transactional emails, verification codes, notifications",
           baseUrl: "https://api.resend.com",
-          configured: true,
-          keyMasked: "Managed by Replit",
+          configured: !!process.env.RESEND_API_KEY,
+          keyMasked: process.env.RESEND_API_KEY ? `${process.env.RESEND_API_KEY.slice(0, 5)}...${process.env.RESEND_API_KEY.slice(-4)}` : null,
           icon: "mail-outline",
         },
         {
@@ -1466,24 +858,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           keyMasked: process.env.DW_MEDIA_API_KEY ? `${process.env.DW_MEDIA_API_KEY.slice(0, 6)}...${process.env.DW_MEDIA_API_KEY.slice(-4)}` : null,
           icon: "videocam-outline",
         },
-        {
-          id: "socketio",
-          name: "Socket.IO (Real-time)",
-          description: "Live messaging, notifications, ecosystem relay",
-          baseUrl: "wss://darkwavestudios.io",
-          configured: true,
-          keyMasked: "Uses Orbit credentials",
-          icon: "flash-outline",
-        },
       ];
 
-      res.json({ connections, tenantId: getTenantId() });
+      res.json({ connections });
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
-  app.get("/api/admin/overview", async (_req: Request, res: Response) => {
+  app.get("/api/admin/overview", requireOwner, async (_req: Request, res: Response) => {
     try {
       const userCountResult = await pool.query("SELECT COUNT(*) as count FROM users");
       const userCount = Number(userCountResult.rows?.[0]?.count ?? 0);
@@ -1491,13 +874,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         platform: "TrustHome",
         version: "1.0.0-beta",
-        tenantId: getTenantId(),
         environment: process.env.NODE_ENV || "development",
         uptime: process.uptime(),
         registeredUsers: userCount,
         owner: "DarkWave Studios",
         ownerUrl: "https://darkwavestudios.io",
-        ecosystem: "PaintPros.io / Orbit",
+        database: "PostgreSQL (TrustHome)",
         trustLayer: "dwsc.io",
         securitySuite: "trustshield.tech",
       });
@@ -1534,7 +916,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/blog/admin/posts", async (_req: Request, res: Response) => {
+  app.get("/api/blog/admin/posts", requireOwner, async (_req: Request, res: Response) => {
     try {
       const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt));
       return res.json(posts);
@@ -1543,7 +925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/blog/admin/posts", async (req: Request, res: Response) => {
+  app.post("/api/blog/admin/posts", requireOwner, async (req: Request, res: Response) => {
     try {
       const [post] = await db.insert(blogPosts).values({
         ...req.body,
@@ -1555,7 +937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/blog/admin/posts/:id", async (req: Request, res: Response) => {
+  app.put("/api/blog/admin/posts/:id", requireOwner, async (req: Request, res: Response) => {
     try {
       const updateData = { ...req.body, updatedAt: new Date() };
       if (req.body.status === 'published' && !req.body.publishedAt) {
@@ -1571,7 +953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/blog/admin/posts/:id", async (req: Request, res: Response) => {
+  app.delete("/api/blog/admin/posts/:id", requireOwner, async (req: Request, res: Response) => {
     try {
       const [post] = await db.delete(blogPosts).where(eq(blogPosts.id, req.params.id as string)).returning();
       if (!post) {
@@ -1583,7 +965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/blog/admin/generate", async (req: Request, res: Response) => {
+  app.post("/api/blog/admin/generate", requireOwner, async (req: Request, res: Response) => {
     try {
       const { topic, category, tone } = req.body;
       if (!topic) {
@@ -1681,16 +1063,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/access-requests", async (req: Request, res: Response) => {
+  app.get("/api/admin/access-requests", requireOwner, async (req: Request, res: Response) => {
     try {
-      if (!req.session.userId) {
-        return res.status(401).json({ error: "Not authenticated" });
-      }
-      const user = await storage.getUser(req.session.userId);
-      if (!user || (user.email !== 'developer@trusthome.io' && user.email !== 'jennifer@trusthome.io')) {
-        return res.status(403).json({ error: "Not authorized" });
-      }
-
       const requests = await db.select().from(accessRequests).orderBy(desc(accessRequests.createdAt));
       return res.json(requests);
     } catch (error) {
@@ -1698,16 +1072,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/access-requests/:id", async (req: Request, res: Response) => {
+  app.put("/api/admin/access-requests/:id", requireOwner, async (req: Request, res: Response) => {
     try {
-      if (!req.session.userId) {
-        return res.status(401).json({ error: "Not authenticated" });
-      }
-      const user = await storage.getUser(req.session.userId);
-      if (!user || (user.email !== 'developer@trusthome.io' && user.email !== 'jennifer@trusthome.io')) {
-        return res.status(403).json({ error: "Not authorized" });
-      }
-
       const { status, notes } = req.body;
       const [updated] = await db.update(accessRequests)
         .set({ status, notes, reviewedAt: new Date() })
@@ -1724,96 +1090,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ─── Business Suite: Expenses ──────────────────────────────────────
-  // Primary: PaintPros ecosystem backend | Fallback: local PostgreSQL
-
-  app.get("/api/expenses", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/expenses", req.query as Record<string, string>);
-      if (data.error || data.notAvailable) {
-        const agentId = req.query.agentId as string || 'demo';
-        const result = await db.select().from(expenses).where(eq(expenses.agentId, agentId)).orderBy(desc(expenses.createdAt));
-        return res.json(result);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/expenses", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/expenses", req.body);
-      if (data.error || data.notAvailable) {
-        const agentId = req.body.agentId || 'demo';
-        const [expense] = await db.insert(expenses).values({
-          agentId,
-          category: req.body.category || 'other',
-          description: req.body.description,
-          amount: parseFloat(req.body.amount),
-          vendor: req.body.vendor || null,
-          date: req.body.date,
-          notes: req.body.notes || null,
-          propertyAddress: req.body.propertyAddress || null,
-          receiptUrl: req.body.receiptUrl || null,
-          ocrData: req.body.ocrData || null,
-        }).returning();
-        return res.json(expense);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/expenses/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/expenses/${req.params.id}`, req.body);
-      if (data.error || data.notAvailable) {
-        const { id } = req.params;
-        const updates: Record<string, any> = {};
-        if (req.body.category !== undefined) updates.category = req.body.category;
-        if (req.body.description !== undefined) updates.description = req.body.description;
-        if (req.body.amount !== undefined) updates.amount = parseFloat(req.body.amount);
-        if (req.body.vendor !== undefined) updates.vendor = req.body.vendor;
-        if (req.body.date !== undefined) updates.date = req.body.date;
-        if (req.body.notes !== undefined) updates.notes = req.body.notes;
-        if (req.body.propertyAddress !== undefined) updates.propertyAddress = req.body.propertyAddress;
-        updates.updatedAt = new Date();
-        const [updated] = await db.update(expenses).set(updates).where(eq(expenses.id, id as string)).returning();
-        if (!updated) return res.status(404).json({ error: "Expense not found" });
-        return res.json(updated);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.delete("/api/expenses/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemDelete(`/expenses/${req.params.id}`);
-      if (data.error || data.notAvailable) {
-        const { id } = req.params;
-        const [deleted] = await db.delete(expenses).where(eq(expenses.id, id as string)).returning();
-        if (!deleted) return res.status(404).json({ error: "Expense not found" });
-        return res.json({ success: true });
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
   app.post("/api/expenses/ocr", async (req: Request, res: Response) => {
     try {
       const { imageBase64 } = req.body;
       if (!imageBase64) return res.status(400).json({ error: "Image data required" });
 
-      const ecoData = await ecosystemPost("/expenses/ocr", { imageBase64 });
-      if (!ecoData.error && !ecoData.notAvailable) {
-        return res.json(ecoData);
-      }
 
       const openai = new OpenAI({
         apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY || "not-configured",
@@ -1848,177 +1129,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       return res.json(parsed);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── Business Suite: Mileage ──────────────────────────────────────
-  // Primary: PaintPros ecosystem backend | Fallback: local PostgreSQL
-
-  app.get("/api/mileage", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/mileage", req.query as Record<string, string>);
-      if (data.error || data.notAvailable) {
-        const agentId = req.query.agentId as string || 'demo';
-        const result = await db.select().from(mileageEntries).where(eq(mileageEntries.agentId, agentId)).orderBy(desc(mileageEntries.createdAt));
-        return res.json(result);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/mileage", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/mileage", req.body);
-      if (data.error || data.notAvailable) {
-        const agentId = req.body.agentId || 'demo';
-        const [entry] = await db.insert(mileageEntries).values({
-          agentId,
-          date: req.body.date,
-          startAddress: req.body.startAddress || null,
-          endAddress: req.body.endAddress || null,
-          miles: parseFloat(req.body.miles),
-          purpose: req.body.purpose,
-          category: req.body.category || 'showing',
-          startLat: req.body.startLat ? parseFloat(req.body.startLat) : null,
-          startLng: req.body.startLng ? parseFloat(req.body.startLng) : null,
-          endLat: req.body.endLat ? parseFloat(req.body.endLat) : null,
-          endLng: req.body.endLng ? parseFloat(req.body.endLng) : null,
-          notes: req.body.notes || null,
-        }).returning();
-        return res.json(entry);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/mileage/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/mileage/${req.params.id}`, req.body);
-      if (data.error || data.notAvailable) {
-        const { id } = req.params;
-        const updates: Record<string, any> = {};
-        if (req.body.date !== undefined) updates.date = req.body.date;
-        if (req.body.startAddress !== undefined) updates.startAddress = req.body.startAddress;
-        if (req.body.endAddress !== undefined) updates.endAddress = req.body.endAddress;
-        if (req.body.miles !== undefined) updates.miles = parseFloat(req.body.miles);
-        if (req.body.purpose !== undefined) updates.purpose = req.body.purpose;
-        if (req.body.category !== undefined) updates.category = req.body.category;
-        if (req.body.notes !== undefined) updates.notes = req.body.notes;
-        updates.updatedAt = new Date();
-        const [updated] = await db.update(mileageEntries).set(updates).where(eq(mileageEntries.id, id as string)).returning();
-        if (!updated) return res.status(404).json({ error: "Mileage entry not found" });
-        return res.json(updated);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.delete("/api/mileage/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemDelete(`/mileage/${req.params.id}`);
-      if (data.error || data.notAvailable) {
-        const { id } = req.params;
-        const [deleted] = await db.delete(mileageEntries).where(eq(mileageEntries.id, id as string)).returning();
-        if (!deleted) return res.status(404).json({ error: "Mileage entry not found" });
-        return res.json({ success: true });
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // ─── MLS Configuration Routes ──────────────────────────────────────
-
-  app.get("/api/mls/config", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemGet("/mls/config", req.query as Record<string, string>);
-      if (data.error || data.notAvailable) {
-        const agentId = (req.query.agentId as string) || 'demo';
-        const result = await db.select().from(mlsConfigurations).where(eq(mlsConfigurations.agentId, agentId)).orderBy(desc(mlsConfigurations.createdAt));
-        return res.json(result);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/mls/config", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPost("/mls/config", req.body);
-      if (data.error || data.notAvailable) {
-        const agentId = req.body.agentId || 'demo';
-        const [config] = await db.insert(mlsConfigurations).values({
-          agentId,
-          provider: req.body.provider,
-          mlsBoardName: req.body.mlsBoardName,
-          mlsAgentId: req.body.mlsAgentId || null,
-          licenseNumber: req.body.licenseNumber || null,
-          apiKey: req.body.apiKey || null,
-          apiSecret: req.body.apiSecret || null,
-          serverUrl: req.body.serverUrl || null,
-          loginUrl: req.body.loginUrl || null,
-          mediaUrl: req.body.mediaUrl || null,
-          status: req.body.status || 'pending',
-          syncEnabled: req.body.syncEnabled ?? false,
-          notes: req.body.notes || null,
-        }).returning();
-        return res.json(config);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.put("/api/mls/config/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemPut(`/mls/config/${req.params.id}`, req.body);
-      if (data.error || data.notAvailable) {
-        const { id } = req.params;
-        const updates: Record<string, any> = {};
-        if (req.body.provider !== undefined) updates.provider = req.body.provider;
-        if (req.body.mlsBoardName !== undefined) updates.mlsBoardName = req.body.mlsBoardName;
-        if (req.body.mlsAgentId !== undefined) updates.mlsAgentId = req.body.mlsAgentId;
-        if (req.body.licenseNumber !== undefined) updates.licenseNumber = req.body.licenseNumber;
-        if (req.body.apiKey !== undefined) updates.apiKey = req.body.apiKey;
-        if (req.body.apiSecret !== undefined) updates.apiSecret = req.body.apiSecret;
-        if (req.body.serverUrl !== undefined) updates.serverUrl = req.body.serverUrl;
-        if (req.body.loginUrl !== undefined) updates.loginUrl = req.body.loginUrl;
-        if (req.body.mediaUrl !== undefined) updates.mediaUrl = req.body.mediaUrl;
-        if (req.body.status !== undefined) updates.status = req.body.status;
-        if (req.body.syncEnabled !== undefined) updates.syncEnabled = req.body.syncEnabled;
-        if (req.body.notes !== undefined) updates.notes = req.body.notes;
-        updates.updatedAt = new Date();
-        const [updated] = await db.update(mlsConfigurations).set(updates).where(eq(mlsConfigurations.id, id as string)).returning();
-        if (!updated) return res.status(404).json({ error: "MLS configuration not found" });
-        return res.json(updated);
-      }
-      return res.json(data);
-    } catch (error) {
-      return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.delete("/api/mls/config/:id", async (req: Request, res: Response) => {
-    try {
-      const data = await ecosystemDelete(`/mls/config/${req.params.id}`);
-      if (data.error || data.notAvailable) {
-        const { id } = req.params;
-        const [deleted] = await db.delete(mlsConfigurations).where(eq(mlsConfigurations.id, id as string)).returning();
-        if (!deleted) return res.status(404).json({ error: "MLS configuration not found" });
-        return res.json({ success: true });
-      }
-      return res.json(data);
     } catch (error) {
       return res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
@@ -2175,7 +1285,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
 
-  setupSocketProxy(httpServer);
 
   return httpServer;
 }

@@ -135,53 +135,6 @@ export default function TeamScreen() {
     return 'Something went wrong. Please try again.';
   };
 
-  const handlePinDigit = useCallback(async (text: string, index: number) => {
-    if (text.length > 1) text = text.slice(-1);
-    if (text && !/^\d$/.test(text)) return;
-
-    setPinError(false);
-    const newDigits = [...pinDigits];
-    newDigits[index] = text;
-    setPinDigits(newDigits);
-
-    if (text && index < 3) {
-      pinRefs.current[index + 1]?.focus();
-    }
-
-    if (newDigits.every(d => d.length === 1)) {
-      const entered = newDigits.join('');
-      setPinChecking(true);
-      try {
-        const res = await apiRequest('POST', '/api/auth/dev-pin', { pin: entered });
-        const data = await res.json();
-        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-        setPinUserName(data.user?.firstName || 'Team Member');
-        if (data.mustResetPassword === true || String(data.mustResetPassword) === 'true' || data.mustResetPassword === 1 || String(data.mustResetPassword) === '1') {
-          goToStep('set_password');
-        } else {
-          router.replace('/');
-        }
-      } catch (err) {
-        setPinError(true);
-        setTimeout(() => {
-          setPinDigits(['', '', '', '']);
-          pinRefs.current[0]?.focus();
-        }, 600);
-      } finally {
-        setPinChecking(false);
-      }
-    }
-  }, [pinDigits, router, goToStep]);
-
-  const handlePinKeyPress = useCallback((e: any, index: number) => {
-    if (e.nativeEvent.key === 'Backspace' && !pinDigits[index] && index > 0) {
-      const newDigits = [...pinDigits];
-      newDigits[index - 1] = '';
-      setPinDigits(newDigits);
-      pinRefs.current[index - 1]?.focus();
-    }
-  }, [pinDigits]);
-
   const handleLogin = async () => {
     if (!email.trim() || !password) {
       setError('Please enter your email and password');
@@ -495,70 +448,21 @@ export default function TeamScreen() {
 
             {step === 'gate' && (
               <Animated.View entering={FadeInDown.duration(400)}>
-                <Text style={[styles.cardTitle, { color: colors.text }]}>Enter Access Code</Text>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Welcome to TrustHome</Text>
                 <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-                  Enter your team PIN to get started, or tap below to sign in with your account
+                  Sign in to your agent workspace, or create your account
                 </Text>
 
-                <View style={styles.pinRow}>
-                  {pinDigits.map((digit, i) => (
-                    <View
-                      key={i}
-                      style={[
-                        styles.pinCell,
-                        {
-                          backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary,
-                          borderColor: pinError ? colors.error : digit ? colors.primary : colors.border,
-                        },
-                      ]}
-                    >
-                      <TextInput
-                        ref={(ref) => { pinRefs.current[i] = ref; }}
-                        style={[styles.pinInput, { color: colors.text }]}
-                        value={digit}
-                        onChangeText={(text) => handlePinDigit(text, i)}
-                        onKeyPress={(e) => handlePinKeyPress(e, i)}
-                        keyboardType="number-pad"
-                        maxLength={1}
-                        secureTextEntry
-                        autoFocus={i === 0}
-                        selectTextOnFocus
-                        testID={`pin-input-${i}`}
-                      />
-                    </View>
-                  ))}
-                </View>
-
-                {pinChecking && (
-                  <View style={styles.pinCheckingRow}>
-                    <ActivityIndicator size="small" color={colors.primary} />
-                    <Text style={[styles.pinCheckingText, { color: colors.textSecondary }]}>Authenticating...</Text>
-                  </View>
-                )}
-
-                {pinError && (
-                  <View style={[styles.errorBox, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
-                    <Ionicons name="alert-circle" size={16} color={colors.error} />
-                    <Text style={[styles.errorText, { color: colors.error }]}>Authentication failed. Try again.</Text>
-                  </View>
-                )}
-
-                <View style={[styles.dividerRow, { marginTop: 8 }]}>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-                  <Text style={[styles.dividerText, { color: colors.textTertiary }]}>or</Text>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
-                </View>
-
                 <Pressable
-                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.primaryAction, opacity: pressed ? 0.85 : 1 }]}
+                  style={({ pressed }) => [styles.primaryBtn, { backgroundColor: '#1A8A7E', opacity: pressed ? 0.85 : 1 }]}
                   onPress={() => goToStep('login')}
                   testID="team-signin-btn"
                 >
                   <Text style={styles.primaryBtnText}>Sign In with Email</Text>
                 </Pressable>
 
-                <Pressable style={styles.linkBtn} onPress={() => goToStep('register')}>
-                  <Text style={[styles.linkText, { color: colors.primary }]}>Create Team Account</Text>
+                <Pressable style={styles.linkBtn} onPress={() => goToStep('register')} testID="team-register-btn">
+                  <Text style={[styles.linkText, { color: colors.primary }]}>Create Agent Account</Text>
                 </Pressable>
 
                 <View style={[styles.dividerRow, { marginTop: 4 }]}>
@@ -966,7 +870,7 @@ export default function TeamScreen() {
                 <View style={[styles.ssoNote, { backgroundColor: colors.primary + '08', borderColor: colors.primary + '20' }]}>
                   <Ionicons name="globe-outline" size={16} color={colors.primary} />
                   <Text style={[styles.ssoNoteText, { color: colors.textSecondary }]}>
-                    This password works with SSO across TrustHome, PaintPros, and all DarkWave ecosystem platforms.
+                    Your TrustHome account is private to you. Your clients and data stay in your own workspace.
                   </Text>
                 </View>
               </Animated.View>

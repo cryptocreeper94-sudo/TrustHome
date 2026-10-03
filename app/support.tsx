@@ -87,13 +87,6 @@ const ECOSYSTEM_LINKS: EcosystemLink[] = [
     icon: 'shield-checkmark-outline',
     color: '#AF52DE',
   },
-  {
-    label: 'PaintPros.io',
-    url: 'https://paintpros.io',
-    description: 'Ecosystem hub',
-    icon: 'color-palette-outline',
-    color: '#FF9500',
-  },
 ];
 
 export default function SupportScreen() {
@@ -157,13 +150,6 @@ export default function SupportScreen() {
       icon: 'call-outline',
       color: '#34C759',
       onPress: () => Linking.openURL('tel:5550199'),
-    },
-    {
-      label: 'Live Chat',
-      value: 'Signal Chat Integration',
-      icon: 'chatbubble-outline',
-      color: '#AF52DE',
-      onPress: () => Linking.openURL('https://signal.me'),
     },
     {
       label: 'Support Hours',

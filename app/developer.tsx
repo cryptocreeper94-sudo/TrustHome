@@ -31,7 +31,16 @@ interface HealthData {
   uptime: number;
   timestamp: string;
   environment: string;
-  tenantId: string;
+}
+
+interface BusinessData {
+  users: { total: number; agents: number; clients: number; vendors: number; new7d: number; new30d: number; activeAgents30d: number };
+  pendingAccessRequests: number;
+  signupsByDay: { day: string; n: number }[];
+  platform: { leads: number; deals: number; documents: number; threads: number; messages: number; events: number; closedDeals: number; closedVolume: number };
+  recentSignups: { id: string; firstName: string; lastName: string; email: string; role: string; brokerage: string | null; createdAt: string }[];
+  uptimeSeconds: number;
+  generatedAt: string;
 }
 
 interface ApiConnection {
@@ -47,18 +56,17 @@ interface ApiConnection {
 interface OverviewData {
   platform: string;
   version: string;
-  tenantId: string;
   environment: string;
   uptime: number;
   registeredUsers: number;
   owner: string;
   ownerUrl: string;
-  ecosystem: string;
+  database: string;
   trustLayer: string;
   securitySuite: string;
 }
 
-type TabId = 'overview' | 'health' | 'connections' | 'requests' | 'partner';
+type TabId = 'business' | 'overview' | 'health' | 'connections' | 'requests' | 'partner';
 
 interface AccessRequestItem {
   id: string;
@@ -79,38 +87,54 @@ interface AccessRequestItem {
 export default function DeveloperScreen() {
   const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
-  const { isAuthenticated, isLoading: authLoading, replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack } = useApp();
+  const { replayPartnerDashboard, openBrokerPitchDeck, openLicensingPack } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [activeTab, setActiveTab] = useState<TabId>('business');
   const [refreshing, setRefreshing] = useState(false);
   const pulseRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [pulseKey, setPulseKey] = useState(0);
-  const [pinUnlocked, setPinUnlocked] = useState(false);
-  const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '']);
-  const [pinError, setPinError] = useState(false);
+  const [pinValue, setPinValue] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
   const [pinShake, setPinShake] = useState(false);
-  const pinInputRefs = useRef<(TextInput | null)[]>([null, null, null, null]);
+
+  const ownerStatus = useQuery<{ unlocked: boolean; configured: boolean }>({
+    queryKey: ['/api/owner/status'],
+    queryFn: getQueryFn({ on401: 'returnNull' }),
+    staleTime: 0,
+  });
+  const pinUnlocked = !!ownerStatus.data?.unlocked;
+
+  const businessQuery = useQuery<BusinessData>({
+    queryKey: ['/api/owner/business'],
+    queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: pinUnlocked,
+    refetchInterval: 60000,
+  });
 
   const overviewQuery = useQuery<OverviewData>({
     queryKey: ['/api/admin/overview'],
     queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: pinUnlocked,
   });
 
   const healthQuery = useQuery<HealthData>({
     queryKey: ['/api/admin/system-health'],
     queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: pinUnlocked,
     refetchInterval: 30000,
   });
 
-  const connectionsQuery = useQuery<{ connections: ApiConnection[]; tenantId: string }>({
+  const connectionsQuery = useQuery<{ connections: ApiConnection[] }>({
     queryKey: ['/api/admin/api-connections'],
     queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: pinUnlocked,
   });
 
   const requestsQuery = useQuery<AccessRequestItem[]>({
     queryKey: ['/api/admin/access-requests'],
     queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: pinUnlocked,
   });
 
   useEffect(() => {
@@ -118,21 +142,23 @@ export default function DeveloperScreen() {
     return () => { if (pulseRef.current) clearInterval(pulseRef.current); };
   }, []);
 
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      setPinUnlocked(true);
-    }
-  }, [authLoading, isAuthenticated]);
+  const handleLock = useCallback(async () => {
+    try { await apiRequest('POST', '/api/owner/lock'); } catch {}
+    queryClient.removeQueries({ queryKey: ['/api/owner/business'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/owner/status'] });
+    router.replace('/');
+  }, [router]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
+      businessQuery.refetch(),
       overviewQuery.refetch(),
       healthQuery.refetch(),
       connectionsQuery.refetch(),
     ]);
     setRefreshing(false);
-  }, [overviewQuery, healthQuery, connectionsQuery]);
+  }, [businessQuery, overviewQuery, healthQuery, connectionsQuery]);
 
   const formatUptime = (seconds: number) => {
     const d = Math.floor(seconds / 86400);
@@ -179,12 +205,130 @@ export default function DeveloperScreen() {
   const bottomInset = Platform.OS === 'web' ? 34 : insets.bottom;
 
   const tabs: { id: TabId; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+    { id: 'business', label: 'Business', icon: 'trending-up-outline' },
     { id: 'overview', label: 'Overview', icon: 'grid-outline' },
     { id: 'health', label: 'Health', icon: 'pulse-outline' },
     { id: 'connections', label: 'APIs', icon: 'link-outline' },
     { id: 'requests', label: 'Requests', icon: 'people-outline' },
     { id: 'partner', label: 'Partner', icon: 'diamond-outline' },
   ];
+
+  const renderBusiness = () => {
+    const data = businessQuery.data;
+    if (businessQuery.isLoading) return <DevConsoleSkeleton />;
+    if (!data) return <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Unable to load business metrics</Text>;
+
+    const maxDay = Math.max(1, ...data.signupsByDay.map(d => d.n));
+    const money = (n: number) => n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}K` : `$${Math.round(n)}`;
+    const kpis = [
+      { label: 'Agents', value: data.users.agents, icon: 'briefcase-outline' as const, accent: '#1A8A7E' },
+      { label: 'Clients', value: data.users.clients, icon: 'people-outline' as const, accent: '#4A90D9' },
+      { label: 'New (7d)', value: data.users.new7d, icon: 'person-add-outline' as const, accent: '#8B5CF6' },
+      { label: 'New (30d)', value: data.users.new30d, icon: 'calendar-outline' as const, accent: '#22d3ee' },
+      { label: 'Active agents (30d)', value: data.users.activeAgents30d, icon: 'flash-outline' as const, accent: '#F59E0B' },
+      { label: 'Pending requests', value: data.pendingAccessRequests, icon: 'mail-unread-outline' as const, accent: '#EF4444' },
+    ];
+    const activity = [
+      { label: 'Leads', value: data.platform.leads },
+      { label: 'Deals', value: data.platform.deals },
+      { label: 'Closed deals', value: data.platform.closedDeals },
+      { label: 'Closed volume', value: money(data.platform.closedVolume) },
+      { label: 'Documents', value: data.platform.documents },
+      { label: 'Conversations', value: data.platform.threads },
+      { label: 'Messages', value: data.platform.messages },
+      { label: 'Calendar events', value: data.platform.events },
+    ];
+
+    return (
+      <View style={styles.sectionContent}>
+        <Animated.View entering={FadeInDown.delay(80).duration(400)} style={[styles.overviewHero, { backgroundColor: '#1A8A7E' }]}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroIcon}>
+              <Ionicons name="trending-up" size={28} color="rgba(255,255,255,0.9)" />
+            </View>
+            <View style={[styles.envBadge, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
+              <Text style={styles.envBadgeText}>OWNER VIEW</Text>
+            </View>
+          </View>
+          <Text style={styles.heroTitle}>TrustHome Business</Text>
+          <Text style={styles.heroVersion}>DarkWave Studios LLC</Text>
+          <View style={styles.heroStats}>
+            <View style={styles.heroStat}>
+              <Text style={styles.heroStatValue}>{data.users.total}</Text>
+              <Text style={styles.heroStatLabel}>Accounts</Text>
+            </View>
+            <View style={[styles.heroStatDivider, { backgroundColor: 'rgba(255,255,255,0.2)' }]} />
+            <View style={styles.heroStat}>
+              <Text style={styles.heroStatValue}>{data.platform.closedDeals}</Text>
+              <Text style={styles.heroStatLabel}>Closed</Text>
+            </View>
+            <View style={[styles.heroStatDivider, { backgroundColor: 'rgba(255,255,255,0.2)' }]} />
+            <View style={styles.heroStat}>
+              <Text style={styles.heroStatValue}>{formatUptime(data.uptimeSeconds)}</Text>
+              <Text style={styles.heroStatLabel}>Uptime</Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        <View style={styles.infoGrid}>
+          {kpis.map((k, i) => (
+            <Animated.View key={k.label} entering={FadeInDown.delay(140 + i * 40).duration(350)} style={[styles.infoCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
+              <Ionicons name={k.icon} size={20} color={k.accent} />
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{k.label}</Text>
+              <Text style={[styles.heroStatValue, { color: colors.text }]}>{k.value}</Text>
+            </Animated.View>
+          ))}
+        </View>
+
+        <Animated.View entering={FadeInDown.delay(380).duration(400)} style={[styles.serviceCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 0 }]}>Sign-ups, last 30 days</Text>
+          {data.signupsByDay.length === 0 ? (
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No sign-ups yet</Text>
+          ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 90, gap: 3, marginTop: 8 }}>
+              {data.signupsByDay.map(d => (
+                <View key={d.day} style={{ flex: 1, alignItems: 'center' }}>
+                  <View style={{ width: '100%', maxWidth: 14, height: Math.max(4, (d.n / maxDay) * 80), backgroundColor: '#1A8A7E', borderRadius: 3 }} />
+                </View>
+              ))}
+            </View>
+          )}
+        </Animated.View>
+
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Platform activity</Text>
+        <View style={styles.infoGrid}>
+          {activity.map(a => (
+            <View key={a.label} style={[styles.infoCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{a.label}</Text>
+              <Text style={[styles.infoValue, { color: colors.text }]}>{a.value}</Text>
+            </View>
+          ))}
+        </View>
+
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent sign-ups</Text>
+        {data.recentSignups.length === 0 ? (
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No accounts yet</Text>
+        ) : data.recentSignups.map(u => (
+          <View key={u.id} style={[styles.serviceCard, { backgroundColor: colors.cardGlass, borderColor: colors.cardGlassBorder }]}>
+            <View style={styles.serviceTop}>
+              <View style={styles.serviceLeft}>
+                <Ionicons name={u.role === 'agent' ? 'briefcase' : 'person'} size={18} color={u.role === 'agent' ? '#1A8A7E' : '#4A90D9'} />
+                <View style={styles.serviceInfo}>
+                  <Text style={[styles.serviceName, { color: colors.text }]}>{u.firstName} {u.lastName}</Text>
+                  <Text style={[styles.serviceEndpoint, { color: colors.textTertiary }]} numberOfLines={1}>{u.email}{u.brokerage ? ` · ${u.brokerage}` : ''}</Text>
+                </View>
+              </View>
+              <View style={styles.serviceRight}>
+                <Text style={[styles.latencyText, { color: colors.textTertiary }]}>
+                  {new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
 
   const renderOverview = () => {
     const data = overviewQuery.data;
@@ -216,8 +360,8 @@ export default function DeveloperScreen() {
             </View>
             <View style={[styles.heroStatDivider, { backgroundColor: 'rgba(255,255,255,0.2)' }]} />
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>{data.tenantId}</Text>
-              <Text style={styles.heroStatLabel}>Tenant</Text>
+              <Text style={styles.heroStatValue}>{data.environment === 'production' ? 'Live' : 'Dev'}</Text>
+              <Text style={styles.heroStatLabel}>Mode</Text>
             </View>
           </View>
         </Animated.View>
@@ -227,7 +371,7 @@ export default function DeveloperScreen() {
           <View style={styles.infoGrid}>
             {[
               { label: 'Owner', value: data.owner, icon: 'business-outline' as const },
-              { label: 'Ecosystem', value: data.ecosystem, icon: 'planet-outline' as const },
+              { label: 'Database', value: data.database, icon: 'server-outline' as const },
               { label: 'Trust Layer', value: data.trustLayer, icon: 'link-outline' as const },
               { label: 'Security', value: data.securitySuite, icon: 'shield-outline' as const },
             ].map((item, i) => (
@@ -371,14 +515,6 @@ export default function DeveloperScreen() {
             </View>
           </Animated.View>
         ))}
-
-        <View style={[styles.tenantBox, { backgroundColor: colors.primary + '0A', borderColor: colors.primary + '30' }]}>
-          <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
-          <View style={styles.tenantBoxText}>
-            <Text style={[styles.tenantLabel, { color: colors.text }]}>Current Tenant Space</Text>
-            <Text style={[styles.tenantValue, { color: colors.textSecondary }]}>{data.tenantId}</Text>
-          </View>
-        </View>
       </View>
     );
   };
@@ -544,50 +680,28 @@ export default function DeveloperScreen() {
 
   const [pinChecking, setPinChecking] = useState(false);
 
-  const handlePinDigit = useCallback(async (text: string, index: number) => {
-    if (text.length > 1) text = text.slice(-1);
-    if (text && !/^\d$/.test(text)) return;
-
-    setPinError(false);
-    const newDigits = [...pinDigits];
-    newDigits[index] = text;
-    setPinDigits(newDigits);
-
-    if (text && index < 3) {
-      pinInputRefs.current[index + 1]?.focus();
+  const submitPin = useCallback(async () => {
+    const entered = pinValue.trim();
+    if (!entered || pinChecking) return;
+    setPinChecking(true);
+    setPinError(null);
+    try {
+      await apiRequest('POST', '/api/owner/unlock', { pin: entered });
+      setPinValue('');
+      await queryClient.invalidateQueries({ queryKey: ['/api/owner/status'] });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      setPinError(msg.startsWith('429') ? 'Too many attempts. Try again later.'
+        : msg.startsWith('503') ? 'Owner access is not configured on the server.'
+        : 'Incorrect PIN. Try again.');
+      setPinShake(true);
+      setTimeout(() => { setPinValue(''); setPinShake(false); }, 600);
+    } finally {
+      setPinChecking(false);
     }
+  }, [pinValue, pinChecking]);
 
-    if (newDigits.every(d => d.length === 1)) {
-      const entered = newDigits.join('');
-      setPinChecking(true);
-      try {
-        await apiRequest('POST', '/api/auth/dev-pin', { pin: entered });
-        await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-        setPinUnlocked(true);
-      } catch (err) {
-        setPinError(true);
-        setPinShake(true);
-        setTimeout(() => {
-          setPinDigits(['', '', '', '']);
-          setPinShake(false);
-          pinInputRefs.current[0]?.focus();
-        }, 600);
-      } finally {
-        setPinChecking(false);
-      }
-    }
-  }, [pinDigits]);
-
-  const handlePinKeyPress = useCallback((e: any, index: number) => {
-    if (e.nativeEvent.key === 'Backspace' && !pinDigits[index] && index > 0) {
-      const newDigits = [...pinDigits];
-      newDigits[index - 1] = '';
-      setPinDigits(newDigits);
-      pinInputRefs.current[index - 1]?.focus();
-    }
-  }, [pinDigits]);
-
-  if (authLoading) {
+  if (ownerStatus.isLoading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
         <DevConsoleSkeleton />
@@ -598,58 +712,58 @@ export default function DeveloperScreen() {
   if (!pinUnlocked) {
     return (
       <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-        <Header title="Developer Console" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
+        <Header title="Owner Portal" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
         <View style={styles.pinGateContainer}>
           <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.pinGateContent}>
-            <View style={[styles.pinLockIcon, { backgroundColor: colors.primary + '14' }]}>
-              <Ionicons name="lock-closed" size={36} color={colors.primary} />
+            <View style={[styles.pinLockIcon, { backgroundColor: '#1A8A7E22' }]}>
+              <Ionicons name="lock-closed" size={36} color="#1A8A7E" />
             </View>
-            <Text style={[styles.pinTitle, { color: colors.text }]}>Restricted Access</Text>
+            <Text style={[styles.pinTitle, { color: colors.text }]}>Owner Access</Text>
             <Text style={[styles.pinSubtitle, { color: colors.textSecondary }]}>
-              Enter your developer PIN to continue
+              Enter the owner PIN to view business analytics
             </Text>
 
             <View style={[styles.pinRow, pinShake && styles.pinShake]}>
-              {pinDigits.map((digit, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.pinCell,
-                    {
-                      backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary,
-                      borderColor: pinError ? colors.error : digit ? colors.primary : colors.cardGlassBorder,
-                    },
-                  ]}
-                >
-                  <TextInput
-                    ref={(ref) => { pinInputRefs.current[i] = ref; }}
-                    style={[styles.pinInput, { color: colors.text }]}
-                    value={digit}
-                    onChangeText={(text) => handlePinDigit(text, i)}
-                    onKeyPress={(e) => handlePinKeyPress(e, i)}
-                    keyboardType="number-pad"
-                    maxLength={1}
-                    secureTextEntry
-                    autoFocus={i === 0}
-                    selectTextOnFocus
-                  />
-                </View>
-              ))}
+              <View style={[styles.pinCell, {
+                width: 220,
+                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : colors.backgroundTertiary,
+                borderColor: pinError ? colors.error : pinValue ? '#1A8A7E' : colors.cardGlassBorder,
+              }]}>
+                <TextInput
+                  testID="owner-pin-input"
+                  style={[styles.pinInput, { color: colors.text, letterSpacing: 8 }]}
+                  value={pinValue}
+                  onChangeText={(t) => { setPinError(null); setPinValue(t.replace(/\s/g, '')); }}
+                  onSubmitEditing={submitPin}
+                  keyboardType="number-pad"
+                  maxLength={32}
+                  secureTextEntry
+                  autoFocus
+                  returnKeyType="go"
+                  placeholder="PIN"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
             </View>
 
-            {pinChecking && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={[styles.pinErrorText, { color: colors.textSecondary }]}>Authenticating...</Text>
-              </View>
-            )}
+            <Pressable
+              testID="owner-pin-submit"
+              onPress={submitPin}
+              disabled={!pinValue || pinChecking}
+              style={({ pressed }) => ({
+                marginTop: 4, marginBottom: 12, paddingHorizontal: 32, paddingVertical: 12, borderRadius: 12,
+                backgroundColor: '#1A8A7E', opacity: !pinValue || pinChecking ? 0.5 : pressed ? 0.8 : 1,
+                flexDirection: 'row', alignItems: 'center', gap: 8,
+              })}
+            >
+              {pinChecking ? <ActivityIndicator size="small" color="#fff" /> : <Ionicons name="key" size={16} color="#fff" />}
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>{pinChecking ? 'Checking…' : 'Unlock'}</Text>
+            </Pressable>
 
             {pinError && (
               <Animated.View entering={FadeInDown.duration(200)}>
-                <Text style={[styles.pinErrorText, { color: colors.error }]}>
-                  Incorrect PIN. Try again.
-                </Text>
+                <Text style={[styles.pinErrorText, { color: colors.error }]}>{pinError}</Text>
               </Animated.View>
             )}
           </Animated.View>
@@ -762,7 +876,7 @@ export default function DeveloperScreen() {
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 4 }}>
               <Ionicons name="information-circle" size={18} color={colors.primary} style={{ marginTop: 1 }} />
               <Text style={{ fontSize: 12, lineHeight: 18, color: colors.textSecondary, flex: 1 }}>
-                These tools are also available from Settings {'>'} Partner Dashboard when logged in as Jennifer Lambert (PIN 7777).
+                These tools are also available from Settings {'>'} Partner Dashboard.
               </Text>
             </View>
           </View>
@@ -773,7 +887,14 @@ export default function DeveloperScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
-      <Header title="Developer Console" showBack  rightAction={<InfoButton onPress={() => setShowHelp(true)} />}/>
+      <Header title="Owner Portal" showBack  rightAction={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Pressable testID="owner-lock" onPress={handleLock} hitSlop={8} style={{ padding: 6 }} accessibilityLabel="Lock owner portal">
+            <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
+          </Pressable>
+          <InfoButton onPress={() => setShowHelp(true)} />
+        </View>
+      }/>
 
       <View style={[styles.tabBar, { backgroundColor: isDark ? '#0B1021' : colors.backgroundSecondary, borderBottomColor: colors.divider }]}>
         {tabs.map(tab => (
@@ -809,6 +930,7 @@ export default function DeveloperScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
         }
       >
+        {activeTab === 'business' && renderBusiness()}
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'health' && renderHealth()}
         {activeTab === 'connections' && renderConnections()}

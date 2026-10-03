@@ -4,6 +4,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { getQueryFn } from '@/lib/query-client';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLocation } from '@/contexts/LocationContext';
 import { useApp } from '@/contexts/AppContext';
@@ -127,33 +129,48 @@ const partnerStyles = StyleSheet.create({
 
 export function AgentDashboard() {
   const { colors, isDark } = useTheme();
-  const { user, isJenniferUser, replayPartnerDashboard, greetingName } = useApp();
+  const { user, isJenniferUser, replayPartnerDashboard, greetingName, isRealAgent } = useApp();
+  const router = useRouter();
   const { safetyModeActive, toggleSafetyMode, currentLocation, hasPermission, requestPermission } = useLocation();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; description: string; details?: string[]; examples?: string[] }>({
     visible: false, title: '', description: '',
   });
 
-  const leadsQuery = useQuery<any[]>({
-    queryKey: ['/api/leads'],
-  });
-
   const analyticsQuery = useQuery<any>({
     queryKey: ['/api/analytics/dashboard'],
+    queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: isRealAgent,
+    staleTime: 30_000,
+  });
+
+  const unreadQuery = useQuery<{ unread: number } | null>({
+    queryKey: ['/api/threads/unread-count'],
+    queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: isRealAgent,
+    refetchInterval: isRealAgent ? 30_000 : false,
   });
 
   const trustLayerQuery = useQuery<any>({
     queryKey: ['/api/trustlayer/status'],
   });
 
-  const liveLeadCount = leadsQuery.data && Array.isArray(leadsQuery.data) ? leadsQuery.data.length : null;
-  const liveAnalytics = analyticsQuery.data && !analyticsQuery.data?.error ? analyticsQuery.data : null;
+  const liveAnalytics = isRealAgent && analyticsQuery.data && !analyticsQuery.data?.error ? analyticsQuery.data : null;
+  const liveLeadCount = liveAnalytics ? Number(liveAnalytics.totalLeads ?? 0) : null;
 
   const statCards = STAT_CARDS.map(card => {
-    if (card.label === 'Pending Leads' && liveLeadCount !== null) {
-      return { ...card, value: liveLeadCount.toString() };
+    if (!liveAnalytics) return card;
+    switch (card.label) {
+      case 'Active Clients': return { ...card, value: String(liveAnalytics.totalLeads ?? 0) };
+      case 'Transactions': return { ...card, value: String(liveAnalytics.activeDeals ?? 0) };
+      case 'Pending Leads': return { ...card, value: String(liveAnalytics.newLeads30d ?? 0) };
+      case 'Messages': return { ...card, value: String(unreadQuery.data?.unread ?? 0) };
+      case 'Revenue (MTD)': {
+        const c = Number(liveAnalytics.commissionEarned ?? 0);
+        return { ...card, label: 'Commission', value: c >= 1000 ? `$${(c / 1000).toFixed(1)}K` : `$${c.toFixed(0)}` };
+      }
+      default: return card;
     }
-    return card;
   });
 
   const showInfo = (title: string, description: string, details?: string[], examples?: string[]) => {
@@ -179,7 +196,7 @@ export function AgentDashboard() {
           {(liveLeadCount !== null || liveAnalytics) && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
-              <Text style={{ fontSize: 10, color: colors.textTertiary }}>PaintPros.io</Text>
+              <Text style={{ fontSize: 10, color: colors.textTertiary }}>Your workspace (live)</Text>
             </View>
           )}
           {trustLayerQuery.data?.configured && (
@@ -393,18 +410,16 @@ export function AgentDashboard() {
           { label: 'Add Client', icon: 'person-add-outline' as const, key: 'add' },
           { label: 'New Showing', icon: 'calendar-outline' as const, key: 'showing' },
           { label: 'Create Post', icon: 'megaphone-outline' as const, key: 'post' },
-          { label: 'Room Visualizer', icon: 'color-palette-outline' as const, key: 'visualizer' },
+          { label: 'Upload Doc', icon: 'cloud-upload-outline' as const, key: 'docs' },
         ].map((btn) => {
           const isActive = selectedAction === btn.key;
           return (
             <Pressable
               key={btn.key}
               onPress={() => {
-                if (btn.key === 'visualizer') {
-                  Linking.openURL('https://paintpros.io/npp/estimate');
-                } else {
-                  setSelectedAction(isActive ? null : btn.key);
-                }
+                setSelectedAction(btn.key);
+                const dest = { add: '/leads', showing: '/showings', post: '/marketing', docs: '/documents' }[btn.key];
+                if (dest) router.push(dest as any);
               }}
               style={[
                 styles.actionBtn,

@@ -77,7 +77,7 @@ const SLIDES: GuideSlide[] = [
     gradient: ['rgba(45,52,54,0.5)', 'rgba(99,110,114,0.6)', 'rgba(45,52,54,0.75)'],
     accentColor: '#DFE6E9',
     image: require('@/assets/images/guide-crm.jpg'),
-    badge: 'PAINTPROS.IO ECOSYSTEM',
+    badge: 'YOUR PRIVATE WORKSPACE',
   },
   {
     id: 'leads',
@@ -167,10 +167,10 @@ const SLIDES: GuideSlide[] = [
     title: 'Communication\nHub',
     subtitle: 'Stay connected with every party in the transaction — clients, vendors, and team.',
     bullets: [
-      'Direct messaging with read receipts and typing indicators',
-      'Transaction-linked threads for organized conversations',
-      'Cross-ecosystem Signal Chat via PaintPros.io',
-      'File sharing and voice messages built in',
+      'Direct messaging with read receipts',
+      'Property-linked threads for organized conversations',
+      'Clients see your messages when they sign in with their email',
+      'Documents stored privately in your workspace',
     ],
     gradient: ['rgba(0,184,148,0.5)', 'rgba(0,206,201,0.55)', 'rgba(0,184,148,0.72)'],
     accentColor: '#DDFFF9',

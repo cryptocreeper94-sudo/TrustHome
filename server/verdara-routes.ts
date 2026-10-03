@@ -8,7 +8,7 @@ import {
   verdaraAssess,
   verdaraGetSpecies,
 } from "./verdara-client";
-import { getDarkWaveHeaders } from "./ecosystem-client";
+import { getDarkWaveHeaders } from "./darkwave-auth";
 
 export function registerVerdaraRoutes(app: Express) {
 
@@ -198,10 +198,6 @@ export function registerVerdaraRoutes(app: Express) {
       trustLayer: {
         configured: !!(process.env.TRUSTLAYER_API_KEY && process.env.TRUSTLAYER_API_SECRET),
         url: "https://dwsc.io",
-      },
-      paintPros: {
-        configured: !!(process.env.ORBIT_ECOSYSTEM_API_KEY && process.env.ORBIT_ECOSYSTEM_API_SECRET),
-        url: "https://paintpros.io",
       },
       verdara: {
         configured: verdaraIsConfigured(),

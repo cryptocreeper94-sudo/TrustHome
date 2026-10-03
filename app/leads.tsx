@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, ActivityIndicator, Modal, TextInput, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -9,7 +9,8 @@ import { Footer } from '@/components/ui/Footer';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTenantList, apiErrorMessage, timeAgo } from '@/lib/tenant-api';
+import { SampleDataBanner } from '@/components/ui/SampleDataBanner';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 
@@ -22,28 +23,27 @@ interface Lead {
   budget: string;
   score: number;
   temperature: 'hot' | 'warm' | 'cold';
-  stage: 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Won';
+  stage: 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Won' | 'Lost';
   property: string;
   lastActivity: string;
   notes: string;
 }
 
+/** Row shape returned by GET /api/leads (tenant-scoped). */
 interface ApiLead {
   id: string;
-  tenantId: string;
+  firstName: string;
+  lastName: string;
   email: string | null;
-  firstName: string | null;
-  lastName: string | null;
   phone: string | null;
-  address: string | null;
-  propertyType: string | null;
-  timeline: string | null;
-  urgencyScore: number | null;
-  budget: string | null;
-  description: string | null;
   source: string;
-  referralSource: string | null;
-  status: string;
+  budget: string | null;
+  score: number;
+  temperature: 'hot' | 'warm' | 'cold';
+  stage: Lead['stage'];
+  propertyInterest: string | null;
+  notes: string | null;
+  lastActivityAt: string;
   createdAt: string;
 }
 
@@ -69,34 +69,26 @@ const STAGE_COLORS: Record<string, string> = {
 };
 
 function mapApiLead(api: ApiLead): Lead {
-  const name = [api.firstName, api.lastName].filter(Boolean).join(' ') || api.phone || 'Unknown';
-  const phone = api.phone ? api.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') : '';
-  const score = api.urgencyScore ?? (api.status === 'new' ? 40 : api.status === 'contacted' ? 60 : 50);
-  const temperature: Lead['temperature'] = score >= 75 ? 'hot' : score >= 50 ? 'warm' : 'cold';
-  const stageMap: Record<string, Lead['stage']> = { new: 'New', contacted: 'Contacted', qualified: 'Qualified', proposal: 'Proposal', won: 'Won' };
-  const stage = stageMap[api.status] || 'New';
-  const budget = api.budget || 'TBD';
-  const createdDate = new Date(api.createdAt);
-  const now = new Date();
-  const diffMs = now.getTime() - createdDate.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const lastActivity = diffDays === 0 ? 'Today' : diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
-  
+  const name = [api.firstName, api.lastName].filter(Boolean).join(' ') || api.email || 'Unnamed lead';
   return {
     id: api.id,
     name,
-    phone,
+    phone: api.phone || '',
     email: api.email || '',
-    source: api.source === 'popup_modal' ? 'Website' : api.source === 'website' ? 'Website' : api.source,
-    budget,
-    score,
-    temperature,
-    stage,
-    property: api.address || 'TBD',
-    lastActivity,
-    notes: api.description || api.timeline || '',
+    source: api.source || 'Manual',
+    budget: api.budget || 'TBD',
+    score: api.score,
+    temperature: api.temperature,
+    stage: api.stage,
+    property: api.propertyInterest || 'TBD',
+    lastActivity: timeAgo(api.lastActivityAt),
+    notes: api.notes || '',
   };
 }
+
+const NEXT_STAGE: Partial<Record<Lead['stage'], Lead['stage']>> = {
+  New: 'Contacted', Contacted: 'Qualified', Qualified: 'Proposal', Proposal: 'Won',
+};
 
 const tempColors = { hot: '#F87171', warm: '#FBBF24', cold: '#60A5FA' };
 
@@ -160,9 +152,12 @@ function AnimatedFilterChip({ label, isActive, color, borderColor, onPress }: { 
   );
 }
 
-function AnimatedLeadCard({ lead, isExpanded, onToggle, index }: { lead: Lead; isExpanded: boolean; onToggle: () => void; index: number }) {
-  const [showHelp, setShowHelp] = useState(false);
+function AnimatedLeadCard({ lead, isExpanded, onToggle, index, onAdvance, onDelete }: {
+  lead: Lead; isExpanded: boolean; onToggle: () => void; index: number;
+  onAdvance?: () => void; onDelete?: () => void;
+}) {
   const { colors } = useTheme();
+  const next = NEXT_STAGE[lead.stage];
   return (
     <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
       <GlassCard style={styles.leadCard} onPress={onToggle}>
@@ -188,55 +183,34 @@ function AnimatedLeadCard({ lead, isExpanded, onToggle, index }: { lead: Lead; i
         {isExpanded && (
           <View style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
             <View style={{ flexDirection: 'row', gap: 16, marginBottom: 16 }}>
-              <AnimatedActionButton icon="call" color="#34D399" />
-              <AnimatedActionButton icon="mail" color="#60A5FA" />
-              <AnimatedActionButton icon="chatbubble" color="#38bdf8" />
-              <AnimatedActionButton icon="calendar" color="#FBBF24" />
+              <AnimatedActionButton icon="call" color="#34D399" onPress={lead.phone ? () => Linking.openURL(`tel:${lead.phone.replace(/[^\d+]/g, '')}`) : undefined} />
+              <AnimatedActionButton icon="mail" color="#60A5FA" onPress={lead.email ? () => Linking.openURL(`mailto:${lead.email}`) : undefined} />
+              <AnimatedActionButton icon="chatbubble" color="#38bdf8" onPress={lead.phone ? () => Linking.openURL(`sms:${lead.phone.replace(/[^\d+]/g, '')}`) : undefined} />
             </View>
 
-            <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>ACTIVITY FEED</Text>
-            
-            <View style={{ marginTop: 12 }}>
-              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#60A5FA20', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#60A5FA' }}>
-                  <Ionicons name="mail" size={16} color="#60A5FA" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>Sent Email - Property Inquiry</Text>
-                    <Text style={{ color: colors.textTertiary, fontSize: 11 }}>2 hours ago</Text>
-                  </View>
-                  <Text style={{ color: colors.textSecondary, marginTop: 4, fontSize: 13 }}>Follow-up regarding {lead.property !== 'TBD' ? lead.property : 'showing'}.</Text>
-                </View>
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#34D39920', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#34D399' }}>
-                  <Ionicons name="business" size={16} color="#34D399" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>Viewed Property details</Text>
-                    <Text style={{ color: colors.textTertiary, fontSize: 11 }}>Yesterday</Text>
-                  </View>
-                  <Text style={{ color: colors.textSecondary, marginTop: 4, fontSize: 13 }}>Spent 18 mins reviewing details and photos.</Text>
-                </View>
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#FBBF2420', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#FBBF24' }}>
-                  <Ionicons name="call" size={16} color="#FBBF24" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>Left Voicemail - Setup</Text>
-                    <Text style={{ color: colors.textTertiary, fontSize: 11 }}>3 days ago</Text>
-                  </View>
-                  <Text style={{ color: colors.textSecondary, marginTop: 4, fontSize: 13 }}>Called to schedule initial consultation.</Text>
-                </View>
-              </View>
-
+            <Text style={[styles.expandedLabel, { color: colors.textSecondary }]}>DETAILS</Text>
+            <View style={{ marginTop: 8, gap: 6 }}>
+              <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Stage: <Text style={{ color: STAGE_COLORS[lead.stage] || colors.text, fontWeight: '700' }}>{lead.stage}</Text></Text>
+              {!!lead.email && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{lead.email}</Text>}
+              {!!lead.phone && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{lead.phone}</Text>}
+              <Text style={{ color: colors.textTertiary, fontSize: 12 }}>Last activity: {lead.lastActivity}</Text>
+              {!!lead.notes && <Text style={{ color: colors.text, fontSize: 13, marginTop: 4, lineHeight: 19 }}>{lead.notes}</Text>}
             </View>
+
+            {(onAdvance || onDelete) && (
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                {onAdvance && next && (
+                  <Pressable testID={`lead-advance-${lead.id}`} onPress={onAdvance} style={{ flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: '#1A8A7E', alignItems: 'center' }}>
+                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Move to {next}</Text>
+                  </Pressable>
+                )}
+                {onDelete && (
+                  <Pressable testID={`lead-delete-${lead.id}`} onPress={onDelete} style={{ paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10, borderWidth: 1, borderColor: '#F8717166', alignItems: 'center' }}>
+                    <Text style={{ color: '#F87171', fontWeight: '700', fontSize: 13 }}>Delete</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
           </View>
         )}
       </GlassCard>
@@ -277,40 +251,31 @@ function AnimatedPipelineCard({ lead, index }: { lead: Lead; index: number }) {
 export default function LeadsScreen() {
   const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
-  const queryClient = useQueryClient();
+  const leadsApi = useTenantList<ApiLead>('/api/leads');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newLead, setNewLead] = useState({ firstName: '', lastName: '', phone: '', email: '', source: 'Website', budget: '' });
+  const emptyLead = { firstName: '', lastName: '', phone: '', email: '', source: 'Website', budget: '', propertyInterest: '', notes: '' };
+  const [newLead, setNewLead] = useState(emptyLead);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const handleAddLead = async () => {
-    if (!newLead.firstName && !newLead.lastName && !newLead.email) return;
+    if (!leadsApi.isLive) { setFormError('Sign in to save leads to your workspace.'); return; }
+    if (!newLead.firstName.trim()) { setFormError('First name is required.'); return; }
     setIsSubmitting(true);
+    setFormError('');
     try {
-      const res = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newLead, status: 'new' }),
-      });
-      if (res.ok) {
-        await queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-        setShowAddModal(false);
-        setNewLead({ firstName: '', lastName: '', phone: '', email: '', source: 'Website', budget: '' });
-      }
+      await leadsApi.create.mutateAsync(newLead);
+      setShowAddModal(false);
+      setNewLead(emptyLead);
     } catch (e) {
-      console.error(e);
+      setFormError(apiErrorMessage(e));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const leadsQuery = useQuery<ApiLead[]>({
-    queryKey: ['/api/leads'],
-  });
-
-  const apiLeads = leadsQuery.data && !('error' in leadsQuery.data) && Array.isArray(leadsQuery.data) 
-    ? leadsQuery.data.map(mapApiLead) 
-    : null;
-  const LEADS = apiLeads && apiLeads.length > 0 ? apiLeads : [];
+  const leadsQuery = { isLoading: leadsApi.isLoading };
+  const LEADS: Lead[] = leadsApi.isLive ? leadsApi.items.map(mapApiLead) : SAMPLE_LEADS;
 
   const [viewMode, setViewMode] = useState<'list' | 'pipeline'>('list');
   const [expandedLead, setExpandedLead] = useState<string | null>(null);
@@ -343,7 +308,7 @@ export default function LeadsScreen() {
       }));
   })();
 
-  const maxSourceCount = Math.max(...computedSources.map(s => s.count));
+  const maxSourceCount = Math.max(1, ...computedSources.map(s => s.count));
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : 'rgba(0,0,0,0.65)' }]}>
@@ -390,11 +355,17 @@ export default function LeadsScreen() {
           </BentoGrid>
         </Animated.View>
 
-        {apiLeads && apiLeads.length > 0 && (
-          <Animated.View entering={FadeInDown.duration(300).delay(80)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 4, marginTop: 6 }}>
-            <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#34D399' }} />
-            <Text style={{ fontSize: 11, color: colors.textTertiary, fontWeight: '500' as const }}>Live data</Text>
-          </Animated.View>
+        <SampleDataBanner live={leadsApi.isLive} count={LEADS.length} noun="leads" />
+
+        {leadsApi.isLive && !leadsApi.isLoading && LEADS.length === 0 && (
+          <GlassCard style={{ marginTop: 12, alignItems: 'center', paddingVertical: 28 }}>
+            <Ionicons name="people-outline" size={32} color={colors.textTertiary} />
+            <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16, marginTop: 10 }}>No leads yet</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 4, textAlign: 'center' }}>Add your first lead to start building your pipeline.</Text>
+            <Pressable testID="leads-empty-add" onPress={() => setShowAddModal(true)} style={{ marginTop: 14, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, backgroundColor: '#1A8A7E' }}>
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Add Lead</Text>
+            </Pressable>
+          </GlassCard>
         )}
 
         {hotLeads.length > 0 && (
@@ -491,6 +462,8 @@ export default function LeadsScreen() {
                 isExpanded={expandedLead === lead.id}
                 onToggle={() => setExpandedLead(expandedLead === lead.id ? null : lead.id)}
                 index={index}
+                onAdvance={leadsApi.isLive && NEXT_STAGE[lead.stage] ? () => leadsApi.update.mutate({ id: lead.id, stage: NEXT_STAGE[lead.stage] }) : undefined}
+                onDelete={leadsApi.isLive ? () => { setExpandedLead(null); leadsApi.remove.mutate(lead.id); } : undefined}
               />
             ))}
           </>
@@ -551,6 +524,19 @@ export default function LeadsScreen() {
                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Budget</Text>
                 <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.budget} onChangeText={t => setNewLead({...newLead, budget: t})} placeholder="$500,000" placeholderTextColor={colors.textTertiary} />
               </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Source</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.source} onChangeText={t => setNewLead({...newLead, source: t})} placeholder="Referral, Zillow, Open House…" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Property of interest</Text>
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.propertyInterest} onChangeText={t => setNewLead({...newLead, propertyInterest: t})} placeholder="123 Main St (optional)" placeholderTextColor={colors.textTertiary} />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Notes</Text>
+                <TextInput multiline style={[styles.input, { minHeight: 70, textAlignVertical: 'top', color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newLead.notes} onChangeText={t => setNewLead({...newLead, notes: t})} placeholder="Pre-approved, wants 3BR…" placeholderTextColor={colors.textTertiary} />
+              </View>
+              {!!formError && <Text style={{ color: '#F87171', fontSize: 13, marginTop: 4 }}>{formError}</Text>}
             </ScrollView>
             <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
               <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>

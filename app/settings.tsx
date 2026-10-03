@@ -121,8 +121,7 @@ export default function SettingsScreen() {
       icon: 'git-network',
       iconColor: '#34C759',
       items: [
-        { icon: 'git-network-outline', label: 'CRM Connection', type: 'status', value: 'Connected', statusColor: colors.success },
-        { icon: 'chatbubbles-outline', label: 'Signal Chat', type: 'status', value: 'Active', statusColor: colors.success },
+        { icon: 'server-outline', label: 'Workspace Data', type: 'status', value: 'TrustHome (private)', statusColor: colors.success },
         { icon: 'shield-outline', label: 'Trust Layer (DWTL)', type: 'status', value: trustLayerQuery.data?.configured ? 'Connected' : 'Not Configured', statusColor: trustLayerQuery.data?.configured ? colors.success : colors.warning },
         { icon: 'home-outline', label: 'MLS Connection', type: 'status', value: mlsStatus, statusColor: mlsStatusColor },
       ],

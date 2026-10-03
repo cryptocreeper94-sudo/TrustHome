@@ -218,14 +218,6 @@ const AGENT_TILES: HubTile[] = [
     badge: 'AI',
   },
   {
-    label: 'Signal Chat',
-    subtitle: 'Ecosystem messaging',
-    icon: 'radio-outline',
-    onAction: 'signal_chat',
-    gradient: ['#4F46E5', '#4338CA'],
-    accentColor: '#A5B4FC',
-  },
-  {
     label: 'Help & Support',
     subtitle: 'FAQs & contact',
     icon: 'help-circle-outline',
@@ -440,7 +432,7 @@ function HubTileItem({ tile, index, onPress, colors, isDark }: {
 
 export function NavigationHub() {
   const { colors, isDark } = useTheme();
-  const { currentRole, user, openAiAssistant, openSignalChat, greetingName } = useApp();
+  const { currentRole, user, openAiAssistant, greetingName } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -451,14 +443,12 @@ export function NavigationHub() {
   const handleTilePress = useCallback((tile: HubTile) => {
     if (tile.onAction === 'ai_assistant') {
       openAiAssistant();
-    } else if (tile.onAction === 'signal_chat') {
-      openSignalChat();
     } else if (tile.externalUrl) {
       Linking.openURL(tile.externalUrl);
     } else if (tile.route) {
       router.push(tile.route as any);
     }
-  }, [router, openAiAssistant, openSignalChat]);
+  }, [router, openAiAssistant]);
 
   const rows: HubTile[][] = [];
   let i = 0;

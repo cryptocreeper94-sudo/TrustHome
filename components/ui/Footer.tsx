@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Linking, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Linking, useWindowDimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -31,6 +31,20 @@ export function Footer() {
     } else {
       if (dwscClickRef.current.timer) clearTimeout(dwscClickRef.current.timer);
       dwscClickRef.current.timer = setTimeout(() => { dwscClickRef.current.count = 0; }, 800);
+    }
+  };
+
+  // Owner portal easter egg: tap "© 2026" five times within 2 seconds
+  const ownerTapRef = useRef({ count: 0, timer: null as ReturnType<typeof setTimeout> | null });
+  const handleCopyrightTap = () => {
+    const s = ownerTapRef.current;
+    s.count += 1;
+    if (s.timer) clearTimeout(s.timer);
+    if (s.count >= 5) {
+      s.count = 0;
+      router.push('/owner' as any);
+    } else {
+      s.timer = setTimeout(() => { s.count = 0; }, 2000);
     }
   };
 
@@ -139,7 +153,9 @@ export function Footer() {
             <Text style={[styles.bottomText, styles.bottomLink, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>DarkWave Studios LLC</Text>
           </Pressable>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
-          <Text style={[styles.bottomText, { color: isDark ? 'rgba(255,255,255,0.3)' : colors.textTertiary }]}>{'\u00A9'} 2026</Text>
+          <Pressable onPress={handleCopyrightTap} style={[styles.bottomLinkPressable, Platform.OS === 'web' ? ({ cursor: 'default', userSelect: 'none' } as any) : null]} testID="copyright-easter-egg" accessibilityLabel="Copyright">
+            <Text style={[styles.bottomText, { color: isDark ? 'rgba(255,255,255,0.3)' : colors.textTertiary }]}>{'\u00A9'} 2026</Text>
+          </Pressable>
           <Text style={[styles.bottomDot, { color: isDark ? 'rgba(255,255,255,0.2)' : colors.textTertiary }]}>{'\u00B7'}</Text>
           <Pressable onPress={() => Linking.openURL('https://dwtl.io')} style={({ pressed }) => [styles.bottomLinkPressable, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.bottomText, { color: isDark ? 'rgba(255,255,255,0.45)' : colors.textSecondary }]}>

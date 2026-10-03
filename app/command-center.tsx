@@ -145,7 +145,7 @@ const categories: Category[] = [
     title: 'Communication',
     icon: 'chatbubbles-outline',
     gradient: ['#2563EB', '#4F46E5'],
-    description: 'Stay connected with clients, partners, and your team. Real-time messaging, cross-ecosystem chat, and AI-powered assistance at your fingertips.',
+    description: 'Stay connected with clients, partners, and your team. Real-time client messaging and AI-powered assistance at your fingertips.',
     cards: [
       {
         label: 'Messages',
@@ -155,16 +155,6 @@ const categories: Category[] = [
         gradient: ['#2563EB', '#1D4ED8'],
         glowColor: 'rgba(37, 99, 235, 0.35)',
         featured: true,
-      },
-      {
-        label: 'Signal Chat',
-        description: 'Cross-ecosystem messaging via PaintPros',
-        externalUrl: 'https://paintpros.io',
-        icon: 'radio-outline',
-        gradient: ['#4338CA', '#3730A3'],
-        glowColor: 'rgba(67, 56, 202, 0.3)',
-        badge: 'Ecosystem',
-        badgeGradient: ['#6366F1', '#4F46E5'],
       },
       {
         label: 'AI Assistant',
@@ -296,18 +286,8 @@ const categories: Category[] = [
     title: 'Ecosystem',
     icon: 'planet-outline',
     gradient: ['#0284C7', '#0369A1'],
-    description: 'Connected services across the DarkWave ecosystem. Access CRM, media production, staffing, and blockchain tools from partner platforms.',
+    description: 'Connected services across the DarkWave ecosystem. Access media production, staffing, and blockchain tools from partner platforms.',
     cards: [
-      {
-        label: 'PaintPros.io',
-        description: 'CRM, Marketing Suite & SSO hub',
-        externalUrl: 'https://paintpros.io',
-        icon: 'color-wand-outline',
-        gradient: ['#0284C7', '#0369A1'],
-        glowColor: 'rgba(2, 132, 199, 0.3)',
-        badge: 'CRM',
-        badgeGradient: ['#38BDF8', '#0EA5E9'],
-      },
       {
         label: 'DarkWave Media',
         description: 'Professional video & photo production',
@@ -436,54 +416,15 @@ function CardItem({ card, index, onPress }: { card: LaunchCard; index: number; o
 export default function CommandCenterScreen() {
   const [showHelp, setShowHelp] = useState(false);
   const { colors, isDark } = useTheme();
-  const { user, isAgentAuthenticated } = useApp();
+  const { user, isAgentAuthenticated, signOut } = useApp();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const [authed, setAuthed] = useState(false);
-  const [pinDigits, setPinDigits] = useState(['', '', '', '']);
-  const [pinError, setPinError] = useState(false);
-  const [pinChecking, setPinChecking] = useState(false);
-  const [userName, setUserName] = useState('');
-  const pinRefs = useRef<(TextInput | null)[]>([null, null, null, null]);
+  const authed = isAgentAuthenticated;
+  const userName = user?.firstName || 'Agent';
 
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
   const bottomInset = Platform.OS === 'web' ? 34 : insets.bottom;
-
-  const handlePinChange = useCallback(async (text: string, index: number) => {
-    if (!/^\d?$/.test(text)) return;
-    const newDigits = [...pinDigits];
-    newDigits[index] = text;
-    setPinDigits(newDigits);
-    setPinError(false);
-
-    if (text && index < 3) {
-      pinRefs.current[index + 1]?.focus();
-    }
-
-    const fullPin = newDigits.join('');
-    if (fullPin.length === 4) {
-      setPinChecking(true);
-      try {
-        const res = await apiRequest('POST', '/api/auth/pin/verify', { pin: fullPin });
-        const data = res as any;
-        setUserName(data.name || 'Admin');
-        setAuthed(true);
-      } catch {
-        setPinError(true);
-        setPinDigits(['', '', '', '']);
-        pinRefs.current[0]?.focus();
-      } finally {
-        setPinChecking(false);
-      }
-    }
-  }, [pinDigits]);
-
-  const handlePinKeyPress = useCallback((e: any, index: number) => {
-    if (e.nativeEvent.key === 'Backspace' && !pinDigits[index] && index > 0) {
-      pinRefs.current[index - 1]?.focus();
-    }
-  }, [pinDigits]);
 
   const handleCardPress = useCallback((card: LaunchCard) => {
     if (card.externalUrl) {
@@ -493,12 +434,10 @@ export default function CommandCenterScreen() {
     }
   }, [router]);
 
-  const handleLogout = useCallback(() => {
-    setAuthed(false);
-    setPinDigits(['', '', '', '']);
-    setUserName('');
-    setPinError(false);
-  }, []);
+  const handleLogout = useCallback(async () => {
+    await signOut();
+    router.replace('/');
+  }, [signOut, router]);
 
   if (!authed) {
     return (
@@ -525,40 +464,20 @@ export default function CommandCenterScreen() {
           </View>
 
           <Text style={styles.authTitle}>Command Center</Text>
-          <Text style={styles.authSubtitle}>Enter your PIN to access mission control</Text>
+          <Text style={styles.authSubtitle}>Sign in to your agent account to open mission control</Text>
 
-          <View style={styles.pinRow}>
-            {pinDigits.map((digit, i) => (
-              <TextInput
-                key={i}
-                ref={ref => { pinRefs.current[i] = ref; }}
-                style={[
-                  styles.pinBox,
-                  digit ? styles.pinBoxFilled : null,
-                  pinError ? styles.pinBoxError : null,
-                ]}
-                value={digit}
-                onChangeText={t => handlePinChange(t, i)}
-                onKeyPress={e => handlePinKeyPress(e, i)}
-                keyboardType="number-pad"
-                maxLength={1}
-                textAlign="center"
-                secureTextEntry
-                autoFocus={i === 0}
-              />
-            ))}
-          </View>
-
-          {pinChecking && (
-            <ActivityIndicator color="#1A8A7E" size="small" style={{ marginTop: 16 }} />
-          )}
-
-          {pinError && (
-            <Animated.View entering={FadeInDown.duration(300)} style={styles.authError}>
-              <Ionicons name="alert-circle" size={16} color="#EF4444" />
-              <Text style={styles.authErrorText}>Invalid PIN. Please try again.</Text>
-            </Animated.View>
-          )}
+          <Pressable
+            testID="command-center-signin"
+            onPress={() => router.push('/team' as any)}
+            style={({ pressed }) => ({
+              marginTop: 24, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 14,
+              backgroundColor: '#1A8A7E', opacity: pressed ? 0.85 : 1,
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+            })}
+          >
+            <Ionicons name="log-in-outline" size={18} color="#fff" />
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Sign In</Text>
+          </Pressable>
 
           <View style={styles.authFooter}>
             <Ionicons name="lock-closed" size={12} color="rgba(255,255,255,0.25)" />

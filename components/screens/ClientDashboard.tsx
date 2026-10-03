@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Image, Platform, Linking
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
@@ -99,6 +100,7 @@ const tlStyles = StyleSheet.create({
 
 export function ClientDashboard() {
   const { colors, isDark } = useTheme();
+  const router = useRouter();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; description: string; details?: string[]; examples?: string[] }>({
     visible: false, title: '', description: '',
@@ -290,30 +292,6 @@ export function ClientDashboard() {
       </HorizontalCarousel>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.duration(400).delay(600)}>
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Tools</Text>
-      </View>
-
-      <Pressable
-        onPress={() => Linking.openURL('https://paintpros.io/npp/estimate')}
-        style={styles.toolCard}
-      >
-        <GlassCard compact style={styles.toolCardInner}>
-          <View style={styles.toolRow}>
-            <View style={[styles.toolIconWrap, { backgroundColor: isDark ? 'rgba(26,138,126,0.15)' : 'rgba(26,138,126,0.08)' }]}>
-              <Ionicons name="color-palette-outline" size={22} color={colors.primary} />
-            </View>
-            <View style={styles.toolInfo}>
-              <Text style={[styles.toolName, { color: colors.text }]}>Room Visualizer</Text>
-              <Text style={[styles.toolDesc, { color: colors.textSecondary }]}>AI-powered room visualization, size estimates, and color matching</Text>
-            </View>
-            <Ionicons name="open-outline" size={16} color={colors.textTertiary} />
-          </View>
-        </GlassCard>
-      </Pressable>
-      </Animated.View>
-
       <Animated.View entering={FadeInDown.duration(400).delay(700)}>
       <View style={styles.quickActions}>
         {[
@@ -325,7 +303,11 @@ export function ClientDashboard() {
           return (
             <Pressable
               key={btn.key}
-              onPress={() => setSelectedAction(isActive ? null : btn.key)}
+              onPress={() => {
+                const dest = ({ message: '/messages', schedule: '/showings' } as Record<string, string>)[btn.key];
+                if (dest) router.push(dest as any);
+                else setSelectedAction(isActive ? null : btn.key);
+              }}
               style={[
                 styles.actionBtn,
                 {

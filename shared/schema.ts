@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, real, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, real, integer, boolean, index, customType } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -379,5 +379,161 @@ export const insertAgentProfileSchema = createInsertSchema(agentProfiles).pick({
 
 export type InsertAgentProfile = z.infer<typeof insertAgentProfileSchema>;
 export type AgentProfile = typeof agentProfiles.$inferSelect;
+
+// ═══════════════════════════════════════════════════════════════════
+// Tenant-scoped agent data. Every row is owned by one agent (users.id).
+// The server always sets agent_id from the session — never from the client.
+// ═══════════════════════════════════════════════════════════════════
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return "bytea";
+  },
+});
+
+export const leads = pgTable("leads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull().default(''),
+  email: text("email"),
+  phone: text("phone"),
+  source: text("source").notNull().default('Manual'),
+  budget: text("budget"),
+  score: integer("score").notNull().default(50),
+  temperature: text("temperature").notNull().default('warm'), // hot | warm | cold
+  stage: text("stage").notNull().default('New'), // New | Contacted | Qualified | Proposal | Won | Lost
+  propertyInterest: text("property_interest"),
+  notes: text("notes"),
+  lastActivityAt: timestamp("last_activity_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("leads_agent_idx").on(t.agentId)]);
+
+export type Lead = typeof leads.$inferSelect;
+
+export const deals = pgTable("deals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  propertyAddress: text("property_address").notNull(),
+  clientName: text("client_name").notNull(),
+  side: text("side").notNull().default('buyer'), // buyer | seller | dual
+  stage: text("stage").notNull().default('lead'), // lead | showing | offer | under_contract | closing | closed | lost
+  price: real("price"),
+  commissionRate: real("commission_rate"),
+  closingDate: text("closing_date"),
+  leadId: varchar("lead_id"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("deals_agent_idx").on(t.agentId)]);
+
+export type Deal = typeof deals.$inferSelect;
+
+export const calendarEvents = pgTable("calendar_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  type: text("type").notNull().default('Showing'), // Showing | Open House | Listing Appt | Meeting | Inspection
+  title: text("title"),
+  address: text("address"),
+  clientName: text("client_name"),
+  startsAt: timestamp("starts_at").notNull(),
+  durationMinutes: integer("duration_minutes").notNull().default(60),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("calendar_events_agent_idx").on(t.agentId, t.startsAt)]);
+
+export type CalendarEventRow = typeof calendarEvents.$inferSelect;
+
+export const properties = pgTable("properties", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  address: text("address").notNull(),
+  city: text("city"),
+  price: real("price"),
+  beds: integer("beds"),
+  baths: real("baths"),
+  sqft: integer("sqft"),
+  status: text("status").notNull().default('Active'), // Active | Under Contract | Buyer Shortlist | Sold
+  mls: text("mls"),
+  imageUrl: text("image_url"),
+  description: text("description"),
+  features: text("features").notNull().default('[]'), // JSON array of strings
+  showingCount: integer("showing_count").notNull().default(0),
+  listedAt: timestamp("listed_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("properties_agent_idx").on(t.agentId)]);
+
+export type PropertyRow = typeof properties.$inferSelect;
+
+export const agentTasks = pgTable("agent_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  title: text("title").notNull(),
+  priority: text("priority").notNull().default('Normal'), // High | Medium | Low | Normal
+  dueAt: text("due_at"),
+  completed: boolean("completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("agent_tasks_agent_idx").on(t.agentId)]);
+
+export type AgentTask = typeof agentTasks.$inferSelect;
+
+export const documents = pgTable("documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  name: text("name").notNull(),
+  mimeType: text("mime_type").notNull().default('application/octet-stream'),
+  sizeBytes: integer("size_bytes").notNull().default(0),
+  sha256: text("sha256").notNull(),
+  status: text("status").notNull().default('Pending'), // Pending | Needs Review | Signed | Verified
+  transactionLabel: text("transaction_label"),
+  dealId: varchar("deal_id"),
+  parties: text("parties").notNull().default('[]'), // JSON array of strings
+  version: integer("version").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("documents_agent_idx").on(t.agentId)]);
+
+export type DocumentRow = typeof documents.$inferSelect;
+
+// File bytes kept in a separate table so listing documents stays light.
+export const documentFiles = pgTable("document_files", {
+  documentId: varchar("document_id").primaryKey().references(() => documents.id, { onDelete: "cascade" }),
+  data: bytea("data").notNull(),
+});
+
+// Agent ↔ client messaging. A client is matched by user id, or by email
+// (so an agent can start a thread before the client has an account).
+export const messageThreads = pgTable("message_threads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  clientUserId: varchar("client_user_id"),
+  clientName: text("client_name").notNull(),
+  clientEmail: text("client_email"),
+  context: text("context"),
+  lastMessageAt: timestamp("last_message_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  index("message_threads_agent_idx").on(t.agentId),
+  index("message_threads_client_idx").on(t.clientUserId),
+  index("message_threads_client_email_idx").on(t.clientEmail),
+]);
+
+export type MessageThread = typeof messageThreads.$inferSelect;
+
+export const threadMessages = pgTable("thread_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  threadId: varchar("thread_id").notNull().references(() => messageThreads.id, { onDelete: "cascade" }),
+  senderUserId: varchar("sender_user_id").notNull(),
+  senderRole: text("sender_role").notNull(), // agent | client
+  body: text("body").notNull(),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [index("thread_messages_thread_idx").on(t.threadId, t.createdAt)]);
+
+export type ThreadMessage = typeof threadMessages.$inferSelect;
 
 export * from "./models/chat";

@@ -15,6 +15,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { registerTrustLayerSSO } from './trustLayerSSO';
 import { registerAffiliateRoutes } from "./affiliate";
+import { registerTenantRoutes } from "./tenant-routes";
 
 const app = express();
 app.use(compression());
@@ -32,6 +33,7 @@ declare module 'express-session' {
     userRole: string;
     userEmail: string;
     userName: string;
+    ownerUntil: number;
   }
 }
 
@@ -470,6 +472,7 @@ function setupErrorHandler(app: express.Application) {
 
   configureExpoAndLanding(app);
 
+  registerTenantRoutes(app); // tenant data + owner portal; registered first so it owns these paths
   const server = await registerRoutes(app);
   // Trust Layer SSO consumer endpoints
   registerTrustLayerSSO(app);

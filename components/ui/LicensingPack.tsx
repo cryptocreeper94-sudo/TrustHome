@@ -41,7 +41,7 @@ const INCLUDED_FEATURES = [
   { label: 'API access & CRM integration', icon: 'code-slash' },
   { label: 'Blockchain verification', icon: 'shield-checkmark' },
   { label: 'AI marketing tools', icon: 'sparkles' },
-  { label: 'Signal Chat messaging', icon: 'chatbubbles' },
+  { label: 'Client messaging & document vault', icon: 'chatbubbles' },
   { label: 'Media Studio access', icon: 'videocam' },
   { label: 'Quarterly business reviews', icon: 'trending-up' },
   { label: 'Compliance & audit reports', icon: 'document-lock' },

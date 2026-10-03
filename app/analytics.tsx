@@ -3,6 +3,8 @@ import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator, Platf
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { getQueryFn } from '@/lib/query-client';
+import { useApp } from '@/contexts/AppContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -65,28 +67,33 @@ function formatCurrency(val: number): string {
   return '$' + val.toLocaleString();
 }
 
+const SOURCE_COLORS = ['#1A8A7E', '#007AFF', '#FF9500', '#AF52DE', '#FF3B30', '#34C759'];
+const PERIOD_KEY: Record<Period, 'month' | 'quarter' | 'year'> = { 'This Month': 'month', Quarter: 'quarter', Year: 'year' };
+const ratio = (a: number, b: number) => (b > 0 ? a / b : 0);
+
 export default function AnalyticsScreen() {
   const { colors, isDark } = useTheme();
+  const { isRealAgent } = useApp();
   const [period, setPeriod] = useState<Period>('This Month');
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const dashboardQuery = useQuery<any>({
     queryKey: ['/api/analytics/dashboard'],
+    queryFn: getQueryFn({ on401: 'returnNull' }),
+    enabled: isRealAgent,
+    staleTime: 30_000,
   });
 
-  const apiDashboard = dashboardQuery.data && !dashboardQuery.data?.error ? dashboardQuery.data : null;
+  const apiDashboard = isRealAgent && dashboardQuery.data && !dashboardQuery.data?.error ? dashboardQuery.data : null;
+  const livePeriod = apiDashboard?.periods?.[PERIOD_KEY[period]];
 
-  const baseData = SAMPLE_DATA[period];
-  const data = apiDashboard ? {
-    ...baseData,
-    funnel: {
-      ...baseData.funnel,
-      leads: period === 'This Month' ? (apiDashboard.thisMonth?.visitors ?? baseData.funnel.leads) : baseData.funnel.leads,
-    },
-  } : baseData;
+  const data: PeriodData = livePeriod ? {
+    ...livePeriod,
+    sources: (livePeriod.sources || []).map((s: { name: string; value: number }, i: number) => ({ ...s, color: SOURCE_COLORS[i % SOURCE_COLORS.length] })),
+  } : SAMPLE_DATA[period];
 
-  const maxRevenue = Math.max(...data.revenueByMonth.map(m => m.value));
-  const maxSource = Math.max(...data.sources.map(s => s.value));
+  const maxRevenue = Math.max(1, ...data.revenueByMonth.map(m => m.value));
+  const maxSource = Math.max(1, ...data.sources.map(s => s.value));
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
@@ -110,7 +117,7 @@ export default function AnalyticsScreen() {
         {apiDashboard && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 16, marginTop: 4 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759' }} />
-            <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live analytics data</Text>
+            <Text style={{ fontSize: 10, color: colors.textTertiary }}>Live · your TrustHome workspace</Text>
           </View>
         )}
 
@@ -162,13 +169,13 @@ export default function AnalyticsScreen() {
           <AccordionSection title="Conversion Funnel" icon="funnel" iconColor="#007AFF" defaultOpen={true}>
             {[
               { label: 'Leads', value: data.funnel.leads, pct: null },
-              { label: 'Showings', value: data.funnel.showings, pct: ((data.funnel.showings / data.funnel.leads) * 100).toFixed(1) },
-              { label: 'Offers', value: data.funnel.offers, pct: ((data.funnel.offers / data.funnel.showings) * 100).toFixed(1) },
-              { label: 'Closings', value: data.funnel.closings, pct: ((data.funnel.closings / data.funnel.offers) * 100).toFixed(1) },
+              { label: 'Showings', value: data.funnel.showings, pct: (ratio(data.funnel.showings, data.funnel.leads) * 100).toFixed(1) },
+              { label: 'Offers', value: data.funnel.offers, pct: (ratio(data.funnel.offers, data.funnel.showings) * 100).toFixed(1) },
+              { label: 'Closings', value: data.funnel.closings, pct: (ratio(data.funnel.closings, data.funnel.offers) * 100).toFixed(1) },
             ].map((step, i, arr) => (
               <View key={step.label}>
                 <View style={styles.funnelRow}>
-                  <View style={[styles.funnelBar, { width: `${(step.value / data.funnel.leads) * 100}%` as any, backgroundColor: colors.primaryAction, opacity: 1 - (i * 0.15) }]} />
+                  <View style={[styles.funnelBar, { width: `${Math.min(100, ratio(step.value, data.funnel.leads) * 100)}%` as any, backgroundColor: colors.primaryAction, opacity: 1 - (i * 0.15) }]} />
                   <View style={styles.funnelLabelRow}>
                     <Text style={[styles.funnelLabel, { color: colors.text }]}>{step.label}</Text>
                     <Text style={[styles.funnelValue, { color: colors.text }]}>{step.value}</Text>

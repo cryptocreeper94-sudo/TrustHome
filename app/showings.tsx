@@ -10,6 +10,8 @@ import { SCREEN_HELP } from '@/constants/helpContent';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { AccordionSection } from '@/components/ui/AccordionSection';
+import { SampleDataBanner } from '@/components/ui/SampleDataBanner';
+import { useTenantList, apiErrorMessage } from '@/lib/tenant-api';
 
 type EventType = 'Showing' | 'Open House' | 'Listing Appt' | 'Meeting' | 'Inspection';
 
@@ -43,7 +45,55 @@ const EVENT_ICONS: Record<EventType, keyof typeof Ionicons.glyphMap> = {
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-let EVENTS: CalendarEvent[] = [];
+/** Row shape from /api/calendar/events */
+interface ApiEvent {
+  id: string;
+  type: EventType;
+  title: string | null;
+  address: string | null;
+  clientName: string | null;
+  startsAt: string;
+  durationMinutes: number;
+  notes: string | null;
+}
+
+function fmtTime(d: Date) {
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function toCalendarEvent(e: ApiEvent): CalendarEvent {
+  const d = new Date(e.startsAt);
+  return {
+    id: e.id, day: d.getDate(), month: d.getMonth(), year: d.getFullYear(), time: fmtTime(d),
+    type: e.type, address: e.address || e.title || '', client: e.clientName || '',
+  };
+}
+
+/** "10:00 AM", "2pm", "14:30" → [hours, minutes] (defaults to 10:00) */
+function parseTime(s: string): [number, number] {
+  const m = s.trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/);
+  if (!m) return [10, 0];
+  let h = Number(m[1]);
+  const min = Number(m[2] || 0);
+  const ap = m[3];
+  if (ap?.startsWith('p') && h < 12) h += 12;
+  if (ap?.startsWith('a') && h === 12) h = 0;
+  return [Math.min(23, h), Math.min(59, min)];
+}
+
+function makeSampleEvents(): CalendarEvent[] {
+  const base = new Date();
+  const at = (addDays: number, time: string, type: EventType, address: string, client: string): CalendarEvent => {
+    const d = new Date(base); d.setDate(d.getDate() + addDays);
+    return { id: `s${addDays}${time}`, day: d.getDate(), month: d.getMonth(), year: d.getFullYear(), time, type, address, client };
+  };
+  return [
+    at(0, '10:00 AM', 'Showing', '1847 Oak Valley Dr', 'Sarah M.'),
+    at(0, '1:00 PM', 'Listing Appt', '890 Magnolia Way', 'Robert K.'),
+    at(1, '11:30 AM', 'Inspection', '2205 Birch Creek Ln', 'Amanda C.'),
+    at(3, '2:00 PM', 'Open House', '445 Sunset Blvd', ''),
+  ];
+}
 
 function getDaysInMonth(month: number, year: number) {
   return new Date(year, month + 1, 0).getDate();
@@ -56,7 +106,11 @@ function getFirstDayOfMonth(month: number, year: number) {
 export default function ShowingsScreen() {
   const { colors, isDark } = useTheme();
   const now = new Date();
-  const [events, setEvents] = useState(EVENTS);
+  const api = useTenantList<ApiEvent>('/api/calendar/events');
+  const [sampleEvents, setSampleEvents] = useState<CalendarEvent[]>(makeSampleEvents);
+  const events: CalendarEvent[] = useMemo(() => (api.isLive ? api.items.map(toCalendarEvent) : sampleEvents), [api.isLive, api.items, sampleEvents]);
+  const [formError, setFormError] = useState('');
+  const [pageError, setPageError] = useState('');
   const [currentMonth, setCurrentMonth] = useState(now.getMonth());
   const [currentYear, setCurrentYear] = useState(now.getFullYear());
   const [selectedDay, setSelectedDay] = useState(now.getDate());
@@ -123,26 +177,38 @@ export default function ShowingsScreen() {
     setSelectedDay(1);
   };
 
-  const handleAddEvent = () => {
-    if (!newEvent.address || !newEvent.client) return;
+  const handleAddEvent = async () => {
+    if (!newEvent.address.trim()) { setFormError('Enter an address or location.'); return; }
+    setFormError('');
     setIsSubmitting(true);
-    setTimeout(() => {
-      const e: CalendarEvent = {
-        id: Math.random().toString(),
-        day: selectedDay,
-        month: currentMonth,
-        year: currentYear,
-        time: newEvent.time,
-        type: newEvent.type,
-        address: newEvent.address,
-        client: newEvent.client
-      };
-      EVENTS.push(e);
-      setEvents([...EVENTS]);
+    const [h, m] = parseTime(newEvent.time);
+    const startsAt = new Date(currentYear, currentMonth, selectedDay, h, m);
+    try {
+      if (api.isLive) {
+        await api.create.mutateAsync({
+          type: newEvent.type, address: newEvent.address.trim(), clientName: newEvent.client.trim() || null,
+          startsAt: startsAt.toISOString(), durationMinutes: 60,
+        });
+      } else {
+        setSampleEvents(prev => [...prev, {
+          id: `s${Date.now()}`, day: selectedDay, month: currentMonth, year: currentYear, time: fmtTime(startsAt),
+          type: newEvent.type, address: newEvent.address.trim(), client: newEvent.client.trim(),
+        }]);
+      }
       setShowAddModal(false);
       setNewEvent({ address: '', client: '', time: '10:00 AM', type: 'Showing' });
+    } catch (e) {
+      setFormError(apiErrorMessage(e));
+    } finally {
       setIsSubmitting(false);
-    }, 500);
+    }
+  };
+
+  const removeEvent = async (ev: CalendarEvent) => {
+    if (typeof window !== 'undefined' && window.confirm && !window.confirm(`Delete ${ev.type.toLowerCase()} at ${ev.address}?`)) return;
+    setPageError('');
+    if (!api.isLive) { setSampleEvents(prev => prev.filter(e => e.id !== ev.id)); return; }
+    try { await api.remove.mutateAsync(ev.id); } catch (e) { setPageError(apiErrorMessage(e)); }
   };
 
   const calendarCells: (number | null)[] = [];
@@ -166,14 +232,17 @@ export default function ShowingsScreen() {
           showBack 
           rightAction={
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primaryAction }]}>
+              <Pressable onPress={() => { setFormError(''); setShowAddModal(true); }} style={[styles.headerAddBtn, { backgroundColor: '#1A8A7E' }]} testID="calendar-add-btn">
                 <Ionicons name="add" size={20} color="#FFF" />
-                <Text style={[styles.headerAddText, { color: colors.primary }]}>Add</Text>
+                <Text style={[styles.headerAddText, { color: '#FFF' }]}>Add</Text>
               </Pressable>
               <InfoButton onPress={() => setShowHelp(true)} />
             </View>
           } 
         />
+
+        <SampleDataBanner live={api.isLive} count={events.length} noun="events" />
+        {pageError ? <Text style={{ color: '#F87171', marginBottom: 8 }}>{pageError}</Text> : null}
 
         <BentoGrid columns={3} gap={10}>
           <GlassCard compact style={styles.statCard}>
@@ -319,7 +388,12 @@ export default function ShowingsScreen() {
                         <Ionicons name={EVENT_ICONS[event.type]} size={13} color={EVENT_COLORS[event.type]} />
                         <Text style={[styles.eventTypeText, { color: EVENT_COLORS[event.type] }]}>{event.type}</Text>
                       </View>
-                      <Text style={[styles.eventTime, { color: colors.textSecondary }]}>{event.time}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Text style={[styles.eventTime, { color: colors.textSecondary }]}>{event.time}</Text>
+                        <Pressable onPress={() => removeEvent(event)} hitSlop={8} accessibilityLabel="Delete event">
+                          <Ionicons name="trash-outline" size={15} color={colors.textTertiary} />
+                        </Pressable>
+                      </View>
                     </View>
                     <Text style={[styles.eventAddress, { color: colors.text }]}>{event.address}</Text>
                     <View style={styles.eventClientRow}>
@@ -352,7 +426,12 @@ export default function ShowingsScreen() {
                           <Ionicons name={EVENT_ICONS[event.type]} size={13} color={EVENT_COLORS[event.type]} />
                           <Text style={[styles.eventTypeText, { color: EVENT_COLORS[event.type] }]}>{event.type}</Text>
                         </View>
-                        <Text style={[styles.eventTime, { color: colors.textSecondary }]}>{event.time}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                          <Text style={[styles.eventTime, { color: colors.textSecondary }]}>{event.time}</Text>
+                          <Pressable onPress={() => removeEvent(event)} hitSlop={8} accessibilityLabel="Delete event">
+                            <Ionicons name="trash-outline" size={15} color={colors.textTertiary} />
+                          </Pressable>
+                        </View>
                       </View>
                       <Text style={[styles.eventAddress, { color: colors.text }]}>{event.address}</Text>
                       <View style={styles.eventClientRow}>
@@ -402,6 +481,7 @@ export default function ShowingsScreen() {
                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Time</Text>
                 <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newEvent.time} onChangeText={t => setNewEvent({...newEvent, time: t})} placeholder="10:00 AM" placeholderTextColor={colors.textTertiary} />
               </View>
+              {formError ? <Text style={{ color: '#F87171', fontSize: 13, marginBottom: 8 }}>{formError}</Text> : null}
             </ScrollView>
             <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
               <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>

@@ -15,6 +15,12 @@ import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { TrustShieldBadge } from '@/components/ui/TrustShieldBadge';
 import { Footer } from '@/components/ui/Footer';
 import { PlanBanner, FaceIdNudge, GettingStartedCard, useOnboardingRedirect } from '@/components/account/AccountWidgets';
+import { useTenantList, formatMoney, timeAgo } from '@/lib/tenant-api';
+
+const DEAL_STAGE_LABELS: Record<string, string> = {
+  lead: 'Lead', pre_approval: 'Pre-Approval', home_search: 'Home Search', showing: 'Showing', offer: 'Offer',
+  under_contract: 'Under Contract', inspection: 'Inspection', closing: 'Closing', closed: 'Closed', lost: 'Lost',
+};
 
 const CARD_IMAGES = {
   team: require('@/assets/images/cards/team.jpg'),
@@ -160,6 +166,60 @@ export function AgentDashboard() {
   const liveAnalytics = isRealAgent && analyticsQuery.data && !analyticsQuery.data?.error ? analyticsQuery.data : null;
   const liveLeadCount = liveAnalytics ? Number(liveAnalytics.totalLeads ?? 0) : null;
 
+  const dealsApi = useTenantList<any>('/api/deals');
+  const eventsApi = useTenantList<any>('/api/calendar/events');
+  const leadsApi = useTenantList<any>('/api/leads');
+  const homeImages = [CARD_IMAGES.home1, CARD_IMAGES.home2, CARD_IMAGES.home3, CARD_IMAGES.home4];
+
+  const todaySchedule = !isRealAgent ? MOCK_TODAY_SCHEDULE : eventsApi.items
+    .filter((e: any) => e.startsAt && new Date(e.startsAt).toDateString() === new Date().toDateString())
+    .sort((a: any, b: any) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
+    .map((e: any) => ({
+      time: new Date(e.startsAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      type: e.type || 'Event',
+      address: e.address || e.title || '',
+      client: e.clientName || '',
+    }));
+
+  const activeDeals = !isRealAgent ? MOCK_ACTIVE_DEALS : dealsApi.items
+    .filter((d: any) => d.stage !== 'closed' && d.stage !== 'lost')
+    .map((d: any, i: number) => ({
+      address: d.propertyAddress,
+      client: d.clientName,
+      stage: DEAL_STAGE_LABELS[d.stage] || d.stage,
+      price: d.price ? formatMoney(d.price) : '',
+      daysActive: d.createdAt ? Math.max(0, Math.floor((Date.now() - new Date(d.createdAt).getTime()) / 86400000)) : 0,
+      image: homeImages[i % homeImages.length],
+    }));
+
+  const tempRank: Record<string, number> = { hot: 0, warm: 1, cold: 2 };
+  const hotLeads = !isRealAgent ? MOCK_HOT_LEADS : leadsApi.items
+    .filter((l: any) => l.stage !== 'Won' && l.stage !== 'Lost' && l.temperature !== 'cold')
+    .sort((a: any, b: any) => (tempRank[a.temperature] ?? 1) - (tempRank[b.temperature] ?? 1))
+    .slice(0, 8)
+    .map((l: any) => ({
+      name: `${l.firstName} ${l.lastName || ''}`.trim(),
+      source: l.source || 'Manual',
+      temp: l.temperature,
+      lastContact: timeAgo(l.lastActivityAt),
+      budget: l.budget || '',
+    }));
+
+  const EmptyPrompt = ({ icon, text, cta, to }: { icon: keyof typeof Ionicons.glyphMap; text: string; cta: string; to: string }) => (
+    <Pressable onPress={() => router.push(to as any)} style={{ marginHorizontal: 16, marginBottom: 8 }}>
+      <GlassCard compact>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Ionicons name={icon} size={22} color="#1A8A7E" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600' }}>{text}</Text>
+            <Text style={{ color: '#1A8A7E', fontSize: 13, fontWeight: '700', marginTop: 2 }}>{cta}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+        </View>
+      </GlassCard>
+    </Pressable>
+  );
+
   const statCards = STAT_CARDS.map(card => {
     if (!liveAnalytics) return card;
     switch (card.label) {
@@ -267,12 +327,15 @@ export function AgentDashboard() {
       <Animated.View entering={FadeInDown.duration(400).delay(300)}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Today's Schedule</Text>
-        <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>{MOCK_TODAY_SCHEDULE.length} events</Text>
+        <Text style={[styles.sectionCount, { color: colors.textSecondary }]}>{todaySchedule.length} events</Text>
       </View>
 
+      {isRealAgent && todaySchedule.length === 0 ? (
+        <EmptyPrompt icon="calendar-outline" text="Nothing on your calendar today" cta="Open Calendar to add a showing" to="/showings" />
+      ) : null}
       <View style={styles.scheduleList}>
-        {MOCK_TODAY_SCHEDULE.map((item, i) => (
-          <Pressable key={i}>
+        {todaySchedule.map((item, i) => (
+          <Pressable key={i} onPress={() => router.push('/showings')}>
             <GlassCard compact style={styles.scheduleCard}>
               <View style={styles.scheduleRow}>
                 <View style={[styles.timePill, { backgroundColor: isDark ? 'rgba(26,138,126,0.15)' : 'rgba(26,138,126,0.1)' }]}>
@@ -296,9 +359,15 @@ export function AgentDashboard() {
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(400).delay(400)}>
-      <HorizontalCarousel title="Active Deals" onSeeAll={() => {}} itemWidth={260}>
-        {MOCK_ACTIVE_DEALS.map((deal, i) => (
-          <Pressable key={i}>
+      {isRealAgent && activeDeals.length === 0 ? (
+        <>
+          <View style={styles.sectionHeader}><Text style={[styles.sectionTitle, { color: colors.text }]}>Active Deals</Text></View>
+          <EmptyPrompt icon="swap-horizontal" text="No active deals yet" cta="Open Transactions to add one" to="/transactions" />
+        </>
+      ) : (
+      <HorizontalCarousel title="Active Deals" onSeeAll={() => router.push('/transactions')} itemWidth={260}>
+        {activeDeals.map((deal, i) => (
+          <Pressable key={i} onPress={() => router.push('/transactions')}>
             <View style={styles.dealCard}>
               <Image source={deal.image} style={styles.dealImage} resizeMode="cover" />
               <LinearGradient
@@ -320,12 +389,19 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      )}
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(400).delay(500)}>
-      <HorizontalCarousel title="Hot Leads" onSeeAll={() => {}} itemWidth={180}>
-        {MOCK_HOT_LEADS.map((lead, i) => (
-          <Pressable key={i}>
+      {isRealAgent && hotLeads.length === 0 ? (
+        <>
+          <View style={styles.sectionHeader}><Text style={[styles.sectionTitle, { color: colors.text }]}>Hot Leads</Text></View>
+          <EmptyPrompt icon="flame-outline" text="No hot leads right now" cta="Open Leads to add a contact" to="/leads" />
+        </>
+      ) : (
+      <HorizontalCarousel title="Hot Leads" onSeeAll={() => router.push('/leads')} itemWidth={180}>
+        {hotLeads.map((lead, i) => (
+          <Pressable key={i} onPress={() => router.push('/leads')}>
             <View style={[styles.leadCard, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
               <View style={styles.leadHeader}>
                 <View style={[styles.tempDot, { backgroundColor: lead.temp === 'hot' ? colors.error : colors.warning }]} />
@@ -338,6 +414,7 @@ export function AgentDashboard() {
           </Pressable>
         ))}
       </HorizontalCarousel>
+      )}
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(400).delay(600)}>

@@ -241,7 +241,7 @@ const dealSchema = z.object({
   propertyAddress: z.string().trim().min(1, "Property address is required"),
   clientName: z.string().trim().min(1, "Client name is required"),
   side: z.enum(["buyer", "seller", "dual"]).default("buyer"),
-  stage: z.enum(["lead", "showing", "offer", "under_contract", "closing", "closed", "lost"]).default("lead"),
+  stage: z.enum(["lead", "pre_approval", "home_search", "showing", "offer", "under_contract", "inspection", "closing", "closed", "lost"]).default("lead"),
   price: optNum,
   commissionRate: optNum,
   closingDate: optStr,

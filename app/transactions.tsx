@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
@@ -10,6 +11,10 @@ import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 import { BentoGrid } from '@/components/ui/BentoGrid';
 import { AccordionSection } from '@/components/ui/AccordionSection';
+import { SampleDataBanner } from '@/components/ui/SampleDataBanner';
+import { useTenantList, apiErrorMessage, formatMoney } from '@/lib/tenant-api';
+
+const TEAL = '#1A8A7E';
 
 const STAGE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   pre_approval: 'document-text',
@@ -17,49 +22,115 @@ const STAGE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   offer: 'pricetag',
   under_contract: 'shield-checkmark',
   inspection: 'construct',
-  closing: 'checkmark-circle',
+  closing: 'key',
+  closed: 'checkmark-done-circle',
+};
+
+const STAGE_DEFS = [
+  { key: 'pre_approval', label: 'Pre-Approval', color: '#FBBF24' },
+  { key: 'home_search', label: 'Home Search', color: '#60A5FA' },
+  { key: 'offer', label: 'Offer', color: '#38bdf8' },
+  { key: 'under_contract', label: 'Under Contract', color: '#1A8A7E' },
+  { key: 'inspection', label: 'Inspection', color: '#F87171' },
+  { key: 'closing', label: 'Closing', color: '#34D399' },
+  { key: 'closed', label: 'Closed', color: '#A78BFA' },
+] as const;
+
+const NEXT_STAGE: Record<string, string> = {
+  pre_approval: 'home_search', home_search: 'offer', offer: 'under_contract',
+  under_contract: 'inspection', inspection: 'closing', closing: 'closed',
 };
 
 const URGENT_STAGES = new Set(['under_contract', 'inspection', 'offer']);
 
-let DEALS: { id: string; address: string; client: string; type: string; price: string; stage: string; daysInStage: number; agent: string; deadline: string; parties: string[] }[] = [];
-
-export interface PipelineStageType {
-  key: string; label: string; color: string; count: number;
+/** Row shape from /api/deals */
+interface ApiDeal {
+  id: string;
+  propertyAddress: string;
+  clientName: string;
+  side: 'buyer' | 'seller' | 'dual';
+  stage: string;
+  price: number | null;
+  closingDate: string | null;
+  notes: string | null;
+  updatedAt: string;
 }
 
-interface DealCardProps {
-  deal: typeof DEALS[0];
-  isExpanded: boolean;
-  onToggle: () => void;
-  index: number;
+interface UIDeal {
+  id: string;
+  address: string;
+  client: string;
+  type: string;
+  price: number | null;
+  stage: string;
+  daysInStage: number;
+  deadline: string;
 }
 
-function AnimatedDealActionButton({ icon, label, primary, colors, isDark }: { icon: keyof typeof Ionicons.glyphMap; label: string; primary?: boolean; colors: any; isDark: boolean }) {
+/** Older stage names from the API map onto the screen's pipeline. */
+function normalizeStage(stage: string): string {
+  if (stage === 'lead') return 'pre_approval';
+  if (stage === 'showing') return 'home_search';
+  if (stage === 'lost') return 'closed';
+  return stage;
+}
+
+function toUI(d: ApiDeal): UIDeal {
+  const days = Math.max(0, Math.floor((Date.now() - new Date(d.updatedAt).getTime()) / 864e5));
+  return {
+    id: d.id,
+    address: d.propertyAddress,
+    client: d.clientName,
+    type: d.side === 'seller' ? 'Sell' : d.side === 'dual' ? 'Dual' : 'Buy',
+    price: d.price,
+    stage: normalizeStage(d.stage),
+    daysInStage: days,
+    deadline: d.closingDate ? `Closing ${new Date(d.closingDate).toLocaleDateString()}` : '',
+  };
+}
+
+const SAMPLE_DEALS: UIDeal[] = [
+  { id: 's1', address: '1847 Oak Valley Dr', client: 'Sarah Mitchell', type: 'Buy', price: 425000, stage: 'under_contract', daysInStage: 6, deadline: 'Inspection due in 3 days' },
+  { id: 's2', address: '890 Magnolia Way', client: 'Robert Kim', type: 'Sell', price: 580000, stage: 'offer', daysInStage: 2, deadline: 'Counter-offer expires tomorrow' },
+  { id: 's3', address: '2205 Birch Creek Ln', client: 'Amanda Chen', type: 'Buy', price: null, stage: 'home_search', daysInStage: 12, deadline: '' },
+  { id: 's4', address: '445 Sunset Blvd', client: 'Jennifer Cole', type: 'Sell', price: 375000, stage: 'closing', daysInStage: 1, deadline: 'Closing Friday 10:00 AM' },
+];
+
+function parsePrice(s: string): number | null {
+  const n = Number(s.replace(/[^0-9.]/g, ''));
+  return s.trim() && Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function DealActionButton({ icon, label, primary, danger, onPress, colors, isDark }: { icon: keyof typeof Ionicons.glyphMap; label: string; primary?: boolean; danger?: boolean; onPress?: () => void; colors: any; isDark: boolean }) {
   const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const fg = primary ? '#FFF' : danger ? '#F87171' : colors.text;
   return (
     <Animated.View style={animStyle}>
       <Pressable
+        onPress={onPress}
         style={[styles.dealActionBtn, primary
-          ? { backgroundColor: colors.primaryAction }
-          : { backgroundColor: isDark ? colors.surfaceElevated : colors.backgroundTertiary, borderColor: colors.border, borderWidth: 1 }
+          ? { backgroundColor: TEAL }
+          : { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : colors.backgroundTertiary, borderColor: danger ? 'rgba(248,113,113,0.4)' : colors.border, borderWidth: 1 }
         ]}
         onPressIn={() => { scale.value = withSpring(0.92, { damping: 15, stiffness: 300 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
       >
-        <Ionicons name={icon} size={16} color={primary ? '#FFF' : colors.text} />
-        <Text style={[styles.dealActionText, !primary && { color: colors.text }]}>{label}</Text>
+        <Ionicons name={icon} size={16} color={fg} />
+        <Text style={[styles.dealActionText, { color: fg }]}>{label}</Text>
       </Pressable>
     </Animated.View>
   );
 }
 
-function DealCard({ deal, isExpanded, onToggle, index }: DealCardProps) {
+function DealCard({ deal, stageColor, stageLabel, isExpanded, onToggle, index, onAdvance, onDelete, busy }: {
+  deal: UIDeal; stageColor: string; stageLabel: string; isExpanded: boolean; onToggle: () => void; index: number;
+  onAdvance?: () => void; onDelete?: () => void; busy?: boolean;
+}) {
   const { colors, isDark } = useTheme();
-  const stage = PIPELINE_STAGES.find(s => s.key === deal.stage);
+  const router = useRouter();
+  const next = NEXT_STAGE[deal.stage];
+  const nextLabel = STAGE_DEFS.find((s) => s.key === next)?.label;
 
   return (
     <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
@@ -67,18 +138,18 @@ function DealCard({ deal, isExpanded, onToggle, index }: DealCardProps) {
         <GlassCard style={styles.dealCard}>
           <View style={styles.dealHeader}>
             <View style={styles.dealHeaderLeft}>
-              <View style={[styles.dealStageDot, { backgroundColor: stage?.color }]} />
+              <View style={[styles.dealStageDot, { backgroundColor: stageColor }]} />
               <View style={{ flex: 1 }}>
                 <Text style={[styles.dealAddress, { color: colors.text }]} numberOfLines={1}>{deal.address}</Text>
-                <Text style={[styles.dealClient, { color: colors.textSecondary }]}>{deal.client} - {deal.type}</Text>
+                <Text style={[styles.dealClient, { color: colors.textSecondary }]}>{deal.client} · {deal.type}</Text>
               </View>
             </View>
-            <Text style={[styles.dealPrice, { color: colors.primary }]}>{deal.price}</Text>
+            <Text style={[styles.dealPrice, { color: '#34D399' }]}>{deal.price ? formatMoney(deal.price) : '—'}</Text>
           </View>
 
           <View style={styles.dealMeta}>
-            <View style={[styles.dealMetaPill, { backgroundColor: stage?.color + '18' }]}>
-              <Text style={[styles.dealMetaText, { color: stage?.color }]}>{stage?.label}</Text>
+            <View style={[styles.dealMetaPill, { backgroundColor: stageColor + '22' }]}>
+              <Text style={[styles.dealMetaText, { color: stageColor }]}>{stageLabel}</Text>
             </View>
             <Text style={[styles.dealDays, { color: colors.textTertiary }]}>{deal.daysInStage}d in stage</Text>
             <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textTertiary} />
@@ -86,26 +157,19 @@ function DealCard({ deal, isExpanded, onToggle, index }: DealCardProps) {
 
           {isExpanded ? (
             <View style={[styles.dealExpanded, { borderTopColor: colors.divider }]}>
-              <View style={styles.dealExpandRow}>
-                <Ionicons name="alert-circle" size={16} color="#FBBF24" />
-                <Text style={[styles.dealExpandText, { color: colors.text }]}>{deal.deadline}</Text>
-              </View>
-              {deal.parties.length > 0 ? (
+              {deal.deadline ? (
                 <View style={styles.dealExpandRow}>
-                  <Ionicons name="people" size={16} color={colors.textSecondary} />
-                  <View style={styles.partyChips}>
-                    {deal.parties.map((p, i) => (
-                      <View key={i} style={[styles.partyChip, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : colors.backgroundTertiary }]}>
-                        <Text style={[styles.partyChipText, { color: colors.textSecondary }]}>{p}</Text>
-                      </View>
-                    ))}
-                  </View>
+                  <Ionicons name="alert-circle" size={16} color="#FBBF24" />
+                  <Text style={[styles.dealExpandText, { color: colors.text }]}>{deal.deadline}</Text>
                 </View>
               ) : null}
               <View style={styles.dealActions}>
-                <AnimatedDealActionButton icon="document-text-outline" label="Docs" primary colors={colors} isDark={isDark} />
-                <AnimatedDealActionButton icon="chatbubble-outline" label="Message" colors={colors} isDark={isDark} />
-                <AnimatedDealActionButton icon="calendar-outline" label="Schedule" colors={colors} isDark={isDark} />
+                {next && onAdvance ? (
+                  <DealActionButton icon="arrow-forward-circle-outline" label={busy ? 'Saving…' : `Move to ${nextLabel}`} primary onPress={busy ? undefined : onAdvance} colors={colors} isDark={isDark} />
+                ) : null}
+                <DealActionButton icon="document-text-outline" label="Docs" onPress={() => router.push('/documents' as any)} colors={colors} isDark={isDark} />
+                <DealActionButton icon="chatbubble-outline" label="Message" onPress={() => router.push('/messages' as any)} colors={colors} isDark={isDark} />
+                {onDelete ? <DealActionButton icon="trash-outline" label="Delete" danger onPress={onDelete} colors={colors} isDark={isDark} /> : null}
               </View>
             </View>
           ) : null}
@@ -115,23 +179,21 @@ function DealCard({ deal, isExpanded, onToggle, index }: DealCardProps) {
   );
 }
 
-function AnimatedStagePill({ stage, isActive, onPress, colors, isDark }: { stage: PipelineStageType; isActive: boolean; onPress: () => void; colors: any; isDark: boolean }) {
+function StagePill({ label, color, count, isActive, onPress, colors, isDark }: { label: string; color: string; count: number; isActive: boolean; onPress: () => void; colors: any; isDark: boolean }) {
   const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
     <Animated.View style={animStyle}>
       <Pressable
         onPress={onPress}
         onPressIn={() => { scale.value = withSpring(0.93, { damping: 15, stiffness: 300 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
-        style={[styles.stagePill, { backgroundColor: isActive ? stage.color : (isDark ? colors.surface : colors.backgroundTertiary), borderColor: isActive ? stage.color : colors.border }]}
+        style={[styles.stagePill, { backgroundColor: isActive ? color : (isDark ? 'rgba(255,255,255,0.04)' : colors.backgroundTertiary), borderColor: isActive ? color : colors.border }]}
       >
-        <View style={[styles.stageCountDot, { backgroundColor: isActive ? 'rgba(255,255,255,0.3)' : stage.color }]}>
-          <Text style={[styles.stageCountText, { color: '#FFF' }]}>{stage.count}</Text>
+        <View style={[styles.stageCountDot, { backgroundColor: isActive ? 'rgba(0,0,0,0.25)' : color }]}>
+          <Text style={[styles.stageCountText, { color: '#FFF' }]}>{count}</Text>
         </View>
-        <Text style={[styles.stagePillText, { color: isActive ? '#FFF' : colors.text }]}>{stage.label}</Text>
+        <Text style={[styles.stagePillText, { color: isActive ? '#FFF' : colors.text }]}>{label}</Text>
       </Pressable>
     </Animated.View>
   );
@@ -139,88 +201,117 @@ function AnimatedStagePill({ stage, isActive, onPress, colors, isDark }: { stage
 
 export default function TransactionsScreen() {
   const { colors, isDark } = useTheme();
-  const [deals, setDeals] = useState(DEALS);
+  const api = useTenantList<ApiDeal>('/api/deals');
+  const [sampleDeals, setSampleDeals] = useState<UIDeal[]>(SAMPLE_DEALS);
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const [expandedDeal, setExpandedDeal] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState<boolean>(false);
-  
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [pageError, setPageError] = useState('');
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [newDeal, setNewDeal] = useState({ address: '', client: '', price: '', type: 'Buy', stage: 'pre_approval' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  const PIPELINE_STAGES: PipelineStageType[] = [
-    { key: 'pre_approval', label: 'Pre-Approval', color: '#FBBF24', count: deals.filter(d => d.stage === 'pre_approval').length },
-    { key: 'home_search', label: 'Home Search', color: '#60A5FA', count: deals.filter(d => d.stage === 'home_search').length },
-    { key: 'offer', label: 'Offer', color: '#38bdf8', count: deals.filter(d => d.stage === 'offer').length },
-    { key: 'under_contract', label: 'Under Contract', color: '#1A8A7E', count: deals.filter(d => d.stage === 'under_contract').length },
-    { key: 'inspection', label: 'Inspection', color: '#F87171', count: deals.filter(d => d.stage === 'inspection').length },
-    { key: 'closing', label: 'Closing', color: '#34D399', count: deals.filter(d => d.stage === 'closing').length },
-  ];
+  const deals: UIDeal[] = useMemo(() => (api.isLive ? api.items.map(toUI) : sampleDeals), [api.isLive, api.items, sampleDeals]);
 
-  const stagesToShow = activeStage
-    ? PIPELINE_STAGES.filter(s => s.key === activeStage)
-    : PIPELINE_STAGES;
+  const stages = STAGE_DEFS.map((s) => ({ ...s, count: deals.filter((d) => d.stage === s.key).length }));
+  const stagesToShow = activeStage ? stages.filter((s) => s.key === activeStage) : stages;
 
-  const handleAddDeal = () => {
-    if (!newDeal.address || !newDeal.client) return;
+  const activeDeals = deals.filter((d) => d.stage !== 'closed');
+  const pipelineValue = activeDeals.reduce((sum, d) => sum + (d.price || 0), 0);
+  const urgentCount = deals.filter((d) => URGENT_STAGES.has(d.stage)).length;
+  const pipelineLabel = pipelineValue >= 1e6 ? `$${(pipelineValue / 1e6).toFixed(2)}M` : pipelineValue >= 1e3 ? `$${Math.round(pipelineValue / 1e3)}K` : `$${pipelineValue}`;
+
+  const handleAddDeal = async () => {
+    if (!newDeal.address.trim() || !newDeal.client.trim()) { setFormError('Enter the property address and client name.'); return; }
+    setFormError('');
     setIsSubmitting(true);
-    setTimeout(() => {
-      const deal = {
-        id: Math.random().toString(),
-        address: newDeal.address,
-        client: newDeal.client,
-        price: newDeal.price || '$0',
-        type: newDeal.type,
-        stage: newDeal.stage,
-        daysInStage: 0,
-        agent: 'Me',
-        deadline: 'TBD',
-        parties: []
-      };
-      DEALS.push(deal);
-      setDeals([...DEALS]);
+    const price = parsePrice(newDeal.price);
+    try {
+      if (api.isLive) {
+        await api.create.mutateAsync({
+          propertyAddress: newDeal.address.trim(),
+          clientName: newDeal.client.trim(),
+          side: newDeal.type === 'Sell' ? 'seller' : 'buyer',
+          stage: newDeal.stage,
+          price,
+        });
+      } else {
+        setSampleDeals((prev) => [...prev, {
+          id: `s${Date.now()}`, address: newDeal.address.trim(), client: newDeal.client.trim(), type: newDeal.type,
+          price, stage: newDeal.stage, daysInStage: 0, deadline: '',
+        }]);
+      }
       setShowAddModal(false);
       setNewDeal({ address: '', client: '', price: '', type: 'Buy', stage: 'pre_approval' });
+    } catch (e) {
+      setFormError(apiErrorMessage(e));
+    } finally {
       setIsSubmitting(false);
-    }, 500);
+    }
+  };
+
+  const advance = async (deal: UIDeal) => {
+    const next = NEXT_STAGE[deal.stage];
+    if (!next) return;
+    setPageError('');
+    if (!api.isLive) {
+      setSampleDeals((prev) => prev.map((d) => (d.id === deal.id ? { ...d, stage: next, daysInStage: 0 } : d)));
+      return;
+    }
+    setBusyId(deal.id);
+    try { await api.update.mutateAsync({ id: deal.id, stage: next }); } catch (e) { setPageError(apiErrorMessage(e)); } finally { setBusyId(null); }
+  };
+
+  const remove = async (deal: UIDeal) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && !window.confirm(`Delete the deal for ${deal.address}?`)) return;
+    setPageError('');
+    if (!api.isLive) { setSampleDeals((prev) => prev.filter((d) => d.id !== deal.id)); return; }
+    try { await api.remove.mutateAsync(deal.id); } catch (e) { setPageError(apiErrorMessage(e)); }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#0B1021' : colors.background }]}>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <Header imageBanner={require('@/assets/images/guide-transactions.jpg')} 
-        title="Transactions" 
-        subtitle="Track every deal from contract to close"
-        showBack 
-        rightAction={
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Pressable onPress={() => setShowAddModal(true)} style={[styles.headerAddBtn, { backgroundColor: colors.primaryAction }]}>
-              <Ionicons name="add" size={20} color="#FFF" />
-              <Text style={[styles.headerAddText, { color: '#FFF' }]}>Add Deal</Text>
-            </Pressable>
-            <InfoButton onPress={() => setShowHelp(true)} />
-          </View>
-        } 
-      />
+        <Header imageBanner={require('@/assets/images/guide-transactions.jpg')}
+          title="Transactions"
+          subtitle="Track every deal from contract to close"
+          showBack
+          rightAction={
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <Pressable onPress={() => { setFormError(''); setShowAddModal(true); }} style={[styles.headerAddBtn, { backgroundColor: TEAL }]} testID="transactions-add-btn">
+                <Ionicons name="add" size={20} color="#FFF" />
+                <Text style={[styles.headerAddText, { color: '#FFF' }]}>Add Deal</Text>
+              </Pressable>
+              <InfoButton onPress={() => setShowHelp(true)} />
+            </View>
+          }
+        />
+
+        <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
+          <SampleDataBanner live={api.isLive} count={deals.length} noun="deals" />
+        </View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(0)}>
           <View style={styles.bentoWrap}>
             <BentoGrid columns={3} gap={10}>
               <GlassCard compact>
                 <View style={styles.statContent}>
-                  <Text style={[styles.statValue, { color: colors.text }]}>{DEALS.length}</Text>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{activeDeals.length}</Text>
                   <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active</Text>
                 </View>
               </GlassCard>
               <GlassCard compact>
                 <View style={styles.statContent}>
-                  <Text style={[styles.statValue, { color: '#34D399' }]}>$4.47M</Text>
+                  <Text style={[styles.statValue, { color: '#34D399' }]}>{pipelineLabel}</Text>
                   <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pipeline</Text>
                 </View>
               </GlassCard>
               <GlassCard compact>
                 <View style={styles.statContent}>
-                  <Text style={[styles.statValue, { color: '#FBBF24' }]}>3</Text>
+                  <Text style={[styles.statValue, { color: '#FBBF24' }]}>{urgentCount}</Text>
                   <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Urgent</Text>
                 </View>
               </GlassCard>
@@ -230,18 +321,20 @@ export default function TransactionsScreen() {
 
         <Animated.View entering={FadeInDown.duration(400).delay(80)}>
           <View style={{ paddingHorizontal: 16, paddingTop: 4 }}>
-            <Text style={{ fontSize: 13, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>PIPELINE</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase', color: isDark ? 'rgba(255,255,255,0.4)' : colors.textTertiary, marginBottom: 12 }}>PIPELINE</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              <Pressable onPress={() => setActiveStage(null)} style={[styles.stagePill, { backgroundColor: !activeStage ? colors.primary : (isDark ? colors.surface : colors.backgroundTertiary), borderColor: !activeStage ? colors.primary : colors.border }]}>
+              <Pressable onPress={() => setActiveStage(null)} style={[styles.stagePill, { backgroundColor: !activeStage ? TEAL : (isDark ? 'rgba(255,255,255,0.04)' : colors.backgroundTertiary), borderColor: !activeStage ? TEAL : colors.border }]} testID="transactions-stage-all">
                 <Text style={[styles.stagePillText, { color: !activeStage ? '#FFF' : colors.text }]}>All</Text>
-                <View style={[styles.stageCountDot, { backgroundColor: !activeStage ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)' }]}>
-                  <Text style={[styles.stageCountText, { color: !activeStage ? '#FFF' : colors.textSecondary }]}>{DEALS.length}</Text>
+                <View style={[styles.stageCountDot, { backgroundColor: !activeStage ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.08)' }]}>
+                  <Text style={[styles.stageCountText, { color: !activeStage ? '#FFF' : colors.textSecondary }]}>{deals.length}</Text>
                 </View>
               </Pressable>
-              {PIPELINE_STAGES.map(s => (
-                <AnimatedStagePill
+              {stages.map((s) => (
+                <StagePill
                   key={s.key}
-                  stage={s}
+                  label={s.label}
+                  color={s.color}
+                  count={s.count}
                   isActive={activeStage === s.key}
                   onPress={() => setActiveStage(activeStage === s.key ? null : s.key)}
                   colors={colors}
@@ -252,12 +345,23 @@ export default function TransactionsScreen() {
           </View>
         </Animated.View>
 
+        {pageError ? <Text style={{ color: '#F87171', paddingHorizontal: 16, marginTop: 12 }}>{pageError}</Text> : null}
+
         <Animated.View entering={FadeInDown.duration(400).delay(240)}>
           <View style={styles.accordionWrap}>
-            {stagesToShow.map(stage => {
-              const stageDeals = DEALS.filter(d => d.stage === stage.key);
+            {api.isLoading ? <ActivityIndicator color={TEAL} style={{ marginTop: 24 }} /> : null}
+            {!api.isLoading && deals.length === 0 ? (
+              <GlassCard>
+                <View style={{ alignItems: 'center', paddingVertical: 18, gap: 8 }}>
+                  <Ionicons name="git-branch-outline" size={32} color={TEAL} />
+                  <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>No deals yet</Text>
+                  <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: 'center' }}>Tap "Add Deal" to start tracking your first one.</Text>
+                </View>
+              </GlassCard>
+            ) : null}
+            {stagesToShow.map((stage) => {
+              const stageDeals = deals.filter((d) => d.stage === stage.key);
               if (stageDeals.length === 0) return null;
-              const hasUrgent = URGENT_STAGES.has(stage.key);
               const isForced = activeStage === stage.key;
               return (
                 <AccordionSection
@@ -267,15 +371,20 @@ export default function TransactionsScreen() {
                   iconColor={stage.color}
                   badge={stageDeals.length}
                   badgeColor={stage.color}
-                  defaultOpen={isForced || hasUrgent}
+                  defaultOpen={isForced || URGENT_STAGES.has(stage.key) || deals.length <= 6}
                 >
                   {stageDeals.map((deal, idx) => (
                     <DealCard
                       key={deal.id}
                       deal={deal}
+                      stageColor={stage.color}
+                      stageLabel={stage.label}
                       isExpanded={expandedDeal === deal.id}
                       onToggle={() => setExpandedDeal(expandedDeal === deal.id ? null : deal.id)}
                       index={idx}
+                      onAdvance={() => advance(deal)}
+                      onDelete={() => remove(deal)}
+                      busy={busyId === deal.id}
                     />
                   ))}
                 </AccordionSection>
@@ -296,35 +405,46 @@ export default function TransactionsScreen() {
                 <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
             </View>
-            <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
               <View style={styles.inputGroup}>
                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Property Address</Text>
-                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.address} onChangeText={t => setNewDeal({...newDeal, address: t})} placeholder="123 Main St" placeholderTextColor={colors.textTertiary} />
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.address} onChangeText={t => setNewDeal({ ...newDeal, address: t })} placeholder="123 Main St" placeholderTextColor={colors.textTertiary} testID="deal-address" />
               </View>
               <View style={styles.inputGroup}>
                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Client Name</Text>
-                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.client} onChangeText={t => setNewDeal({...newDeal, client: t})} placeholder="John Doe" placeholderTextColor={colors.textTertiary} />
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.client} onChangeText={t => setNewDeal({ ...newDeal, client: t })} placeholder="John Doe" placeholderTextColor={colors.textTertiary} testID="deal-client" />
               </View>
               <View style={styles.inputGroup}>
                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Price / Value</Text>
-                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.price} onChangeText={t => setNewDeal({...newDeal, price: t})} placeholder="$450,000" placeholderTextColor={colors.textTertiary} />
+                <TextInput style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }]} value={newDeal.price} onChangeText={t => setNewDeal({ ...newDeal, price: t })} placeholder="$450,000" placeholderTextColor={colors.textTertiary} keyboardType="numeric" testID="deal-price" />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Buying or selling?</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {['Buy', 'Sell'].map((t) => (
+                    <Pressable key={t} onPress={() => setNewDeal({ ...newDeal, type: t })} style={[styles.stageSelectBtn, { backgroundColor: newDeal.type === t ? TEAL : 'transparent', borderColor: TEAL }]}>
+                      <Text style={{ color: newDeal.type === t ? '#FFF' : TEAL, fontSize: 12, fontWeight: '600' }}>{t === 'Buy' ? 'Buyer' : 'Seller'}</Text>
+                    </Pressable>
+                  ))}
+                </View>
               </View>
               <View style={styles.inputGroup}>
                 <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Stage</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                  {PIPELINE_STAGES.map(s => (
-                    <Pressable key={s.key} onPress={() => setNewDeal({...newDeal, stage: s.key})} style={[styles.stageSelectBtn, { backgroundColor: newDeal.stage === s.key ? s.color : 'transparent', borderColor: s.color }]}>
+                  {STAGE_DEFS.filter((s) => s.key !== 'closed').map(s => (
+                    <Pressable key={s.key} onPress={() => setNewDeal({ ...newDeal, stage: s.key })} style={[styles.stageSelectBtn, { backgroundColor: newDeal.stage === s.key ? s.color : 'transparent', borderColor: s.color }]}>
                       <Text style={{ color: newDeal.stage === s.key ? '#FFF' : s.color, fontSize: 12, fontWeight: '600' }}>{s.label}</Text>
                     </Pressable>
                   ))}
                 </View>
               </View>
+              {formError ? <Text style={{ color: '#F87171', fontSize: 13, marginBottom: 8 }}>{formError}</Text> : null}
             </ScrollView>
             <View style={[styles.modalFooter, { borderTopColor: colors.divider }]}>
               <Pressable style={[styles.modalBtn, { backgroundColor: isDark ? '#0B1021' : colors.backgroundTertiary }]} onPress={() => setShowAddModal(false)}>
                 <Text style={[styles.modalBtnText, { color: colors.text }]}>Cancel</Text>
               </Pressable>
-              <Pressable style={[styles.modalBtn, { backgroundColor: colors.primaryAction }]} onPress={handleAddDeal} disabled={isSubmitting}>
+              <Pressable style={[styles.modalBtn, { backgroundColor: TEAL }]} onPress={handleAddDeal} disabled={isSubmitting} testID="deal-save">
                 {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Add Deal</Text>}
               </Pressable>
             </View>
@@ -380,7 +500,7 @@ const styles = StyleSheet.create({
   partyChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   partyChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   partyChipText: { fontSize: 12 },
-  dealActions: { flexDirection: 'row', gap: 10, marginTop: 6 },
+  dealActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 6 },
   dealActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, minHeight: 44 },
   dealActionText: { fontSize: 13, fontWeight: '600' as const, color: '#FFF' },
   headerAddBtn: {

@@ -81,8 +81,8 @@ const light = {
 };
 
 const dark = {
-  primary: palette.neutral[50],
-  primaryLight: palette.neutral[300],
+  primary: '#0D9488',        // teal: readable as text on navy AND as a button behind white text
+  primaryLight: 'rgba(45, 212, 191, 0.14)',
   primaryDark: palette.neutral[0],
   primaryAction: palette.neutral[800],  // Button bg that pairs with white text
   accent: palette.metallic[400],

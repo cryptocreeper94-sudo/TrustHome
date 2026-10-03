@@ -221,14 +221,16 @@ export function AgentDashboard() {
   );
 
   const statCards = STAT_CARDS.map(card => {
-    if (!liveAnalytics) return card;
+    if (!isRealAgent) return card;
+    const a = liveAnalytics || {};
     switch (card.label) {
-      case 'Active Clients': return { ...card, value: String(liveAnalytics.totalLeads ?? 0) };
-      case 'Transactions': return { ...card, value: String(liveAnalytics.activeDeals ?? 0) };
-      case 'Pending Leads': return { ...card, value: String(liveAnalytics.newLeads30d ?? 0) };
+      case 'Active Clients': return { ...card, value: String(a.totalLeads ?? 0) };
+      case 'Transactions': return { ...card, value: String(a.activeDeals ?? 0) };
+      case 'Trust Score': return { ...card, value: 'New' };
+      case 'Pending Leads': return { ...card, value: String(a.newLeads30d ?? 0) };
       case 'Messages': return { ...card, value: String(unreadQuery.data?.unread ?? 0) };
       case 'Revenue (MTD)': {
-        const c = Number(liveAnalytics.commissionEarned ?? 0);
+        const c = Number(a.commissionEarned ?? 0);
         return { ...card, label: 'Commission', value: c >= 1000 ? `$${(c / 1000).toFixed(1)}K` : `$${c.toFixed(0)}` };
       }
       default: return card;
@@ -250,7 +252,14 @@ export function AgentDashboard() {
           <Text style={[styles.greeting, { color: colors.textSecondary }]}>{new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}</Text>
           <Text style={[styles.name, { color: colors.text }]}>{greetingName || (user ? `${user.firstName} ${user.lastName}` : MOCK_AGENT.name)}</Text>
         </View>
-        <TrustShieldBadge score={MOCK_AGENT.trustScore} compact showLink />
+        {isRealAgent ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(26,138,126,0.14)' }}>
+            <Ionicons name="shield-outline" size={14} color="#1A8A7E" />
+            <Text style={{ color: '#1A8A7E', fontSize: 12, fontWeight: '700' }}>New</Text>
+          </View>
+        ) : (
+          <TrustShieldBadge score={MOCK_AGENT.trustScore} compact showLink />
+        )}
       </Animated.View>
 
       {(liveLeadCount !== null || liveAnalytics || trustLayerQuery.data?.configured) && (
@@ -441,7 +450,7 @@ export function AgentDashboard() {
                   <Ionicons name={v.icon} size={18} color="#FFFFFF" />
                 </View>
                 <Text style={styles.verticalLabel}>{v.label}</Text>
-                <Text style={styles.verticalCount}>{v.count}</Text>
+                <Text style={styles.verticalCount}>{isRealAgent ? 'None yet' : v.count}</Text>
               </View>
             </View>
           </Pressable>

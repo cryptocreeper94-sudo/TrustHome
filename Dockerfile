@@ -26,10 +26,12 @@ RUN npm run server:build
 # Expose port
 EXPOSE 5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+# Health check (longer start period to allow schema sync)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD curl -f http://localhost:5000/ || exit 1
 
 # Start production server
+# Sync Drizzle schema to the Coolify Postgres first (DB host is internal-only).
+# No --force: destructive changes are refused rather than applied; server still boots.
 ENV NODE_ENV=production
-CMD ["node", "server_dist/index.js"]
+CMD ["sh", "-c", "npx drizzle-kit push < /dev/null || echo '[schema] drizzle-kit push failed or needs manual review'; exec node server_dist/index.js"]

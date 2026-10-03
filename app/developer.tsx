@@ -15,6 +15,7 @@ import { DevConsoleSkeleton, ListSkeleton } from '@/components/ui/SkeletonLoader
 import { getQueryFn, apiRequest, queryClient } from '@/lib/query-client';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
+import { OwnerBillingPanel } from '@/components/owner/OwnerBillingPanel';
 
 
 interface ServiceStatus {
@@ -269,6 +270,8 @@ export default function DeveloperScreen() {
             </View>
           </View>
         </Animated.View>
+
+        <OwnerBillingPanel />
 
         <View style={styles.infoGrid}>
           {kpis.map((k, i) => (

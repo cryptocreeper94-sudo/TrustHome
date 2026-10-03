@@ -32,6 +32,10 @@ import {
   mileageEntries,
   mlsConfigurations,
 } from "@shared/schema";
+import { checkLimit } from "./billing";
+import { sendNoticeEmail } from "./resend-client";
+
+const APP_URL = (process.env.APP_URL || "https://trusthome.tlid.io").replace(/\/$/, "");
 
 // ─── Guards ───────────────────────────────────────────────────────────
 
@@ -98,6 +102,57 @@ function recordPinFailure(ip: string) {
   }
 }
 
+// ─── Message email notifications ──────────────────────────────────────
+
+/**
+ * Emails the other side of a conversation when a new message arrives.
+ * Throttled: only sends if the recipient hasn't already got an unread message
+ * from this sender in the thread (so a burst of messages = one email).
+ * Fire-and-forget — never blocks or fails the request.
+ */
+function notifyNewMessage(
+  thread: typeof messageThreads.$inferSelect,
+  senderRole: "agent" | "client",
+  senderName: string,
+  body: string,
+  isNewThread: boolean,
+  msgId?: string,
+) {
+  (async () => {
+    if (!isNewThread) {
+      const r = await pool.query(
+        `SELECT 1 FROM thread_messages
+          WHERE thread_id = $1 AND sender_role = $2 AND read_at IS NULL AND ($3::text IS NULL OR id::text <> $3)
+          LIMIT 1`,
+        [thread.id, senderRole, msgId ?? null],
+      );
+      if (r.rowCount) return; // recipient already has an unread notice
+    }
+
+    let to = "";
+    if (senderRole === "agent") {
+      to = thread.clientEmail || "";
+    } else {
+      const [agent] = await db.select({ email: users.email }).from(users).where(eq(users.id, thread.agentId));
+      to = agent?.email || "";
+    }
+    if (!to) return;
+
+    const preview = body.length > 400 ? body.slice(0, 400) + "…" : body;
+    const toClient = senderRole === "agent";
+    await sendNoticeEmail({
+      to,
+      subject: `New message from ${senderName} on TrustHome`,
+      heading: `${senderName} sent you a message`,
+      body: toClient
+        ? `"${preview}"\n\nTo read and reply, sign in to TrustHome (or create a free account) using this email address: ${to}.`
+        : `"${preview}"\n\nSign in to TrustHome to reply.`,
+      ctaText: "Open Messages",
+      ctaUrl: `${APP_URL}/messages`,
+    });
+  })().catch((err) => console.error("[messages] notify failed:", err?.message || err));
+}
+
 // ─── Generic tenant CRUD ──────────────────────────────────────────────
 
 type TenantTable = typeof leads | typeof deals | typeof calendarEvents | typeof properties
@@ -108,7 +163,7 @@ function registerTenantCrud(
   path: string,
   table: TenantTable,
   createSchema: z.ZodTypeAny,
-  opts: { orderBy?: any; label: string },
+  opts: { orderBy?: any; label: string; limit?: "contacts" | "activeDeals" },
 ) {
   const t = table as any;
   const updateSchema = (createSchema as z.ZodObject<any>).partial();
@@ -128,6 +183,11 @@ function registerTenantCrud(
   app.post(path, requireAgent, async (req, res) => {
     const parsed = createSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0]?.message || "Invalid input" });
+    if (opts.limit) {
+      const isClosedDeal = opts.limit === "activeDeals" && ["closed", "lost"].includes(String((parsed.data as any)?.stage));
+      const over = isClosedDeal ? null : await checkLimit(req, opts.limit);
+      if (over) return res.status(402).json({ error: over, code: "limit_reached" });
+    }
     const inserted = (await db.insert(t).values({ ...parsed.data, agentId: uid(req) } as any).returning()) as any[];
     const row = inserted[0];
     res.status(201).json(row);
@@ -147,8 +207,8 @@ function registerTenantCrud(
   app.patch(`${path}/:id`, requireAgent, update);
 
   app.delete(`${path}/:id`, requireAgent, async (req, res) => {
-    const [row] = await db.delete(t)
-      .where(and(eq(t.id, req.params.id as string), eq(t.agentId, uid(req)))).returning();
+    const [row] = (await db.delete(t)
+      .where(and(eq(t.id, req.params.id as string), eq(t.agentId, uid(req)))).returning()) as any[];
     if (!row) return res.status(404).json({ error: `${opts.label} not found` });
     res.json({ success: true });
   });
@@ -476,8 +536,8 @@ export function registerTenantRoutes(app: Express) {
   });
 
   // ── Agent data ──
-  registerTenantCrud(app, "/api/leads", leads, leadSchema, { label: "Lead" });
-  registerTenantCrud(app, "/api/deals", deals, dealSchema, { label: "Deal" });
+  registerTenantCrud(app, "/api/leads", leads, leadSchema, { label: "Lead", limit: "contacts" });
+  registerTenantCrud(app, "/api/deals", deals, dealSchema, { label: "Deal", limit: "activeDeals" });
   registerTenantCrud(app, "/api/calendar/events", calendarEvents, eventSchema, {
     label: "Event", orderBy: asc(calendarEvents.startsAt),
   });
@@ -508,6 +568,10 @@ export function registerTenantRoutes(app: Express) {
     express.raw({ type: () => true, limit: MAX_UPLOAD }),
     async (req, res) => {
       const data = req.body as Buffer;
+      if (Buffer.isBuffer(data) && data.length > 0) {
+        const over = await checkLimit(req, "storage", data.length);
+        if (over) return res.status(402).json({ error: over, code: "limit_reached" });
+      }
       if (!Buffer.isBuffer(data) || data.length === 0) return res.status(400).json({ error: "No file received" });
       const rawName = String(req.header("x-file-name") || "document");
       let name: string;
@@ -651,6 +715,7 @@ export function registerTenantRoutes(app: Express) {
       }
       return t;
     });
+    if (message) notifyNewMessage(thread, "agent", req.session.userName || "Your agent", message, true);
     res.status(201).json(thread);
   });
 
@@ -684,6 +749,7 @@ export function registerTenantRoutes(app: Express) {
       threadId: access.thread.id, senderUserId: uid(req), senderRole: access.role, body,
     }).returning();
     await db.update(messageThreads).set({ lastMessageAt: new Date() }).where(eq(messageThreads.id, access.thread.id));
+    notifyNewMessage(access.thread, access.role, req.session.userName || (access.role === "agent" ? "Your agent" : access.thread.clientName), body, false, msg.id);
     res.status(201).json({ id: msg.id, body: msg.body, createdAt: msg.createdAt, mine: true, readAt: null });
   });
 

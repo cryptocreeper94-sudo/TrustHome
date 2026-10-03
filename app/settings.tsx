@@ -13,6 +13,7 @@ import { AccordionSection } from '@/components/ui/AccordionSection';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 import { Footer } from '@/components/ui/Footer';
+import { BiometricSettingsCard } from '@/components/account/BiometricSettingsCard';
 
 interface SettingsItem {
   icon: keyof typeof Ionicons.glyphMap;
@@ -38,6 +39,11 @@ export default function SettingsScreen() {
   const [showGreetingModal, setShowGreetingModal] = useState(false);
   const [greetingInput, setGreetingInput] = useState('');
   const router = useRouter();
+
+  const profileQuery = useQuery<{ phone?: string | null; brokerage?: string | null; licenseNumber?: string | null } | null>({
+    queryKey: ['/api/account/profile'],
+    enabled: !!user && user.id !== 'demo-user' && user.id !== 'browse-user',
+  });
 
   const trustLayerQuery = useQuery<any>({
     queryKey: ['/api/trustlayer/status'],
@@ -191,15 +197,15 @@ export default function SettingsScreen() {
                 </View>
                 <Text style={[styles.profileName, { color: colors.text }]}>{user ? `${user.firstName} ${user.lastName}` : 'Not signed in'}</Text>
                 <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>{user?.email || ''}</Text>
-                <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>{user?.phone || ''}</Text>
+                <Text style={[styles.profileDetail, { color: colors.textSecondary }]}>{profileQuery.data?.phone || ''}</Text>
                 <View style={styles.profileMeta}>
                   <View style={styles.metaItem}>
                     <Ionicons name="card-outline" size={14} color={colors.textSecondary} />
-                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>{user?.licenseNumber || 'No license on file'}</Text>
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>{profileQuery.data?.licenseNumber || 'No license on file'}</Text>
                   </View>
                   <View style={styles.metaItem}>
                     <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
-                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>{user?.brokerage || 'No brokerage set'}</Text>
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>{profileQuery.data?.brokerage || 'No brokerage set'}</Text>
                   </View>
                 </View>
               </View>
@@ -208,6 +214,10 @@ export default function SettingsScreen() {
 
           <Animated.View entering={FadeInDown.duration(500).delay(200)} style={{ marginTop: 14 }}>
             <TrustShieldBadge score={97.4} verified showLink />
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.duration(500).delay(250)} style={{ marginTop: 14 }}>
+            <BiometricSettingsCard />
           </Animated.View>
 
           <View style={styles.accordionGroup}>

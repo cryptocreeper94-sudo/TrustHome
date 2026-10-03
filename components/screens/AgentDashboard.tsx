@@ -14,6 +14,7 @@ import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { TrustShieldBadge } from '@/components/ui/TrustShieldBadge';
 import { Footer } from '@/components/ui/Footer';
+import { PlanBanner, FaceIdNudge, GettingStartedCard, useOnboardingRedirect } from '@/components/account/AccountWidgets';
 
 const CARD_IMAGES = {
   team: require('@/assets/images/cards/team.jpg'),
@@ -133,6 +134,7 @@ export function AgentDashboard() {
   const router = useRouter();
   const { safetyModeActive, toggleSafetyMode, currentLocation, hasPermission, requestPermission } = useLocation();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  useOnboardingRedirect();
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; description: string; details?: string[]; examples?: string[] }>({
     visible: false, title: '', description: '',
   });
@@ -208,7 +210,11 @@ export function AgentDashboard() {
         </View>
       )}
 
-      {MOCK_URGENT.length > 0 ? (
+      <PlanBanner />
+      <FaceIdNudge />
+      <GettingStartedCard />
+
+      {MOCK_URGENT.length > 0 && !isRealAgent ? (
         <Animated.View entering={FadeInDown.duration(400).delay(100)} style={[styles.urgentBar, { backgroundColor: isDark ? 'rgba(255,59,48,0.1)' : 'rgba(255,59,48,0.06)' }]}>
           <View style={styles.urgentHeader}>
             <Ionicons name="warning" size={16} color={colors.warning} />

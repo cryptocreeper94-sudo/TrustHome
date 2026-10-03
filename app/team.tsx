@@ -12,6 +12,7 @@ import { useApp } from '@/contexts/AppContext';
 import { apiRequest, queryClient } from '@/lib/query-client';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
+import { passkeysSupported, signInWithPasskey, biometricName } from '@/lib/billing';
 
 type TeamStep = 'gate' | 'login' | 'register' | 'verify' | 'forgot' | 'reset_code' | 'set_password' | 'request_access' | 'request_success' | 'demo_verify';
 type VerifySource = 'login' | 'register';
@@ -41,6 +42,9 @@ export default function TeamScreen() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+  const canPasskey = passkeysSupported();
+  const bioName = biometricName();
 
   const [verifyCode, setVerifyCode] = useState(['', '', '', '', '', '']);
   const codeRefs = useRef<(TextInput | null)[]>([]);
@@ -201,13 +205,51 @@ export default function TeamScreen() {
         rememberMe,
       });
       await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-      router.replace('/');
+      router.replace(verifySource === 'register' ? '/onboarding' as any : '/');
     } catch (err) {
       setError(await parseError(err));
     } finally {
       setLoading(false);
     }
   };
+
+  const handlePasskeyLogin = async () => {
+    setPasskeyBusy(true);
+    clearError();
+    try {
+      await signInWithPasskey(true);
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      router.replace('/');
+    } catch (err) {
+      if (err instanceof Error && err.message === 'cancelled') return;
+      setError(await parseError(err));
+    } finally {
+      setPasskeyBusy(false);
+    }
+  };
+
+  const renderPasskeyButton = (testID: string) => !canPasskey ? null : (
+    <Pressable
+      style={({ pressed }) => [{
+        flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'center' as const, gap: 10,
+        paddingVertical: 15, borderRadius: 14, marginBottom: 12,
+        backgroundColor: isDark ? '#0F172A' : '#111827',
+        borderWidth: 1, borderColor: 'rgba(45,212,191,0.45)',
+        opacity: passkeyBusy ? 0.7 : pressed ? 0.85 : 1,
+      }]}
+      onPress={handlePasskeyLogin}
+      disabled={passkeyBusy}
+      testID={testID}
+      accessibilityLabel={`Sign in with ${bioName}`}
+    >
+      {passkeyBusy ? <ActivityIndicator color="#2DD4BF" /> : (
+        <>
+          <Ionicons name={bioName === 'Face ID' ? 'scan-outline' : 'finger-print-outline'} size={22} color="#2DD4BF" />
+          <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '700' as const }}>Sign in with {bioName}</Text>
+        </>
+      )}
+    </Pressable>
+  );
 
   const handleResendCode = async () => {
     setLoading(true);
@@ -453,6 +495,7 @@ export default function TeamScreen() {
                   Sign in to your agent workspace, or create your account
                 </Text>
 
+                {renderPasskeyButton('team-passkey-btn')}
                 <Pressable
                   style={({ pressed }) => [styles.primaryBtn, { backgroundColor: '#1A8A7E', opacity: pressed ? 0.85 : 1 }]}
                   onPress={() => goToStep('login')}
@@ -557,6 +600,7 @@ export default function TeamScreen() {
                   {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.primaryBtnText}>Sign In</Text>}
                 </Pressable>
 
+                {renderPasskeyButton('team-login-passkey-btn')}
                 <Pressable style={styles.linkBtn} onPress={() => { setResetEmail(email); goToStep('forgot'); }}>
                   <Text style={[styles.linkText, { color: colors.primary }]}>Forgot Password?</Text>
                 </Pressable>

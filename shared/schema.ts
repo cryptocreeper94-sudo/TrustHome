@@ -536,4 +536,53 @@ export const threadMessages = pgTable("thread_messages", {
 
 export type ThreadMessage = typeof threadMessages.$inferSelect;
 
+// ─── Plans & billing ────────────────────────────────────────────────
+// One row per agent. Created lazily the first time an agent is seen, which
+// starts their 14-day Professional trial (no card required).
+export const agentAccounts = pgTable("agent_accounts", {
+  userId: varchar("user_id").primaryKey(),
+  trialEndsAt: timestamp("trial_ends_at").notNull(),
+  plan: text("plan"),                       // professional | team | founders (paid plan via Stripe)
+  billingInterval: text("billing_interval"), // month | year
+  subStatus: text("sub_status"),            // Stripe subscription status
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  lastSyncedAt: timestamp("last_synced_at"),
+  comped: boolean("comped").notNull().default(false),
+  compedNote: text("comped_note"),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("agent_accounts_customer_idx").on(t.stripeCustomerId)]);
+
+export type AgentAccount = typeof agentAccounts.$inferSelect;
+
+// Team plan: the team lead invites agents by email; invited agents get Professional.
+export const teamSeats = pgTable("team_seats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: varchar("owner_id").notNull(),
+  email: text("email").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [index("team_seats_owner_idx").on(t.ownerId), index("team_seats_email_idx").on(t.email)]);
+
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ─── Passkeys (Face ID / Touch ID / Windows Hello) ──────────────────
+export const passkeys = pgTable("passkeys", {
+  id: text("id").primaryKey(),               // credential ID (base64url)
+  userId: varchar("user_id").notNull(),
+  publicKey: text("public_key").notNull(),   // base64url
+  counter: integer("counter").notNull().default(0),
+  transports: text("transports"),            // JSON array
+  deviceLabel: text("device_label"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+}, (t) => [index("passkeys_user_idx").on(t.userId)]);
+
 export * from "./models/chat";

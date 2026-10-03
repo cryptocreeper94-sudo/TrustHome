@@ -83,6 +83,7 @@ export function DrawerMenu() {
     { icon: 'pricetag-outline', emoji: '💰', label: 'Pricing', route: '/pricing' },
     { icon: 'briefcase-outline', emoji: E['briefcase-outline'], label: 'Enterprise', route: '/enterprise' },
     { icon: 'shield-checkmark-outline', emoji: E['shield-checkmark-outline'], label: 'Trust Layer', onPress: () => Linking.openURL('https://dwtl.io') },
+    { icon: 'book-outline', emoji: '📖', label: 'How TrustHome Works', route: '/guide' },
     { icon: 'help-circle-outline', emoji: E['help-circle-outline'], label: 'Help & Support', route: '/support' },
   ] : [
     { icon: 'home', emoji: E['home'], label: 'Home', route: '/' },
@@ -102,6 +103,8 @@ export function DrawerMenu() {
     { icon: 'film-outline', emoji: E['film-outline'], label: 'Media Studio', route: '/media-studio', agentOnly: true },
     { icon: 'color-palette-outline', emoji: E['color-palette-outline'], label: 'Branding', route: '/branding', agentOnly: true, dividerAfter: true },
     { icon: 'person-outline', emoji: E['person-outline'], label: 'Profile & Settings', route: '/settings' },
+    { icon: 'card-outline', emoji: '💳', label: 'Plan & Billing', route: '/billing', agentOnly: true },
+    { icon: 'book-outline', emoji: '📖', label: 'How TrustHome Works', route: '/guide' },
     { icon: 'grid-outline', emoji: E['grid-outline'], label: 'Command Center', route: '/command-center', agentOnly: true },
     { icon: 'code-slash-outline', emoji: E['code-slash-outline'], label: 'Developer Console', route: '/developer', agentOnly: true },
     { icon: 'map-outline', emoji: E['map-outline'], label: 'Platform Tour', onPress: () => { router.push('/'); setTimeout(replayWelcomeGuide, 300); }, agentOnly: true },

@@ -94,3 +94,22 @@ export async function sendPasswordResetEmail(to: string, code: string) {
     ),
   });
 }
+
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+
+/** Simple branded notice with one button. All text is HTML-escaped. */
+export async function sendNoticeEmail(opts: { to: string; subject: string; heading: string; body: string; ctaText: string; ctaUrl: string }) {
+  const { client, fromEmail } = getResendClient();
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:40px 0;"><tr><td align="center">
+<table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;">
+<tr><td style="background:#1A8A7E;padding:28px 40px;text-align:center;"><h1 style="margin:0;color:#fff;font-size:26px;">TrustHome</h1></td></tr>
+<tr><td style="padding:36px 40px;">
+<h2 style="margin:0 0 10px;color:#333;font-size:20px;">${esc(opts.heading)}</h2>
+<p style="margin:0 0 26px;color:#555;font-size:15px;line-height:1.55;white-space:pre-line;">${esc(opts.body)}</p>
+<a href="${esc(opts.ctaUrl)}" style="display:inline-block;background:#1A8A7E;color:#fff;text-decoration:none;font-weight:700;padding:14px 26px;border-radius:10px;font-size:15px;">${esc(opts.ctaText)}</a>
+</td></tr>
+<tr><td style="background:#f8f9fa;padding:18px 40px;text-align:center;border-top:1px solid #eee;"><p style="margin:0;color:#aaa;font-size:12px;">&copy; ${new Date().getFullYear()} TrustHome</p></td></tr>
+</table></td></tr></table></body></html>`;
+  await client.emails.send({ from: fromEmail, to: opts.to, subject: opts.subject, html });
+}

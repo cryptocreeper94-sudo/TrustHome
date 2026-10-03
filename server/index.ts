@@ -16,6 +16,8 @@ import * as path from "path";
 import { registerTrustLayerSSO } from './trustLayerSSO';
 import { registerAffiliateRoutes } from "./affiliate";
 import { registerTenantRoutes } from "./tenant-routes";
+import { registerBillingRoutes } from "./billing";
+import { registerPasskeyRoutes } from "./passkeys";
 
 const app = express();
 app.use(compression());
@@ -473,6 +475,8 @@ function setupErrorHandler(app: express.Application) {
   configureExpoAndLanding(app);
 
   registerTenantRoutes(app); // tenant data + owner portal; registered first so it owns these paths
+  registerBillingRoutes(app); // plans, Stripe, team seats, onboarding
+  registerPasskeyRoutes(app); // Face ID / Touch ID / fingerprint sign-in (WebAuthn)
   const server = await registerRoutes(app);
   // Trust Layer SSO consumer endpoints
   registerTrustLayerSSO(app);

@@ -9,6 +9,10 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/ui/Header';
 import { Footer } from '@/components/ui/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useApp } from '@/contexts/AppContext';
+import { usePublicPlans, startCheckout, INTENDED_PLAN_KEY, type PaidPlan } from '@/lib/billing';
+import { apiErrorMessage } from '@/lib/tenant-api';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { SCREEN_HELP } from '@/constants/helpContent';
 
@@ -56,7 +60,7 @@ const PLANS: PlanTier[] = [
       'Unlimited transactions',
       'AI marketing suite & blog engine',
       'Showing scheduler & calendar sync',
-      'Encrypted messaging (Signal protocol)',
+      'Secure client messaging',
       'Document vault (25GB)',
       'Analytics dashboard',
       'Expense & mileage tracking',
@@ -75,9 +79,9 @@ const PLANS: PlanTier[] = [
     features: [
       'Everything in Professional',
       'Up to 10 agent seats included',
-      'Team analytics & leaderboard',
-      'Shared transaction pipeline',
-      'Team lead dashboard',
+      'Team numbers at a glance',
+      'Each agent keeps a private workspace',
+      'Add or remove agents any time',
       'Custom branding & QR codes',
       'Dedicated onboarding specialist',
       'Phone & chat support',
@@ -115,7 +119,7 @@ const COMPARISON_ITEMS = [
 const FAQ_ITEMS = [
   {
     q: 'What happens after my 14-day trial?',
-    a: 'Your trial converts to a paid subscription. You can cancel anytime before the trial ends — no charge, no questions asked.',
+    a: 'If you pick a plan during your trial, your card is charged only when the trial ends. If you don\'t pick one, you simply move to the free Starter plan — nothing is deleted.',
   },
   {
     q: 'Can I switch plans later?',
@@ -144,6 +148,31 @@ export default function PricingScreen() {
 
   const [billing, setBilling] = useState<BillingCycle>('monthly');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const { isRealAgent } = useApp();
+  const publicPlans = usePublicPlans();
+  const [ctaBusy, setCtaBusy] = useState<string | null>(null);
+  const [ctaError, setCtaError] = useState('');
+  const foundersLeft = publicPlans.data?.foundersRemaining;
+
+  const handleChoose = async (planName: string) => {
+    setCtaError('');
+    const plan: PaidPlan | null = planName === 'Founders Circle' ? 'founders' : planName === 'Professional' ? 'professional' : planName === 'Team' ? 'team' : null;
+    if (!isRealAgent) {
+      if (plan) await AsyncStorage.setItem(INTENDED_PLAN_KEY, plan);
+      router.push('/team' as any);
+      return;
+    }
+    if (!plan) { router.push('/billing' as any); return; }
+    setCtaBusy(planName);
+    try {
+      await startCheckout(plan, billing === 'annual' ? 'year' : 'month');
+    } catch (e) {
+      const msg = apiErrorMessage(e);
+      if (/already have a plan/i.test(msg)) router.push('/billing' as any);
+      else setCtaError(msg);
+      setCtaBusy(null);
+    }
+  };
 
   const savingsPercent = 20;
 
@@ -198,7 +227,7 @@ export default function PricingScreen() {
           >
             <View style={styles.foundersBadge}>
               <Ionicons name="diamond" size={12} color="#D4AF37" />
-              <Text style={styles.foundersBadgeText}>{FOUNDERS_PLAN.badge}</Text>
+              <Text style={styles.foundersBadgeText}>{typeof foundersLeft === 'number' ? `LIMITED — ${foundersLeft} OF 100 SEATS LEFT` : FOUNDERS_PLAN.badge}</Text>
             </View>
             <View style={isWeb ? { flexDirection: 'row', gap: 32, alignItems: 'flex-start' } : undefined}>
               <View style={{ flex: 1 }}>
@@ -217,8 +246,8 @@ export default function PricingScreen() {
                     <Text style={styles.featureText}>{f}</Text>
                   </View>
                 ))}
-                <Pressable style={({ pressed }) => [styles.foundersBtn, pressed && { opacity: 0.85 }]}>
-                  <Text style={styles.foundersBtnText}>{FOUNDERS_PLAN.cta}</Text>
+                <Pressable style={({ pressed }) => [styles.foundersBtn, pressed && { opacity: 0.85 }]} onPress={() => handleChoose(FOUNDERS_PLAN.name)} disabled={!!ctaBusy || foundersLeft === 0} testID="pricing-founders-btn">
+                  <Text style={styles.foundersBtnText}>{foundersLeft === 0 ? 'Sold out' : ctaBusy === FOUNDERS_PLAN.name ? 'Opening checkout…' : FOUNDERS_PLAN.cta}</Text>
                   <Ionicons name="arrow-forward" size={16} color="#000" />
                 </Pressable>
               </View>
@@ -227,6 +256,7 @@ export default function PricingScreen() {
         </Animated.View>
 
         {/* ─── PLAN CARDS ─── */}
+        {ctaError ? <Text style={{ color: '#F87171', textAlign: 'center', marginBottom: 12, fontSize: 14 }}>{ctaError}</Text> : null}
         <View style={isWeb ? styles.plansRow : undefined}>
           {PLANS.map((plan, i) => (
             <Animated.View key={i} entering={FadeInDown.delay(300 + i * 100).duration(600)} style={[isWeb && { flex: 1 }]}>
@@ -271,8 +301,8 @@ export default function PricingScreen() {
                   styles.planBtn,
                   plan.highlighted && styles.planBtnHighlighted,
                   pressed && { opacity: 0.85 },
-                ]}>
-                  <Text style={[styles.planBtnText, plan.highlighted && styles.planBtnTextHighlighted]}>{plan.cta}</Text>
+                ]} onPress={() => handleChoose(plan.name)} disabled={!!ctaBusy} testID={`pricing-${plan.name.toLowerCase()}-btn`}>
+                  <Text style={[styles.planBtnText, plan.highlighted && styles.planBtnTextHighlighted]}>{ctaBusy === plan.name ? 'Opening checkout…' : isRealAgent && plan.price.monthly > 0 ? `Choose ${plan.name}` : plan.cta}</Text>
                 </Pressable>
               </GlassCard>
             </Animated.View>

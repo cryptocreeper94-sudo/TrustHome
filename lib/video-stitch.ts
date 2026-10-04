@@ -9,13 +9,50 @@
  * so the screen must stay open while it works.
  */
 
+export interface MediaItem {
+  file: File;
+  kind: 'video' | 'image';
+  /** Video: its length. Photo: how long to show it. */
+  seconds: number;
+}
+
 export interface StitchOptions {
-  clips: File[];
+  clips: MediaItem[];
   music?: Blob | null;
   voice?: Blob | null;
   title?: string;
   subtitle?: string;
   onProgress?: (fraction: number, label: string) => void;
+}
+
+export function mediaKind(file: File): 'video' | 'image' {
+  if (file.type.startsWith('image/') || /\.(jpe?g|png|heic|heif|webp|gif)$/i.test(file.name)) return 'image';
+  return 'video';
+}
+
+function loadImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(`"${file.name}" could not be opened. Try a JPG or PNG photo.`)); };
+    img.src = url;
+  });
+}
+
+function drawImageZoom(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number, progress: number) {
+  const iw = img.naturalWidth || w;
+  const ih = img.naturalHeight || h;
+  // Fill the frame when the shapes are close; otherwise fit with black bars.
+  const cover = Math.max(w / iw, h / ih);
+  const contain = Math.min(w / iw, h / ih);
+  const base = cover / contain < 1.35 ? cover : contain;
+  const zoom = 1 + 0.08 * Math.min(1, Math.max(0, progress)); // slow push-in
+  const dw = iw * base * zoom;
+  const dh = ih * base * zoom;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
 }
 
 export interface StitchResult {
@@ -130,7 +167,7 @@ export async function stitchClips(opts: StitchOptions): Promise<StitchResult> {
   const { clips, music, voice, onProgress } = opts;
   const title = (opts.title || '').trim();
   const subtitle = (opts.subtitle || '').trim();
-  if (!clips.length) throw new Error('Add at least one clip.');
+  if (!clips.length) throw new Error('Add at least one clip or photo.');
   if (!videoBuilderSupported()) throw new Error('This browser cannot build videos. Please use Safari or Chrome.');
 
   // One <video> element for every clip — iOS only lets an element play with sound
@@ -144,30 +181,40 @@ export async function stitchClips(opts: StitchOptions): Promise<StitchResult> {
   const AC: typeof AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
   const ac = new AC();
   // Must happen before the first `await` so it still counts as part of the tap.
-  const firstUrl = URL.createObjectURL(clips[0]);
-  video.src = firstUrl;
-  video.play().then(() => video.pause()).catch(() => {});
+  const firstVideo = clips.find((c) => c.kind === 'video');
+  if (firstVideo) {
+    video.src = URL.createObjectURL(firstVideo.file);
+    video.play().then(() => video.pause()).catch(() => {});
+  }
   await ac.resume().catch(() => {});
   const dest = ac.createMediaStreamDestination();
 
-  let clipGain: GainNode | null = null;
-  try {
-    const src = ac.createMediaElementSource(video);
-    clipGain = ac.createGain();
-    clipGain.gain.value = voice ? 0.25 : music ? 0.6 : 1;
-    src.connect(clipGain).connect(dest);
-  } catch {
-    video.muted = true; // fall back to silent clips rather than failing
+  if (firstVideo) {
+    try {
+      const src = ac.createMediaElementSource(video);
+      const clipGain = ac.createGain();
+      clipGain.gain.value = voice ? 0.25 : music ? 0.6 : 1;
+      src.connect(clipGain).connect(dest);
+    } catch {
+      video.muted = true; // fall back to silent clips rather than failing
+    }
   }
 
-  const durations = await Promise.all(clips.map(readClipDuration));
+  const durations = clips.map((c) => Math.max(0.5, c.seconds || (c.kind === 'image' ? 4 : 0)));
   const total = durations.reduce((a, b) => a + b, 0) || clips.length;
 
-  // Size the output from the first clip (cap the long side at 1280 for phones).
-  if (video.readyState < 1) await waitFor(video, 'loadedmetadata');
-  video.currentTime = 0;
-  const vw = video.videoWidth || 1280;
-  const vh = video.videoHeight || 720;
+  // Size the output from the first item (cap the long side at 1280 for phones).
+  let vw = 1280;
+  let vh = 720;
+  if (clips[0].kind === 'video') {
+    if (video.readyState < 1) await waitFor(video, 'loadedmetadata');
+    vw = video.videoWidth || vw;
+    vh = video.videoHeight || vh;
+  } else {
+    const img0 = await loadImage(clips[0].file);
+    vw = img0.naturalWidth || vw;
+    vh = img0.naturalHeight || vh;
+  }
   const scale = Math.min(1, 1280 / Math.max(vw, vh));
   const W = Math.round((vw * scale) / 2) * 2;
   const H = Math.round((vh * scale) / 2) * 2;
@@ -209,12 +256,19 @@ export async function stitchClips(opts: StitchOptions): Promise<StitchResult> {
   let elapsedBefore = 0;
   let raf = 0;
   const startedAt = performance.now();
+  let current: { kind: 'video' } | { kind: 'image'; img: HTMLImageElement; start: number; dur: number } | null = null;
+  const itemTime = () => {
+    if (!current) return 0;
+    if (current.kind === 'video') return video.currentTime || 0;
+    return Math.min(current.dur, (performance.now() - current.start) / 1000);
+  };
   const loop = () => {
-    drawContain(ctx, video, W, H);
+    if (current?.kind === 'video') drawContain(ctx, video, W, H);
+    else if (current?.kind === 'image') drawImageZoom(ctx, current.img, W, H, itemTime() / current.dur);
     const t = (performance.now() - startedAt) / 1000;
     const alpha = t < 0.6 ? t / 0.6 : t < 4 ? 1 : t < 5 ? 5 - t : 0;
     drawTitle(ctx, W, H, title, subtitle, alpha);
-    const overall = Math.min(0.99, (elapsedBefore + (video.currentTime || 0)) / total);
+    const overall = Math.min(0.99, (elapsedBefore + itemTime()) / total);
     onProgress?.(overall, 'Building your video…');
     raf = requestAnimationFrame(loop);
   };
@@ -227,25 +281,34 @@ export async function stitchClips(opts: StitchOptions): Promise<StitchResult> {
     raf = requestAnimationFrame(loop);
 
     for (let i = 0; i < clips.length; i++) {
-      onProgress?.(elapsedBefore / total, `Clip ${i + 1} of ${clips.length}`);
-      if (i > 0) {
-        const url = URL.createObjectURL(clips[i]);
-        video.src = url;
-        await waitFor(video, 'loadeddata');
-      } else if (video.readyState < 2) {
-        await waitFor(video, 'loadeddata');
+      const item = clips[i];
+      onProgress?.(elapsedBefore / total, `Item ${i + 1} of ${clips.length}`);
+      if (item.kind === 'image') {
+        const img = await loadImage(item.file);
+        current = { kind: 'image', img, start: performance.now(), dur: durations[i] };
+        await new Promise((r) => setTimeout(r, durations[i] * 1000));
+      } else {
+        if (item !== firstVideo || video.readyState < 2) {
+          if (item !== firstVideo) {
+            URL.revokeObjectURL(video.src);
+            video.src = URL.createObjectURL(item.file);
+          }
+          if (video.readyState < 2) await waitFor(video, 'loadeddata');
+        }
+        video.currentTime = 0;
+        current = { kind: 'video' };
+        const ended = waitFor(video, 'ended');
+        try {
+          await video.play();
+        } catch {
+          video.muted = true;
+          await video.play();
+        }
+        await ended;
       }
-      const ended = waitFor(video, 'ended');
-      try {
-        await video.play();
-      } catch {
-        video.muted = true;
-        await video.play();
-      }
-      await ended;
-      elapsedBefore += durations[i] || video.duration || 0;
-      URL.revokeObjectURL(video.src);
+      elapsedBefore += durations[i];
     }
+    if (video.src) URL.revokeObjectURL(video.src);
   } finally {
     cancelAnimationFrame(raf);
     try { musicNode?.node.stop(); } catch { /* not started */ }

@@ -11,14 +11,15 @@ import { Footer } from '@/components/ui/Footer';
 import { InfoButton, InfoModal } from '@/components/ui/InfoModal';
 import { uploadDocument, MAX_UPLOAD_BYTES, formatBytes, apiErrorMessage } from '@/lib/tenant-api';
 import {
-  videoBuilderSupported, pickLocalFiles, readClipDuration, stitchClips, startVoiceRecording, formatSeconds,
+  videoBuilderSupported, pickLocalFiles, readClipDuration, stitchClips, startVoiceRecording, formatSeconds, mediaKind,
   type StitchResult,
 } from '@/lib/video-stitch';
 
 const TEAL = '#1A8A7E';
 const MAX_TOTAL_SECONDS = 5 * 60;
 
-interface Clip { id: string; file: File; seconds: number }
+interface Clip { id: string; file: File; kind: 'video' | 'image'; seconds: number; thumb?: string }
+const PHOTO_SECONDS = [3, 4, 5, 7];
 
 export default function WalkthroughMakerScreen() {
   const { colors, isDark } = useTheme();
@@ -52,10 +53,24 @@ export default function WalkthroughMakerScreen() {
 
   const addClips = async () => {
     setError('');
-    const files = await pickLocalFiles('video/*', true);
+    const files = await pickLocalFiles('video/*,image/*', true);
     if (!files.length) return;
-    const withDur = await Promise.all(files.map(async f => ({ id: Math.random().toString(36).slice(2), file: f, seconds: await readClipDuration(f) })));
-    setClips(prev => [...prev, ...withDur]);
+    const items = await Promise.all(files.map(async (f): Promise<Clip> => {
+      const kind = mediaKind(f);
+      return kind === 'image'
+        ? { id: Math.random().toString(36).slice(2), file: f, kind, seconds: 4, thumb: URL.createObjectURL(f) }
+        : { id: Math.random().toString(36).slice(2), file: f, kind, seconds: await readClipDuration(f) };
+    }));
+    setClips(prev => [...prev, ...items]);
+    setResult(null);
+  };
+
+  const cyclePhotoTime = (id: string) => {
+    setClips(prev => prev.map(c => {
+      if (c.id !== id) return c;
+      const next = PHOTO_SECONDS[(PHOTO_SECONDS.indexOf(c.seconds) + 1) % PHOTO_SECONDS.length];
+      return { ...c, seconds: next };
+    }));
     setResult(null);
   };
 
@@ -105,7 +120,7 @@ export default function WalkthroughMakerScreen() {
     if (result) { URL.revokeObjectURL(result.url); setResult(null); }
     // Called directly from the tap (no await before stitchClips starts) so iPhone allows sound.
     stitchClips({
-      clips: clips.map(c => c.file),
+      clips: clips.map(c => ({ file: c.file, kind: c.kind, seconds: c.seconds })),
       music: addMusic ? music : null,
       voice: addVoice ? voice : null,
       title: addTitle ? title : '',
@@ -181,17 +196,17 @@ export default function WalkthroughMakerScreen() {
         ) : null}
 
         <Animated.View entering={FadeInDown.delay(100).springify()} style={s.section}>
-          <Text style={[s.sectionTitle, { color: colors.text }]}>1. Add your clips</Text>
+          <Text style={[s.sectionTitle, { color: colors.text }]}>1. Add your photos & clips</Text>
           <Text style={[s.sectionDesc, { color: colors.textSecondary }]}>
-            Pick short videos from your phone. They play in the order shown — use the arrows to rearrange.
+            Pick photos and short videos from your phone. They play in the order shown — use the arrows to rearrange. Tap a photo's time to change how long it shows.
           </Text>
 
           <Pressable onPress={addClips} disabled={!supported || busy} style={[s.uploadZone, { borderColor: 'rgba(26,138,126,0.45)' }]} testID="walkthrough-add-clips">
             <LinearGradient colors={isDark ? ['rgba(26,138,126,0.12)', 'rgba(26,138,126,0.03)'] : ['rgba(26,138,126,0.08)', 'rgba(26,138,126,0.02)']} style={s.uploadGradient}>
               <View style={[s.uploadIconWrap, { backgroundColor: 'rgba(26,138,126,0.18)' }]}>
-                <Ionicons name="videocam-outline" size={28} color={TEAL} />
+                <Ionicons name="images-outline" size={28} color={TEAL} />
               </View>
-              <Text style={[s.uploadText, { color: colors.text }]}>{clips.length ? 'Add more clips' : 'Tap to choose video clips'}</Text>
+              <Text style={[s.uploadText, { color: colors.text }]}>{clips.length ? 'Add more photos or clips' : 'Tap to choose photos & video clips'}</Text>
               <Text style={[s.uploadSubtext, { color: colors.textSecondary }]}>Up to 5 minutes total · stays on your device</Text>
             </LinearGradient>
           </Pressable>
@@ -201,9 +216,21 @@ export default function WalkthroughMakerScreen() {
               {clips.map((clip, idx) => (
                 <View key={clip.id} style={[s.clipItem, cardBg]}>
                   <View style={s.clipNumberWrap}><Text style={s.clipNumber}>{idx + 1}</Text></View>
+                  {clip.kind === 'image' && clip.thumb ? (
+                    React.createElement('img', { src: clip.thumb, alt: '', style: { width: 44, height: 44, objectFit: 'cover', borderRadius: 8, marginRight: 10 } })
+                  ) : (
+                    <View style={s.thumbIcon}><Ionicons name="videocam" size={20} color={TEAL} /></View>
+                  )}
                   <View style={s.clipInfo}>
                     <Text style={[s.clipName, { color: colors.text }]} numberOfLines={1}>{clip.file.name}</Text>
-                    <Text style={[s.clipMeta, { color: colors.textSecondary }]}>{formatSeconds(clip.seconds)} · {formatBytes(clip.file.size)}</Text>
+                    {clip.kind === 'image' ? (
+                      <Pressable onPress={() => cyclePhotoTime(clip.id)} disabled={busy} style={s.timeChip} testID={`walkthrough-photo-time-${idx}`}>
+                        <Ionicons name="time-outline" size={12} color={TEAL} />
+                        <Text style={{ color: TEAL, fontSize: 12, fontWeight: '700' }}>Photo · shows {clip.seconds} sec</Text>
+                      </Pressable>
+                    ) : (
+                      <Text style={[s.clipMeta, { color: colors.textSecondary }]}>Video · {formatSeconds(clip.seconds)} · {formatBytes(clip.file.size)}</Text>
+                    )}
                   </View>
                   <Pressable onPress={() => moveClip(idx, -1)} disabled={idx === 0 || busy} style={[s.iconBtn, { opacity: idx === 0 ? 0.3 : 1 }]}>
                     <Ionicons name="arrow-up" size={18} color={colors.textSecondary} />
@@ -333,7 +360,7 @@ export default function WalkthroughMakerScreen() {
               <Text style={[s.createText, { color: clips.length && supported ? '#FFF' : colors.textTertiary }]}>{result ? 'Build Again' : 'Create Video'}</Text>
             </Pressable>
           )}
-          {!clips.length && supported ? <Text style={[s.hint, { color: colors.textSecondary }]}>Add at least one clip to get started.</Text> : null}
+          {!clips.length && supported ? <Text style={[s.hint, { color: colors.textSecondary }]}>Add at least one photo or clip to get started.</Text> : null}
         </Animated.View>
 
         {result && !busy ? (
@@ -387,7 +414,7 @@ export default function WalkthroughMakerScreen() {
         visible={showHelp}
         onClose={() => setShowHelp(false)}
         title="Walkthrough Maker"
-        description="Film a few short clips as you walk through a home, then let TrustHome join them into one smooth video you can text, post, or email."
+        description="Snap photos or film a few short clips as you walk through a home, then let TrustHome join them into one smooth video you can text, post, or email."
         details={[
           'Your clips never leave your phone — the video is built right on your device.',
           'Add a title (like the address), a song, or your own voice.',
@@ -420,6 +447,8 @@ const s = StyleSheet.create({
   clipInfo: { flex: 1 },
   clipName: { fontSize: 15, fontWeight: '600', marginBottom: 2 },
   clipMeta: { fontSize: 12 },
+  thumbIcon: { width: 44, height: 44, borderRadius: 8, marginRight: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(26,138,126,0.15)' },
+  timeChip: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, backgroundColor: 'rgba(26,138,126,0.14)' },
   iconBtn: { padding: 6 },
   settingsCard: { padding: 0, overflow: 'hidden' },
   settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 18, gap: 12 },
